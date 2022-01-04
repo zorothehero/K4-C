@@ -683,6 +683,7 @@ void esp::draw_target_hotbar(aim_target target) {
 						case 3: { b += 0.0008f; g -= 0.0008f; if (b >= 1) cases = 0; break; }
 						default: { r = 1.00f; g = 0.00f; b = 1.00f; break; }
 						}
+
 						if (!item)
 							return;
 						const auto item_name = item->get_weapon_name();
