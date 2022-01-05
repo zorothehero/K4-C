@@ -19,7 +19,7 @@ namespace unity {
 
 	static auto get_keyCode = reinterpret_cast<rust::classes::KeyCode(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Event"), _("get_keyCode"), 0, _(""), _("UnityEngine"))));
 
-	static auto LineOfSight = reinterpret_cast<bool(*)(vector3, vector3, rust::classes::Layers layer, float padding)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GamePhysics"), _("LineOfSight"), -1, _(""), _(""))));
+	static auto LineOfSight = reinterpret_cast<bool(*)(Vector3, Vector3, rust::classes::Layers layer, float padding)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GamePhysics"), _("LineOfSight"), -1, _(""), _(""))));
 
 	static auto GetKey = reinterpret_cast<bool(*)(rust::classes::KeyCode)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Input"), _("GetKeyInt"), 1, _(""), _("UnityEngine"))));
 
@@ -29,6 +29,9 @@ namespace unity {
 
 	static auto set_shader = reinterpret_cast<void(*)(uintptr_t, uintptr_t)>(il2cpp::methods::resolve_icall(_("UnityEngine.Material::set_shader()")));
 
+	static auto get_realtimesincestartup = reinterpret_cast<float(*)()>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Time"), _("get_realtimeSinceStartup"), 0, _(""), _("UnityEngine"))));
+
+	
 	void init_unity() {
 		get_shader = reinterpret_cast<uintptr_t(*)(uintptr_t material)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Material"), _("get_shader"), 0, _(""), _("UnityEngine"))));
 
@@ -50,12 +53,19 @@ namespace unity {
 
 		get_keyCode = reinterpret_cast<rust::classes::KeyCode(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Event"), _("get_keyCode"), 0, _(""), _("UnityEngine"))));
 
-		LineOfSight = reinterpret_cast<bool(*)(vector3, vector3, rust::classes::Layers layer, float padding)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GamePhysics"), _("LineOfSight"), -1, _(""), _(""))));
+		LineOfSight = reinterpret_cast<bool(*)(Vector3, Vector3, rust::classes::Layers layer, float padding)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GamePhysics"), _("LineOfSight"), -1, _(""), _(""))));
 
 		GetKey = reinterpret_cast<bool(*)(rust::classes::KeyCode)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Input"), _("GetKeyInt"), 1, _(""), _("UnityEngine"))));
+
+		get_realtimesincestartup = reinterpret_cast<float(*)()>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Time"), _("get_realtimeSinceStartup"), 0, _(""), _("UnityEngine"))));
 	}
 
-	bool is_visible(vector3 source, vector3 destination) {
+	uintptr_t bundle;
+	uintptr_t bundle_font;
+	uintptr_t chams_shader;
+	uintptr_t font_ptr;
+
+	bool is_visible(Vector3 source, Vector3 destination) {
 		auto layer = (int)rust::classes::Layers::ProjectileLineOfSightCheck | (int)rust::classes::Layers::Terrain;
 
 		return LineOfSight(source, destination, rust::classes::Layers(layer), 0);
@@ -83,7 +93,7 @@ namespace unity {
 		return matrix;
 	}
 
-	vector3 get_camera_pos() {
+	Vector3 get_camera_pos() {
 		if (!camera) {
 			camera = unity::get_main_camera();
 		}
@@ -94,7 +104,7 @@ namespace unity {
 			return {};
 		}
 
-		auto matrix = mem::read<vector3>(camera_ + 0x42C);
+		auto matrix = mem::read<Vector3>(camera_ + 0x42C);
 		if (!matrix.x || !matrix.y) {
 			camera = unity::get_main_camera();
 			return {};
@@ -103,5 +113,5 @@ namespace unity {
 
 		return matrix;
 	}
-	float get_fov(vector3 Pos);
+	float get_fov(Vector3 Pos);
 }

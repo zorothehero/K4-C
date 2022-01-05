@@ -18,6 +18,7 @@
 #include "utils/xorstr.hpp"
 #include "utils/pattern/pattern.hpp"
 
+
 #include "gui/OnGUI.hpp"
 
 #include "assets/assets.hpp"
@@ -39,6 +40,13 @@ bool DllMain(uintptr_t hmodule)
 		//mem::try_pattern(_("53 C3"));
 
 		il2cpp::init();
+		/*
+		mem::hook_virtual_function(_("PlayerEyes"), _("get_BodyLeanOffset"), &hooks::hk_bodylean);
+		mem::hook_virtual_function(_("BaseMountable"), _("EyePositionForPlayer"), &hooks::hk_EyePositionForPlayer);
+		mem::hook_virtual_function(_("InputState"), _("IsDown"), &hooks::hk_IsDown);
+
+		*/
+
 		unity::init_unity();
 		gui::init_gui();
 		hooks::init_hooks();
@@ -46,15 +54,20 @@ bool DllMain(uintptr_t hmodule)
 		init_projectile();
 		has_initialized = true;
 	}
+
+	il2cpp::hook(&hooks::hk_bodylean, _("get_BodyLeanOffset"), _("PlayerEyes"), _(""), 1);
+	il2cpp::hook(&hooks::hk_IsDown, _("IsDown"), _("InputState"), _(""), 2);
+	il2cpp::hook(&hooks::hk_EyePositionForPlayer, _("EyePositionForPlayer"), _("BaseMountable"), _(""), 3);
+
 	il2cpp::hook(&gui::OnGUI, _("OnGUI"), _("DDraw"), _("UnityEngine"), 0);
 	il2cpp::hook(&hooks::hk_OnNetworkMessage, _("OnNetworkMessage"), _("Client"), _(""), 1);
-	
+
 	////il2cpp::hook(&OnFatBullet, _("Update"), _("Projectile"), _(""), 0);
 
 	mem::hook_virtual_function(_("BasePlayer"), _("ClientInput"), &hooks::hk_baseplayer_ClientInput);
 	
-	////mem::hook_virtual_function(_("BasePlayer"), _("BlockSprint"), &hooks::hk_blocksprint);
-	////mem::hook_virtual_function(_("Client"), _("IsConnected"), &hooks::is_connected_hk, _("Network"));
+	//mem::hook_virtual_function(_("BasePlayer"), _("BlockSprint"), &hooks::hk_blocksprint);
+	//mem::hook_virtual_function(_("Client"), _("IsConnected"), &hooks::is_connected_hk, _("Network"));
 
 	return true;
 }

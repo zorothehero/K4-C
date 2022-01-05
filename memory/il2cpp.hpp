@@ -58,6 +58,12 @@ namespace il2cpp {
 
 		using il2cpp_string_new_wrapper = uintptr_t(*)(const char*);
 		static auto new_string = LI_FIND_DEF(il2cpp_string_new_wrapper);
+
+		using il2cpp_type_get_object = uintptr_t(*)(uintptr_t);
+		static auto type_get_object = LI_FIND_DEF(il2cpp_type_get_object);
+
+		using il2cpp_class_get_type = uintptr_t(*)(uintptr_t);
+		static auto class_get_type = LI_FIND_DEF(il2cpp_class_get_type);
 	}
 
 	void init() {
@@ -113,6 +119,15 @@ namespace il2cpp {
 		using il2cpp_runtime_class_init = uintptr_t(*)(uintptr_t);
 
 		methods::runtime_class_init = LI_FIND_DEF(il2cpp_runtime_class_init);
+
+		using il2cpp_type_get_object = uintptr_t(*)(uintptr_t);
+
+		methods::type_get_object = LI_FIND_DEF(il2cpp_type_get_object);
+
+		using il2cpp_class_get_type = uintptr_t(*)(uintptr_t);
+
+		methods::class_get_type = LI_FIND_DEF(il2cpp_class_get_type);
+
 	}
 
 	uintptr_t init_class(const char* name, const char* name_space = _("")) {
@@ -212,6 +227,31 @@ namespace il2cpp {
 			return ret;
 		}
 		return 0;
+	}
+
+	inline auto find_class(const char* name, const char* name_space = "") -> const std::uintptr_t {
+		const auto domain = methods::domain_get();
+
+		std::uintptr_t assembly_count{ 0 };
+		std::uintptr_t* assemblies;
+		assemblies = methods::domain_get_assemblies((void*)domain, &assembly_count);
+
+		for (size_t idx{ 0 }; idx < assembly_count; idx++) {
+			const auto img = methods::assembly_get_image(assemblies[idx]);
+			const auto kl = methods::class_from_name(img, name_space, name);
+			if (!kl)
+				continue;
+
+			return kl;
+		}
+
+		return 0;
+	}
+
+	inline auto type_object(const char* name_space, const char* name) -> const uintptr_t
+	{
+		auto klass = find_class(name, name_space);
+		return methods::type_get_object(methods::class_get_type(klass));
 	}
 }
 

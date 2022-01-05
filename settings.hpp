@@ -1,6 +1,8 @@
 #pragma once
 
 namespace settings {
+	float desyncTime = 0.0f;
+
 	namespace weapon {
 		bool hitbox_override  = false;
 		bool magic_bullet  = false;
@@ -22,6 +24,9 @@ namespace settings {
 		bool nosway = false;
 		bool automatic = false;
 		bool mods = false;
+
+		bool manipulator = false;
+		bool autoshoot = false;
 	}
 
 	namespace visuals {
@@ -70,9 +75,12 @@ namespace settings {
 		bool sidehealth = false;
 		bool nameesp = false;
 		bool woundedflag = false;
+		bool distance = false;
 
 		bool weaponesp = false;
 		bool vehicle = false;
+
+		bool desync_indicator = false;
 	}
 
 	namespace misc {

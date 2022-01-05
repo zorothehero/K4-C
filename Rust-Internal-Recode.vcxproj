@@ -24,7 +24,7 @@
     <ProjectGuid>{14cee1a1-5c1a-4ecc-91dc-618666acbda0}</ProjectGuid>
     <RootNamespace>RustInternalRecode</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
-    <ProjectName>Rust</ProjectName>
+    <ProjectName>Internal</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">

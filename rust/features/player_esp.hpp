@@ -12,6 +12,7 @@ namespace esp {
 	uintptr_t client_entities;
 	base_player* local_player;
 	VMatrix matrix;
+	aim_target best_target;
 
 	struct bounds_t {
 		float left, right, top, bottom;
@@ -22,17 +23,17 @@ namespace esp {
 		char zpad[ 128 ];
 	};
 
-	bool out_w2s(const vector3& position, vector2& screen_pos) {
+	bool out_w2s(const Vector3& position, Vector2& screen_pos) {
 		if (!matrix.m) {
 			return false;
 		}
 
-		vector2 out;
+		Vector2 out;
 		const auto temp = matrix.transpose( );
 
-		auto translation_vector = vector3{temp[ 3 ][ 0 ], temp[ 3 ][ 1 ], temp[ 3 ][ 2 ]};
-		auto up = vector3{temp[ 1 ][ 0 ], temp[ 1 ][ 1 ], temp[ 1 ][ 2 ]};
-		auto right = vector3{temp[ 0 ][ 0 ], temp[ 0 ][ 1 ], temp[ 0 ][ 2 ]};
+		auto translation_vector = Vector3{temp[ 3 ][ 0 ], temp[ 3 ][ 1 ], temp[ 3 ][ 2 ]};
+		auto up = Vector3{temp[ 1 ][ 0 ], temp[ 1 ][ 1 ], temp[ 1 ][ 2 ]};
+		auto right = Vector3{temp[ 0 ][ 0 ], temp[ 0 ][ 1 ], temp[ 0 ][ 2 ]};
 
 		float w = translation_vector.dot(position) + temp[ 3 ][ 3 ];
 
@@ -58,27 +59,28 @@ namespace esp {
 
 	void draw_heli(float x, float y, float w, float h);
 
-	void draw_tool_cupboard(vector2 w2s_position, uintptr_t label, vector4 color, rust::list<PlayerNameID*>* authorizedPlayers_list);
+	void draw_tool_cupboard(Vector2 w2s_position, uintptr_t label, Vector4 color, rust::list<PlayerNameID*>* authorizedPlayers_list);
 
-	void draw_hackable_crate(vector2 w2s_position, uintptr_t crate, vector4 color);
+	void draw_hackable_crate(Vector2 w2s_position, uintptr_t crate, Vector4 color);
 
-	void draw_item(vector2 w2s_position, uintptr_t label, vector4 color, wchar_t* name = _(L""));
+	void draw_item(Vector2 w2s_position, uintptr_t label, Vector4 color, wchar_t* name = _(L""));
 
 	void draw_player(base_player* player, bool is_npc);
 
+	void do_chams(base_player* player);
+
 	void draw_target_hotbar(aim_target target);
 
-	void draw_name(vector3 position, wchar_t* name);
+	void draw_name(Vector3 position, wchar_t* name);
 
 	void draw_middle(aim_target target);
 
-	void draw_weapon_icon(weapon* item, vector2 w2s_position);
+	void draw_weapon_icon(weapon* item, Vector2 w2s_position);
 
 	uintptr_t shader;
 
 	void iterate_players(bool draw = true) {
-		aim_target best_target = aim_target( );
-
+		best_target = aim_target();
 		auto get_client_entities = [ & ]( ) {
 			client_entities = il2cpp::value(_("BaseNetworkable"), _("clientEntities"), false);
 		};
@@ -136,7 +138,7 @@ namespace esp {
 					auto visual_state = *reinterpret_cast<uintptr_t*>(transform + 0x38);
 
 
-					auto world_position = *reinterpret_cast<vector3*>(visual_state + 0x90);
+					auto world_position = *reinterpret_cast<Vector3*>(visual_state + 0x90);
 
 					auto local = ClosestPoint(esp::local_player, world_position);
 					if (local.get_3d_dist(world_position) >= 5)
@@ -185,7 +187,7 @@ namespace esp {
 			if (!entity_class_name)
 				continue;
 
-			vector4 esp_color(1, 0, 1, 1);
+			Vector4 esp_color(1, 0, 1, 1);
 			uintptr_t esp_name;
 
 			auto game_object = *reinterpret_cast<uintptr_t*>(object + 0x30);
@@ -200,7 +202,7 @@ namespace esp {
 			if (!visual_state)
 				continue;
 
-			auto world_position = *reinterpret_cast<vector3*>(visual_state + 0x90);
+			auto world_position = *reinterpret_cast<Vector3*>(visual_state + 0x90);
 			if (world_position.is_empty( ))
 				continue;
 
@@ -217,7 +219,7 @@ namespace esp {
 				if (flag != 128 && flag != 256)
 					continue;
 
-				vector2 w2s_position = {};
+				Vector2 w2s_position = {};
 				if (out_w2s(world_position, w2s_position))
 					esp::draw_hackable_crate(w2s_position, ent, {0.45, 0.72, 1, 0.8});
 			}
@@ -244,9 +246,9 @@ namespace esp {
 
 					auto item_name = item->get_weapon_name( );
 
-					esp_color = vector4(196, 124, 0, 255);
+					esp_color = Vector4(196, 124, 0, 255);
 
-					vector2 w2s_position = {};
+					Vector2 w2s_position = {};
 					if (out_w2s(world_position, w2s_position))
 						draw_weapon_icon(item, w2s_position);
 					//esp::draw_item(w2s_position, 0, esp_color, item_name);
@@ -262,32 +264,32 @@ namespace esp {
 					if (!authorizedPlayers_list)
 						continue;
 
-					vector2 w2s_position = {};
+					Vector2 w2s_position = {};
 					if (out_w2s(world_position, w2s_position))
-						esp::draw_tool_cupboard(w2s_position, il2cpp::methods::new_string(_("Tool Cupboard")), vector4(255, 0, 0, 255), authorizedPlayers_list);
+						esp::draw_tool_cupboard(w2s_position, il2cpp::methods::new_string(_("Tool Cupboard")), Vector4(255, 0, 0, 255), authorizedPlayers_list);
 				}
 
 
 				if (*(int*)(entity_class_name + 4) == 'ileH' && settings::visuals::heli_esp && settings::visuals::vehicle) {
 					auto base_heli = reinterpret_cast<base_player*>(ent);
 
-					vector2 rearrotor, beam, mainrotor;
+					Vector2 rearrotor, beam, mainrotor;
 					out_w2s(base_heli->get_bone_transform(22)->get_bone_position( ), rearrotor);
 					out_w2s(base_heli->get_bone_transform(19)->get_bone_position( ), mainrotor);
 					out_w2s(base_heli->get_bone_transform(56)->get_bone_position( ), beam);
 					esp_name = il2cpp::methods::new_string(("Heli"));
-					esp_color = vector4(232, 232, 232, 255);
+					esp_color = Vector4(232, 232, 232, 255);
 
 					uintptr_t transform = mem::read<uintptr_t>(base_heli->get_model( ) + 0x48); //boneTransforms; // 0x48
 
-					const vector2 diff = {(beam.x + rearrotor.x) / 2, (beam.y + rearrotor.y) / 2};
+					const Vector2 diff = {(beam.x + rearrotor.x) / 2, (beam.y + rearrotor.y) / 2};
 
 					const float h = max(beam.y, rearrotor.y) - min(beam.y, rearrotor.y);
 					const float y = diff.y;
 					const float w = (max(beam.x, rearrotor.x) - min(beam.x, rearrotor.x));
 					float x = diff.x - h / 4;
 
-					vector2 w2s_position = {};
+					Vector2 w2s_position = {};
 					if (out_w2s(world_position, w2s_position))
 						esp::draw_item(w2s_position, esp_name, esp_color);
 
@@ -299,15 +301,15 @@ namespace esp {
 				}
 				else if (settings::visuals::stone_ore && settings::visuals::materials && (*(int*)(object_name.zpad + 52) == 'nots' || *(int*)(object_name.zpad + 47) == 'nots')) {
 					esp_name = il2cpp::methods::new_string(_("Stone Ore"));
-					esp_color = vector4(232, 232, 232, 255);
+					esp_color = Vector4(232, 232, 232, 255);
 				}
 				else if (settings::visuals::sulfur_ore && settings::visuals::materials && (*(int*)(object_name.zpad + 52) == 'flus' || *(int*)(object_name.zpad + 47) == 'flus')) {
 					esp_name = il2cpp::methods::new_string((_("Sulfur Ore")));
-					esp_color = vector4(203, 207, 0, 255);
+					esp_color = Vector4(203, 207, 0, 255);
 				}
 				else if (settings::visuals::metal_ore && settings::visuals::materials && (*(int*)(object_name.zpad + 52) == 'atem' || *(int*)(object_name.zpad + 47) == 'atem')) {
 					esp_name = il2cpp::methods::new_string(_("Metal Ore"));
-					esp_color = vector4(145, 145, 145, 255);
+					esp_color = Vector4(145, 145, 145, 255);
 				}
 				else if (settings::visuals::traps && (*(int*)(object_name.zpad + 36) == 'terr' || *(int*)(object_name.zpad + 43) == 'tnug' || *(int*)(object_name.zpad + 38) == 'rtra')) {
 					if (*(int*)(object_name.zpad + 36) == 'terr')
@@ -317,23 +319,23 @@ namespace esp {
 					else if (*(int*)(object_name.zpad + 38) == 'rtra')
 						esp_name = il2cpp::methods::new_string(_("Bear Trap*"));
 
-					esp_color = vector4(255, 166, 0, 255);
+					esp_color = Vector4(255, 166, 0, 255);
 				}
 				else if (settings::visuals::vehicles && settings::visuals::vehicle && *(int*)(entity_class_name + 4) == 'iheV') {
 					esp_name = il2cpp::methods::new_string(_("Vehicle"));
-					esp_color = vector4(0, 161, 219, 255);
+					esp_color = Vector4(0, 161, 219, 255);
 				}
 				else if (settings::visuals::airdrops && *(int*)(object_name.zpad + 39) == 'pord') {
 					esp_name = il2cpp::methods::new_string(_("Airdrop"));
-					esp_color = vector4(0, 161, 219, 255);
+					esp_color = Vector4(0, 161, 219, 255);
 				}
 				else if (settings::visuals::cloth && settings::visuals::materials && *(int*)(object_name.zpad + 52) == 'c-pm') {
 					esp_name = il2cpp::methods::new_string(_("Cloth"));
-					esp_color = vector4(0, 219, 58, 255);
+					esp_color = Vector4(0, 219, 58, 255);
 				}
 				else if (settings::visuals::corpses && *(int*)(object_name.zpad + 29) == 'proc') {
 					esp_name = il2cpp::methods::new_string(_("Player Corpse"));
-					esp_color = vector4(230, 230, 230, 255);
+					esp_color = Vector4(230, 230, 230, 255);
 				}
 				else if (tag != 6)
 					continue;
@@ -345,7 +347,7 @@ namespace esp {
 							continue;
 					}
 
-					vector2 w2s_position = {};
+					Vector2 w2s_position = {};
 					if (out_w2s(world_position, w2s_position))
 						esp::draw_item(w2s_position, esp_name, esp_color);
 
@@ -421,91 +423,7 @@ namespace esp {
 
 				
 				if (draw) {
-					if (settings::visuals::chams) {
-						static int cases = 0;
-						static float r = 1.00f, g = 0.00f, b = 1.00f;
-						switch (cases) {
-						case 0: { r -= 0.0004f; if (r <= 0) cases += 1; break; }
-						case 1: { g += 0.0004f; b -= 0.0004f; if (g >= 1) cases += 1; break; }
-						case 2: { r += 0.0004f; if (r >= 1) cases += 1; break; }
-						case 3: { b += 0.0004f; g -= 0.0004f; if (b >= 1) cases = 0; break; }
-						default: { r = 1.00f; g = 0.00f; b = 1.00f; break; }
-						}
-						auto _multiMesh = mem::read<uintptr_t>(player->get_player_model( ) + 0x2C0); //SkinnedMultiMesh _multiMesh;
-						if (_multiMesh) {
-							auto render = get_Renderers(_multiMesh);
-
-							for (int i = 0; i < render->get_size( ); i++) {
-								auto renderer = render->get_value(i);
-
-								//////// CHAMMINGS ///////
-
-								if (renderer) {
-									auto material = get_material(renderer);
-									if (material) {
-										if (!shader)
-											shader = Find(_(L"Hidden/Internal-Colored"));
-										unity::set_shader(material, shader);
-										SetInt(material, _(L"_ZTest"), 8); // through walls
-										
-										if (settings::visuals::rainbow_chams) {
-											SetColor(material, _(L"_Color"), col(r, g, b, 1));
-										} else if (get_IsNpc(player->get_player_model()) && player->is_visible(local_player->get_bone_transform((int)rust::classes::Bone_List::head)->get_bone_position(), player->get_bone_transform((int)rust::classes::Bone_List::head)->get_bone_position())) {
-											SetColor(material, _(L"_Color"), col(0, 0.5, 1, 0.5));
-										} else if (get_IsNpc(player->get_player_model())) {
-											SetColor(material, _(L"_Color"), col(0, 0, 0.6, 0.5));
-										} else if (get_IsNpc(player->get_player_model())) {
-											SetColor(material, _(L"_Color"), col(0, 0, 0.6, 0.5));
-										} else if (player->is_teammate(local_player)) {
-											SetColor(material, _(L"_Color"), col(0, 1, 1, 1));
-										} else if (player->is_visible(local_player->get_bone_transform((int)rust::classes::Bone_List::head)->get_bone_position(), player->get_bone_transform((int)rust::classes::Bone_List::head)->get_bone_position())) {
-											SetColor(material, _(L"_Color"), col(settings::visuals::VisRcolor, settings::visuals::VisGcolor, settings::visuals::VisBcolor, 1));
-										} else {
-											SetColor(material, _(L"_Color"), col(settings::visuals::InvRcolor, settings::visuals::InvGcolor, settings::visuals::InvBcolor, 1));
-										}
-									}
-								}
-							}
-						}
-					}
-
-					if (draw) {
-						if (settings::visuals::cancer) {
-							static int cases = 0;
-							static float r = 1.00f, g = 0.00f, b = 1.00f;
-							switch (cases) {
-							case 0: { r -= 0.0208f; if (r <= 0) cases += 1; break; }
-							case 1: { g += 0.0208f; b -= 0.0208f; if (g >= 1) cases += 1; break; }
-							case 2: { r += 0.0208f; if (r >= 1) cases += 1; break; }
-							case 3: { b += 0.0208f; g -= 0.0208f; if (b >= 1) cases = 0; break; }
-							default: { r = 1.00f; g = 0.00f; b = 1.00f; break; }
-							}
-							auto _multiMesh = mem::read<uintptr_t>(player->get_player_model() + 0x2B0);
-							if (_multiMesh) {
-								auto render = get_Renderers(_multiMesh);
-
-								for (int i = 0; i < render->get_size(); i++) {
-									auto renderer = render->get_value(i);
-
-									if (renderer) {
-										auto material = get_material(renderer);
-										if (material) {
-											if (!shader)
-												shader = Find(_(L"Hidden/Internal-Colored"));
-											SetInt(material, _(L"_ZTest"), 8); // through walls
-											SetColor(material, _(L"_Color"), col(1, 0, 0, 2));
-
-											unity::set_shader(material, shader);
-
-
-
-										}
-									}
-								}
-							}
-						}
-					}
-
+					
 					draw_player(player, is_npc);
 
 					if (settings::weapon::silent_melee)
@@ -542,14 +460,14 @@ namespace esp {
 			if (id == esp::local_player->get_steam_id( ))
 				continue;
 
-			auto position = mem::read<vector3>(player + 0x2C);
+			auto position = mem::read<Vector3>(player + 0x2C);
 			auto distance = esp::local_player->get_bone_transform(48)->get_bone_position( ).distance(position);
 			if (distance < 350.f)
 				continue;
 
 			auto player_name = (str)(*reinterpret_cast<uintptr_t*>(player + 0x18));
 			auto name = player_name->str;
-			vector2 out;
+			Vector2 out;
 			esp::out_w2s(position, out);
 			esp::draw_name({out.x, out.y, 0}, name);
 		}
