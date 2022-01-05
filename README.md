@@ -1,3 +1,3 @@
-# rust-internal-source
+# K4-Cheats (All cheats repo)
 
-Amogushook internal source - paste of nekocheat but added alot of shit code is messy but idc
+$ Rust internal (K4-Rust)- forked from amogushook/nekopaste.
