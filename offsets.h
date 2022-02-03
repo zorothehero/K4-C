@@ -8,4 +8,4 @@ namespace offsets {
 	constexpr auto Method$Facepunch_Pool_GetList_TraceInfo_MethodAddress = 29466464; // 
 	constexpr auto Method$BaseEntity_ServerRPC_uint = 51325792;	//      "Address":,"Method$BaseEntity.ServerRPC<uint>()",
 	constexpr auto BaseEntity$$ServerRPC_uint_ = 15999696;	//      "Address":, "Name": "BaseEntity$$ServerRPC<uint>",
-}	
+}

@@ -75,6 +75,10 @@ uintptr_t viewOffset = il2cpp::value(_("PlayerEyes"), _("viewOffset"));
 
 uintptr_t swimming = il2cpp::value(_("PlayerWalkMovement"), _("swimming"));
 
+uintptr_t ducking = il2cpp::value(_("BaseMovement"), _("<Ducking>k__BackingField"));
+
+uintptr_t TargetMovement = il2cpp::value(_("BaseMovement"), _("<TargetMovement>k__BackingField"));
+
 uintptr_t lastHitTime = il2cpp::value(_("Chainsaw"), _("lastHitTime"));
 uintptr_t lastHitMaterial = il2cpp::value(_("Chainsaw"), _("lastHitMaterial"));
 uintptr_t gathering = il2cpp::value(_("BaseMelee"), _("gathering"));
@@ -350,6 +354,8 @@ void init_bp() {
 	viewOffset = il2cpp::value(_("PlayerEyes"), _("viewOffset"));
 
 	swimming = il2cpp::value(_("PlayerWalkMovement"), _("swimming"));
+	ducking = il2cpp::value(_("BaseMovement"), _("<Ducking>k__BackingField"));
+	TargetMovement = il2cpp::value(_("BaseMovement"), _("<TargetMovement>k__BackingField"));
 	groundAngleNew = il2cpp::value(_("PlayerWalkMovement"), _("groundAngleNew"));
 	flying = il2cpp::value(_("PlayerWalkMovement"), _("flying"));
 
@@ -921,7 +927,15 @@ public:
 	void set_swimming(bool flag) {
 		*reinterpret_cast<bool*>((uintptr_t)this + swimming) = flag;
 	}
-
+	bool get_swimming() {
+		return *reinterpret_cast<bool*>((uintptr_t)this + swimming);
+	}
+	float get_ducking() {
+		return *reinterpret_cast<float*>((uintptr_t)this + ducking);
+	}
+	Vector3 set_TargetMovement() {
+		return *reinterpret_cast<Vector3*>((uintptr_t)this + TargetMovement);
+	}
 	bool get_admin_cheat() {
 		return *reinterpret_cast<bool*>((uintptr_t)this + 0x18);
 	}
@@ -1074,14 +1088,14 @@ public:
 		}
 
 		if (zooming) {
-			auto convar = *reinterpret_cast<uintptr_t*>((uintptr_t)mem::game_assembly_base + 51460336); //"ConVar_Graphics_c*"
+			auto convar = *reinterpret_cast<uintptr_t*>((uintptr_t)mem::game_assembly_base + 51460400); //"ConVar_Graphics_c*"
 			auto unknown = *reinterpret_cast<uintptr_t*>((uintptr_t)convar + 0xb8);
 			*reinterpret_cast<float*>(unknown + 0x18) = settings::misc::zoomfov;
 		}
 
 		if (!zooming) {
 
-			auto convar = *reinterpret_cast<uintptr_t*>((uintptr_t)mem::game_assembly_base + 51460336); //"ConVar_Graphics_c*"
+			auto convar = *reinterpret_cast<uintptr_t*>((uintptr_t)mem::game_assembly_base + 51460400); //"ConVar_Graphics_c*"
 			auto unknown = *reinterpret_cast<uintptr_t*>((uintptr_t)convar + 0xb8);
 			*reinterpret_cast<float*>(unknown + 0x18) = settings::misc::playerfov;
 		}

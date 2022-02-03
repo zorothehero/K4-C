@@ -62,6 +62,7 @@ bool DllMain(uintptr_t hmodule)
 
 
 	il2cpp::hook(&hooks::DoFatBullet, _("Update"), _("Projectile"), _(""), 0);
+	il2cpp::hook(&hooks::hk_UpdateVelocity, _("UpdateVelocity"), _("PlayerWalkMovement"), _(""), 0);
 
 	//il2cpp::hook(&hooks::hk_bodylean, _("get_BodyLeanOffset"), _("PlayerEyes"), _(""), 0);
 	//il2cpp::hook(&hooks::hk_IsDown, _("IsDown"), _("InputState"), _(""), 1);

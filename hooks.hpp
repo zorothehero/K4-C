@@ -72,6 +72,7 @@ namespace hooks {
 		static auto BaseProjectile_OnSignal = reinterpret_cast<void (*)(base_projectile*, int, rust::classes::string)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseProjectile"), _("OnSignal"), 2, _(""), _(""))));
 		static auto playerwalkmovement_client_input = reinterpret_cast<void (*)(playerwalkmovement*, uintptr_t, modelstate*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("PlayerWalkMovement"), _("ClientInput"), -1, _(""), _(""))));
 		static auto DoFixedUpdate = reinterpret_cast<void (*)(playerwalkmovement*, modelstate*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("PlayerWalkMovement"), _("DoFixedUpdate"), -1, _(""), _(""))));
+		static auto UpdateVelocity = reinterpret_cast<void (*)(playerwalkmovement*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("PlayerWalkMovement"), _("UpdateVelocity"), -1, _(""), _(""))));
 		static auto blocksprint = reinterpret_cast<void (*)(base_player*, float)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("BlockSprint"), 1, _(""), _(""))));
 		static auto OnNetworkMessage = reinterpret_cast<void (*)(uintptr_t, uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Client"), _("OnNetworkMessage"), 1, _(""), _(""))));
 		static auto IsConnected = reinterpret_cast<bool (*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Client"), _("IsConnected"), 0, _(""), _("Network"))));
@@ -130,6 +131,8 @@ namespace hooks {
 
 		orig::isdown = reinterpret_cast<bool(*)(input_state*,int)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("InputState"), _("IsDown"), 1, _(""), _(""))));
 
+		orig::UpdateVelocity = reinterpret_cast<void (*)(playerwalkmovement*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("PlayerWalkMovement"), _("UpdateVelocity"), -1, _(""), _(""))));
+
 		orig::EyePositionForPlayer = reinterpret_cast<Vector3(*)(basemountable*, base_player*, Vector4)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseMountable"), _("EyePositionForPlayer"), 2, _(""), _(""))));
 
 		orig::eokadoattack = reinterpret_cast<void(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("FlintStrikeWeapon"), _("DoAttack"), 0, _(""), _(""))));
@@ -143,6 +146,7 @@ namespace hooks {
 			_("GameAssembly.dll"), _("74 3A 4C 8B 0D ? ? ? ? 48 8B CB"));
 
 		ServerRPC_int = reinterpret_cast<void (*)(base_projectile*, rust::classes::string funcName, unsigned int arg1, uintptr_t)>(mem::game_assembly_base + offsets::BaseEntity$$ServerRPC_uint_);
+
 
 		change_code_rpc = reinterpret_cast<void (*)(base_player*, rust::classes::string, uintptr_t, bool, uintptr_t)>(mem::game_assembly_base + offsets::BaseEntity$$ServerRPC_string_bool_Address);
 
@@ -471,9 +475,9 @@ namespace hooks {
     return
 	uintptr_t client_entities;
 
-	void hk_dofixedupdate(playerwalkmovement* base_movement, modelstate* modelstate) {
+	/**void hk_dofixedupdate(playerwalkmovement* base_movement, modelstate* modelstate) {
 		if (esp::local_player && settings::misc::always_sprint && settings::misc::Movement) {
-			bool is_busy = get_ducked(modelstate) | IsSwimming(esp::local_player);
+			bool is_busy = get_ducked(modelstate) || IsSwimming(esp::local_player);
 
 			float speed = GetSpeed(esp::local_player, 1, is_busy);
 
@@ -490,6 +494,7 @@ namespace hooks {
 
 		orig::DoFixedUpdate(base_movement, modelstate);
 	}
+	/*/
 
 	void hk_blocksprint(base_player* player, float duration) {
 		if (!settings::weapon::always_shoot && settings::misc::Movement)
@@ -503,46 +508,10 @@ namespace hooks {
 
 	}
 
-	void draw_raid()
-	{
-		auto effect_network = il2cpp::init_class(_("EffectNetwork"));
-		if (!effect_network)
-			return;
-
-		auto effect = *reinterpret_cast<uintptr_t*>(effect_network + 0xB8);
-		if (!effect)
-		{
-			LOG("Effect null...");
-			return;
-		}
-
-		effect = *reinterpret_cast<uintptr_t*>(effect);
-		if (!effect)
-		{
-			LOG("Effect1 null...");
-			return;
-		}
-
-		auto world_pos = *reinterpret_cast<Vector3*>(effect + 0x5C);
-		if (world_pos.is_empty())
-		{
-			LOG("world_pos.is_empty()");
-			return;
-		}
-
-		auto pooled_str = (str)(*reinterpret_cast<uintptr_t*>(effect + 0x88));
-		auto pooledString = pooled_str->str;
-
-		uintptr_t m_szTranslated;
-
-		//assets/prefabs/ammo/rifle/riflebullet_explosive.prefab
-
-		LOG("pooledString: %ls", pooled_str);
-	}
 
 	void hk_OnNetworkMessage(uintptr_t client, uintptr_t packet)
 	{
-		draw_raid();
+	//	draw_raid();
 		orig::OnNetworkMessage(client, packet);
 	}
 
@@ -692,7 +661,6 @@ namespace hooks {
 		}
 		return orig::baseprojectile_launchprojectile((uintptr_t)p);
 	}
-
 	void hk_DoFirstPersonCamera(playereyes* eyes, uintptr_t cam)
 	{
 
@@ -700,7 +668,18 @@ namespace hooks {
 
 	void hk_UpdateVelocity(playerwalkmovement* self)
 	{
+	//	if (!self->flying()) {
+		if (settings::misc::always_sprint) {
+			Vector3 vel = self->set_TargetMovement();
+			float max_speed = (self->get_swimming() || self->get_ducking() > 0.5) ? 1.7f : 5.5f;
+			if (vel.length() > 0.f) {
+				Vector3 target_vel = Vector3(vel.x / vel.length() * max_speed, vel.y, vel.z / vel.length() * max_speed);
+				self->set_TargetMovement() = target_vel;
+				vel = target_vel;
+			}
+		}
 
+		return orig::UpdateVelocity(self);
 	}
 
 	void hk_HandleJumping(playerwalkmovement* self, modelstate* state, bool jump, bool in_dir = false) 
@@ -730,8 +709,8 @@ namespace hooks {
 
 	void hk_baseplayer_ClientInput(base_player* baseplayer, input_state* state) {
 
-		if(!do_fixed_update_ptr)
-			do_fixed_update_ptr = mem::hook_virtual_function(_("PlayerWalkMovement"), _("DoFixedUpdate"), &hk_dofixedupdate);
+		//if(!do_fixed_update_ptr)
+			//do_fixed_update_ptr = mem::hook_virtual_function(_("PlayerWalkMovement"), _("DoFixedUpdate"), &hk_dofixedupdate);
 		
 		if(!client_input_ptr)
 			client_input_ptr	= mem::hook_virtual_function(_("PlayerWalkMovement"), _("ClientInput"), &hk_playerwalkmovement_ClientInput);
