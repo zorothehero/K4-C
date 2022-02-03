@@ -2,7 +2,7 @@
 
 namespace settings {
 	float desyncTime = 0.0f;
-
+	float time_since_last_shot = 0.0f;
 	namespace weapon {
 		bool hitbox_override  = false;
 		bool magic_bullet  = false;
@@ -26,6 +26,8 @@ namespace settings {
 		bool mods = false;
 
 		bool manipulator = false;
+		bool doubletap = false;
+		bool always_reload = false;
 		bool autoshoot = false;
 	}
 

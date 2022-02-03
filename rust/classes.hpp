@@ -83,6 +83,7 @@ uintptr_t nextAttackTime = il2cpp::value(_("AttackEntity"), _("nextAttackTime"))
 uintptr_t timeSinceDeploy = il2cpp::value(_("AttackEntity"), _("timeSinceDeploy"));
 uintptr_t deployDelay = il2cpp::value(_("AttackEntity"), _("deployDelay"));
 uintptr_t repeatDelay = il2cpp::value(_("AttackEntity"), _("repeatDelay"));
+uintptr_t reloadTime = il2cpp::value(_("BaseProjectile"), _("reloadTime"));
 uintptr_t integrity = il2cpp::value(_("Projectile"), _("integrity"));
 
 uintptr_t groundAngleNew = il2cpp::value(_("PlayerWalkMovement"), _("groundAngleNew"));
@@ -158,6 +159,8 @@ static auto SetInt = reinterpret_cast<void(*)(uintptr_t material, rust::classes:
 
 static auto get_deltaTime = reinterpret_cast<float(*)()>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Time"), _("get_deltaTime"), 0, _(""), _("UnityEngine"))));
 
+static auto get_fixedTime = reinterpret_cast<float(*)()>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Time"), _("get_fixedTime"), 0, _(""), _("UnityEngine"))));
+
 static auto get_IsNpc = reinterpret_cast<bool(*)(uintptr_t player_model)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("PlayerModel"), _("get_IsNpc"), -1, _(""), _(""))));
 
 static auto get_time = reinterpret_cast<float(*)()>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Time"), _("get_time"), 0, _(""), _("UnityEngine"))));
@@ -191,6 +194,14 @@ static auto get_Renderers = reinterpret_cast<rust::list<uintptr_t>*(*)(uintptr_t
 static auto get_material = reinterpret_cast<uintptr_t(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Renderer"), _("get_material"), 0, _(""), _("UnityEngine"))));
 
 static auto get_maxspeed = reinterpret_cast<float(*)(base_player*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("GetMaxSpeed"), 0, _(""), _(""))));
+
+static auto SendSignal = reinterpret_cast<void(*)(uintptr_t, rust::classes::Signal, rust::classes::string)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseEntity"), _("SendSignalBroadcast"), 2, _(""), _(""))));
+
+static auto updateammodisplay = reinterpret_cast<void(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseProjectile"), _("UpdateAmmoDisplay"), 0, _(""), _(""))));
+
+static auto shot_fired = reinterpret_cast<void(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseProjectile"), _("ShotFired"), 0, _(""), _(""))));
+
+static auto did_attack_client_side = reinterpret_cast<void(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseProjectile"), _("DidAttackClientside"), 0, _(""), _(""))));
 
 class col {
 public:
@@ -249,6 +260,15 @@ void init_bp() {
 
 	get_up = reinterpret_cast<Vector3(*)(transform*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Transform"), _("get_up"), 0, _(""), _("UnityEngine"))));
 
+	get_fixedTime = reinterpret_cast<float(*)()>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Time"), _("get_fixedTime"), 0, _(""), _("UnityEngine"))));
+
+	SendSignal = reinterpret_cast<void(*)(uintptr_t,rust::classes::Signal,rust::classes::string)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseEntity"), _("SendSignalBroadcast"), 2, _(""), _(""))));
+
+	updateammodisplay = reinterpret_cast<void(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseProjectile"), _("UpdateAmmoDisplay"), 0, _(""), _(""))));
+
+	shot_fired = reinterpret_cast<void(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseProjectile"), _("ShotFired"), 0, _(""), _(""))));
+
+	did_attack_client_side = reinterpret_cast<void(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseProjectile"), _("DidAttackClientside"), 0, _(""), _(""))));
 
 
 #pragma region il2
@@ -561,6 +581,17 @@ public:
 		return *reinterpret_cast<float*>((uintptr_t)this + repeatDelay);
 	}
 
+	float get_reload_time() {
+		__try
+		{
+			return *reinterpret_cast<float*>((uintptr_t)this + reloadTime);
+		}
+		__except (true)
+		{
+			printf(_("Exception occured in %s!\n"), __FUNCTION__);
+		}
+	}
+
 	char* get_class_name() {
 		auto bp = *reinterpret_cast<uintptr_t*>(this);
 		return (char*)*reinterpret_cast<uintptr_t*>(bp + 0x10);
@@ -846,8 +877,15 @@ public:
 		return *reinterpret_cast<int32_t*>(item_definition + itemid);
 	}
 
-	base_projectile* get_base_projetile() {
-		return *reinterpret_cast<base_projectile**>((uintptr_t)this + heldEntity);
+	base_projectile* get_base_projectile() {
+		__try
+		{
+			return *reinterpret_cast<base_projectile**>((uintptr_t)this + heldEntity);
+		}
+		__except (true)
+		{
+			printf(_("%s"), __FUNCTION__);
+		}
 	}
 };
 
@@ -1018,6 +1056,12 @@ public:
 		return s;
 	}
 
+	void SendSignalBroadcast(rust::classes::Signal signal, wchar_t* str = _(L""))
+	{
+		if (!this) return;
+		return SendSignal((uintptr_t)this, signal, rust::classes::string(str));
+	}
+
 	void fov() {
 		bool zooming = false;
 
@@ -1030,14 +1074,14 @@ public:
 		}
 
 		if (zooming) {
-			auto convar = *reinterpret_cast<uintptr_t*>((uintptr_t)mem::game_assembly_base + 51447584); //"ConVar_Graphics_c*"
+			auto convar = *reinterpret_cast<uintptr_t*>((uintptr_t)mem::game_assembly_base + 51460336); //"ConVar_Graphics_c*"
 			auto unknown = *reinterpret_cast<uintptr_t*>((uintptr_t)convar + 0xb8);
 			*reinterpret_cast<float*>(unknown + 0x18) = settings::misc::zoomfov;
 		}
 
 		if (!zooming) {
 
-			auto convar = *reinterpret_cast<uintptr_t*>((uintptr_t)mem::game_assembly_base + 51447584); //"ConVar_Graphics_c*"
+			auto convar = *reinterpret_cast<uintptr_t*>((uintptr_t)mem::game_assembly_base + 51460336); //"ConVar_Graphics_c*"
 			auto unknown = *reinterpret_cast<uintptr_t*>((uintptr_t)convar + 0xb8);
 			*reinterpret_cast<float*>(unknown + 0x18) = settings::misc::playerfov;
 		}

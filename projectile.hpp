@@ -300,43 +300,6 @@ public:
 				if (settings::weapon::hitbox_override)
 					Transform = FindBone(target.player, _(L"head"));
 			}
-			//else
-			//{
-			//	auto weakspots = target.player->get_weakspots();
-			//	if (weakspots) {
-			//		auto size = *reinterpret_cast<uintptr_t*>(weakspots + 0x18);
-
-			//		bool tail_alive = false;
-			//		bool main_alive = false;
-			//		for (int i = 0; i < size; i++) {
-			//			auto weakspot = *(uintptr_t*)(weakspots + 0x20 + i * 0x8);
-			//			if (!weakspot)
-			//				continue;
-			//			auto health = *reinterpret_cast<float*>(weakspot + 0x24);
-			//			if (health > 0) {
-			//				if (i == 0) {
-			//					main_alive = true;
-			//				}
-			//				else {
-			//					tail_alive = true;
-			//				}
-			//			}
-			//		}
-
-			//		if (tail_alive) {
-			//			attack->hitBone = 2699525250;
-			//			attack->hitPartID = 2306822461;
-			//			attack->hitPositionLocal = { .9f, -.4f, .1f };
-			//			attack->hitNormalLocal = { .9f, -.4f, .1f };
-			//		}
-			//		else if (main_alive) {
-			//			attack->hitBone = 224139191;
-			//			attack->hitPartID = 2306822461;
-			//			attack->hitPositionLocal = { .9f, -.4f, .1f };
-			//			attack->hitNormalLocal = { .9f, -.4f, .1f };
-			//		}
-			//	}
-			//}
 			if (!Transform)
 				return false;
 

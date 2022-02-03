@@ -119,7 +119,7 @@ namespace gui {
 	uintptr_t label, skin;
 	bool open;
 	bool InsertPressed;
-
+	float opacity = 0.f;
 	float tick_time_when_called;
 
 	void outline_box(Vector2 pos, Vector2 size, Color clr)
@@ -176,7 +176,7 @@ namespace gui {
 			methods::set_fontSize(label, sz);
 		};
 
-		set_font(_(L"arial.ttf"), 24);
+		set_font(_(L"minecraft.ttf"), 24);
 
 		methods::set_alignment(label, 0);
 		methods::set_color(Color(1, 1, 1, 1));
@@ -237,17 +237,17 @@ namespace gui {
 	Color perc_col(float Num, float alpha = 1.0f)
 	{
 		float red, green, blue;
-		if (Num < 0.99)
+		if (Num < 0.5)
 		{
-			red = Num * 1.6f * 185.f;
-			green = 30.f;
-			blue = 255.f;
+			red = Num * 2.f * 255.f;
+			green = 255.f;
+			blue = 0.f;
 		}
 		else
 		{
 			red = 255.f;
-			blue = (2.f - 2.f * Num) * 255.f;
-			green = 80.f;
+			green = (2.f - 2.f * Num) * 255.f;
+			blue = 0.f;
 		}
 
 		red -= 100;
@@ -256,20 +256,29 @@ namespace gui {
 		return Color(red / 255, green / 255, blue / 255, alpha);
 	}
 
-	void tab(rust::classes::EventType event, Vector2 pos, Vector2 mouse, const wchar_t* tab_name, int id) {
 
+	int last_active_id = 0;
+
+	void tab(rust::classes::EventType event, Vector2 pos, Vector2 mouse, const wchar_t* tab_name, int id) {
 		if (event == rust::classes::EventType::MouseDown) {
-			if (rust::classes::Rect(pos.x + id * tab_size.x + 2.0f, pos.y - 4, tab_size.x, tab_size.y).Contains(mouse)) {
+			if (rust::classes::Rect(pos.x + 2, pos.y - 4 + id * tab_size.y + 2.0f, tab_size.x, tab_size.y).Contains(mouse)) {
+				last_active_id = active_tab;
 				active_tab = id;
+				opacity = 0.0f;
 			}
 		}
 		else if (event == rust::classes::EventType::Repaint) {
 			if (active_tab == id) {
-				fill_box(rust::classes::Rect(pos.x + id * tab_size.x + 2.0f, pos.y, tab_size.x, 2), rgba(249.f, 130.f, 109.f, 255.f));
+				float o = (opacity / 255.f);
+				fill_box(rust::classes::Rect(pos.x, pos.y + id * tab_size.y, tab_size.x + 2, tab_size.y), rgba(21.f, 27.f, 37.f, o));
+			}
+			else if (active_tab == last_active_id) {
+				float o = ((255.f - opacity) / 255.f);
+				fill_box(rust::classes::Rect(pos.x, pos.y + id * tab_size.y, tab_size.x + 2, tab_size.y), rgba(21.f, 27.f, 37.f, o));
 			}
 
-			Label(rust::classes::Rect{ pos.x + id * tab_size.x + 2.0f + 1, pos.y - 4 + 1, tab_size.x, tab_size.y }, tab_name, rgba(0, 0, 0, 255.f)				, true, 12);
-			Label(rust::classes::Rect{ pos.x + id * tab_size.x + 2.0f, pos.y - 4, tab_size.x, tab_size.y }, tab_name,		  rgba(159.f, 163.f, 169.f, 255.f), true, 12);
+			Label(rust::classes::Rect{ pos.x + 2, pos.y + 1 + id * tab_size.y + 1, tab_size.x, tab_size.y }, tab_name, rgba(0, 0, 0, 255.f), true, 12);
+			Label(rust::classes::Rect{ pos.x + 2, pos.y + id * tab_size.y, tab_size.x, tab_size.y }, tab_name,		  rgba(159.f, 163.f, 169.f, 255.f), true, 12);
 		}
 	}
 
@@ -277,22 +286,23 @@ namespace gui {
 		pos.x += 5;
 		const float button_size = 20;
 		if (event == rust::classes::EventType::MouseDown) {
-			if (rust::classes::Rect(pos.x + id * tab_size.x + 3 + 2.0f, pos.y + current_pos.y - 4, 100, button_size + 3).Contains(mouse)) {
+			if (rust::classes::Rect(pos.x + tab_size.x + 3 + 2.0f, pos.y + current_pos.y - 4 + 3 + 2.0f, 100, button_size + 3).Contains(mouse)) {
 				*checked_ref = !*checked_ref;
 			}
 		}
 		
-		outline_box(Vector2(pos.x + id * tab_size.x + 3 + 2.0f, pos.y + 7 + current_pos.y - 4), Vector2(10, 10), rgba(14.f, 18.f, 24.f, 255));
+		float o1 = (opacity / 255.f);
+		outline_box(Vector2(pos.x + tab_size.x + 3 + 2.0f, pos.y + 7 + current_pos.y - 4), Vector2(10, 10), rgba(14.f, 18.f, 24.f, o1));
 
 		if (event == rust::classes::EventType::Repaint) {
-			gui::Label(rust::classes::Rect{ pos.x + 15 + id * tab_size.x + 3 + 2.0f + 1, pos.y + current_pos.y - 4 + 1, 200, button_size + 3 }, button_name, rgba(0, 0, 0, 200.f), false, 14);
+			gui::Label(rust::classes::Rect{ pos.x + 15 + tab_size.x + 3 + 2.0f + 1, pos.y + current_pos.y - 4 + 1, 200, button_size + 3 }, button_name, rgba(0, 0, 0, (opacity / 255.f)), false, 14);
 			if (*checked_ref) {
-				fill_box(rust::classes::Rect{ pos.x + id * tab_size.x + 3 + 2.0f, pos.y + 7 + current_pos.y - 4, 10, 10 }, rgba(14.f, 18.f, 24.f, 255.f));
-				fill_box(rust::classes::Rect{ pos.x + 3 + id * tab_size.x + 3 + 2.0f, pos.y + 10 + current_pos.y - 4, 5, 5 }, rgba(249.f, 130.f, 109.f, 255.f));
-				gui::Label(rust::classes::Rect{ pos.x + 15 + id * tab_size.x + 3 + 2.0f, pos.y + current_pos.y - 4, 200, button_size + 3 }, button_name, rgba(249.f, 130.f, 109.f, 255.f), false, 14);
+				fill_box(rust::classes::Rect{ pos.x + tab_size.x + 3 + 2.0f, pos.y + 7 + current_pos.y - 4, 10, 10 }, rgba(14.f, 18.f, 24.f, (opacity / 255.f)));
+				fill_box(rust::classes::Rect{ pos.x + 3 + tab_size.x + 3 + 2.0f, pos.y + 10 + current_pos.y - 4, 5, 5 }, rgba(249.f, 130.f, 109.f, (opacity / 255.f)));
+				gui::Label(rust::classes::Rect{ pos.x + 15 + tab_size.x + 3 + 2.0f, pos.y + current_pos.y - 4, 200, button_size + 3 }, button_name, rgba(249.f, 130.f, 109.f, (opacity / 255.f)), false, 14);
 			}
 			else
-				gui::Label(rust::classes::Rect{ pos.x + 15 + id * tab_size.x + 3 + 2.0f, pos.y + current_pos.y - 4, 200, button_size + 3 }, button_name, rgba(159.f, 163.f, 169.f, 255.f), false, 14);
+				gui::Label(rust::classes::Rect{ pos.x + 15 + tab_size.x + 3 + 2.0f, pos.y + current_pos.y - 4, 200, button_size + 3 }, button_name, rgba(159.f, 163.f, 169.f, (opacity / 255.f)), false, 14);
 		}
 		current_pos.y += button_size;
 	}
@@ -385,13 +395,16 @@ namespace gui {
 
 	void OnGUI(uintptr_t rcx)
 	{
-		tab_size = Vector2(100, 35);
+		tab_size = Vector2(102, 35);
 		init();
 
 		float t = 0.0f;
 
 		if (esp::local_player)
 			t = esp::local_player->get_last_sent_ticket_time();
+
+		if (opacity < 255.0f)
+			opacity += 2.f;
 
 		auto current = methods::get_current();
 		auto event_type = methods::get_type(current);
@@ -407,7 +420,7 @@ namespace gui {
 		auto mouse = get_mousePosition();
 		auto height = unity::get_height();
 
-		Vector2 pos, menu_pos = { 650, 200 }, menu_size = { 800, 500 }, button_size = { 200, 0 }, mouse_pos = { mouse.x, height - mouse.y };
+		Vector2 pos, menu_pos = { 650, 200 }, menu_size = { 500, 330 }, button_size = { 200, 0 }, mouse_pos = { mouse.x, height - mouse.y };
 
 		if (event_type == rust::classes::EventType::Repaint) {
 			{
@@ -433,12 +446,23 @@ namespace gui {
 					gui::vertical_line(Vector2{ (float)(ScreenWidth / 2), (float)(ScreenHeight / 2) }, 1.f, gui::Color(1, 0, 0, 1));
 				}
 
-				if (settings::visuals::desync_indicator)
+				if (esp::local_player)
 				{
-					Progbar({ 900, 650 }, { 120, 4 }, settings::desyncTime, 1.0f);
+					if (settings::visuals::desync_indicator)
+					{
+						Progbar({ 900, 650 }, { 120, 4 }, settings::desyncTime, 1.0f);
+					}
+					//put extra gui things here
+					auto held = esp::local_player->get_active_weapon();
+					if (settings::weapon::always_reload)
+					{
+						if (held->get_base_projectile())
+						{
+							auto b = held->get_base_projectile();
+							Progbar({ 900, 670 }, { 120, 4 }, settings::time_since_last_shot, (b->get_reload_time() - (b->get_reload_time() / 10)));
+						}
+					}
 				}
-				//put extra gui things here
-
 
 				esp::start();
 			}
@@ -458,8 +482,10 @@ namespace gui {
 				}
 				unity::set_lockstate(rust::classes::CursorLockMode::None);
 
+				outline_box({ menu_pos.x - 1, menu_pos.y - 1 }, { menu_size.x + 1, menu_size.y + 1}, rgba(249.f, 130.f, 109.f, 255.f));
 				fill_box(rust::classes::Rect{ menu_pos.x, menu_pos.y + 30, menu_size.x, menu_size.y - 30 }, rgba(21.f, 27.f, 37.f, 255));
 				fill_box(rust::classes::Rect{ menu_pos.x, menu_pos.y, menu_size.x, 30 }, rgba(14.f, 18.f, 24.f, 255));
+				fill_box(rust::classes::Rect{ menu_pos.x, menu_pos.y + 30, tab_size.x + 2, menu_size.y - 30 }, rgba(14.f, 18.f, 24.f, 255));
 
 				//MENU TIME
 
@@ -471,10 +497,10 @@ namespace gui {
 				auto weapon_tab = 0, visual_tab = 1, misc_tab = 2, other_esp = 3, color_tab = 4;
 
 				tab(event_type, menu_pos, mouse_pos, _(L"Weapon"), weapon_tab);
-				tab(event_type, menu_pos, mouse_pos, _(L"Player Visuals"), visual_tab);
+				tab(event_type, menu_pos, mouse_pos, _(L"Visuals"), visual_tab);
 				tab(event_type, menu_pos, mouse_pos, _(L"Misc"), misc_tab);
-				tab(event_type, menu_pos, mouse_pos, _(L"Other Visuals"), other_esp);
-				tab(event_type, menu_pos, mouse_pos, _(L"Esp Color"), color_tab);
+				tab(event_type, menu_pos, mouse_pos, _(L"Other"), other_esp);
+				tab(event_type, menu_pos, mouse_pos, _(L"Colors"), color_tab);
 
 				menu_pos = { menu_pos.x, menu_pos.y + 30 };
 				menu_size.x -= 90;
@@ -518,7 +544,11 @@ namespace gui {
 					checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Hitbox Override Head"), &settings::weapon::hitbox_override, weapon_tab);
 					checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Hitbox Override Random"), &settings::weapon::random_hitbox, weapon_tab);
 					checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Rapid fire"), &settings::weapon::rapidfire, weapon_tab);
+					checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Fast bullet"), &settings::weapon::fast_bullet, weapon_tab);
+					checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Autoshoot"), &settings::weapon::autoshoot, weapon_tab);
 					checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Manipulator"), &settings::weapon::manipulator, weapon_tab);
+					checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Double-tap"), &settings::weapon::doubletap, weapon_tab);
+					checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Always reload"), &settings::weapon::always_reload, weapon_tab);
 					break;
 				case 1:
 					checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Desync indicator"), &settings::visuals::desync_indicator, visual_tab);
@@ -560,10 +590,10 @@ namespace gui {
 					checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Player Movement"), &settings::misc::Movement, misc_tab);
 					if (settings::misc::Movement) {
 						pos.x += 20;
-						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Always Sprint"), &settings::misc::always_sprint, misc_tab);
-						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Always Shoot"), &settings::weapon::always_shoot, misc_tab);
+						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Omnisprint"), &settings::misc::always_sprint, misc_tab);
+						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Can hold items"), &settings::weapon::always_shoot, misc_tab);
 						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Infinite Jump"), &settings::misc::infinite_jump, misc_tab);
-						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Speedhack (Press X)"), &settings::misc::speedhack, misc_tab);
+						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Timescale (Press X)"), &settings::misc::speedhack, misc_tab);
 						if (settings::misc::speedhack) {
 							Slider(menu_pos, il2cpp::methods::new_string(string::format(("%s %d"), _("Speed:"), (int)settings::misc::speedhackspeed)), pos, { 0, 10 }, settings::misc::speedhackspeed, misc_tab);
 						}

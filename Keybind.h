@@ -4,15 +4,13 @@
 
 namespace keybinds {
 	auto psilentk = rust::classes::KeyCode::Mouse4; // the bind
-	bool psilentb = true; //if you want the bind enable or not
+	bool psilentb = false; //if you want the bind enable or not
 	auto speedhackk = rust::classes::KeyCode::X;
 	bool speedhackb = true;
 	auto silentwalkk = rust::classes::KeyCode::Mouse2;
 	bool silentwalkb = true;
-	auto fakelagk = rust::classes::KeyCode::X;
+	auto fakelagk = rust::classes::KeyCode::Z;
 	bool fakelagb = false;
-	auto speedkeyk = rust::classes::KeyCode::X;
-	bool speedkeyb = true;
 	auto desynconk = rust::classes::KeyCode::C;
 	bool desynconb = true;
 

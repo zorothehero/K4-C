@@ -42,6 +42,24 @@ namespace rust {
 	};
 
 	namespace classes {
+		enum class Signal {
+			Attack,
+			Alt_Attack,
+			DryFire,
+			Reload,
+			Deploy,
+			Flinch_Head,
+			Flinch_Chest,
+			Flinch_Stomach,
+			Flinch_RearHead,
+			Flinch_RearTorso,
+			Throw,
+			Relax,
+			Gesture,
+			PhysImpact,
+			Eat,
+			Startled
+		};
 		enum BUTTON : uint32_t {
 			FORWARD = 2,
 			BACKWARD = 4,

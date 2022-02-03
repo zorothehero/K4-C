@@ -368,7 +368,7 @@ namespace esp {
 			auto hit_player = [ & ]( ) {
 				auto weapon = esp::local_player->get_active_weapon( );
 				if (weapon) {
-					auto baseprojectile = weapon->get_base_projetile( );
+					auto baseprojectile = weapon->get_base_projectile( );
 					if (baseprojectile) {
 						auto class_name = baseprojectile->get_class_name( );
 						if (*(int*)(class_name + 4) == 'eleM' || *(int*)(class_name + 4) == 'mmah') {
