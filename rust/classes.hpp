@@ -1088,14 +1088,14 @@ public:
 		}
 
 		if (zooming) {
-			auto convar = *reinterpret_cast<uintptr_t*>((uintptr_t)mem::game_assembly_base + 51460400); //"ConVar_Graphics_c*"
+			auto convar = *reinterpret_cast<uintptr_t*>((uintptr_t)mem::game_assembly_base + 51668488); //"ConVar_Graphics_c*"
 			auto unknown = *reinterpret_cast<uintptr_t*>((uintptr_t)convar + 0xb8);
 			*reinterpret_cast<float*>(unknown + 0x18) = settings::misc::zoomfov;
 		}
 
 		if (!zooming) {
 
-			auto convar = *reinterpret_cast<uintptr_t*>((uintptr_t)mem::game_assembly_base + 51460400); //"ConVar_Graphics_c*"
+			auto convar = *reinterpret_cast<uintptr_t*>((uintptr_t)mem::game_assembly_base + 51668488); //"ConVar_Graphics_c*"
 			auto unknown = *reinterpret_cast<uintptr_t*>((uintptr_t)convar + 0xb8);
 			*reinterpret_cast<float*>(unknown + 0x18) = settings::misc::playerfov;
 		}
