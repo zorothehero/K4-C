@@ -677,6 +677,11 @@ public:
 		return out;
 	}
 
+	Vector3 fwd()
+	{
+		return Vector3(0, 0, this->z);
+	}
+
 	float world_distance(const Vector3& vector)
 	{
 		return float(sqrtf(powf(vector.x - x, 2.0) + powf(vector.y - y, 2.0) + powf(vector.z - z, 2.0)));
@@ -759,9 +764,31 @@ public:
 		return Vector3(x * number, y * number, z * number);
 	}
 
+	Vector3 multiply(const Vector3& ref) const
+	{
+		return Vector3(x * ref.x, y * ref.y, z * ref.z);
+	}
+
 	Vector3 operator/(float number) const
 	{
 		return Vector3(x / number, y / number, z / number);
+	}
+
+	static Vector3 move_towards(Vector3 current, Vector3 target, float maxDistanceDelta)
+	{
+		float toVector_x = target.x - current.x;
+		float toVector_y = target.y - current.y;
+		float toVector_z = target.z - current.z;
+
+		float sqdist = toVector_x * toVector_x + toVector_y * toVector_y + toVector_z * toVector_z;
+
+		if (sqdist == 0 || (maxDistanceDelta >= 0 && sqdist <= maxDistanceDelta * maxDistanceDelta))
+			return target;
+		auto dist = (float)my_sqrt(sqdist);
+
+		return Vector3(current.x + toVector_x / dist * maxDistanceDelta,
+			current.y + toVector_y / dist * maxDistanceDelta,
+			current.z + toVector_z / dist * maxDistanceDelta);
 	}
 
 	void angle_vectors(Vector3* forward, Vector3* right, Vector3* up)

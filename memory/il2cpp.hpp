@@ -163,7 +163,9 @@ namespace il2cpp {
 				if (selected_argument >= 0 && arg_name) {
 					uintptr_t args = mem::read<uintptr_t>(f + 0x28);
 					int method_count = methods::method_get_param_count( f);
-					if (selected_argument > method_count || (argument_number >= 0 && method_count != argument_number)) continue;
+					if (selected_argument > method_count 
+						|| (argument_number >= 0 && method_count != argument_number)) 
+						continue;
 
 					char* argname;
 					if (method_count > 0) {
@@ -179,6 +181,11 @@ namespace il2cpp {
 			}
 		}
 		return 0;
+	}
+
+	void unhook(void* our_func)
+	{
+
 	}
 
 	uintptr_t hook( void* our_func, const char* function_to_hook,const char* class_to_hook, const char* name_space = _(""), int argument_number = -1, char* argument_name = _("")) {

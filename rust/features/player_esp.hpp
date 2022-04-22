@@ -270,7 +270,7 @@ namespace esp {
 				}
 
 
-				if (*(int*)(entity_class_name + 4) == 'ileH' && settings::visuals::heli_esp && settings::visuals::vehicle) {
+				if (*(int*)(entity_class_name + 4) == 'ileH' && settings::visuals::heli_esp) {
 					auto base_heli = reinterpret_cast<base_player*>(ent);
 
 					Vector2 rearrotor, beam, mainrotor;
@@ -426,7 +426,7 @@ namespace esp {
 					
 					draw_player(player, is_npc);
 
-					if (settings::weapon::silent_melee)
+					if (settings::weapon::silent_melee || unity::GetKey(rust::classes::KeyCode(settings::keybind::silentmelee)))
 						hit_player( );
 				}
 			}

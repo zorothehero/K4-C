@@ -86,6 +86,7 @@ static auto Trace_All = reinterpret_cast<void(*)(uintptr_t, uintptr_t, int)>(0);
 static auto get_magnitude = reinterpret_cast<float(*)(uintptr_t)>(0);
 
 static auto Sphere = reinterpret_cast<void (*)(Vector3 vPos, float fRadius, col color, float fDuration, bool distanceFade)>(0);
+static auto getrandomvel = reinterpret_cast<float(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("ItemModProjectile"), _("GetRandomVelocity"), 0, _(""), _(""))));
 
 
 void init_projectile() {
@@ -99,7 +100,8 @@ void init_projectile() {
 
 	GetName = reinterpret_cast<str(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("AssetNameCache"), _("GetName"), 1, _(""), _(""))));
 	Do_Hit = reinterpret_cast<bool(*)(Projectile*, uintptr_t, Vector3, Vector3)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Projectile"), _("DoHit"), 0, _(""), _(""))));
-	get_magnitude = reinterpret_cast<float(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Vector3"), _("get_magnitude"), 0, _(""), _("UnityEngine"))));;
+	get_magnitude = reinterpret_cast<float(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Vector3"), _("get_magnitude"), 0, _(""), _("UnityEngine"))));
+	getrandomvel = reinterpret_cast<float(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("ItemModProjectile"), _("GetRandomVelocity"), 0, _(""), _(""))));
 }
 
 class Projectile {
@@ -142,6 +144,7 @@ public:
 	void traveledDistance(float d) { safe_write(this + O::Projectile::traveledDistance, d, float); }
 
 	float initialDistance() { return safe_read(this + O::Projectile::initialDistance, float); }
+	float SetInitialDistance(float d) { return safe_write(this + O::Projectile::initialDistance, d, float); }
 
 	float traveledTime() { return safe_read(this + O::Projectile::traveledTime, float); }
 	void traveledTime(float d) { safe_write(this + O::Projectile::traveledTime, d, float); }
@@ -260,8 +263,11 @@ public:
 
 	}
 
-	Vector3 Simulate(bool returnvelocity, bool sendtoserver) {
-		Vector3 pos = prevSentPosition(); Vector3 prev = prevSentVelocity(); float part = partialTime(); float travel = max(traveledTime() - sentTraveledTime(), 0);
+	Vector3 Simulate(bool returnvelocity, bool sendtoserver, Vector3& pos, float& part) {
+		pos = prevSentPosition(); 
+		Vector3 prev = prevSentVelocity(); 
+		part = partialTime(); 
+		float travel = max(traveledTime() - sentTraveledTime(), 0);
 
 		Vector3 gr = get_gravity(); //static Vector3 get_gravity();
 
@@ -286,7 +292,7 @@ public:
 		auto target = esp::local_player->get_aimbot_target(point, maxdist);
 
 		if (get_isAlive((base_projectile*)pr) && target.player && !target.teammate) {
-			if (!unity::is_visible(target.pos, point)) {
+			if (!target.player->is_visible(target.pos, point), 0.5f) {
 				return false;
 			}
 
@@ -323,7 +329,7 @@ public:
 
 		auto material = info.material != 0 ? GetName(info.material)->str : (_(L"generic"));
 
-		bool canIgnore = unity::is_visible(sentPosition(), currentPosition() + currentVelocity().Normalized() * 0.01f);
+		bool canIgnore = esp::local_player->is_visible(sentPosition(), currentPosition() + currentVelocity().Normalized() * 0.01f, 0.5f);
 		if (!canIgnore) {
 			integrity(0);
 			return true;
@@ -331,7 +337,9 @@ public:
 
 		float org;
 		if (canIgnore) {
-			Vector3 attackStart = Simulate(false, true);
+			float time = 0;
+			Vector3 pos{};
+			Vector3 attackStart = Simulate(false, true, pos, time);
 
 			safe_write(ht + 0x14, Ray(attackStart, Vector3()), Ray);
 		}

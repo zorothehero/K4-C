@@ -32,44 +32,51 @@ bool has_initialized = false;
 
 bool DllMain(uintptr_t hmodule)
 {
-
 	if (!has_initialized) {
-		mem::game_assembly_base = LI_MODULE_SAFE_(_("GameAssembly.dll"));
-		mem::unity_player_base = LI_MODULE_SAFE_(_("UnityPlayer.dll"));
+		if (safety::check_sinkhole())
+		{
+			//LI_FIND(AllocConsole)();
+			//LI_FIND(SetConsoleTitleA)(_("dbg"));
+			//LI_FIND(freopen_s)(reinterpret_cast<FILE**>(stdin), _("CONIN$"), _("r"), stdin);
+			//LI_FIND(freopen_s)(reinterpret_cast<FILE**>(stdout), _("CONOUT$"), _("w"), stdout);
 
-		//mem::try_pattern(_("53 C3"));
+			mem::game_assembly_base = LI_MODULE_SAFE_(_("GameAssembly.dll"));
+			mem::unity_player_base = LI_MODULE_SAFE_(_("UnityPlayer.dll"));
 
-		il2cpp::init();
-		/*
-		mem::hook_virtual_function(_("PlayerEyes"), _("get_BodyLeanOffset"), &hooks::hk_bodylean);
-		mem::hook_virtual_function(_("BaseMountable"), _("EyePositionForPlayer"), &hooks::hk_EyePositionForPlayer);
-		mem::hook_virtual_function(_("InputState"), _("IsDown"), &hooks::hk_IsDown);
-		*/
+			//mem::try_pattern(_("53 C3"));
 
-		unity::init_unity();
-		gui::init_gui();
-		hooks::init_hooks();
+			il2cpp::init();
+			/*
+			mem::hook_virtual_function(_("PlayerEyes"), _("get_BodyLeanOffset"), &hooks::hk_bodylean);
+			mem::hook_virtual_function(_("BaseMountable"), _("EyePositionForPlayer"), &hooks::hk_EyePositionForPlayer);
+			mem::hook_virtual_function(_("InputState"), _("IsDown"), &hooks::hk_IsDown);
+			*/
 
+			unity::init_unity();
+			gui::init_gui();
+			hooks::init_hooks();
 
-		init_bp();
-		init_projectile();
-		has_initialized = true;
+			init_bp();
+
+			//il2cpp::hook(&hooks::hk_bodylean, _("get_BodyLeanOffset"), _("PlayerEyes"), _(""), 0);
+			//il2cpp::hook(&hooks::hook_test, _("get_position"), _("PlayerEyes"), _(""), 0);
+			//il2cpp::hook(&hooks::AimConeDir_hk, _("GetModifiedAimConeDirection"), _("AimConeUtil"), _(""), 0);
+			//il2cpp::hook(&hooks::hook_test2, _("get_center"), _("PlayerEyes"), _(""), 0);
+			//il2cpp::hook(&hooks::hook_test3, _("get_offset"), _("PlayerEyes"), _(""), 0);
+
+			init_projectile();
+			has_initialized = true;
+		}
 	}
 
 	il2cpp::hook(&gui::OnGUI, _("OnGUI"), _("DDraw"), _("UnityEngine"), 0);
-	il2cpp::hook(&hooks::hk_OnNetworkMessage, _("OnNetworkMessage"), _("Client"), _(""), 1);
-
-
-
 	il2cpp::hook(&hooks::DoFatBullet, _("Update"), _("Projectile"), _(""), 0);
-	il2cpp::hook(&hooks::hk_UpdateVelocity, _("UpdateVelocity"), _("PlayerWalkMovement"), _(""), 0);
-
-	//il2cpp::hook(&hooks::hk_bodylean, _("get_BodyLeanOffset"), _("PlayerEyes"), _(""), 0);
-	//il2cpp::hook(&hooks::hk_IsDown, _("IsDown"), _("InputState"), _(""), 1);
-	il2cpp::hook(&hooks::EokaDoAttack_hk, _("DoAttack"), _("FlintStrikeWeapon"), _(""), 1);
+	//il2cpp::hook(&hooks::hk_CreateProjectile, _("CreateProjectile"), _("BaseProjectile"), _(""), -1);
+	//il2cpp::hook(&hooks::hk_EyePositionForPlayer, _("get_offset"), _("PlayerEyes"), _(""), 0);
+	//il2cpp::hook(&hooks::hk_OnNetworkMessage, _("OnNetworkMessage"), _("Client"), _(""), 1);
+	//il2cpp::hook(&hooks::EokaDoAttack_hk, _("DoAttack"), _("FlintStrikeWeapon"), _(""), 1);
 
 	mem::hook_virtual_function(_("BasePlayer"), _("ClientInput"), &hooks::hk_baseplayer_ClientInput);
-	mem::hook_virtual_function(_("BasePlayer"), _("BlockSprint"), &hooks::hk_blocksprint);
 	mem::hook_virtual_function(_("BaseProjectile"), _("LaunchProjectile"), &hooks::hk_LaunchProjectile);
 	//mem::hook_virtual_function(_("Client"), _("IsConnected"), &hooks::is_connected_hk, _("Network"));
 
