@@ -3,9 +3,7 @@
 #include "settings.hpp"
 #include "offsets.h"
 #include <math.h>
-#include "Keybind.h"
 
-#include <vector>
 namespace misc
 {
 	bool manual = false;
@@ -24,16 +22,24 @@ namespace misc
 		float magnitude = (newPos - vector).Length();
 		Ray z = Ray(vector, normalized);
 		bool flag = unity::Raycast(z, magnitude + radius, 429990145);
+
+		//auto hitinfo_class = il2cpp::init_class(_("RaycastHit"));
+		//if (!hitinfo_class)
+		//	return flag;
+		//
+		//RaycastHit* hitInfo = (RaycastHit*)il2cpp::methods::object_new(hitinfo_class);
+		//
 		//if (!flag)
 		//{
-		//	flag = unity::Spherecast(z, radius, magnitude, 429990145);
+		//	flag = unity::Spherecast(vector, radius, normalized, hitInfo, magnitude, 429990145);
 		//}
 		return flag;
 	}
-
-	void get_cyl(float radius, unsigned int sectors, std::vector<Vector3>& re)
+	
+	void get_cyl(float radius, unsigned int sectors, Vector3 re[])
 	{
-		for (float y = -1.49f; y < 1.49f; y += 0.1f) {
+		int index = 0;
+		for (float y = -1.5f; y < 1.5f; y += 0.2f) {
 			int points = sectors;
 			float step = (M_PI_2) / points;
 			float x, z, current = 0;
@@ -42,15 +48,16 @@ namespace misc
 				x = Vector3::my_sin(current) * radius;
 				z = Vector3::my_cos(current) * radius;
 
-				re.push_back(Vector3(x, y, z));
-				re.push_back(Vector3(-x, y, z));
-				re.push_back(Vector3(x, y, -z));
-				re.push_back(Vector3(-x, y, -z));
+				re[index++] = Vector3(x, y, z);
+				re[index++] = Vector3(-x, y, z);
+				re[index++] = Vector3(x, y, -z);
+				re[index++] = Vector3(-x, y, -z);
 
 				current += step;
 			}
 		}
 	}
+	
 
 	bool ValidateEyePos(Vector3 pos, Vector3 offset = Vector3(0,0,0))
 	{
@@ -88,12 +95,13 @@ namespace misc
 		return flag;
 	}
 
-	bool can_manipulate(base_player* ply, Vector3 pos, float mm_eye = 7.f) //7m only check rn
+
+	bool can_manipulate(base_player* ply, Vector3 pos, float mm_eye = 6.f) //7m only check rn
 	{
 		Vector3 v = *reinterpret_cast<Vector3*>((uintptr_t)ply + eyes);
 		Vector3 re_p = ply->get_bone_transform(47)->get_bone_position() + ply->get_bone_transform(47)->up() * (ply->get_player_eyes()->get_view_offset().y + v.y);
-		std::vector<Vector3> ar{};
-		get_cyl(mm_eye, 10, ar);
+		//std::vector<Vector3> ar{};
+		Vector3 ar[10000] = {};
 
 		if (ply->is_visible(re_p, pos))
 		{
@@ -101,17 +109,20 @@ namespace misc
 			return true;
 		}
 
+		get_cyl(mm_eye, 10, ar);
+		//spheres::determine_array(mm_eye, ar);
+
 		for (auto a : ar)
 		{
 			Vector3 p = re_p + a;
 
-			if (!ply->is_visible(p, re_p))
-				continue;
+			if (!ply->is_visible(p, re_p) || a == Vector3(0,0,0))
+				continue;	
 
-			if (!ply->is_visible(p - Vector3(0, 0.1, 0), re_p)) //double check not too low as likes to shoot from just under the ground
-				continue;
+			//if (!ply->is_visible(p - Vector3(0, 0.1, 0), re_p)) //double check not too low as likes to shoot from just under the ground
+			//	continue;
 
-			Sphere(p, 0.05f, col(0.1, 0.3, 0.9, 1), 0.01f, 10);
+			//Sphere(p, 0.05f, col(1, 1, 1, 1), 0.02f, 10);
 			if (!ply->is_visible(p, pos))
 				continue;
 
@@ -150,6 +161,7 @@ namespace hooks {
 		static auto eokadoattack = reinterpret_cast<void(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("FlintStrikeWeapon"), _("DoAttack"), 0, _(""), _(""))));
 		static auto baseprojectile_launchprojectile = reinterpret_cast<void(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseProjectile"), _("LaunchProjectile"), 0, _(""), _(""))));
 		static auto baseprojectile_createprojectile = reinterpret_cast<uintptr_t(*)(base_projectile*, rust::classes::string, Vector3, Vector3, Vector3)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseProjectile"), _("CreateProjectile"), 0, _(""), _(""))));
+		//static auto aimconeutil_getmodifiedaimconedirection = reinterpret_cast<Vector3(*)(float, Vector3, bool)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("AimConeUtil"), _("GetModifiedAimConeDirection"), -1, _(""), _(""))));
 
 		uintptr_t playerprojectileattack;
 		uintptr_t baseprojectilecreateprojectile;
@@ -207,6 +219,8 @@ namespace hooks {
 		orig::baseprojectile_launchprojectile = reinterpret_cast<void(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseProjectile"), _("LaunchProjectile"), 0, _(""), _(""))));
 
 		orig::baseprojectile_createprojectile = reinterpret_cast<uintptr_t(*)(base_projectile*, rust::classes::string, Vector3, Vector3, Vector3)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseProjectile"), _("CreateProjectile"), 0, _(""), _(""))));
+
+		//orig::aimconeutil_getmodifiedaimconedirection = reinterpret_cast<Vector3(*)(float, Vector3, bool)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("AimConeUtil"), _("GetModifiedAimConeDirection"), -1, _(""), _(""))));
 
 		serverrpc_projecileshoot = rb::pattern::find_rel(
 			_("GameAssembly.dll"), _("4C 8B 0D ? ? ? ? 48 8B 75 28"));
@@ -364,8 +378,20 @@ namespace hooks {
 					}
 				}
 
-				original_vel = *reinterpret_cast<Vector3*>(projectile + 0x24);
+				//original_vel = *reinterpret_cast<Vector3*>(projectile + 0x24);
+				
+				Vector3 target_dir = (rpc_position - target.pos).normalize();
+				float vel = 100.f;
+				for (int i = 0; i < projectile_list->get_size(); i++) {
+					auto projectile = *(base_projectile**)((uintptr_t)projectile_list + 0x20 + i * 0x8);
 
+					if (!projectile)
+						continue;
+					vel = projectile->get_item_mod_projectile()->get_projectile_velocity();
+				}
+				Vector3 spoofed_vel = target_dir * (vel * 1.49 * 1 + 0);
+				
+				original_vel = spoofed_vel;
 				
 				if (target.player && (target.visible || manipulated || misc::autoshot) && !target.teammate) {
 					if (!settings::weapon::bullet_tp)
@@ -617,9 +643,10 @@ namespace hooks {
 		return Update(p);
 	}
 
-	void AimConeDir_hk(float aimcone, Vector3 input, bool anywhereInside)
+	Vector3 AimConeDir_hk(float aimcone, Vector3 input, bool anywhereInside)
 	{
-		//return orig::getmodifiedaimcone(aimcone, input, anywhereInside);
+		//return orig::aimconeutil_getmodifiedaimconedirection(aimcone, input, anywhereInside);
+		return Vector3(0, 0, 0);
 	}
 
 
@@ -694,7 +721,7 @@ namespace hooks {
 
 		flying = player_walk_movement->get_flying();
 
-		if (!keybinds::silentwalkb || unity::GetKey(keybinds::silentwalkk)) {
+		if (!settings::misc::silentwalk || unity::GetKey((rust::classes::KeyCode)settings::keybind::silentwalk)) {
 			if (settings::misc::silentwalk) {
 				set_onLadder(model_state, true);
 			}
@@ -976,18 +1003,20 @@ namespace hooks {
 
 				}
 
+				bool manipulation = false;
 				float mm_eye = ((0.01f + ((settings::desyncTime + 2.f / 60.f + 0.125f) * baseplayer->max_velocity())));
 				float time = get_fixedTime();
 				if (esp::best_target.player && held)
 				{
 					Vector3 target = esp::best_target.player->get_bone_transform(48)->get_bone_position();
-					Sphere(target, 0.05, col(0.8, 0.9, 0.3, 1), 0.05f, 10.f);
+					//Sphere(target, 0.05, col(0.8, 0.9, 0.3, 1), 0.05f, 10.f);
 					auto mag = *reinterpret_cast<uintptr_t*>((uintptr_t)held + primaryMagazine);
 					auto mag_ammo = *reinterpret_cast<int*>((uintptr_t)mag + 0x1C); //0x1C = public int contents;
 					if (settings::weapon::manipulator
 						&& ((unity::GetKey(rust::classes::KeyCode(settings::keybind::manipulator)))
 							|| misc::manipulate_vis))
 					{
+						manipulation = true;
 						float nextshot = misc::fixed_time_last_shot + held->get_repeat_delay();
 						if (misc::can_manipulate(baseplayer, target, mm_eye))
 							if (nextshot < time
@@ -1007,8 +1036,8 @@ namespace hooks {
 					if ((settings::weapon::autoshoot || unity::GetKey(rust::classes::KeyCode(settings::keybind::autoshoot))))
 					{
 						float nextshot = misc::fixed_time_last_shot + held->get_repeat_delay();
-						Sphere(target, 0.05f, col(0.6, 0.6, 0.6, 1), 0.02f, 100.f);
-						Sphere(baseplayer->get_bone_transform(48)->get_bone_position(), 0.05f, col(0.6, 0.6, 0.6, 1), 0.02f, 100.f);
+						//Sphere(target, 0.05f, col(0.6, 0.6, 0.6, 1), 0.02f, 100.f);
+						//Sphere(baseplayer->get_bone_transform(48)->get_bone_position(), 0.05f, col(0.6, 0.6, 0.6, 1), 0.02f, 100.f);
 						if (baseplayer->is_visible(target, baseplayer->get_bone_transform(48)->get_bone_position())
 							&& get_fixedTime() > nextshot
 							&& held->get_time_since_deploy() > held->get_deploy_delay()
@@ -1027,7 +1056,7 @@ namespace hooks {
 							&& settings::weapon::manipulator
 							&& mag_ammo > 0)
 						{
-							if (misc::can_manipulate(baseplayer, target, 5.f))
+							if (misc::can_manipulate(baseplayer, target, 6.f))
 							{//maybe check more later idk
 								misc::manipulate_vis = true;
 							}
@@ -1038,13 +1067,21 @@ namespace hooks {
 				}
 				else misc::manipulate_vis = false;
 				//desync on key
-				if (unity::GetKey(rust::classes::KeyCode(settings::keybind::desync_ok))
-					|| (settings::weapon::manipulator
-						&& (unity::GetKey(rust::classes::KeyCode(settings::keybind::manipulator))
-							|| misc::manipulate_vis)))
-					baseplayer->set_client_tick_interval(0.99f);
-				else if (!is_lagging && !is_speeding)
-					baseplayer->set_client_tick_interval(0.05f);
+
+				if (manipulation)
+						baseplayer->set_client_tick_interval(0.99f);
+				
+
+				if (settings::misc::fake_lag && !manipulation)
+				{
+					esp::local_player->set_client_tick_interval(0.4f);
+					is_lagging = true;
+				}
+				else if (!settings::misc::fake_lag && !manipulation) {
+					esp::local_player->set_client_tick_interval(0.05f);
+					is_lagging = false;
+				}
+
 
 				if (settings::weapon::always_reload
 					&& held)
@@ -1066,21 +1103,6 @@ namespace hooks {
 						misc::did_reload = true;
 						misc::time_since_last_shot = 0;
 					}
-				}
-
-				if (!keybinds::fakelagb || unity::GetKey(keybinds::fakelagk)) {
-					if (!is_lagging && !flying && settings::misc::fake_lag && !is_speeding) {
-						baseplayer->set_client_tick_interval(0.4f);
-						is_lagging = true;
-					}
-				}
-				else if (is_lagging && flying || is_lagging && is_speeding) {
-					esp::local_player->set_client_tick_interval(0.03f);
-					is_lagging = false;
-				}
-				else if (is_lagging && !settings::misc::fake_lag) {
-					esp::local_player->set_client_tick_interval(0.05f);
-					is_lagging = false;
 				}
 
 				if (settings::misc::eyeoffset || unity::GetKey((rust::classes::KeyCode)settings::keybind::neck))

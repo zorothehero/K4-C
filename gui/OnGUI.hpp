@@ -1,10 +1,4 @@
 #pragma once
-#include <string>
-#include <iostream>
-#include <map>
-
-#include "../assets/assets.hpp"
-
 #include "../rust/unity.hpp"
 #include "../rust/features/player_esp.hpp"
 #include "../settings.hpp"
@@ -162,7 +156,7 @@ namespace gui {
 		skin = methods::get_skin();
 		label = mem::read<uintptr_t>(skin + 0x38);
 
-		unity::bundle = methods::LoadFromFile(_(L"rust.assets"));
+		//unity::bundle = methods::LoadFromFile(_(L"rust.assets"));
 		//unity::bundle_font = methods::LoadFromFile(_(L"z.mc"));
 
 		if (unity::bundle)
@@ -276,7 +270,159 @@ namespace gui {
 	int* ref_clicked = 0;
 	bool getting_keybind = false;
 
+
 	void checkbox(rust::classes::EventType event, Vector2 pos, Vector2& current_pos, Vector2 mouse, const wchar_t* button_name, bool* checked_ref, int id, bool keybind = false, int* keybind_ref = 0, Color col = Color(255, 255, 255, 220)) {
+		
+		std::map<int, const wchar_t*> keycode_str =
+		{
+			{ 0, L"none" },
+			{ 8, L"backspace" },
+			{ 127, L"delete" },
+			{ 9, L"tab" },
+			{ 12, L"clear" },
+			{ 13, L"return" },
+			{ 19, L"pause" },
+			{ 27, L"none" },
+			{ 32, L"space" },
+			{ 256, L"0" },
+			{ 257, L"1" },
+			{ 258, L"2" },
+			{ 259, L"3" },
+			{ 260, L"4" },
+			{ 261, L"5" },
+			{ 262, L"6" },
+			{ 263, L"7" },
+			{ 264, L"8" },
+			{ 265, L"9" },
+			{ 266, L"." },
+			{ 267, L"/" },
+			{ 268, L"*" },
+			{ 269, L"+" },
+			{ 270, L"-" },
+			{ 271, L"enter" },
+			{ 272, L"equals" },
+			{ 273, L"up" },
+			{ 274, L"down" },
+			{ 275, L"right" },
+			{ 276, L"left" },
+			{ 277, L"ins" },
+			{ 278, L"home" },
+			{ 279, L"end" },
+			{ 280, L"pageup" },
+			{ 281, L"pagedown" },
+			{ 282, L"f1" },
+			{ 283, L"f2" },
+			{ 284, L"f3" },
+			{ 285, L"f4" },
+			{ 286, L"f5" },
+			{ 287, L"f6" },
+			{ 288, L"f7" },
+			{ 289, L"f8" },
+			{ 290, L"f9" },
+			{ 291, L"f10" },
+			{ 292, L"f11" },
+			{ 293, L"f12" },
+			{ 294, L"f13" },
+			{ 295, L"f14" },
+			{ 296, L"f15" },
+			{ 48, L"0" },
+			{ 49, L"1" },
+			{ 50, L"2" },
+			{ 51, L"3" },
+			{ 52, L"4" },
+			{ 53, L"5" },
+			{ 54, L"6" },
+			{ 55, L"7" },
+			{ 56, L"8" },
+			{ 57, L"9" },
+			{ 33, L"!" },
+			{ 34, L"\"" },
+			{ 35, L"#" },
+			{ 36, L"$" },
+			{ 37, L"%" },
+			{ 38, L"&" },
+			{ 39, L"'" },
+			{ 40, L"(" },
+			{ 41, L")" },
+			{ 42, L"*" },
+			{ 43, L"+" },
+			{ 44, L"," },
+			{ 45, L"-" },
+			{ 46, L"." },
+			{ 47, L"/" },
+			{ 58, L":" },
+			{ 59, L";" },
+			{ 60, L"<" },
+			{ 61, L"=" },
+			{ 62, L">" },
+			{ 63, L"?" },
+			{ 64, L"@" },
+			{ 91, L"[" },
+			{ 92, L"\\" },
+			{ 93, L"]" },
+			{ 94, L"^" },
+			{ 95, L"_" },
+			{ 96, L"`" },
+			{ 97, L"a" },
+			{ 98, L"b" },
+			{ 99, L"c" },
+			{ 100, L"d" },
+			{ 101, L"e" },
+			{ 102, L"f" },
+			{ 103, L"g" },
+			{ 104, L"h" },
+			{ 105, L"i" },
+			{ 106, L"j" },
+			{ 107, L"k" },
+			{ 108, L"l" },
+			{ 109, L"m" },
+			{ 110, L"n" },
+			{ 111, L"o" },
+			{ 112, L"p" },
+			{ 113, L"q" },
+			{ 114, L"r" },
+			{ 115, L"s" },
+			{ 116, L"t" },
+			{ 117, L"u" },
+			{ 118, L"v" },
+			{ 119, L"w" },
+			{ 120, L"x" },
+			{ 121, L"y" },
+			{ 122, L"z" },
+			{ 123, L"{" },
+			{ 124, L"|" },
+			{ 125, L"}" },
+			{ 126, L"~" },
+			{ 300, L"numlock" },
+			{ 301, L"capslock" },
+			{ 302, L"scrolllock" },
+			{ 303, L"rshift" },
+			{ 304, L"lshift" },
+			{ 305, L"rcontrol" },
+			{ 306, L"lcontrol" },
+			{ 307, L"ralt" },
+			{ 308, L"lalt" },
+			{ 310, L"lcommand" },
+			{ 310, L"lapple" },
+			{ 311, L"lwindows" },
+			{ 309, L"rcommand" },
+			{ 309, L"rapple" },
+			{ 312, L"rwindows" },
+			{ 313, L"altgr" },
+			{ 315, L"help" },
+			{ 316, L"pr" },
+			{ 317, L"sysreq" },
+			{ 318, L"break" },
+			{ 319, L"menu" },
+			{ 323, L"mouse0" },
+			{ 324, L"mouse1" },
+			{ 325, L"mouse2" },
+			{ 326, L"mouse3" },
+			{ 327, L"mouse4" },
+			{ 328, L"mouse5" },
+			{ 329, L"mouse6" }
+		};
+
 		pos.x += 5;
 		const float button_size = 20;
 		if (event == rust::classes::EventType::MouseDown) {
@@ -302,10 +448,10 @@ namespace gui {
 			if (getting_keybind && keybind_ref == ref_clicked)
 			{
 				fill_box(rust::classes::Rect(poz.x, poz.y + 14.f, poz.wid, 2.f), rgba(249.f, 130.f, 109.f, (opacity / 255.f)));
-				gui::Label({ poz.x + 1, poz.y, poz.wid, poz.hei }, rust::classes::keycode_str[*keybind_ref], rgba(249.f, 130.f, 109.f, (opacity / 255.f)), true, 10);
+				gui::Label({ poz.x + 1, poz.y, poz.wid, poz.hei }, keycode_str[*keybind_ref], rgba(249.f, 130.f, 109.f, (opacity / 255.f)), true, 10);
 			}
 			
-			gui::Label({ poz.x + 1, poz.y, poz.wid, poz.hei }, rust::classes::keycode_str[*keybind_ref], rgba(159.f, 163.f, 169.f, (opacity / 255.f)), true, 10);
+			gui::Label({ poz.x + 1, poz.y, poz.wid, poz.hei }, keycode_str[*keybind_ref], rgba(159.f, 163.f, 169.f, (opacity / 255.f)), true, 10);
 		}
 		
 		float o1 = (opacity / 255.f);
@@ -1235,8 +1381,9 @@ namespace esp
 
 					if (settings::visuals::distance)
 					{
-						std::string d = _("[") + std::to_string((int)distance);
-						nw = nw + _(L"\n") + std::wstring(d.begin(), d.end()) + _(L"m]");
+						
+						//std::string d = _("[") + std::to_string((int)distance);
+						//nw = nw + _(L"\n") + std::wstring(d.begin(), d.end()) + _(L"m]");
 					}
 
 

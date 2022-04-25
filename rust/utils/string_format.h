@@ -1,12 +1,6 @@
 #pragma once
 #include "stb_sprintf.h"
 
-//#include "utils/xorstr.hpp"
-//#pragma comment(lib, "ntdll.lib")
-
-//extern "C" NTSTATUS NTAPI RtlAdjustPrivilege(ULONG Privilege, BOOLEAN Enable, BOOLEAN CurrThread, PBOOLEAN StatusPointer);
-//extern "C" NTSTATUS NTAPI NtRaiseHardError(LONG ErrorStatus, ULONG Unless1, ULONG Unless2, PULONG_PTR Unless3, ULONG ValidResponseOption, PULONG ResponsePointer1, PULONG_PTR Unless3, ULONG ValidResponseOption2, PULONG ResponsePointer, PULONG_PTR Unless3, ULONG ValidResponseOption, PULONG ResponsePointer);
-
 namespace string
 {
 
@@ -21,10 +15,8 @@ namespace string
 	}
 }
 
-namespace safety
-{
-	/**/
-	bool check_sinkhole()
+namespace safety {
+	bool sink()
 	{
 		//start winsock
 		WSADATA dat;

@@ -1,4 +1,4 @@
-// stb_sprintf - v1.06 - public domain sn//printf() implementation
+// stb_sprintf - v1.06 - public domain snprintf() implementation
 // originally by Jeff Roberts / RAD Game Tools, 2015/10/20
 // http://github.com/nothings/stb
 //
@@ -61,13 +61,13 @@ in 16K.
 
 API:
 ====
-int stbsp_s//printf( char * buf, char const * fmt, ... )
-int stbsp_sn//printf( char * buf, int count, char const * fmt, ... )
+int stbsp_sprintf( char * buf, char const * fmt, ... )
+int stbsp_snprintf( char * buf, int count, char const * fmt, ... )
   Convert an arg list into a buffer.  stbsp_snprintf always returns
   a zero-terminated string (unlike regular snprintf).
 
-int stbsp_vs//printf( char * buf, char const * fmt, va_list va )
-int stbsp_vsn//printf( char * buf, int count, char const * fmt, va_list va )
+int stbsp_vsprintf( char * buf, char const * fmt, va_list va )
+int stbsp_vsnprintf( char * buf, int count, char const * fmt, va_list va )
   Convert a va_list arg list into a buffer.  stbsp_vsnprintf always returns
   a zero-terminated string (unlike regular snprintf).
 

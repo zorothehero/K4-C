@@ -23,7 +23,7 @@
 #include <utility>
 
 #ifdef _DEBUG
-#define LOG(...)
+#define LOG(...) printf("\n" __VA_ARGS__)
 #else
 #define LOG(...)
 #endif

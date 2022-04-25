@@ -9,15 +9,6 @@
 #define DEFINE_MEMBER_N(type, name, offset) struct {unsigned char MAKE_PAD(offset); type name;}
 #define min(a,b)            (((a) < (b)) ? (a) : (b))
 
-struct Ray {
-	Vector3 origin;
-	Vector3 dir;
-	Ray(Vector3 o, Vector3 d) {
-		origin = o;
-		dir = d;
-	}
-};
-
 namespace rust {
 	template<typename T>
 	class list {
@@ -52,39 +43,6 @@ namespace rust {
 	};
 
 	namespace classes {
-		enum class Signal {
-			Attack,
-			Alt_Attack,
-			DryFire,
-			Reload,
-			Deploy,
-			Flinch_Head,
-			Flinch_Chest,
-			Flinch_Stomach,
-			Flinch_RearHead,
-			Flinch_RearTorso,
-			Throw,
-			Relax,
-			Gesture,
-			PhysImpact,
-			Eat,
-			Startled
-		};
-		enum BUTTON : uint32_t {
-			FORWARD = 2,
-			BACKWARD = 4,
-			LEFT = 8,
-			RIGHT = 16,
-			JUMP = 32,
-			DUCK = 64,
-			SPRINT = 128,
-			USE = 256,
-			FIRE_PRIMARY = 1024,
-			FIRE_SECONDARY = 2048,
-			RELOAD = 8192,
-			FIRE_THIRD = 134217728
-		};
-
 		enum class layer : uint32_t {
 			Default = 0,
 			TransparentFX = 1,
@@ -145,14 +103,14 @@ namespace rust {
 		class Attack {
 		public:
 			union {
-				DEFINE_MEMBER_N(Vector3, pointStart, 0x14);
-				DEFINE_MEMBER_N(Vector3, pointEnd, 0x18);
+				DEFINE_MEMBER_N(vector3, pointStart, 0x14);
+				DEFINE_MEMBER_N(vector3, pointEnd, 0x18);
 				DEFINE_MEMBER_N(unsigned int, hitID, 0x2C);
 				DEFINE_MEMBER_N(unsigned int, hitBone, 0x30);
-				DEFINE_MEMBER_N(Vector3, hitNormalLocal, 0x34);
-				DEFINE_MEMBER_N(Vector3, hitPositionLocal, 0x40);
-				DEFINE_MEMBER_N(Vector3, hitNormalWorld, 0x4C);
-				DEFINE_MEMBER_N(Vector3, hitPositionWorld, 0x48);
+				DEFINE_MEMBER_N(vector3, hitNormalLocal, 0x34);
+				DEFINE_MEMBER_N(vector3, hitPositionLocal, 0x40);
+				DEFINE_MEMBER_N(vector3, hitNormalWorld, 0x4C);
+				DEFINE_MEMBER_N(vector3, hitPositionWorld, 0x48);
 				DEFINE_MEMBER_N(unsigned int, hitPartID, 0x64);
 				DEFINE_MEMBER_N(unsigned int, hitMaterialID, 0x68);
 				DEFINE_MEMBER_N(unsigned int, hitItem, 0x6C);
@@ -195,12 +153,11 @@ namespace rust {
 		public:
 			union {
 				DEFINE_MEMBER_N(PlayerAttack*, playerAttack, 0x18);
-				DEFINE_MEMBER_N(Vector3, hitVelocity, 0x20);
+				DEFINE_MEMBER_N(vector3, hitVelocity, 0x20);
 				DEFINE_MEMBER_N(float, hitDistance, 0x2C);
 				DEFINE_MEMBER_N(float, travelTime, 0x30);
 			};
 		};
-
 		enum class Layers
 		{
 			Terrain = 8388608,
@@ -231,7 +188,6 @@ namespace rust {
 			DismountCheck = 1486946561,
 			AIPlacement = 278986753,
 			WheelRay = 1235321089,
-			z = 1503731969,
 		};
 
 		enum class Bone_List : int
@@ -288,7 +244,7 @@ namespace rust {
 				return *reinterpret_cast<uintptr_t*>(value + 0x18);
 			}
 		};
-
+		
 		enum class KeyCode
 		{
 			Backspace = 8,
@@ -519,7 +475,7 @@ namespace rust {
 				wid = 0;
 				hei = 0;
 			}
-			bool Contains(Vector2 point)
+			bool Contains(vector2 point)
 			{
 				return point.x >= x && point.x < (x + wid) && point.y >= y && point.y < (y + hei);
 			}
@@ -539,7 +495,7 @@ namespace rust {
 			union {
 				//              Type     Name    Offset
 				DEFINE_MEMBER_N(uintptr_t, type, 0x10);
-				DEFINE_MEMBER_N(Vector3, AttackRay, 0x14);
+				DEFINE_MEMBER_N(vector3, AttackRay, 0x14);
 				DEFINE_MEMBER_N(float, Radius, 0x2C);
 				DEFINE_MEMBER_N(float, Forgiveness, 0x30);
 				DEFINE_MEMBER_N(float, MaxDistance, 0x34);
@@ -552,9 +508,9 @@ namespace rust {
 				DEFINE_MEMBER_N(uintptr_t, collider, 0x78);
 				DEFINE_MEMBER_N(uintptr_t, ignoreEntity, 0x80);
 				DEFINE_MEMBER_N(uintptr_t, HitEntity, 0x88);
-				DEFINE_MEMBER_N(Vector3, HitPoint, 0x90);
-				DEFINE_MEMBER_N(Vector3, HitNormal, 0x9C);
-				DEFINE_MEMBER_N(Vector3, HitNormal, 0x9C);
+				DEFINE_MEMBER_N(vector3, HitPoint, 0x90);
+				DEFINE_MEMBER_N(vector3, HitNormal, 0x9C);
+				DEFINE_MEMBER_N(vector3, HitNormal, 0x9C);
 				DEFINE_MEMBER_N(float, HitDistance, 0xA8);
 				DEFINE_MEMBER_N(uintptr_t, HitTransform, 0xB0);
 				DEFINE_MEMBER_N(unsigned int, HitPart, 0xB8);
