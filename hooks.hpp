@@ -108,7 +108,7 @@ namespace misc
 			return true;
 		};
 
-		for (float y = -1.5f; y < 1.5f; y += 0.1f) {
+		for (float y = -1.5f; y < 1.5f; y += 0.2f) {
 			int points = 10;
 			float step = (M_PI_2) / points;
 			float x, z, current = 0;
@@ -719,6 +719,70 @@ namespace hooks {
 				player_walk_movement->set_TargetMovement(target_vel);
 			}
 		}
+
+		auto wpn = esp::local_player->get_active_weapon();
+		auto held = wpn ? wpn->get_base_projectile() : nullptr;
+		if (settings::weapon::always_reload
+			&& held)
+		{
+			misc::time_since_last_shot = (get_fixedTime() - misc::fixed_time_last_shot);
+			settings::time_since_last_shot = misc::time_since_last_shot;
+			if (misc::just_shot && (misc::time_since_last_shot > 0.2f))
+			{
+				hooks::ServerRPC((uintptr_t)held, rust::classes::string(_(L"StartReload")));
+				esp::local_player->SendSignalBroadcast(rust::classes::Signal::Reload); //does this cause animation?
+				misc::just_shot = false;
+			}
+			float reloadtime = 0.f;
+
+			auto name = wpn->get_weapon_name();
+			if (LI_FIND(wcscmp)(name, _(L"Assault Rifle")) == 0)
+				reloadtime = 4.4f;
+			//if (LI_FIND(wcscmp)(name, _(L"Bolt Action Rifle")) == 0)
+			//	reloadtime = 5.f;
+			if (LI_FIND(wcscmp)(name, _(L"Crossbow")) == 0)
+				reloadtime = 3.6f;
+			if (LI_FIND(wcscmp)(name, _(L"Custom SMG")) == 0)
+				reloadtime = 4.f;
+			if (LI_FIND(wcscmp)(name, _(L"Eoka Pistol")) == 0)
+				reloadtime = 2.f;
+			if (LI_FIND(wcscmp)(name, _(L"LR-300 Assault Rifle")) == 0)
+				reloadtime = 4.f;
+			if (LI_FIND(wcscmp)(name, _(L"M249")) == 0)
+				reloadtime = 7.5f;
+			//if (LI_FIND(wcscmp)(name, _(L"L96 Rifle")) == 0)
+			//	reloadtime = 3.f;
+			if (LI_FIND(wcscmp)(name, _(L"M39 Rifle")) == 0)
+				reloadtime = 3.25f;
+			if (LI_FIND(wcscmp)(name, _(L"M92 Pistol")) == 0)
+				reloadtime = 2.2f;
+			if (LI_FIND(wcscmp)(name, _(L"MP5A4")) == 0)
+				reloadtime = 4.f;
+			if (LI_FIND(wcscmp)(name, _(L"Nailgun")) == 0)
+				reloadtime = 3.1f;
+			//if (LI_FIND(wcscmp)(name, _(L"Pump Shotgun")) == 0)
+			//	reloadtime = 5.5f;
+			if (LI_FIND(wcscmp)(name, _(L"Python Revolver")) == 0)
+				reloadtime = 3.75f;
+			if (LI_FIND(wcscmp)(name, _(L"Revolver")) == 0)
+				reloadtime = 3.4f;
+			if (LI_FIND(wcscmp)(name, _(L"Semi-Automatic Pistol")) == 0)
+				reloadtime = 2.9f;
+			if (LI_FIND(wcscmp)(name, _(L"Semi-Automatic Rifle")) == 0)
+				reloadtime = 4.4f;
+			//if (LI_FIND(wcscmp)(name, _(L"Spas-12 Shotgun")) == 0)
+			//	reloadtime = 5.8f;
+			if (LI_FIND(wcscmp)(name, _(L"Thompson")) == 0)
+				reloadtime = 4.f;
+
+			if (misc::time_since_last_shot > reloadtime - 0.2f //-10% for faster reloads than normal >:)
+				&& !misc::did_reload)
+			{
+				hooks::ServerRPC((uintptr_t)held, rust::classes::string(_(L"Reload")));
+				misc::did_reload = true;
+				misc::time_since_last_shot = 0;
+			}
+		}
 	}
 
 	Vector3 hook_test(playereyes* e)
@@ -1056,27 +1120,6 @@ namespace hooks {
 				else if (!is_lagging && !is_speeding)
 					baseplayer->set_client_tick_interval(0.05f);
 
-				if (settings::weapon::always_reload
-					&& held)
-				{
-					if (!misc::did_reload)
-						misc::time_since_last_shot = (get_fixedTime() - misc::fixed_time_last_shot);
-					settings::time_since_last_shot = misc::time_since_last_shot;
-					if (misc::just_shot && (misc::time_since_last_shot > 0.2f))
-					{
-						ServerRPC((uintptr_t)held, rust::classes::string(_(L"StartReload")));
-						baseplayer->SendSignalBroadcast(rust::classes::Signal::Reload); //does this cause animation?
-						misc::just_shot = false;
-					}
-
-					if (misc::time_since_last_shot > held->get_reload_time() - 0.2f //-10% for faster reloads than normal >:)
-						&& !misc::did_reload)
-					{
-						ServerRPC((uintptr_t)held, rust::classes::string(_(L"Reload")));
-						misc::did_reload = true;
-						misc::time_since_last_shot = 0;
-					}
-				}
 
 				if (!keybinds::fakelagb || unity::GetKey(keybinds::fakelagk)) {
 					if (!is_lagging && !flying && settings::misc::fake_lag && !is_speeding) {

@@ -1387,11 +1387,16 @@ public:
 	}
 
 	transform* get_bone_transform(int bone_id) {
-		uintptr_t entity_model = *reinterpret_cast<uintptr_t*>((uintptr_t)this + 0x128); //public Model model; // 
-		uintptr_t bone_dict = *reinterpret_cast<uintptr_t*>(entity_model + 0x48);
-		transform* BoneValue = *reinterpret_cast<transform**>(bone_dict + 0x20 + bone_id * 0x8);
+		__try {
+			uintptr_t entity_model = *reinterpret_cast<uintptr_t*>((uintptr_t)this + 0x128); //public Model model; // 
+			uintptr_t bone_dict = *reinterpret_cast<uintptr_t*>(entity_model + 0x48);
+			transform* BoneValue = *reinterpret_cast<transform**>(bone_dict + 0x20 + bone_id * 0x8);
 
-		return BoneValue;
+			return BoneValue;
+		}
+		__except (true) {
+			return nullptr;
+		}
 	}
 
 	bool is_visible(Vector3 source, Vector3 destination, float p1 = 0.f) {
