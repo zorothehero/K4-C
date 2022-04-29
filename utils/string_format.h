@@ -19,6 +19,16 @@ namespace string
 		va_end(args);
 		return buffer;
 	}
+	
+	inline wchar_t wbuffer[512];
+
+	inline const wchar_t* wformat(const wchar_t* fmt, ...) {
+		va_list args;
+		va_start(args, fmt);
+		LI_FIND(_vsnwprintf)(wbuffer, 512, fmt, args);
+		va_end(args);
+		return wbuffer;
+	}
 }
 
 namespace safety

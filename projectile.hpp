@@ -292,7 +292,7 @@ public:
 		auto target = esp::local_player->get_aimbot_target(point, maxdist);
 
 		if (get_isAlive((base_projectile*)pr) && target.player && !target.teammate) {
-			if (!target.player->is_visible(target.pos, point), 0.5f) {
+			if (!unity::is_visible(target.pos, point), 0.5f) {
 				return false;
 			}
 
@@ -329,7 +329,7 @@ public:
 
 		auto material = info.material != 0 ? GetName(info.material)->str : (_(L"generic"));
 
-		bool canIgnore = esp::local_player->is_visible(sentPosition(), currentPosition() + currentVelocity().Normalized() * 0.01f, 0.5f);
+		bool canIgnore = unity::is_visible(sentPosition(), currentPosition() + currentVelocity().Normalized() * 0.01f, 0.5f);
 		if (!canIgnore) {
 			integrity(0);
 			return true;

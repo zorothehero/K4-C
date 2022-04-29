@@ -1034,7 +1034,7 @@ public:
 		y *= number;
 		z *= number;
 		w *= number;
-		return *this;
+		return *this;	
 	}
 
 	Vector4& operator/=(float number)

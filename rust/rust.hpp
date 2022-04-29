@@ -1,7 +1,6 @@
 #pragma once
 #include "../utils/vector.hpp"
 #include "../memory/il2cpp.hpp"
-#include <map>
 
 #define STR_MERGE_IMPL(a, b) a##b
 #define STR_MERGE(a, b) STR_MERGE_IMPL(a, b)

@@ -7,5 +7,5 @@ namespace offsets {
     constexpr auto Method$Facepunch_Pool_GetList_TraceInfo_Address = 51833056;
     constexpr auto Method$Facepunch_Pool_GetList_TraceInfo_MethodAddress = 23106208;
     constexpr auto Method$BaseEntity_ServerRPC_uint = 51964800;
-    constexpr auto BaseEntity$$ServerRPC_uint_ = 26298256;
+    constexpr auto BaseEntity$$ServerRPC_uint_ = 26288272;
 }

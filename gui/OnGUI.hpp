@@ -51,7 +51,7 @@ namespace gui {
 
 		static auto LoadFromFile = reinterpret_cast<uintptr_t(*)(rust::classes::string path)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("AssetBundle"), _("LoadFromFile"), 1, _("path"), _("UnityEngine"), 1)));
 
-		static auto LoadAsset = reinterpret_cast<uintptr_t(*)(uintptr_t bundle, rust::classes::string path, uintptr_t type)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("AssetBundle"), _("LoadAsset"), 2, _("name"), _("UnityEngine"), 1)));		 
+		static auto LoadAsset = reinterpret_cast<uintptr_t(*)(uintptr_t bundle, rust::classes::string path, uintptr_t type)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("AssetBundle"), _("LoadAsset"), 2, _("name"), _("UnityEngine"), 1)));
 
 		static auto DrawTexture = reinterpret_cast<void (*)(rust::classes::Rect, uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GUI"), _("DrawTexture"), 2, _("image"), _("UnityEngine"), 2)));
 
@@ -98,7 +98,7 @@ namespace gui {
 		methods::LoadAllAssets = reinterpret_cast<uintptr_t(*)(uintptr_t bundle, uintptr_t type)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("AssetBundle"), _("LoadAllAssets"), 1, _("type"), _("UnityEngine"), 1)));
 
 		methods::LoadFromFile = reinterpret_cast<uintptr_t(*)(rust::classes::string path)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("AssetBundle"), _("LoadFromFile"), 1, _("path"), _("UnityEngine"), 1)));
-		
+
 		methods::LoadAsset = reinterpret_cast<uintptr_t(*)(uintptr_t bundle, rust::classes::string path, uintptr_t type)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("AssetBundle"), _("LoadAsset"), 2, _("name"), _("UnityEngine"), 1)));
 
 		methods::DrawTexture = reinterpret_cast<void (*)(rust::classes::Rect, uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GUI"), _("DrawTexture"), 2, _("image"), _("UnityEngine"), 2)));
@@ -117,6 +117,301 @@ namespace gui {
 	bool InsertPressed;
 	float opacity = 0.f;
 	float tick_time_when_called;
+
+	const wchar_t* get_keystr(int key) {
+		switch (key)
+		{
+		case 0:
+			return _(L"none");
+		case 8:
+			return _(L"backspace");
+		case 127:
+			return _(L"delete");
+		case 9:
+			return _(L"tab");
+		case 12:
+			return _(L"clear");
+		case 13:
+			return _(L"return");
+		case 19:
+			return _(L"pause");
+		case 27:
+			return _(L"none");
+		case 32:
+			return _(L"space");
+		case 256:
+			return _(L"0");
+		case 257:
+			return _(L"1");
+		case 258:
+			return _(L"2");
+		case 259:
+			return _(L"3");
+		case 260:
+			return _(L"4");
+		case 261:
+			return _(L"5");
+		case 262:
+			return _(L"6");
+		case 263:
+			return _(L"7");
+		case 264:
+			return _(L"8");
+		case 265:
+			return _(L"9");
+		case 266:
+			return _(L".");
+		case 267:
+			return _(L"/");
+		case 268:
+			return _(L"*");
+		case 269:
+			return _(L"+");
+		case 270:
+			return _(L"-");
+		case 271:
+			return _(L"enter");
+		case 272:
+			return _(L"equals");
+		case 273:
+			return _(L"up");
+		case 274:
+			return _(L"down");
+		case 275:
+			return _(L"right");
+		case 276:
+			return _(L"left");
+		case 277:
+			return _(L"ins");
+		case 278:
+			return _(L"home");
+		case 279:
+			return _(L"end");
+		case 280:
+			return _(L"pageup");
+		case 281:
+			return _(L"pagedown");
+		case 282:
+			return _(L"f1");
+		case 283:
+			return _(L"f2");
+		case 284:
+			return _(L"f3");
+		case 285:
+			return _(L"f4");
+		case 286:
+			return _(L"f5");
+		case 287:
+			return _(L"f6");
+		case 288:
+			return _(L"f7");
+		case 289:
+			return _(L"f8");
+		case 290:
+			return _(L"f9");
+		case 291:
+			return _(L"f10");
+		case 292:
+			return _(L"f11");
+		case 293:
+			return _(L"f12");
+		case 294:
+			return _(L"f13");
+		case 295:
+			return _(L"f14");
+		case 296:
+			return _(L"f15");
+		case 48:
+			return _(L"0");
+		case 49:
+			return _(L"1");
+		case 50:
+			return _(L"2");
+		case 51:
+			return _(L"3");
+		case 52:
+			return _(L"4");
+		case 53:
+			return _(L"5");
+		case 54:
+			return _(L"6");
+		case 55:
+			return _(L"7");
+		case 56:
+			return _(L"8");
+		case 57:
+			return _(L"9");
+		case 33:
+			return _(L"!");
+		case 34:
+			return _(L"\"");
+		case 35:
+			return _(L"#");
+		case 36:
+			return _(L"$");
+		case 37:
+			return _(L"%");
+		case 38:
+			return _(L"&");
+		case 39:
+			return _(L"'");
+		case 40:
+			return _(L"(");
+		case 41:
+			return _(L")");
+		case 42:
+			return _(L"*");
+		case 43:
+			return _(L"+");
+		case 44:
+			return _(L",");
+		case 45:
+			return _(L"-");
+		case 46:
+			return _(L".");
+		case 47:
+			return _(L"/");
+		case 58:
+			return _(L":");
+		case 59:
+			return _(L";");
+		case 60:
+			return _(L"<");
+		case 61:
+			return _(L"=");
+		case 62:
+			return _(L">");
+		case 63:
+			return _(L"?");
+		case 64:
+			return _(L"@");
+		case 91:
+			return _(L"[");
+		case 92:
+			return _(L"\\");
+		case 93:
+			return _(L"]");
+		case 94:
+			return _(L"^");
+		case 95:
+			return _(L"_");
+		case 96:
+			return _(L"`");
+		case 97:
+			return _(L"a");
+		case 98:
+			return _(L"b");
+		case 99:
+			return _(L"c");
+		case 100:
+			return _(L"d");
+		case 101:
+			return _(L"e");
+		case 102:
+			return _(L"f");
+		case 103:
+			return _(L"g");
+		case 104:
+			return _(L"h");
+		case 105:
+			return _(L"i");
+		case 106:
+			return _(L"j");
+		case 107:
+			return _(L"k");
+		case 108:
+			return _(L"l");
+		case 109:
+			return _(L"m");
+		case 110:
+			return _(L"n");
+		case 111:
+			return _(L"o");
+		case 112:
+			return _(L"p");
+		case 113:
+			return _(L"q");
+		case 114:
+			return _(L"r");
+		case 115:
+			return _(L"s");
+		case 116:
+			return _(L"t");
+		case 117:
+			return _(L"u");
+		case 118:
+			return _(L"v");
+		case 119:
+			return _(L"w");
+		case 120:
+			return _(L"x");
+		case 121:
+			return _(L"y");
+		case 122:
+			return _(L"z");
+		case 123:
+			return _(L"{");
+		case 124:
+			return _(L"|");
+		case 125:
+			return _(L"}");
+		case 126:
+			return _(L"~");
+		case 300:
+			return _(L"numlock");
+		case 301:
+			return _(L"capslock");
+		case 302:
+			return _(L"scrolllock");
+		case 303:
+			return _(L"rshift");
+		case 304:
+			return _(L"lshift");
+		case 305:
+			return _(L"rcontrol");
+		case 306:
+			return _(L"lcontrol");
+		case 307:
+			return _(L"ralt");
+		case 308:
+			return _(L"lalt");
+		case 310:
+			return _(L"lcommand");
+		case 311:
+			return _(L"lwindows");
+		case 309:
+			return _(L"rcommand");
+		case 312:
+			return _(L"rwindows");
+		case 313:
+			return _(L"altgr");
+		case 315:
+			return _(L"help");
+		case 316:
+			return _(L"pr");
+		case 317:
+			return _(L"sysreq");
+		case 318:
+			return _(L"break");
+		case 319:
+			return _(L"menu");
+		case 323:
+			return _(L"mouse0");
+		case 324:
+			return _(L"mouse1");
+		case 325:
+			return _(L"mouse2");
+		case 326:
+			return _(L"mouse3");
+		case 327:
+			return _(L"mouse4");
+		case 328:
+			return _(L"mouse5");
+		case 329:
+			return _(L"mouse");
+		}
+		return _(L"undefined");
+	}
 
 	void outline_box(Vector2 pos, Vector2 size, Color clr)
 	{
@@ -261,7 +556,7 @@ namespace gui {
 			}
 
 			Label(rust::classes::Rect{ pos.x + 2, pos.y + 1 + id * tab_size.y + 1, tab_size.x, tab_size.y }, tab_name, rgba(0, 0, 0, 255.f), true, 12);
-			Label(rust::classes::Rect{ pos.x + 2, pos.y + id * tab_size.y, tab_size.x, tab_size.y }, tab_name,		  rgba(159.f, 163.f, 169.f, 255.f), true, 12);
+			Label(rust::classes::Rect{ pos.x + 2, pos.y + id * tab_size.y, tab_size.x, tab_size.y }, tab_name, rgba(159.f, 163.f, 169.f, 255.f), true, 12);
 		}
 	}
 
@@ -272,156 +567,6 @@ namespace gui {
 
 
 	void checkbox(rust::classes::EventType event, Vector2 pos, Vector2& current_pos, Vector2 mouse, const wchar_t* button_name, bool* checked_ref, int id, bool keybind = false, int* keybind_ref = 0, Color col = Color(255, 255, 255, 220)) {
-		
-		std::map<int, const wchar_t*> keycode_str =
-		{
-			{ 0, L"none" },
-			{ 8, L"backspace" },
-			{ 127, L"delete" },
-			{ 9, L"tab" },
-			{ 12, L"clear" },
-			{ 13, L"return" },
-			{ 19, L"pause" },
-			{ 27, L"none" },
-			{ 32, L"space" },
-			{ 256, L"0" },
-			{ 257, L"1" },
-			{ 258, L"2" },
-			{ 259, L"3" },
-			{ 260, L"4" },
-			{ 261, L"5" },
-			{ 262, L"6" },
-			{ 263, L"7" },
-			{ 264, L"8" },
-			{ 265, L"9" },
-			{ 266, L"." },
-			{ 267, L"/" },
-			{ 268, L"*" },
-			{ 269, L"+" },
-			{ 270, L"-" },
-			{ 271, L"enter" },
-			{ 272, L"equals" },
-			{ 273, L"up" },
-			{ 274, L"down" },
-			{ 275, L"right" },
-			{ 276, L"left" },
-			{ 277, L"ins" },
-			{ 278, L"home" },
-			{ 279, L"end" },
-			{ 280, L"pageup" },
-			{ 281, L"pagedown" },
-			{ 282, L"f1" },
-			{ 283, L"f2" },
-			{ 284, L"f3" },
-			{ 285, L"f4" },
-			{ 286, L"f5" },
-			{ 287, L"f6" },
-			{ 288, L"f7" },
-			{ 289, L"f8" },
-			{ 290, L"f9" },
-			{ 291, L"f10" },
-			{ 292, L"f11" },
-			{ 293, L"f12" },
-			{ 294, L"f13" },
-			{ 295, L"f14" },
-			{ 296, L"f15" },
-			{ 48, L"0" },
-			{ 49, L"1" },
-			{ 50, L"2" },
-			{ 51, L"3" },
-			{ 52, L"4" },
-			{ 53, L"5" },
-			{ 54, L"6" },
-			{ 55, L"7" },
-			{ 56, L"8" },
-			{ 57, L"9" },
-			{ 33, L"!" },
-			{ 34, L"\"" },
-			{ 35, L"#" },
-			{ 36, L"$" },
-			{ 37, L"%" },
-			{ 38, L"&" },
-			{ 39, L"'" },
-			{ 40, L"(" },
-			{ 41, L")" },
-			{ 42, L"*" },
-			{ 43, L"+" },
-			{ 44, L"," },
-			{ 45, L"-" },
-			{ 46, L"." },
-			{ 47, L"/" },
-			{ 58, L":" },
-			{ 59, L";" },
-			{ 60, L"<" },
-			{ 61, L"=" },
-			{ 62, L">" },
-			{ 63, L"?" },
-			{ 64, L"@" },
-			{ 91, L"[" },
-			{ 92, L"\\" },
-			{ 93, L"]" },
-			{ 94, L"^" },
-			{ 95, L"_" },
-			{ 96, L"`" },
-			{ 97, L"a" },
-			{ 98, L"b" },
-			{ 99, L"c" },
-			{ 100, L"d" },
-			{ 101, L"e" },
-			{ 102, L"f" },
-			{ 103, L"g" },
-			{ 104, L"h" },
-			{ 105, L"i" },
-			{ 106, L"j" },
-			{ 107, L"k" },
-			{ 108, L"l" },
-			{ 109, L"m" },
-			{ 110, L"n" },
-			{ 111, L"o" },
-			{ 112, L"p" },
-			{ 113, L"q" },
-			{ 114, L"r" },
-			{ 115, L"s" },
-			{ 116, L"t" },
-			{ 117, L"u" },
-			{ 118, L"v" },
-			{ 119, L"w" },
-			{ 120, L"x" },
-			{ 121, L"y" },
-			{ 122, L"z" },
-			{ 123, L"{" },
-			{ 124, L"|" },
-			{ 125, L"}" },
-			{ 126, L"~" },
-			{ 300, L"numlock" },
-			{ 301, L"capslock" },
-			{ 302, L"scrolllock" },
-			{ 303, L"rshift" },
-			{ 304, L"lshift" },
-			{ 305, L"rcontrol" },
-			{ 306, L"lcontrol" },
-			{ 307, L"ralt" },
-			{ 308, L"lalt" },
-			{ 310, L"lcommand" },
-			{ 310, L"lapple" },
-			{ 311, L"lwindows" },
-			{ 309, L"rcommand" },
-			{ 309, L"rapple" },
-			{ 312, L"rwindows" },
-			{ 313, L"altgr" },
-			{ 315, L"help" },
-			{ 316, L"pr" },
-			{ 317, L"sysreq" },
-			{ 318, L"break" },
-			{ 319, L"menu" },
-			{ 323, L"mouse0" },
-			{ 324, L"mouse1" },
-			{ 325, L"mouse2" },
-			{ 326, L"mouse3" },
-			{ 327, L"mouse4" },
-			{ 328, L"mouse5" },
-			{ 329, L"mouse6" }
-		};
 
 		pos.x += 5;
 		const float button_size = 20;
@@ -448,12 +593,12 @@ namespace gui {
 			if (getting_keybind && keybind_ref == ref_clicked)
 			{
 				fill_box(rust::classes::Rect(poz.x, poz.y + 14.f, poz.wid, 2.f), rgba(249.f, 130.f, 109.f, (opacity / 255.f)));
-				gui::Label({ poz.x + 1, poz.y, poz.wid, poz.hei }, keycode_str[*keybind_ref], rgba(249.f, 130.f, 109.f, (opacity / 255.f)), true, 10);
+				gui::Label({ poz.x + 1, poz.y, poz.wid, poz.hei }, rust::classes::string(get_keystr(*keybind_ref)), rgba(249.f, 130.f, 109.f, (opacity / 255.f)), true, 10);
 			}
-			
-			gui::Label({ poz.x + 1, poz.y, poz.wid, poz.hei }, keycode_str[*keybind_ref], rgba(159.f, 163.f, 169.f, (opacity / 255.f)), true, 10);
+
+			gui::Label({ poz.x + 1, poz.y, poz.wid, poz.hei }, rust::classes::string(get_keystr(*keybind_ref)), rgba(159.f, 163.f, 169.f, (opacity / 255.f)), true, 10);
 		}
-		
+
 		float o1 = (opacity / 255.f);
 		outline_box(Vector2(pos.x + tab_size.x + 3 + 2.0f, pos.y + 7 + current_pos.y - 4), Vector2(10, 10), rgba(14.f, 18.f, 24.f, o1));
 
@@ -574,7 +719,7 @@ namespace gui {
 
 		if (event == rust::classes::EventType::MouseDown) {
 			if (pz.Contains(mouse)) {
-				out = (((pos.x + 7) - mouse.x) * (max/wid)) * -1;
+				out = (((pos.x + 7) - mouse.x) * (max / wid)) * -1;
 			}
 		}
 
@@ -609,256 +754,262 @@ namespace gui {
 		if ((a / b) > b)
 			a = b;
 
-		fill_box(rust::classes::Rect(start.x + 1, start.y + 1, (end.x * (a / b)) - 1, end.y - 1), perc_col(a/b));
+		fill_box(rust::classes::Rect(start.x + 1, start.y + 1, (end.x * (a / b)) - 1, end.y - 1), perc_col(a / b));
 	}
 
 	float out;
 
 	void OnGUI(uintptr_t rcx)
 	{
-		tab_size = Vector2(102, 35);
-		init();
+		__try
+		{
+			tab_size = Vector2(102, 35);
+			init();
 
-		float t = 0.0f;
+			float t = 0.0f;
 
-		if (esp::local_player)
-			t = esp::local_player->get_last_sent_tick_time();
+			if (esp::local_player)
+				t = esp::local_player->get_last_sent_tick_time();
 
-		if (opacity < 255.0f)
-			opacity += 2.f;
+			if (opacity < 255.0f)
+				opacity += 2.f;
 
-		auto current = methods::get_current();
-		auto event_type = methods::get_type(current);
+			auto current = methods::get_current();
+			auto event_type = methods::get_type(current);
 
-		if (event_type == rust::classes::EventType::KeyDown || event_type == rust::classes::EventType::KeyUp) {
-			rust::classes::KeyCode cur = unity::get_keyCode(current);
-			if (event_type == rust::classes::EventType::KeyDown)
-				OnKeyDown(cur);
-			else
-				OnKeyUp(cur);
-		}
+			if (event_type == rust::classes::EventType::KeyDown || event_type == rust::classes::EventType::KeyUp) {
+				rust::classes::KeyCode cur = unity::get_keyCode(current);
+				if (event_type == rust::classes::EventType::KeyDown)
+					OnKeyDown(cur);
+				else
+					OnKeyUp(cur);
+			}
 
-		auto mouse = get_mousePosition();
-		auto height = unity::get_height();
+			auto mouse = get_mousePosition();
+			auto height = unity::get_height();
 
-		Vector2 pos, menu_pos = { 650, 200 }, menu_size = { 500, 330 }, button_size = { 200, 0 }, mouse_pos = { mouse.x, height - mouse.y };
+			Vector2 pos, menu_pos = { 650, 200 }, menu_size = { 500, 330 }, button_size = { 200, 0 }, mouse_pos = { mouse.x, height - mouse.y };
 
-		if (event_type == rust::classes::EventType::Repaint) {
-			{
-				static int cases = 0;
-				static float r = 1.00f, g = 0.00f, b = 1.00f;
-				switch (cases) {
-				case 0: { r -= 0.0015f; if (r <= 0) cases += 1; break; }
-				case 1: { g += 0.0015f; b -= 0.0015f; if (g >= 1) cases += 1; break; }
-				case 2: { r += 0.0015f; if (r >= 1) cases += 1; break; }
-				case 3: { b += 0.0015f; g -= 0.0015f; if (b >= 1) cases = 0; break; }
-				default: { r = 1.00f; g = 0.00f; b = 1.00f; break; }
-				}
-				const float ScreenWidth = 1920;
-				const float ScreenHeight = 1080;
-
-				if (settings::misc::Crosshair) {
-					//gui::vertical_line(vector2{ (float)(ScreenWidth / 2), (float)(ScreenHeight / 2 + 2) }, 4.f, gui::Color(1, 0, 0, 0.5));
-					//gui::vertical_line(vector2{ (float)(ScreenWidth / 2), (float)((ScreenHeight / 2)) }, 4.f, gui::Color(1, 0, 0, 0.5));
-					//gui::horizontal_line(vector2{ (float)(ScreenWidth / 2 + 2), (float)(ScreenHeight / 2) }, 4.f, gui::Color(1, 0, 0, 0.5));
-					//gui::horizontal_line(vector2{ (float)((ScreenWidth / 2) - 1),(float)(ScreenHeight / 2) }, 4.f, gui::Color(1, 0, 0, 0.5));
-
-
-					gui::vertical_line(Vector2{ (float)(ScreenWidth / 2), (float)(ScreenHeight / 2) }, 1.f, gui::Color(1, 0, 0, 1));
-				}
-
-				if (esp::local_player)
+			if (event_type == rust::classes::EventType::Repaint) {
 				{
-					float bars = 0;
-					if (settings::visuals::desync_indicator)
-					{
-						Progbar({ 900, (650 + (bars++ * 10)) }, { 120, 4 }, settings::desyncTime, 1.0f);
+					static int cases = 0;
+					static float r = 1.00f, g = 0.00f, b = 1.00f;
+					switch (cases) {
+					case 0: { r -= 0.0015f; if (r <= 0) cases += 1; break; }
+					case 1: { g += 0.0015f; b -= 0.0015f; if (g >= 1) cases += 1; break; }
+					case 2: { r += 0.0015f; if (r >= 1) cases += 1; break; }
+					case 3: { b += 0.0015f; g -= 0.0015f; if (b >= 1) cases = 0; break; }
+					default: { r = 1.00f; g = 0.00f; b = 1.00f; break; }
 					}
-					//put extra gui things here
-					auto held = esp::local_player->get_active_weapon();
-					if (settings::weapon::always_reload)
+					const float ScreenWidth = 1920;
+					const float ScreenHeight = 1080;
+
+					if (settings::misc::Crosshair) {
+						//gui::vertical_line(vector2{ (float)(ScreenWidth / 2), (float)(ScreenHeight / 2 + 2) }, 4.f, gui::Color(1, 0, 0, 0.5));
+						//gui::vertical_line(vector2{ (float)(ScreenWidth / 2), (float)((ScreenHeight / 2)) }, 4.f, gui::Color(1, 0, 0, 0.5));
+						//gui::horizontal_line(vector2{ (float)(ScreenWidth / 2 + 2), (float)(ScreenHeight / 2) }, 4.f, gui::Color(1, 0, 0, 0.5));
+						//gui::horizontal_line(vector2{ (float)((ScreenWidth / 2) - 1),(float)(ScreenHeight / 2) }, 4.f, gui::Color(1, 0, 0, 0.5));
+
+
+						gui::vertical_line(Vector2{ (float)(ScreenWidth / 2), (float)(ScreenHeight / 2) }, 1.f, gui::Color(1, 0, 0, 1));
+					}
+
+					if (esp::local_player)
 					{
-						if (held->get_base_projectile())
+						float bars = 0;
+						if (settings::visuals::desync_indicator)
 						{
-							auto b = held->get_base_projectile();
-							Progbar({ 900, (650 + (bars++ * 10)) }, { 120, 4 }, settings::time_since_last_shot, (b->get_reload_time() - (b->get_reload_time() / 10)));
+							Progbar({ 900, (650 + (bars++ * 10)) }, { 120, 4 }, settings::desyncTime, 1.0f);
+						}
+						//put extra gui things here
+						auto held = esp::local_player->get_active_weapon();
+						if (settings::weapon::always_reload)
+						{
+							if (held->get_base_projectile())
+							{
+								auto b = held->get_base_projectile();
+								Progbar({ 900, (650 + (bars++ * 10)) }, { 120, 4 }, settings::time_since_last_shot, (b->get_reload_time() - (b->get_reload_time() / 10)));
+							}
 						}
 					}
-				}
 
-				esp::start();
+					esp::start();
+				}
+			}
+
+			if (open) {
+				{
+					int margin = 3;
+					static int cases = 0;
+					static float r = 1.00f, g = 0.00f, b = 1.00f;
+					switch (cases) {
+					case 0: { r -= 0.0015f; if (r <= 0) cases += 1; break; }
+					case 1: { g += 0.0015f; b -= 0.0015f; if (g >= 1) cases += 1; break; }
+					case 2: { r += 0.0015f; if (r >= 1) cases += 1; break; }
+					case 3: { b += 0.0015f; g -= 0.0015f; if (b >= 1) cases = 0; break; }
+					default: { r = 1.00f; g = 0.00f; b = 1.00f; break; }
+					}
+					unity::set_lockstate(rust::classes::CursorLockMode::None);
+
+					outline_box({ menu_pos.x - 1, menu_pos.y - 1 }, { menu_size.x + 1, menu_size.y + 1 }, rgba(249.f, 130.f, 109.f, 255.f));
+					fill_box(rust::classes::Rect{ menu_pos.x, menu_pos.y + 30, menu_size.x, menu_size.y - 30 }, rgba(21.f, 27.f, 37.f, 255));
+					fill_box(rust::classes::Rect{ menu_pos.x, menu_pos.y, menu_size.x, 30 }, rgba(14.f, 18.f, 24.f, 255));
+					fill_box(rust::classes::Rect{ menu_pos.x, menu_pos.y + 30, tab_size.x + 2, menu_size.y - 30 }, rgba(14.f, 18.f, 24.f, 255));
+
+					//MENU TIME
+
+					gui::Label(rust::classes::Rect{ menu_pos.x + 2.0f + 1, menu_pos.y - 4 + 1, menu_size.x, 30 }, _(L"K4"), gui::Color(1, 1, 1, 1), true, 16);
+
+					menu_pos.y += 30;
+					menu_size.y -= 25;
+
+					auto weapon_tab = 0, visual_tab = 1, misc_tab = 3, other_esp = 2, color_tab = 4;
+
+					tab(event_type, menu_pos, mouse_pos, _(L"Combat"), weapon_tab);
+					tab(event_type, menu_pos, mouse_pos, _(L"Visual"), visual_tab);
+					tab(event_type, menu_pos, mouse_pos, _(L"Esp"), other_esp);
+					tab(event_type, menu_pos, mouse_pos, _(L"Misc"), misc_tab);
+					tab(event_type, menu_pos, mouse_pos, _(L"Colors"), color_tab);
+
+					menu_pos = { menu_pos.x + 10, menu_pos.y + 30 };
+					menu_size.x -= 90;
+					menu_size.y -= 15;
+
+					if (settings::misc::code_lock_code < 1000)
+						settings::misc::code_lock_code = 1000;
+					else if (settings::misc::code_lock_code > 9999)
+						settings::misc::code_lock_code = 9999;
+
+					switch (active_tab) {
+					case 0:
+						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"PSilent"), &settings::weapon::psilent, weapon_tab, true, &settings::keybind::psilent);
+						Slider(event_type, menu_pos, mouse_pos, il2cpp::methods::new_string(_("Fov")), pos, settings::weapon::aimbotfov, 2500.f, weapon_tab);
+						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Silent melee"), &settings::weapon::silent_melee, weapon_tab, true, &settings::keybind::silentmelee);
+						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Thick bullet"), &settings::weapon::thick_bullet, weapon_tab);
+						Slider(event_type, menu_pos, mouse_pos, il2cpp::methods::new_string(_("Size")), pos, settings::weapon::thickness, 1.f, weapon_tab);
+						//checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Removals"), &settings::weapon::weapon_removals, weapon_tab);
+						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Legit recoil"), &settings::weapon::legit_recoil, weapon_tab); //
+						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"No Recoil"), &settings::weapon::norecoil, weapon_tab);		 // make into slider?
+						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"No Spread"), &settings::weapon::nospread, weapon_tab);		 //
+						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"No Sway"), &settings::weapon::nosway, weapon_tab); //doesnt work?
+						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Automatic"), &settings::weapon::automatic, weapon_tab);
+
+						menu_pos.x += 170;
+						pos.y = 0; //?
+
+						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Force head"), &settings::weapon::hitbox_override, weapon_tab);
+						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Force random"), &settings::weapon::random_hitbox, weapon_tab);
+						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Rapid fire"), &settings::weapon::rapidfire, weapon_tab);
+						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Fast bullet"), &settings::weapon::fast_bullet, weapon_tab);
+						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Bullet tp"), &settings::weapon::bullet_tp, weapon_tab);
+						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Autoshoot"), &settings::weapon::autoshoot, weapon_tab, true, &settings::keybind::autoshoot);
+						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Manipulator"), &settings::weapon::manipulator, weapon_tab, true, &settings::keybind::manipulator);
+						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Double-tap"), &settings::weapon::doubletap, weapon_tab);
+						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Always reload"), &settings::weapon::always_reload, weapon_tab);
+						break;
+					case 1:
+						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Desync indicator"), &settings::visuals::desync_indicator, visual_tab);
+						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Players"), &settings::visuals::player_esp, visual_tab);
+						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Full Box"), &settings::visuals::full_box, visual_tab);
+						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Corner Box"), &settings::visuals::corner_box, visual_tab);
+						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Crosshair Health"), &settings::visuals::midhealth, visual_tab);
+						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Crosshair Name"), &settings::visuals::midname, visual_tab);
+						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Name"), &settings::visuals::nameesp, visual_tab);
+						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Distance"), &settings::visuals::distance, visual_tab);
+						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Wounded"), &settings::visuals::woundedflag, visual_tab);
+						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Weapon Esp"), &settings::visuals::weaponesp, visual_tab);
+						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Hotbar Esp"), &settings::visuals::hotbar_esp, visual_tab);
+
+						menu_pos.x += 170;
+						pos.y = 0; //?
+
+						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Bottom healthbar"), &settings::visuals::bottomhealth, visual_tab);
+						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Side healthbar"), &settings::visuals::sidehealth, visual_tab);
+						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Chams"), &settings::visuals::chams, visual_tab);
+						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Rainbow chams"), &settings::visuals::rainbow_chams, visual_tab);
+						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Sleeper"), &settings::visuals::sleeper_esp, visual_tab);
+						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"NPC"), &settings::visuals::npc_esp, visual_tab);
+						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Corpse"), &settings::visuals::corpses, visual_tab);
+						//checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Misc"), &settings::visuals::misc_esp, visual_tab);
+						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Held sprites"), &settings::visuals::spriteitem, visual_tab);
+						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Snaplines"), &settings::visuals::snaplines, visual_tab);
+						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Show fov"), &settings::visuals::show_fov, visual_tab);
+						break;
+					case 2:
+						//checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Materials"), &settings::visuals::materials, other_esp);
+						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Stone ore"), &settings::visuals::stone_ore, other_esp);
+						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Metal ore"), &settings::visuals::metal_ore, other_esp);
+						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Sulfur ore"), &settings::visuals::sulfur_ore, other_esp);
+						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Cloth"), &settings::visuals::cloth, other_esp);
+						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Vehicles"), &settings::visuals::vehicles, other_esp);
+						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Patrol-heli"), &settings::visuals::heli_esp, other_esp);
+						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Dropped items"), &settings::visuals::dropped_items, other_esp);
+						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Stashes"), &settings::visuals::stash, other_esp);
+						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Airdrops"), &settings::visuals::airdrops, other_esp);
+						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Traps"), &settings::visuals::traps, other_esp);
+						//button(event_type, menu_pos, pos, mouse_pos, _(L"Toolcupboard Esp"), &settings::visuals::tc_esp, other_esp);
+						break;
+					case 3:
+						//checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Player Movement"), &settings::misc::Movement, misc_tab);
+						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Omnisprint"), &settings::misc::always_sprint, misc_tab);
+						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Can hold items"), &settings::weapon::always_shoot, misc_tab);
+						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Infinite jump"), &settings::misc::infinite_jump, misc_tab);
+						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Timescale"), &settings::misc::speedhack, misc_tab, true, &settings::keybind::timescale);
+						Slider(event_type, menu_pos, mouse_pos, il2cpp::methods::new_string(_("Scale")), pos, settings::misc::speedhackspeed, 10.f, misc_tab);
+						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Spiderman"), &settings::misc::spiderman, misc_tab);
+						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Big jump"), &settings::misc::gravity, misc_tab);
+						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Shoot while mounted"), &settings::misc::attack_on_mountables, misc_tab);
+						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Silent farm"), &settings::misc::silent_farm, misc_tab);
+						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Silent walk"), &settings::misc::silentwalk, misc_tab, true, &settings::keybind::silentwalk);
+						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Spinbot"), &settings::misc::spinbot, misc_tab);
+						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Fake lag"), &settings::misc::fake_lag, misc_tab);
+						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Desync"), &settings::misc::desync, misc_tab, true, &settings::keybind::desync_ok);
+
+						menu_pos.x += 170;
+						pos.y = 0; //?
+
+						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Admin mode"), &settings::misc::admin_mode, misc_tab);
+						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"No collisions"), &settings::misc::no_playercollision, misc_tab);
+						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Instant med"), &settings::misc::instant_med, misc_tab);
+						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Suicide"), &settings::misc::TakeFallDamage, misc_tab, true, &settings::keybind::suicide);
+						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Longneck"), &settings::misc::eyeoffset, misc_tab, true, &settings::keybind::neck);
+						Slider(event_type, menu_pos, mouse_pos, il2cpp::methods::new_string(_("Size")), pos, settings::misc::playereyes, 1.5f, misc_tab);
+						//checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Player FOV"), &settings::misc::playerfovtoggle, misc_tab);
+						Slider(event_type, menu_pos, mouse_pos, il2cpp::methods::new_string(_("Player fov")), pos, settings::misc::playerfov, 150, misc_tab);
+						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Zoom"), &settings::misc::zoomtoggle, misc_tab, true, &settings::keybind::zoom);
+						Slider(event_type, menu_pos, mouse_pos, il2cpp::methods::new_string(_("Zoom fov")), pos, settings::misc::zoomfov, 50, misc_tab);
+						//checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Brightnight"), &settings::misc::brightnight, misc_tab);
+						Slider(event_type, menu_pos, mouse_pos, il2cpp::methods::new_string(_("Stars")), pos, settings::misc::staramount, 1000, misc_tab);
+						break;
+					case 4:
+						buttonvis(event_type, menu_pos, pos, mouse_pos, _(L"Visible color"), &settings::misc::trollface, color_tab, Color(settings::visuals::VisRcolor, settings::visuals::VisGcolor, settings::visuals::VisBcolor, 1)); {
+							Slider(event_type, menu_pos, mouse_pos, il2cpp::methods::new_string(string::format(("%s %d"), _("R:"), (int)settings::visuals::VisRcolor)), pos, settings::visuals::VisRcolor, 1.f, color_tab);
+							Slider(event_type, menu_pos, mouse_pos, il2cpp::methods::new_string(string::format(("%s %d"), _("G:"), (int)settings::visuals::VisGcolor)), pos, settings::visuals::VisGcolor, 1.f, color_tab);
+							Slider(event_type, menu_pos, mouse_pos, il2cpp::methods::new_string(string::format(("%s %d"), _("B:"), (int)settings::visuals::VisBcolor)), pos, settings::visuals::VisBcolor, 1.f, color_tab);
+						}
+
+						buttoninv(event_type, menu_pos, pos, mouse_pos, _(L"Invisible color"), &settings::misc::trollface, color_tab, Color(settings::visuals::InvRcolor, settings::visuals::InvGcolor, settings::visuals::InvBcolor, 1)); {
+							Slider(event_type, menu_pos, mouse_pos, il2cpp::methods::new_string(string::format(("%s %d"), _("R:"), (int)settings::visuals::InvRcolor)), pos, settings::visuals::InvRcolor, 1.f, color_tab);
+							Slider(event_type, menu_pos, mouse_pos, il2cpp::methods::new_string(string::format(("%s %d"), _("G:"), (int)settings::visuals::InvGcolor)), pos, settings::visuals::InvGcolor, 1.f, color_tab);
+							Slider(event_type, menu_pos, mouse_pos, il2cpp::methods::new_string(string::format(("%s %d"), _("B:"), (int)settings::visuals::InvBcolor)), pos, settings::visuals::InvBcolor, 1.f, color_tab);
+						}
+						buttonteam(event_type, menu_pos, pos, mouse_pos, _(L"Teammate color"), &settings::misc::trollface, color_tab, Color(settings::visuals::TeamRcolor, settings::visuals::TeamGcolor, settings::visuals::TeamBcolor, 1)); {
+							Slider(event_type, menu_pos, mouse_pos, il2cpp::methods::new_string(string::format(("%s %d"), _("R:"), (int)settings::visuals::TeamRcolor)), pos, settings::visuals::TeamRcolor, 1.f, color_tab);
+							Slider(event_type, menu_pos, mouse_pos, il2cpp::methods::new_string(string::format(("%s %d"), _("G:"), (int)settings::visuals::TeamGcolor)), pos, settings::visuals::TeamGcolor, 1.f, color_tab);
+							Slider(event_type, menu_pos, mouse_pos, il2cpp::methods::new_string(string::format(("%s %d"), _("B:"), (int)settings::visuals::TeamBcolor)), pos, settings::visuals::TeamBcolor, 1.f, color_tab);
+						}
+						buttonteam(event_type, menu_pos, pos, mouse_pos, _(L"Name color"), &settings::misc::trollface, color_tab, Color(settings::visuals::nameRcolor, settings::visuals::nameGcolor, settings::visuals::nameBcolor, 1)); {
+							Slider(event_type, menu_pos, mouse_pos, il2cpp::methods::new_string(string::format(("%s %d"), _("R:"), (int)settings::visuals::nameRcolor)), pos, settings::visuals::nameRcolor, 1.f, color_tab);
+							Slider(event_type, menu_pos, mouse_pos, il2cpp::methods::new_string(string::format(("%s %d"), _("G:"), (int)settings::visuals::nameGcolor)), pos, settings::visuals::nameGcolor, 1.f, color_tab);
+							Slider(event_type, menu_pos, mouse_pos, il2cpp::methods::new_string(string::format(("%s %d"), _("B:"), (int)settings::visuals::nameBcolor)), pos, settings::visuals::nameBcolor, 1.f, color_tab);
+						}
+					};
+					pos = { 0, 0 };
+				}
 			}
 		}
-
-		if (open) {
-			{
-				int margin = 3;
-				static int cases = 0;
-				static float r = 1.00f, g = 0.00f, b = 1.00f;
-				switch (cases) {
-				case 0: { r -= 0.0015f; if (r <= 0) cases += 1; break; }
-				case 1: { g += 0.0015f; b -= 0.0015f; if (g >= 1) cases += 1; break; }
-				case 2: { r += 0.0015f; if (r >= 1) cases += 1; break; }
-				case 3: { b += 0.0015f; g -= 0.0015f; if (b >= 1) cases = 0; break; }
-				default: { r = 1.00f; g = 0.00f; b = 1.00f; break; }
-				}
-				unity::set_lockstate(rust::classes::CursorLockMode::None);
-
-				outline_box({ menu_pos.x - 1, menu_pos.y - 1 }, { menu_size.x + 1, menu_size.y + 1}, rgba(249.f, 130.f, 109.f, 255.f));
-				fill_box(rust::classes::Rect{ menu_pos.x, menu_pos.y + 30, menu_size.x, menu_size.y - 30 }, rgba(21.f, 27.f, 37.f, 255));
-				fill_box(rust::classes::Rect{ menu_pos.x, menu_pos.y, menu_size.x, 30 }, rgba(14.f, 18.f, 24.f, 255));
-				fill_box(rust::classes::Rect{ menu_pos.x, menu_pos.y + 30, tab_size.x + 2, menu_size.y - 30 }, rgba(14.f, 18.f, 24.f, 255));
-
-				//MENU TIME
-
-				gui::Label(rust::classes::Rect{ menu_pos.x + 2.0f + 1, menu_pos.y - 4 + 1, menu_size.x, 30 }, _(L"K4"), gui::Color( 1, 1, 1, 1), true, 16);
-
-				menu_pos.y += 30;
-				menu_size.y -= 25;
-
-				auto weapon_tab = 0, visual_tab = 1, misc_tab = 3, other_esp = 2, color_tab = 4;
-
-				tab(event_type, menu_pos, mouse_pos, _(L"Combat"), weapon_tab);
-				tab(event_type, menu_pos, mouse_pos, _(L"Visual"), visual_tab);
-				tab(event_type, menu_pos, mouse_pos, _(L"Esp"), other_esp);
-				tab(event_type, menu_pos, mouse_pos, _(L"Misc"), misc_tab);
-				tab(event_type, menu_pos, mouse_pos, _(L"Colors"), color_tab);
-
-				menu_pos = { menu_pos.x + 10, menu_pos.y + 30 };
-				menu_size.x -= 90;
-				menu_size.y -= 15;
-
-				if (settings::misc::code_lock_code < 1000)
-					settings::misc::code_lock_code = 1000;
-				else if (settings::misc::code_lock_code > 9999)
-					settings::misc::code_lock_code = 9999;
-
-				switch (active_tab) {
-				case 0:
-					checkbox(event_type, menu_pos, pos, mouse_pos, _(L"PSilent"), &settings::weapon::psilent, weapon_tab, true, &settings::keybind::psilent);
-					Slider(event_type, menu_pos, mouse_pos, il2cpp::methods::new_string(_("Fov")), pos, settings::weapon::aimbotfov, 2500.f, weapon_tab);
-					checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Silent melee"), &settings::weapon::silent_melee, weapon_tab, true, &settings::keybind::silentmelee);
-					checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Thick bullet"), &settings::weapon::thick_bullet, weapon_tab);
-					Slider(event_type, menu_pos, mouse_pos, il2cpp::methods::new_string(_("Size")), pos, settings::weapon::thickness, 1.f, weapon_tab);
-					//checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Removals"), &settings::weapon::weapon_removals, weapon_tab);
-					checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Legit recoil"), &settings::weapon::legit_recoil, weapon_tab); //
-					checkbox(event_type, menu_pos, pos, mouse_pos, _(L"No Recoil"), &settings::weapon::norecoil, weapon_tab);		 // make into slider?
-					checkbox(event_type, menu_pos, pos, mouse_pos, _(L"No Spread"), &settings::weapon::nospread, weapon_tab);		 //
-					checkbox(event_type, menu_pos, pos, mouse_pos, _(L"No Sway"), &settings::weapon::nosway, weapon_tab); //doesnt work?
-					checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Automatic"), &settings::weapon::automatic, weapon_tab);
-
-					menu_pos.x += 170;
-					pos.y = 0; //?
-
-					checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Force head"), &settings::weapon::hitbox_override, weapon_tab);
-					checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Force random"), &settings::weapon::random_hitbox, weapon_tab);
-					checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Rapid fire"), &settings::weapon::rapidfire, weapon_tab);
-					checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Fast bullet"), &settings::weapon::fast_bullet, weapon_tab);
-					checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Bullet tp"), &settings::weapon::bullet_tp, weapon_tab);
-					checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Autoshoot"), &settings::weapon::autoshoot, weapon_tab, true, &settings::keybind::autoshoot);
-					checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Manipulator"), &settings::weapon::manipulator, weapon_tab, true, &settings::keybind::manipulator);
-					checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Double-tap"), &settings::weapon::doubletap, weapon_tab);
-					checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Always reload"), &settings::weapon::always_reload, weapon_tab);
-					break;
-				case 1:
-					checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Desync indicator"), &settings::visuals::desync_indicator, visual_tab);
-					checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Players"), &settings::visuals::player_esp, visual_tab);
-					checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Full Box"), &settings::visuals::full_box, visual_tab);
-					checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Corner Box"), &settings::visuals::corner_box, visual_tab);
-					checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Crosshair Health"), &settings::visuals::midhealth, visual_tab);
-					checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Crosshair Name"), &settings::visuals::midname, visual_tab);
-					checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Name"), &settings::visuals::nameesp, visual_tab);
-					checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Distance"), &settings::visuals::distance, visual_tab);
-					checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Wounded"), &settings::visuals::woundedflag, visual_tab);
-					checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Weapon Esp"), &settings::visuals::weaponesp, visual_tab);
-					checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Hotbar Esp"), &settings::visuals::hotbar_esp, visual_tab);
-
-					menu_pos.x += 170;
-					pos.y = 0; //?
-
-					checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Bottom healthbar"), &settings::visuals::bottomhealth, visual_tab);
-					checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Side healthbar"), &settings::visuals::sidehealth, visual_tab);
-					checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Chams"), &settings::visuals::chams, visual_tab);
-					checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Rainbow chams"), &settings::visuals::rainbow_chams, visual_tab);
-					checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Sleeper"), &settings::visuals::sleeper_esp, visual_tab);
-					checkbox(event_type, menu_pos, pos, mouse_pos, _(L"NPC"), &settings::visuals::npc_esp, visual_tab);
-					checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Corpse"), &settings::visuals::corpses, visual_tab);
-					//checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Misc"), &settings::visuals::misc_esp, visual_tab);
-					checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Held sprites"), &settings::visuals::spriteitem, visual_tab);
-					checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Snaplines"), &settings::visuals::snaplines, visual_tab);
-					checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Show fov"), &settings::visuals::show_fov, visual_tab);
-					break;
-				case 2:
-					//checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Materials"), &settings::visuals::materials, other_esp);
-					checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Stone ore"), &settings::visuals::stone_ore, other_esp);
-					checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Metal ore"), &settings::visuals::metal_ore, other_esp);
-					checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Sulfur ore"), &settings::visuals::sulfur_ore, other_esp);
-					checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Cloth"), &settings::visuals::cloth, other_esp);
-					checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Vehicles"), &settings::visuals::vehicles, other_esp);
-					checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Patrol-heli"), &settings::visuals::heli_esp, other_esp);
-					checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Dropped items"), &settings::visuals::dropped_items, other_esp);
-					checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Stashes"), &settings::visuals::stash, other_esp);
-					checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Airdrops"), &settings::visuals::airdrops, other_esp);
-					checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Traps"), &settings::visuals::traps, other_esp);
-					//button(event_type, menu_pos, pos, mouse_pos, _(L"Toolcupboard Esp"), &settings::visuals::tc_esp, other_esp);
-					break;
-				case 3:
-					//checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Player Movement"), &settings::misc::Movement, misc_tab);
-					checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Omnisprint"), &settings::misc::always_sprint, misc_tab);
-					checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Can hold items"), &settings::weapon::always_shoot, misc_tab);
-					checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Infinite jump"), &settings::misc::infinite_jump, misc_tab);
-					checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Timescale"), &settings::misc::speedhack, misc_tab, true, &settings::keybind::timescale);
-					Slider(event_type, menu_pos, mouse_pos, il2cpp::methods::new_string(_("Scale")), pos, settings::misc::speedhackspeed, 10.f, misc_tab);
-					checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Spiderman"), &settings::misc::spiderman, misc_tab);
-					checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Big jump"), &settings::misc::gravity, misc_tab);
-					checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Shoot while mounted"), &settings::misc::attack_on_mountables, misc_tab);
-					checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Silent farm"), &settings::misc::silent_farm, misc_tab);
-					checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Silent walk"), &settings::misc::silentwalk, misc_tab, true, &settings::keybind::silentwalk);
-					checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Spinbot"), &settings::misc::spinbot, misc_tab);
-					checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Fake lag"), &settings::misc::fake_lag, misc_tab);
-					checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Desync"), &settings::misc::desync, misc_tab, true, &settings::keybind::desync_ok);
-
-					menu_pos.x += 170;
-					pos.y = 0; //?
-
-					checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Admin mode"), &settings::misc::admin_mode, misc_tab);
-					checkbox(event_type, menu_pos, pos, mouse_pos, _(L"No collisions"), &settings::misc::no_playercollision, misc_tab);
-					checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Instant med"), &settings::misc::instant_med, misc_tab);
-					checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Suicide"), &settings::misc::TakeFallDamage, misc_tab, true, &settings::keybind::suicide);
-					checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Longneck"), &settings::misc::eyeoffset, misc_tab, true, &settings::keybind::neck);
-					Slider(event_type, menu_pos, mouse_pos, il2cpp::methods::new_string(_("Size")), pos, settings::misc::playereyes, 1.5f, misc_tab);
-					//checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Player FOV"), &settings::misc::playerfovtoggle, misc_tab);
-					Slider(event_type, menu_pos, mouse_pos, il2cpp::methods::new_string(_("Player fov")), pos, settings::misc::playerfov, 150, misc_tab);
-					checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Zoom"), &settings::misc::zoomtoggle, misc_tab, true, &settings::keybind::zoom);
-					Slider(event_type, menu_pos, mouse_pos, il2cpp::methods::new_string(_("Zoom fov")), pos, settings::misc::zoomfov, 50, misc_tab);
-					//checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Brightnight"), &settings::misc::brightnight, misc_tab);
-					Slider(event_type, menu_pos, mouse_pos, il2cpp::methods::new_string(_("Stars")), pos, settings::misc::staramount, 1000, misc_tab);
-					break;
-				case 4:
-					buttonvis(event_type, menu_pos, pos, mouse_pos, _(L"Visible color"), &settings::misc::trollface, color_tab, Color(settings::visuals::VisRcolor, settings::visuals::VisGcolor, settings::visuals::VisBcolor, 1)); {
-						Slider(event_type, menu_pos, mouse_pos, il2cpp::methods::new_string(string::format(("%s %d"), _("R:"), (int)settings::visuals::VisRcolor)), pos, settings::visuals::VisRcolor, 1.f, color_tab);
-						Slider(event_type, menu_pos, mouse_pos, il2cpp::methods::new_string(string::format(("%s %d"), _("G:"), (int)settings::visuals::VisGcolor)), pos, settings::visuals::VisGcolor, 1.f, color_tab);
-						Slider(event_type, menu_pos, mouse_pos, il2cpp::methods::new_string(string::format(("%s %d"), _("B:"), (int)settings::visuals::VisBcolor)), pos, settings::visuals::VisBcolor, 1.f, color_tab);
-					}
-
-					buttoninv(event_type, menu_pos, pos, mouse_pos, _(L"Invisible color"), &settings::misc::trollface, color_tab, Color(settings::visuals::InvRcolor, settings::visuals::InvGcolor, settings::visuals::InvBcolor, 1)); {
-						Slider(event_type, menu_pos, mouse_pos, il2cpp::methods::new_string(string::format(("%s %d"), _("R:"), (int)settings::visuals::InvRcolor)), pos, settings::visuals::InvRcolor, 1.f, color_tab);
-						Slider(event_type, menu_pos, mouse_pos, il2cpp::methods::new_string(string::format(("%s %d"), _("G:"), (int)settings::visuals::InvGcolor)), pos, settings::visuals::InvGcolor, 1.f, color_tab);
-						Slider(event_type, menu_pos, mouse_pos, il2cpp::methods::new_string(string::format(("%s %d"), _("B:"), (int)settings::visuals::InvBcolor)), pos, settings::visuals::InvBcolor, 1.f, color_tab);
-					}
-					buttonteam(event_type, menu_pos, pos, mouse_pos, _(L"Teammate color"), &settings::misc::trollface, color_tab, Color(settings::visuals::TeamRcolor, settings::visuals::TeamGcolor, settings::visuals::TeamBcolor, 1)); {
-						Slider(event_type, menu_pos, mouse_pos, il2cpp::methods::new_string(string::format(("%s %d"), _("R:"), (int)settings::visuals::TeamRcolor)), pos, settings::visuals::TeamRcolor, 1.f, color_tab);
-						Slider(event_type, menu_pos, mouse_pos, il2cpp::methods::new_string(string::format(("%s %d"), _("G:"), (int)settings::visuals::TeamGcolor)), pos, settings::visuals::TeamGcolor, 1.f, color_tab);
-						Slider(event_type, menu_pos, mouse_pos, il2cpp::methods::new_string(string::format(("%s %d"), _("B:"), (int)settings::visuals::TeamBcolor)), pos, settings::visuals::TeamBcolor, 1.f, color_tab);
-					}
-					buttonteam(event_type, menu_pos, pos, mouse_pos, _(L"Name color"), &settings::misc::trollface, color_tab, Color(settings::visuals::nameRcolor, settings::visuals::nameGcolor, settings::visuals::nameBcolor, 1)); {
-						Slider(event_type, menu_pos, mouse_pos, il2cpp::methods::new_string(string::format(("%s %d"), _("R:"), (int)settings::visuals::nameRcolor)), pos, settings::visuals::nameRcolor, 1.f, color_tab);
-						Slider(event_type, menu_pos, mouse_pos, il2cpp::methods::new_string(string::format(("%s %d"), _("G:"), (int)settings::visuals::nameGcolor)), pos, settings::visuals::nameGcolor, 1.f, color_tab);
-						Slider(event_type, menu_pos, mouse_pos, il2cpp::methods::new_string(string::format(("%s %d"), _("B:"), (int)settings::visuals::nameBcolor)), pos, settings::visuals::nameBcolor, 1.f, color_tab);
-					}
-				};
-				pos = { 0, 0 };
-			}
+		__except (true) {
+			return;
 		}
 	}
 }
@@ -1034,11 +1185,12 @@ namespace esp
 									gui::Label(rust::classes::Rect{ 20, 370 + info_y, 200, 200 }, il2cpp::methods::newstring(string::format(("(x%d) %ls"), getam, item_name)), gui::Color(1, 1, 1, 1), true, 9);
 									gui::Label(rust::classes::Rect{ 20, 370 + info_y, 200, 200 }, il2cpp::methods::newstring(string::format(("(x%d) %ls"), getam, item_name)), gui::Color(255, 255, 255, 220), true, 9);
 									*/
-									info_y += 95;
+									info_y += 15;
 								}
 							}
 						}
 						});
+					info_y = 0;
 				}
 			};
 
@@ -1106,7 +1258,7 @@ namespace esp
 			case 3: { b += 0.0004f; g -= 0.0004f; if (b >= 1) cases = 0; break; }
 			default: { r = 1.00f; g = 0.00f; b = 1.00f; break; }
 			}
-			auto _multiMesh = mem::read<uintptr_t>(player->get_player_model() + 0x2D0); //SkinnedMultiMesh _multiMesh;
+			auto _multiMesh = mem::read<uintptr_t>(player->get_player_model() + 0x2C0); //SkinnedMultiMesh _multiMesh;
 			if (_multiMesh) {
 				auto render = get_Renderers(_multiMesh);
 
@@ -1126,7 +1278,7 @@ namespace esp
 							if (settings::visuals::rainbow_chams) {
 								SetColor(material, _(L"_Color"), col(r, g, b, 1));
 							}
-							else if (get_IsNpc(player->get_player_model()) && player->is_visible(local_player->get_bone_transform((int)rust::classes::Bone_List::head)->get_bone_position(), player->get_bone_transform((int)rust::classes::Bone_List::head)->get_bone_position())) {
+							else if (get_IsNpc(player->get_player_model()) && unity::is_visible(local_player->get_bone_transform((int)rust::classes::Bone_List::head)->get_bone_position(), player->get_bone_transform((int)rust::classes::Bone_List::head)->get_bone_position())) {
 								SetColor(material, _(L"_Color"), col(0, 0.5, 1, 0.5));
 							}
 							else if (get_IsNpc(player->get_player_model())) {
@@ -1138,7 +1290,7 @@ namespace esp
 							else if (player->is_teammate(local_player)) {
 								SetColor(material, _(L"_Color"), col(0, 1, 1, 1));
 							}
-							else if (player->is_visible(local_player->get_bone_transform((int)rust::classes::Bone_List::head)->get_bone_position(), player->get_bone_transform((int)rust::classes::Bone_List::head)->get_bone_position())) {
+							else if (unity::is_visible(local_player->get_bone_transform((int)rust::classes::Bone_List::head)->get_bone_position(), player->get_bone_transform((int)rust::classes::Bone_List::head)->get_bone_position())) {
 								SetColor(material, _(L"_Color"), col(settings::visuals::VisRcolor, settings::visuals::VisGcolor, settings::visuals::VisBcolor, 1));
 							}
 							else {
@@ -1162,7 +1314,7 @@ namespace esp
 		auto visible_color = gui::Color(settings::visuals::VisRcolor, settings::visuals::VisGcolor, settings::visuals::VisBcolor, 1);
 		auto invisible_color = gui::Color(settings::visuals::InvRcolor, settings::visuals::InvGcolor, settings::visuals::InvBcolor, 1);
 		auto teammate_color = gui::Color(settings::visuals::TeamRcolor, settings::visuals::TeamGcolor, settings::visuals::TeamBcolor, 1);
-		auto safezone_color = gui::Color{ 249.f/255.f, 130.f/255.f, 109.f/255.f, 1.0 };
+		auto safezone_color = gui::Color{ 0.99609375, 0.9453125, 0, 1.0 };
 		bounds_t bounds;
 
 		struct bone_t {
@@ -1237,7 +1389,7 @@ namespace esp
 
 		if (get_bounds(bounds, 4)) {
 			if (!is_visible)
-				is_visible = player->is_visible(camera_position, bones[16].world_position);
+				is_visible = unity::is_visible(camera_position, bones[16].world_position);
 
 			gui::Color clr = !is_teammate ? (is_visible ? visible_color : invisible_color) : teammate_color;
 			if (HasPlayerFlag(player, rust::classes::PlayerFlags::SafeZone))
@@ -1342,8 +1494,8 @@ namespace esp
 					// WEAPON NAME ESP
 					if (settings::visuals::weaponesp) {
 						auto half = (bounds.right - bounds.left) / 2;
-						gui::Label(rust::classes::Rect{ bounds.left - 80.f  , bounds.bottom + 1.f, 80.f + half * 2 + 80.f , 20 }, weapon_name, gui::Color(0, 0, 0, 120), true, 10.5);
-						gui::Label(rust::classes::Rect{ bounds.left - 80.f  , bounds.bottom + 0.f, 80.f + half * 2 + 79.f , 20 }, weapon_name, gui::Color(249.f / 255.f, 130.f / 255.f, 109.f / 255.f, 1), true, 10);
+						gui::Label(rust::classes::Rect{ bounds.left - 80.f  , bounds.top + 10.f, 80.f + half * 2 + 80.f , 20 }, weapon_name, gui::Color(0, 0, 0, 120), true, 10.5);
+						gui::Label(rust::classes::Rect{ bounds.left - 80.f  , bounds.top + 9.f, 80.f + half * 2 + 79.f , 20 }, weapon_name, gui::Color(0.99609375, 0, 0.67578125, 1), true, 10);
 					}
 				}
 			}
@@ -1360,35 +1512,32 @@ namespace esp
 				//const char* new_name = ;
 				// PLAYER NAME
 
-				std::wstring nw(name);
+				const wchar_t* nw;
 
 				if (settings::visuals::nameesp) {
 					auto half = (bounds.right - bounds.left) / 2;
 
 					if (settings::visuals::woundedflag) {
 
-						const wchar_t* woundedlol = L"[Wounded]";
+						const wchar_t* woundedlol = L"Wounded";
 
 						if (HasPlayerFlag(player, rust::classes::PlayerFlags::Wounded)) {
 
 							//outline 
-							gui::Label(rust::classes::Rect{ bounds.left - 79.5f  , bounds.top - 17.f, 79.f + half * 2 + 79.5f , 20 }, woundedlol, gui::Color(0, 0, 0, 120), true, 9.5);
+							gui::Label(rust::classes::Rect{ bounds.left - 79.5f  , bounds.top - 32.f, 79.f + half * 2 + 79.5f , 20 }, woundedlol, gui::Color(0, 0, 0, 120), true, 9.5);
 							//actual text
-							gui::Label(rust::classes::Rect{ bounds.left - 80.f  , bounds.top - 18.f, 80.f + half * 2 + 80.f , 20 }, woundedlol, gui::Color(0.9,0.9,0.1, 1), true, 9);
+							gui::Label(rust::classes::Rect{ bounds.left - 80.f  , bounds.top - 33.f, 80.f + half * 2 + 80.f , 20 }, woundedlol, gui::Color(0.99609, 0.56640, 0, 1), true, 9);
 						}
 
 					}
 
 					if (settings::visuals::distance)
-					{
-						
-						//std::string d = _("[") + std::to_string((int)distance);
-						//nw = nw + _(L"\n") + std::wstring(d.begin(), d.end()) + _(L"m]");
-					}
+						nw = string::wformat(_(L"%s\n%d"), _(L""), name, (int)distance);
+					else
+						nw = string::wformat(_(L"%s"), _(L""), name);
 
-
-					gui::Label(rust::classes::Rect{ bounds.left - 80.f  , bounds.bottom + 7.f, 79.f + half * 2 + 80.f , 30 }, nw.c_str(), gui::Color(0, 0, 0, 120), true, 10.5);
-					gui::Label(rust::classes::Rect{ bounds.left - 80.f  , bounds.bottom + 8.f, 80.f + half * 2 + 80.f , 30 }, nw.c_str(), gui::Color(settings::visuals::nameRcolor, settings::visuals::nameGcolor, settings::visuals::nameBcolor, 1), true, 10);
+					gui::Label(rust::classes::Rect{ bounds.left - 80.f  , bounds.bottom + 7.f, 79.f + half * 2 + 80.f , 30 }, nw, gui::Color(0, 0, 0, 120), true, 10.5);
+					gui::Label(rust::classes::Rect{ bounds.left - 80.f  , bounds.bottom + 8.f, 80.f + half * 2 + 80.f , 30 }, nw, gui::Color(settings::visuals::nameRcolor, settings::visuals::nameGcolor, settings::visuals::nameBcolor, 1), true, 10);
 				}
 				// PLAYER NAME
 			}

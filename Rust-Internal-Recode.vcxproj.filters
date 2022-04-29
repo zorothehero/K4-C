@@ -84,5 +84,6 @@
     <ClInclude Include="utils\stb_sprintf.h">
       <Filter>utils</Filter>
     </ClInclude>
+    <ClInclude Include="mmisc.hpp" />
   </ItemGroup>
 </Project>

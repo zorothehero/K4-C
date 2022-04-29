@@ -75,44 +75,44 @@ class Projectile;
 
 static auto Retire = reinterpret_cast<void(*)(Projectile*)>(0);
 static auto Update = reinterpret_cast<void(*)(Projectile*)>(0);
-static auto Do_Hit = reinterpret_cast<bool(*)(Projectile*, uintptr_t, vector3, vector3)>(0);
+static auto Do_Hit = reinterpret_cast<bool(*)(Projectile*, uintptr_t, Vector3, Vector3)>(0);
 
 
 static auto GetName = reinterpret_cast<str(*)(uintptr_t)>(0);
 
-static auto HitPointWorld = reinterpret_cast<vector3(*)(uintptr_t)>(0);
-static auto HitNormalWorld = reinterpret_cast<vector3(*)(uintptr_t)>(0);
+static auto HitPointWorld = reinterpret_cast<Vector3(*)(uintptr_t)>(0);
+static auto HitNormalWorld = reinterpret_cast<Vector3(*)(uintptr_t)>(0);
 
 static auto Trace_All = reinterpret_cast<void(*)(uintptr_t, uintptr_t, int)>(0);
 static auto get_magnitude = reinterpret_cast<float(*)(uintptr_t)>(0);
 
-static auto Sphere = reinterpret_cast<void (*)(vector3 vPos, float fRadius, col color, float fDuration, bool distanceFade)>(0);
+static auto Sphere = reinterpret_cast<void (*)(Vector3 vPos, float fRadius, col color, float fDuration, bool distanceFade)>(0);
 
 
 void init_projectile() {
 	Update = reinterpret_cast<void(*)(Projectile*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Projectile"), _("Update"), 0, _(""), _(""))));
-	Sphere = reinterpret_cast<void (*)(vector3 vPos, float fRadius, col color, float fDuration, bool distanceFade)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("DDraw"), _("Sphere"), 5, _(""), _("UnityEngine"))));
+	Sphere = reinterpret_cast<void (*)(Vector3 vPos, float fRadius, col color, float fDuration, bool distanceFade)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("DDraw"), _("Sphere"), 5, _(""), _("UnityEngine"))));
 	Retire = reinterpret_cast<void(*)(Projectile*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Projectile"), _("Retire"), 0, _(""), _(""))));
 	Trace_All = reinterpret_cast<void(*)(uintptr_t, uintptr_t, int)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GameTrace"), _("TraceAll"), 3, _(""), _(""))));
 
-	HitPointWorld = reinterpret_cast<vector3(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("HitTest"), _("HitPointWorld"), 0, _(""), _(""))));
-	HitNormalWorld = reinterpret_cast<vector3(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("HitTest"), _("HitNormalWorld"), 0, _(""), _(""))));
+	HitPointWorld = reinterpret_cast<Vector3(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("HitTest"), _("HitPointWorld"), 0, _(""), _(""))));
+	HitNormalWorld = reinterpret_cast<Vector3(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("HitTest"), _("HitNormalWorld"), 0, _(""), _(""))));
 
 	GetName = reinterpret_cast<str(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("AssetNameCache"), _("GetName"), 1, _(""), _(""))));
-	Do_Hit = reinterpret_cast<bool(*)(Projectile*, uintptr_t, vector3, vector3)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Projectile"), _("DoHit"), 0, _(""), _(""))));
+	Do_Hit = reinterpret_cast<bool(*)(Projectile*, uintptr_t, Vector3, Vector3)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Projectile"), _("DoHit"), 0, _(""), _(""))));
 	get_magnitude = reinterpret_cast<float(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Vector3"), _("get_magnitude"), 0, _(""), _("UnityEngine"))));;
 }
 
 class Projectile {
 public:
-	void initialVelocity(vector3 d) { safe_write(this + O::Projectile::initialVelocity, d, vector3); }
-	vector3 initialVelocity() { return safe_read(this + O::Projectile::initialVelocity, vector3); }
+	void initialVelocity(Vector3 d) { safe_write(this + O::Projectile::initialVelocity, d, Vector3); }
+	Vector3 initialVelocity() { return safe_read(this + O::Projectile::initialVelocity, Vector3); }
 
-	vector3 sentPosition() { return safe_read(this + O::Projectile::sentPosition, vector3); }
-	void sentPosition(vector3 d) { safe_write(this + O::Projectile::sentPosition, d, vector3); }
+	Vector3 sentPosition() { return safe_read(this + O::Projectile::sentPosition, Vector3); }
+	void sentPosition(Vector3 d) { safe_write(this + O::Projectile::sentPosition, d, Vector3); }
 
-	void currentVelocity(vector3 d) { safe_write(this + O::Projectile::currentVelocity, d, vector3); }
-	vector3 currentVelocity() { return safe_read(this + O::Projectile::currentVelocity, vector3); }
+	void currentVelocity(Vector3 d) { safe_write(this + O::Projectile::currentVelocity, d, Vector3); }
+	Vector3 currentVelocity() { return safe_read(this + O::Projectile::currentVelocity, Vector3); }
 
 	float drag() { return safe_read(this + O::Projectile::drag, float); }
 
@@ -123,19 +123,19 @@ public:
 	void integrity(float f) { safe_write(this + O::Projectile::integrity, f, float); }
 	float integrity() { return safe_read(this + O::Projectile::integrity, float); }
 	float maxDistance() { return safe_read(this + O::Projectile::maxDistance, float); }
-	vector3 currentPosition() { return safe_read(this + O::Projectile::currentPosition, vector3); }
-	void currentPosition(vector3 d) { safe_write(this + O::Projectile::currentPosition, d, vector3); }
+	Vector3 currentPosition() { return safe_read(this + O::Projectile::currentPosition, Vector3); }
+	void currentPosition(Vector3 d) { safe_write(this + O::Projectile::currentPosition, d, Vector3); }
 
 	void partialTime(float f) { safe_write(this + O::Projectile::tumbleSpeed, f, float); }
 	float partialTime() { return safe_read(this + O::Projectile::tumbleSpeed, float); }
-	vector3 prevSentVelocity() { return safe_read(this + O::Projectile::tumbleAxis, vector3); }
-	void prevSentVelocity(vector3 d) { safe_write(this + O::Projectile::tumbleAxis, d, vector3); }
+	Vector3 prevSentVelocity() { return safe_read(this + O::Projectile::tumbleAxis, Vector3); }
+	void prevSentVelocity(Vector3 d) { safe_write(this + O::Projectile::tumbleAxis, d, Vector3); }
 	float sentTraveledTime() { return safe_read(this + O::Projectile::closeFlybyDistance, float); }
 	void sentTraveledTime(float d) { safe_write(this + O::Projectile::closeFlybyDistance, d, float); }
 	float lastUpdateTime() { return safe_read(this + O::Projectile::ricochetChance, float); }
 	void lastUpdateTime(float d) { safe_write(this + O::Projectile::ricochetChance, d, float); }
-	vector3 prevSentPosition() { return safe_read(this + O::Projectile::swimScale, vector3); }
-	void prevSentPosition(vector3 d) { safe_write(this + O::Projectile::swimScale, d, vector3); }
+	Vector3 prevSentPosition() { return safe_read(this + O::Projectile::swimScale, Vector3); }
+	void prevSentPosition(Vector3 d) { safe_write(this + O::Projectile::swimScale, d, Vector3); }
 	bool needsLOS() { return safe_read(this + O::Projectile::createDecals, bool); }
 	void needsLOS(bool d) { safe_write(this + O::Projectile::createDecals, d, bool); }
 
@@ -147,8 +147,8 @@ public:
 	float traveledTime() { return safe_read(this + O::Projectile::traveledTime, float); }
 	void traveledTime(float d) { safe_write(this + O::Projectile::traveledTime, d, float); }
 
-	vector3 previousPosition() { return safe_read(this + O::Projectile::previousPosition, vector3); }
-	void previousPosition(vector3 d) { safe_write(this + O::Projectile::previousPosition, d, vector3); }
+	Vector3 previousPosition() { return safe_read(this + O::Projectile::previousPosition, Vector3); }
+	void previousPosition(Vector3 d) { safe_write(this + O::Projectile::previousPosition, d, Vector3); }
 
 	void hitTest(DWORD64 d) { safe_write(this + O::Projectile::hitTest, d, DWORD64); }
 	DWORD64 hitTest() { return safe_read(this + O::Projectile::hitTest, DWORD64); }
@@ -175,8 +175,8 @@ public:
 		bool valid; // 0x10
 		float distance; // 0x14
 		DWORD64 entity; // 0x18   //BasePlayer
-		vector3 point; // 0x20
-		vector3 normal; // 0x2C
+		Vector3 point; // 0x20
+		Vector3 normal; // 0x2C
 		DWORD64/*Transform*/ bone; // 0x38
 		DWORD64 material; // 0x40
 		unsigned int partID; // 0x48
@@ -191,10 +191,10 @@ public:
 		return maxdist;
 	}
 
-	vector3 SimulateProjectile(vector3& position, vector3& velocity, float& partialTime, float travelTime, vector3 gravity, float drag)
+	Vector3 SimulateProjectile(Vector3& position, Vector3& velocity, float& partialTime, float travelTime, Vector3 gravity, float drag)
 	{
 		float num = 0.03125f;
-		vector3 origin = position;
+		Vector3 origin = position;
 		if (partialTime > 0)
 		{
 			float num2 = num - partialTime;
@@ -244,30 +244,30 @@ public:
 
 		safe_write(ht + 0xB8, info.partID, unsigned int); //HitPart
 		safe_write(ht + 0xB0, info.bone, DWORD64); //HitTransform
-		safe_write(ht + 0x90, info.point, vector3); //HitPoint
-		safe_write(ht + 0x9C, info.normal, vector3); //HitNormal
+		safe_write(ht + 0x90, info.point, Vector3); //HitPoint
+		safe_write(ht + 0x9C, info.normal, Vector3); //HitNormal
 		safe_write(ht + 0x78, info.collider, DWORD64); //collider
 
 		DWORD64 go = info.collider != 0 ? get_gameObject(info.collider) : get_gameObject(info.bone);
 		safe_write(ht + 0x70, go, DWORD64); //gameObject
 		if (info.bone != 0) {
 
-			vector3 hitpoint = InverseTransformPoint(safe_read(ht + 0xB0, transform*)/*HitTransform*/, info.point);
-			safe_write(ht + 0x90, hitpoint, vector3); //hitPoint
+			Vector3 hitpoint = InverseTransformPoint(safe_read(ht + 0xB0, transform*)/*HitTransform*/, info.point);
+			safe_write(ht + 0x90, hitpoint, Vector3); //hitPoint
 
-			vector3 normalpoint = InverseTransformDirection(safe_read(ht + 0xB0, transform*)/*HitTransform*/, info.normal);
-			safe_write(ht + 0x9C, normalpoint, vector3); //HitNormal
+			Vector3 normalpoint = InverseTransformDirection(safe_read(ht + 0xB0, transform*)/*HitTransform*/, info.normal);
+			safe_write(ht + 0x9C, normalpoint, Vector3); //HitNormal
 		}
 
 	}
 
-	vector3 Simulate(bool returnvelocity, bool sendtoserver) {
-		vector3 pos = prevSentPosition(); vector3 prev = prevSentVelocity(); float part = partialTime(); float travel = max(traveledTime() - sentTraveledTime(), 0);
+	Vector3 Simulate(bool returnvelocity, bool sendtoserver) {
+		Vector3 pos = prevSentPosition(); Vector3 prev = prevSentVelocity(); float part = partialTime(); float travel = max(traveledTime() - sentTraveledTime(), 0);
 
-		vector3 gr = get_gravity(); //static Vector3 get_gravity();
+		Vector3 gr = get_gravity(); //static Vector3 get_gravity();
 
 
-		vector3 origin = SimulateProjectile(pos, prev, part, travel, gr * gravityModifier(), drag());
+		Vector3 origin = SimulateProjectile(pos, prev, part, travel, gr * gravityModifier(), drag());
 
 		if (sendtoserver) {
 			prevSentPosition(pos);
@@ -281,13 +281,13 @@ public:
 		return origin;
 	}
 
-	bool DoFatBulletHit(Projectile* pr, vector3 point) {
+	bool DoFatBulletHit(Projectile* pr, Vector3 point) {
 		float maxdist = GetHitDist();
 
 		auto target = esp::local_player->get_aimbot_target(point, maxdist);
 
 		if (get_isAlive((base_projectile*)pr) && target.player && !target.teammate) {
-			if (!unity::is_visible(target.pos, point)) {
+			if (!esp::local_player->is_visible(target.pos, point)) {
 				return false;
 			}
 
@@ -343,25 +343,25 @@ public:
 
 			safe_write(ht + 0xB0, (uintptr_t)Transform, DWORD64);
 
-			vector3 hitpoint = InverseTransformPoint(Transform, point);
-			safe_write(ht + 0x90, hitpoint, vector3); //hitPoint
-			safe_write(ht + 0x14, point, vector3);
+			Vector3 hitpoint = InverseTransformPoint(Transform, point);
+			safe_write(ht + 0x90, hitpoint, Vector3); //hitPoint
+			safe_write(ht + 0x14, point, Vector3);
 
-			bool result = Do_Hit(pr, ht, point, vector3());
+			bool result = Do_Hit(pr, ht, point, Vector3());
 			//Sphere(point, 0.015f, col(1, 0, 0, 1), 20, true);
 			return true;
 		}
 		return false;
 	}
 
-	bool DoHit(Projectile* pr, DWORD64 ht, vector3 point, vector3 normal, TraceInfo info, bool& exit) {
+	bool DoHit(Projectile* pr, DWORD64 ht, Vector3 point, Vector3 normal, TraceInfo info, bool& exit) {
 		bool result = false;
 		if (!IsAlive())
 			return result;
 
 		auto material = info.material != 0 ? GetName(info.material)->str : (_(L"generic"));
 
-		bool canIgnore = unity::is_visible(sentPosition(), currentPosition() + currentVelocity().Normalized() * 0.01f);
+		bool canIgnore = esp::local_player->is_visible(sentPosition(), currentPosition() + currentVelocity().Normalized() * 0.01f);
 		if (!canIgnore) {
 			integrity(0);
 			return true;
@@ -369,9 +369,9 @@ public:
 
 		float org;
 		if (canIgnore) {
-			vector3 attackStart = Simulate(false, true);
+			Vector3 attackStart = Simulate(false, true);
 
-			safe_write(ht + 0x14, Ray(attackStart, vector3()), Ray);
+			safe_write(ht + 0x14, Ray(attackStart, Vector3()), Ray);
 		}
 
 		if (canIgnore && m_wcsicmp(material, _(L"Flesh"))) {
@@ -391,13 +391,13 @@ public:
 
 
 	bool DoMovement(float deltaTime, Projectile* pr) {
-		vector3 a = currentVelocity() * deltaTime;
+		Vector3 a = currentVelocity() * deltaTime;
 		float magnitude = a.Length();
 		float num2 = 1 / magnitude;
-		vector3 vec2 = a * num2;
+		Vector3 vec2 = a * num2;
 		bool flag = false;
 
-		vector3 vec3 = currentPosition() + vec2 * magnitude;
+		Vector3 vec3 = currentPosition() + vec2 * magnitude;
 		float num3 = traveledTime() + deltaTime;
 
 		DWORD64 ht = hitTest();
@@ -456,8 +456,8 @@ public:
 			if (Trace.valid) {
 				this->UpdateHitTest(Trace);
 
-				vector3 vec4 = HitPointWorld(ht); //Vector3 HitPointWorld();
-				vector3 normal = HitNormalWorld(ht); //Vector3 HitNormalWorld();
+				Vector3 vec4 = HitPointWorld(ht); //Vector3 HitPointWorld();
+				Vector3 normal = HitNormalWorld(ht); //Vector3 HitNormalWorld();
 
 				//Line(currentPosition(), vec4, col(1, 1, 1, 1), 20, true, true);
 				//Sphere(Trace.point, 0.05f, col(0.5, 0, 0, 1), 20, true);
@@ -495,12 +495,12 @@ public:
 		if (!IsAlive())
 			return;
 
-		vector3 gr = get_gravity(); //static Vector3 get_gravity();
+		Vector3 gr = get_gravity(); //static Vector3 get_gravity();
 
-		vector3 tr = (gr * gravityModifier() * deltaTime);
+		Vector3 tr = (gr * gravityModifier() * deltaTime);
 		currentVelocity(currentVelocity() + tr);
 
-		vector3 dr = (currentVelocity() * drag() * deltaTime);
+		Vector3 dr = (currentVelocity() * drag() * deltaTime);
 		currentVelocity(currentVelocity() - dr);
 	}
 
@@ -511,7 +511,7 @@ public:
 		}
 
 		transform* Transform = get_transform((base_player*)pr);
-		vector3 pos = Transform->get_bone_position();
+		Vector3 pos = Transform->get_bone_position();
 		this->currentPosition(pos);
 
 		if (traveledTime() == 0) {
@@ -529,9 +529,9 @@ public:
 		}
 
 		auto Trans = get_transform((base_player*)pr); //Component | Transform get_transform(); 
-		set_position(Trans, currentPosition()); //Transform | void set_position(vector3 value); 
+		set_position(Trans, currentPosition()); //Transform | void set_position(Vector3 value); 
 
-		vector4 rotation = LookRotation(currentVelocity(), vector3(0, 1, 0));
+		Vector4 rotation = LookRotation(currentVelocity(), Vector3(0, 1, 0));
 
 		set_rotation(Trans, rotation);
 	}

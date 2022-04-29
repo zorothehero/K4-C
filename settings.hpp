@@ -134,7 +134,7 @@ namespace settings {
 		float staramount = 350;
 		bool admin_mode = false;
 		bool view_offset  = false;
-		bool instant_med  = true;
+		bool instant_med  = false;
 		bool instant_revive = false;
 		bool no_playercollision = false;
 		bool spiderman = false;

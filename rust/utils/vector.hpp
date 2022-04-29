@@ -2,16 +2,16 @@
 #include <cmath>
 #include <cfloat>
 
-class vector2
+class Vector2
 {
 public:
 	float x;
 	float y;
 
-	vector2()
+	Vector2()
 	{}
 
-	vector2(float x, float y)
+	Vector2(float x, float y)
 		: x(x), y(y)
 	{}
 };
@@ -75,17 +75,17 @@ float my_pow(float base, float exp)
 		return base * my_pow(base, exp - 1);
 }
 
-class vector3
+class Vector3
 {
 public:
 	float x;
 	float y;
 	float z;
 
-	vector3()
+	Vector3()
 	{}
 
-	vector3(float x, float y, float z)
+	Vector3(float x, float y, float z)
 		: x(x), y(y), z(z)
 	{}
 
@@ -480,7 +480,7 @@ public:
 
 	static float my_asin(float x) { return my_atan2(x, my_sqrt(1.0 - (x * x))); }
 
-	inline float calc_pitch(vector3 from, vector3 to, weapon_stats_t stats)
+	inline float calc_pitch(Vector3 from, Vector3 to, weapon_stats_t stats)
 	{
 		float dist = (to - from).length_2d();
 
@@ -506,7 +506,7 @@ public:
 		return pitch * r_to_deg;
 	}
 
-	vector3 lerp(vector3 v, float x, bool clamp = true)
+	Vector3 lerp(Vector3 v, float x, bool clamp = true)
 	{
 		auto delta = (v - *this);
 		if (clamp)
@@ -519,7 +519,7 @@ public:
 		return result;
 	}
 
-	vector3 forward()
+	Vector3 forward()
 	{
 		float sp, sy, cp, cy;
 
@@ -543,7 +543,7 @@ public:
 		return val;
 	}
 
-	vector3 clamp()
+	Vector3 clamp()
 	{
 		constexpr auto yaw_limit = static_cast<float>(180);
 		constexpr auto pitch_limit = static_cast<float>(90);
@@ -608,7 +608,7 @@ public:
 		return 0;
 	}
 
-	vector3 rotation()
+	Vector3 rotation()
 	{
 		float pitch = -my_atan2(y, my_sqrt(x * x + z * z));
 		float yaw = -my_atan2(-x, z);
@@ -619,7 +619,7 @@ public:
 		return { pitch, yaw, 0 };
 	}
 
-	inline float Distance(const vector3& vector)
+	inline float Distance(const Vector3& vector)
 	{
 		return my_sqrt(
 			(x - vector.x) * (x - vector.x) +
@@ -627,7 +627,7 @@ public:
 			(z - vector.z) * (z - vector.z));
 	}
 
-	float dot(const vector3& vector)
+	float dot(const Vector3& vector)
 	{
 		return x * vector.x + y * vector.y + z * vector.z;
 	}
@@ -639,11 +639,11 @@ public:
 
 	#define powFFFFFFFFFFFFFFFFFFFFFF(n) (n)*(n)
 
-	float get_3d_dist(const vector3& Dst) {
+	float get_3d_dist(const Vector3& Dst) {
 		return my_sqrt( powFFFFFFFFFFFFFFFFFFFFFF(x - Dst.x) + powFFFFFFFFFFFFFFFFFFFFFF(y - Dst.y) + powFFFFFFFFFFFFFFFFFFFFFF(z - Dst.z));
 	}
 
-	float distance(const vector3& vector)
+	float distance(const Vector3& vector)
 	{
 		return my_sqrt(
 			(x - vector.x) * (x - vector.x) +
@@ -651,14 +651,14 @@ public:
 			(z - vector.z) * (z - vector.z));
 	}
 
-	vector3 Normalized() {
+	Vector3 Normalized() {
 		float len = Length();
-		return vector3(x / len, y / len, z / len);
+		return Vector3(x / len, y / len, z / len);
 	}
 
-	vector3 normalize()
+	Vector3 normalize()
 	{
-		vector3 out = *this;
+		Vector3 out = *this;
 		auto l = length();
 		if (l == 0)
 			return *this;
@@ -669,7 +669,7 @@ public:
 		return out;
 	}
 
-	float world_distance(const vector3& vector)
+	float world_distance(const Vector3& vector)
 	{
 		return float(sqrtf(powf(vector.x - x, 2.0) + powf(vector.y - y, 2.0) + powf(vector.z - z, 2.0)));
 	}
@@ -685,7 +685,7 @@ public:
 		y = ty;
 	}
 
-	vector3& operator+=(const vector3& vector)
+	Vector3& operator+=(const Vector3& vector)
 	{
 		x += vector.x;
 		y += vector.y;
@@ -694,7 +694,7 @@ public:
 		return *this;
 	}
 
-	vector3& operator-=(const vector3& vector)
+	Vector3& operator-=(const Vector3& vector)
 	{
 		x -= vector.x;
 		y -= vector.y;
@@ -703,7 +703,7 @@ public:
 		return *this;
 	}
 
-	vector3& operator*=(float number)
+	Vector3& operator*=(float number)
 	{
 		x *= number;
 		y *= number;
@@ -712,7 +712,7 @@ public:
 		return *this;
 	}
 
-	vector3& operator/=(float number)
+	Vector3& operator/=(float number)
 	{
 		x /= number;
 		y /= number;
@@ -721,42 +721,42 @@ public:
 		return *this;
 	}
 
-	bool operator==(const vector3& vector) const
+	bool operator==(const Vector3& vector) const
 	{
 		return x == vector.x && y == vector.y && z == vector.z;
 	}
 
-	bool operator!=(const vector3& vector) const
+	bool operator!=(const Vector3& vector) const
 	{
 		return x != vector.x || y != vector.y || z != vector.z;
 	}
 
-	vector3 operator+(const vector3& vector) const
+	Vector3 operator+(const Vector3& vector) const
 	{
-		return vector3(x + vector.x, y + vector.y, z + vector.z);
+		return Vector3(x + vector.x, y + vector.y, z + vector.z);
 	}
 
-	vector3 operator-(const vector3& vector) const
+	Vector3 operator-(const Vector3& vector) const
 	{
-		return vector3(x - vector.x, y - vector.y, z - vector.z);
+		return Vector3(x - vector.x, y - vector.y, z - vector.z);
 	}
 
-	vector3 operator-() const
+	Vector3 operator-() const
 	{
-		return vector3(-x, -y, -z);
+		return Vector3(-x, -y, -z);
 	}
 
-	vector3 operator*(float number) const
+	Vector3 operator*(float number) const
 	{
-		return vector3(x * number, y * number, z * number);
+		return Vector3(x * number, y * number, z * number);
 	}
 
-	vector3 operator/(float number) const
+	Vector3 operator/(float number) const
 	{
-		return vector3(x / number, y / number, z / number);
+		return Vector3(x / number, y / number, z / number);
 	}
 
-	void angle_vectors(vector3* forward, vector3* right, vector3* up)
+	void angle_vectors(Vector3* forward, Vector3* right, Vector3* up)
 	{
 		float sp, sy, cp, cy, sr, cr;
 
@@ -825,7 +825,7 @@ public:
 		return false;
 	}
 
-	vector3 operator*(const vector3& vec) {
+	Vector3 operator*(const Vector3& vec) {
 		VMatrix m;
 
 		m[3][0] = vec.x;
@@ -844,7 +844,7 @@ public:
 
 		auto result = m * (*this);
 
-		return vector3{ result[3][0], result[3][1], result[3][2] };
+		return Vector3{ result[3][0], result[3][1], result[3][2] };
 	}
 
 	VMatrix operator*(const VMatrix& _m2) {
@@ -885,7 +885,8 @@ public:
 	};
 };
 
-class vector4
+
+class Vector4
 {
 public:
 	float x;
@@ -893,16 +894,16 @@ public:
 	float z;
 	float w;
 
-	vector4()
+	Vector4()
 	{}
 
-	vector4(float x, float y, float z, float w)
+	Vector4(float x, float y, float z, float w)
 		: x(x), y(y), z(z), w(w)
 	{}
 
-	vector3 forward()
+	Vector3 forward()
 	{
-		vector3  point = { 0, 0, 1 };
+		Vector3  point = { 0, 0, 1 };
 		float num = x * 2;
 		float num2 = y * 2;
 		float num3 = z * 2;
@@ -915,7 +916,7 @@ public:
 		float num10 = w * num;
 		float num11 = w * num2;
 		float num12 = w * num3;
-		vector3  result;
+		Vector3  result;
 		result.x = (1 - (num5 + num6)) * point.x + (num7 - num12) * point.y +
 			(num8 + num11) * point.z;
 		result.y = (num7 + num12) * point.x + (1 - (num4 + num6)) * point.y +
@@ -926,12 +927,12 @@ public:
 	}
 
 
-	inline float dot(const vector4& vector)
+	inline float dot(const Vector4& vector)
 	{
 		return x * vector.x + y * vector.y + z * vector.z + w * vector.w;
 	}
 
-	inline float distance(const vector4& vector)
+	inline float distance(const Vector4& vector)
 	{
 		return sqrtf(
 			(x - vector.x) * (x - vector.x) +
@@ -940,42 +941,42 @@ public:
 			(w - vector.w) * (w - vector.w));
 	}
 
-	bool operator==(const vector4& vector) const
+	bool operator==(const Vector4& vector) const
 	{
 		return x == vector.x && y == vector.y && z == vector.z && w == vector.w;
 	}
 
-	bool operator!=(const vector4& vector) const
+	bool operator!=(const Vector4& vector) const
 	{
 		return x != vector.x || y != vector.y || z != vector.z || w != vector.w;
 	}
 
-	vector4 operator+(const vector4& vector) const
+	Vector4 operator+(const Vector4& vector) const
 	{
-		return vector4(x + vector.x, y + vector.y, z + vector.z, w + vector.w);
+		return Vector4(x + vector.x, y + vector.y, z + vector.z, w + vector.w);
 	}
 
-	vector4 operator-(const vector4& vector) const
+	Vector4 operator-(const Vector4& vector) const
 	{
-		return vector4(x - vector.x, y - vector.y, z - vector.z, w - vector.w);
+		return Vector4(x - vector.x, y - vector.y, z - vector.z, w - vector.w);
 	}
 
-	vector4 operator-() const
+	Vector4 operator-() const
 	{
-		return vector4(-x, -y, -z, -w);
+		return Vector4(-x, -y, -z, -w);
 	}
 
-	vector4 operator*(float number) const
+	Vector4 operator*(float number) const
 	{
-		return vector4(x * number, y * number, z * number, w * number);
+		return Vector4(x * number, y * number, z * number, w * number);
 	}
 
-	vector4 operator/(float number) const
+	Vector4 operator/(float number) const
 	{
-		return vector4(x / number, y / number, z / number, w / number);
+		return Vector4(x / number, y / number, z / number, w / number);
 	}
 
-	vector4& operator+=(const vector4& vector)
+	Vector4& operator+=(const Vector4& vector)
 	{
 		x += vector.x;
 		y += vector.y;
@@ -984,7 +985,7 @@ public:
 		return *this;
 	}
 
-	vector4& operator-=(const vector4& vector)
+	Vector4& operator-=(const Vector4& vector)
 	{
 		x -= vector.x;
 		y -= vector.y;
@@ -993,7 +994,7 @@ public:
 		return *this;
 	}
 
-	vector4& operator*=(float number)
+	Vector4& operator*=(float number)
 	{
 		x *= number;
 		y *= number;
@@ -1002,7 +1003,7 @@ public:
 		return *this;
 	}
 
-	vector4& operator/=(float number)
+	Vector4& operator/=(float number)
 	{
 		x /= number;
 		y /= number;
@@ -1014,8 +1015,8 @@ public:
 
 struct matrix
 {
-	vector4 vec0;
-	vector4 vec1;
-	vector4 vec2;
-	vector4 vec3;
+	Vector4 vec0;
+	Vector4 vec1;
+	Vector4 vec2;
+	Vector4 vec3;
 };
