@@ -9,6 +9,7 @@
 #include "../rust.hpp"
 
 namespace esp {
+	float rl_time = 0.f;
 	uintptr_t client_entities;
 	base_player* local_player;
 	VMatrix matrix;
@@ -76,6 +77,8 @@ namespace esp {
 	void draw_middle(aim_target target);
 
 	void draw_weapon_icon(weapon* item, Vector2 w2s_position);
+
+	void draw_target_fov(Vector2 o, float r);
 
 	uintptr_t shader;
 

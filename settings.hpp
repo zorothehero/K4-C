@@ -49,6 +49,7 @@ namespace settings {
 
 	namespace visuals {
 		bool player_esp = true;
+		bool draw_fov = true;
 		bool rainbow_chams = true;
 		bool hotbar_esp = false;
 		bool chams = true;
@@ -96,6 +97,7 @@ namespace settings {
 		bool bottomhealth = false;
 		bool steamid = false;
 		bool sidehealth = true;
+		bool skeleton = true;
 		bool nameesp = true;
 		bool woundedflag = false;
 		bool distance = true;

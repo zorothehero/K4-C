@@ -431,6 +431,27 @@ namespace gui {
 		methods::DrawTexture(rust::classes::Rect(pos.x, pos.y, size, 1), white_texture);
 	}
 
+	void line(Vector2 start, Vector2 end, Color clr, float thickness = 1.f)
+	{
+		methods::set_color(clr);
+
+		double x = end.x - start.x;
+		double y = end.y - start.y;
+		double length = Vector3::my_sqrt(x * x + y * y);
+
+		double addx = x / length;
+		double addy = y / length;
+
+		x = start.x;
+		y = start.y;
+
+		for (double i = 0; i < length; i += 1)
+		{
+			horizontal_line(Vector2(x, y), thickness, clr);
+			x += addx;
+			y += addy;
+		}
+	}
 	void vertical_line(Vector2 pos, float size, Color clr)
 	{
 		methods::set_color(clr);
@@ -453,22 +474,18 @@ namespace gui {
 		label = mem::read<uintptr_t>(skin + 0x38);
 
 		//unity::bundle = methods::LoadFromFile(_(L"rust.assets"));
-		//unity::bundle_font = methods::LoadFromFile(_(L"z.mc"));
+		unity::bundle_font = methods::LoadFromFile(_(L"C:\\k4"));
 
 		if (unity::bundle)
 		{
 			//unity::chams_shader = methods::LoadAsset(unity::bundle, _(L"Chams"), unity::GetType(_(L"UnityEngine.Shader, UnityEngine.CoreModule")));
 		}
 
-		const auto set_font = [&](rust::classes::string str, int sz) {
-			//static auto font = methods::LoadAsset(unity::bundle, str, unity::GetType(_(L"UnityEngine.Font, UnityEngine.CoreModule")));
-			static auto font = methods::LoadAsset(unity::bundle_font, str, il2cpp::type_object(_("UnityEngine"), _("Font")));
-			*reinterpret_cast<uintptr_t*>(skin + 0x18) = font;
 
-			methods::set_fontSize(label, sz);
-		};
+		//static auto font = methods::LoadAsset(unity::bundle_font, rust::classes::string(_(L"minecraftchmc.ttf")), il2cpp::type_object(_("UnityEngine"), _("Font")));
+		//*reinterpret_cast<uintptr_t*>(skin + 0x18) = font;
 
-		//set_font(_(L"minecraftchmc.ttf"), 24);
+		methods::set_fontSize(label, 24);
 
 		methods::set_alignment(label, 0);
 		methods::set_color(Color(1, 1, 1, 1));
@@ -749,10 +766,10 @@ namespace gui {
 
 	void Progbar(Vector2 start, Vector2 end, float a, float b)
 	{
+		if (a < 0) return;
 		fill_box(rust::classes::Rect(start.x, start.y, end.x, end.y + 1), rgba(21.f, 27.f, 37.f, 255.f));
 
-		if (a < 0) a = 0;
-		if ((a / b) > b)
+		if ((a / b) > 1)
 			a = b;
 
 		fill_box(rust::classes::Rect(start.x + 1, start.y + 1, (end.x * (a / b)) - 1, end.y - 1), perc_col(a / b));
@@ -829,10 +846,27 @@ namespace gui {
 							if (held->get_base_projectile())
 							{
 								auto b = held->get_base_projectile();
-								Progbar({ 900, (650 + (bars++ * 10)) }, { 120, 4 }, settings::time_since_last_shot, (b->get_reload_time() - (b->get_reload_time() / 10)));
+								auto r = esp::rl_time;
+								if(settings::time_since_last_shot < r)
+									Progbar({ 900, (650 + (bars++ * 10)) }, { 120, 4 }, settings::time_since_last_shot, (r - 0.2f));
 							}
 						}
+						if (settings::visuals::snaplines)
+						{
+							if (esp::best_target.player)
+							{
+								Vector3 o = WorldToScreen(esp::best_target.pos);
+								if (esp::best_target.visible)
+									gui::line(Vector2(ScreenWidth / 2, 1080), Vector2(o.x, o.y), gui::Color(0, 0.9, 0.2, 1));
+								else
+									gui::line(Vector2(ScreenWidth / 2, 1080), Vector2(o.x, o.y), gui::Color(0.9, 0, 0.2, 1));
+							}
+						}
+						if (settings::visuals::draw_fov) {
+							esp::draw_target_fov(Vector2(ScreenWidth / 2, ScreenHeight / 2), settings::weapon::aimbotfov);
+						}
 					}
+
 
 					esp::start();
 				}
@@ -932,7 +966,8 @@ namespace gui {
 						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"NPC"), &settings::visuals::npc_esp, visual_tab);
 						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Corpse"), &settings::visuals::corpses, visual_tab);
 						//checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Misc"), &settings::visuals::misc_esp, visual_tab);
-						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Held sprites"), &settings::visuals::spriteitem, visual_tab);
+						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Held icons"), &settings::visuals::spriteitem, visual_tab);
+						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Skeleton"), &settings::visuals::skeleton, visual_tab);
 						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Snaplines"), &settings::visuals::snaplines, visual_tab);
 						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Show fov"), &settings::visuals::show_fov, visual_tab);
 						break;
@@ -971,6 +1006,7 @@ namespace gui {
 
 						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Admin mode"), &settings::misc::admin_mode, misc_tab);
 						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"No collisions"), &settings::misc::no_playercollision, misc_tab);
+						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Interactive debug"), &settings::misc::interactive_debug, misc_tab);
 						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Instant med"), &settings::misc::instant_med, misc_tab);
 						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Suicide"), &settings::misc::TakeFallDamage, misc_tab, true, &settings::keybind::suicide);
 						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Longneck"), &settings::misc::eyeoffset, misc_tab, true, &settings::keybind::neck);
@@ -1229,6 +1265,18 @@ namespace esp
 		}
 	}
 
+	void draw_target_fov(Vector2 o, float r) {
+		int segments = 0;
+		for (size_t i = 0; i < segments; i++)
+		{
+			float theta = 2.0f * 3.1415926f * float(i) / float(segments);//get the current angle
+
+			float x = r * LI_FIND(cosf)(theta);//calculate the x component
+			float y = r * LI_FIND(sinf)(theta);//calculate the y component
+			gui::horizontal_line(Vector2(o.x+x, o.y+y), 1, gui::Color(1,1,1,1));
+		}
+	}
+
 	void draw_weapon_icon(weapon* item, Vector2 w2s_position) {
 
 		auto sprite = get_iconSprite(item);
@@ -1326,17 +1374,61 @@ namespace esp
 			bool visible;
 		};
 
-		std::array<bone_t, 20> bones = {
-			bone_t{ Vector3{}, 17, false, Vector3{}, false }, bone_t{ Vector3{}, 18, false, Vector3{}, false },
-			bone_t{ Vector3{}, 15, false, Vector3{}, false }, bone_t{ Vector3{}, 14, false, Vector3{}, false },
-			bone_t{ Vector3{}, 1, false, Vector3{}, false },  bone_t{ Vector3{}, 2, false, Vector3{}, false },
-			bone_t{ Vector3{}, 3, false, Vector3{}, false },  bone_t{ Vector3{}, 6, false, Vector3{}, false },
-			bone_t{ Vector3{}, 5, false, Vector3{}, false },  bone_t{ Vector3{}, 21, false, Vector3{}, false },
-			bone_t{ Vector3{}, 23, false, Vector3{}, false }, bone_t{ Vector3{}, 48, false, Vector3{}, false },
-			bone_t{ Vector3{}, 24, false, Vector3{}, false }, bone_t{ Vector3{}, 25, false, Vector3{}, false },
-			bone_t{ Vector3{}, 26, false, Vector3{}, false }, bone_t{ Vector3{}, 27, false, Vector3{}, false },
-			bone_t{ Vector3{}, 55, false, Vector3{}, false }, bone_t{ Vector3{}, 56, false, Vector3{}, false },
-			bone_t{ Vector3{}, 57, false, Vector3{}, false }, bone_t{ Vector3{}, 76, false, Vector3{}, false }
+		std::array<bone_t, 50> bones = {
+			//additional to original 20 (15 * 2) = 50
+			bone_t{ Vector3{}, 58, false, Vector3{}, false },  // r_index1
+			bone_t{ Vector3{}, 59, false, Vector3{}, false },  // r_index2
+			bone_t{ Vector3{}, 60, false, Vector3{}, false },  // r_index3
+			bone_t{ Vector3{}, 61, false, Vector3{}, false },  // r_little1
+			bone_t{ Vector3{}, 62, false, Vector3{}, false },  // r_little2
+			bone_t{ Vector3{}, 63, false, Vector3{}, false },  // r_little3
+			bone_t{ Vector3{}, 64, false, Vector3{}, false },  // r_middle1
+			bone_t{ Vector3{}, 65, false, Vector3{}, false },  // r_middle2
+			bone_t{ Vector3{}, 66, false, Vector3{}, false },  // r_middle3
+			bone_t{ Vector3{}, 68, false, Vector3{}, false },  // r_ring1
+			bone_t{ Vector3{}, 69, false, Vector3{}, false },  // r_ring2
+			bone_t{ Vector3{}, 70, false, Vector3{}, false },  // r_ring3
+			bone_t{ Vector3{}, 71, false, Vector3{}, false },  // r_thumb1
+			bone_t{ Vector3{}, 72, false, Vector3{}, false },  // r_thumb2
+			bone_t{ Vector3{}, 73, false, Vector3{}, false },  // r_thumb3
+			bone_t{ Vector3{}, 27, false, Vector3{}, false },  // l_index1
+			bone_t{ Vector3{}, 28, false, Vector3{}, false },  // l_index2
+			bone_t{ Vector3{}, 29, false, Vector3{}, false },  // l_index3
+			bone_t{ Vector3{}, 30, false, Vector3{}, false },  // l_little1
+			bone_t{ Vector3{}, 31, false, Vector3{}, false },  // l_little2
+			bone_t{ Vector3{}, 32, false, Vector3{}, false },  // l_little3
+			bone_t{ Vector3{}, 33, false, Vector3{}, false },  // l_middle1
+			bone_t{ Vector3{}, 34, false, Vector3{}, false },  // l_middle2
+			bone_t{ Vector3{}, 35, false, Vector3{}, false },  // l_middle3
+			bone_t{ Vector3{}, 37, false, Vector3{}, false },  // l_ring1
+			bone_t{ Vector3{}, 38, false, Vector3{}, false },  // l_ring2
+			bone_t{ Vector3{}, 39, false, Vector3{}, false },  // l_ring3
+			bone_t{ Vector3{}, 40, false, Vector3{}, false },  // l_thumb1
+			bone_t{ Vector3{}, 41, false, Vector3{}, false },  // l_thumb2
+			bone_t{ Vector3{}, 42, false, Vector3{}, false },  // l_thumb3
+
+			bone_t{ Vector3{}, 2, false, Vector3{}, false },  // l_hip
+			bone_t{ Vector3{}, 3, false, Vector3{}, false },  // l_knee
+			bone_t{ Vector3{}, 6, false, Vector3{}, false },  // l_ankle_scale
+			bone_t{ Vector3{}, 5, false, Vector3{}, false },  // l_toe
+			bone_t{ Vector3{}, 24, false, Vector3{}, false }, // l_upperarm
+			bone_t{ Vector3{}, 25, false, Vector3{}, false }, // l_forearm
+			bone_t{ Vector3{}, 26, false, Vector3{}, false }, // l_hand
+			bone_t{ Vector3{}, 27, false, Vector3{}, false }, // l_index1
+
+			bone_t{ Vector3{}, 48, false, Vector3{}, false }, // jaw
+			bone_t{ Vector3{}, 18, false, Vector3{}, false }, // spine1
+			bone_t{ Vector3{}, 21, false, Vector3{}, false }, // spine3
+			bone_t{ Vector3{}, 1, false, Vector3{}, false },  // pelvis
+			bone_t{ Vector3{}, 23, false, Vector3{}, false }, // l_clavicle
+
+			bone_t{ Vector3{}, 17, false, Vector3{}, false }, // r_ankle_scale
+			bone_t{ Vector3{}, 15, false, Vector3{}, false }, // r_foot
+			bone_t{ Vector3{}, 14, false, Vector3{}, false }, // r_knee
+			bone_t{ Vector3{}, 55, false, Vector3{}, false }, // r_upperarm
+			bone_t{ Vector3{}, 56, false, Vector3{}, false }, // r_forearm
+			bone_t{ Vector3{}, 57, false, Vector3{}, false }, // r_hand
+			bone_t{ Vector3{}, 76, false, Vector3{}, false }  // r_ulna
 		};
 
 		bool is_visible = false;
@@ -1470,7 +1562,6 @@ namespace esp
 				gui::fill_box(rust::classes::Rect(bounds.left - 6, bounds.top + box_height - height + 2, 2, height), health_color);
 			}
 
-
 			if (player_weapon)
 			{
 				auto sprite = get_iconSprite(player_weapon);
@@ -1501,8 +1592,6 @@ namespace esp
 				}
 			}
 
-
-
 			if (name)
 			{
 				auto transform = player->get_bone_transform(48);
@@ -1513,7 +1602,7 @@ namespace esp
 				//const char* new_name = ;
 				// PLAYER NAME
 
-				const wchar_t* nw;
+				//const wchar_t* nw;
 
 				if (settings::visuals::nameesp) {
 					auto half = (bounds.right - bounds.left) / 2;
@@ -1533,14 +1622,163 @@ namespace esp
 					}
 
 					if (settings::visuals::distance)
-						nw = string::wformat(_(L"%s\n%d"), _(L""), name, (int)distance);
-					else
-						nw = string::wformat(_(L"%s"), _(L""), name);
+					{
+						auto nstr = string::wformat(_(L"[%dm]"), (int)distance);
+						gui::Label(rust::classes::Rect{ bounds.left - 80.f  , bounds.bottom + 17.f, 79.f + half * 2 + 80.f , 30 }, nstr, gui::Color(0, 0, 0, 120), true, 10.5);
+						gui::Label(rust::classes::Rect{ bounds.left - 80.f  , bounds.bottom + 18.f, 80.f + half * 2 + 80.f , 30 }, nstr, gui::Color(settings::visuals::nameRcolor, settings::visuals::nameGcolor, settings::visuals::nameBcolor, 1), true, 10);
+					}
+					//if (settings::visuals::distance)
+					//	nw = string::wformat(_(L"%s\n%d"), _(L""), name, (int)distance);
+					//else
+					//	nw = string::wformat(_(L"%s"), _(L""), name);
 
-					gui::Label(rust::classes::Rect{ bounds.left - 80.f  , bounds.bottom + 7.f, 79.f + half * 2 + 80.f , 30 }, nw, gui::Color(0, 0, 0, 120), true, 10.5);
-					gui::Label(rust::classes::Rect{ bounds.left - 80.f  , bounds.bottom + 8.f, 80.f + half * 2 + 80.f , 30 }, nw, gui::Color(settings::visuals::nameRcolor, settings::visuals::nameGcolor, settings::visuals::nameBcolor, 1), true, 10);
+					gui::Label(rust::classes::Rect{ bounds.left - 80.f  , bounds.bottom + 7.f, 79.f + half * 2 + 80.f , 30 }, name, gui::Color(0, 0, 0, 120), true, 10.5);
+					gui::Label(rust::classes::Rect{ bounds.left - 80.f  , bounds.bottom + 8.f, 80.f + half * 2 + 80.f , 30 }, name, gui::Color(settings::visuals::nameRcolor, settings::visuals::nameGcolor, settings::visuals::nameBcolor, 1), true, 10);
 				}
 				// PLAYER NAME
+			}
+
+			if (settings::visuals::skeleton)
+			{
+				//jaw -> spine4
+				//spine4 -- l_upperarm -> l_lowerarm -> l_hand -> (make hands)
+				//spine4 -- r_upperarm -> r_lowerarm -> r_hand -> (make hands)
+				//spine4 -> spine3
+				//spine3 -> pelvis
+				//pelvis -- l_knee -> l_ankle_scale -> l_foot
+				//pelvis -- r_knee -> r_ankle_scale -> r_foot
+
+
+				//jaw
+				auto transform = player->get_bone_transform(48);
+				Vector3 world_position = transform->get_bone_position();
+				Vector3 jaw = WorldToScreen(world_position);
+
+				//spine4
+				transform = player->get_bone_transform(22);
+				world_position = transform->get_bone_position();
+				Vector3 spine4 = WorldToScreen(world_position);
+
+				//spine3
+				transform = player->get_bone_transform(21);
+				world_position = transform->get_bone_position();
+				Vector3 spine3 = WorldToScreen(world_position);
+
+				//pelvis
+				transform = player->get_bone_transform(7);
+				world_position = transform->get_bone_position();
+				Vector3 pelvis = WorldToScreen(world_position);
+
+				//l_hip
+				transform = player->get_bone_transform(3);
+				world_position = transform->get_bone_position();
+				Vector3 l_hip = WorldToScreen(world_position);
+
+				//r_knee
+				transform = player->get_bone_transform(14);
+				world_position = transform->get_bone_position();
+				Vector3 r_knee = WorldToScreen(world_position);
+
+				//l_ankle_scale
+				transform = player->get_bone_transform(6);
+				world_position = transform->get_bone_position();
+				Vector3 l_ankle_scale = WorldToScreen(world_position);
+
+				//r_ankle_scale
+				transform = player->get_bone_transform(17);
+				world_position = transform->get_bone_position();
+				Vector3 r_ankle_scale = WorldToScreen(world_position);
+
+				//r_foot
+				transform = player->get_bone_transform(15);
+				world_position = transform->get_bone_position();
+				Vector3 r_foot = WorldToScreen(world_position);
+
+				//l_foot
+				transform = player->get_bone_transform(4);
+				world_position = transform->get_bone_position();
+				Vector3 l_foot = WorldToScreen(world_position);
+
+				//r_upperarm
+				transform = player->get_bone_transform(55);
+				world_position = transform->get_bone_position();
+				Vector3 r_upperarm = WorldToScreen(world_position);
+
+				//l_upperarm
+				transform = player->get_bone_transform(24);
+				world_position = transform->get_bone_position();
+				Vector3 l_upperarm = WorldToScreen(world_position);
+
+				//r_forearm
+				transform = player->get_bone_transform(56);
+				world_position = transform->get_bone_position();
+				Vector3 r_forearm = WorldToScreen(world_position);
+
+				//l_forearm
+				transform = player->get_bone_transform(25);
+				world_position = transform->get_bone_position();
+				Vector3 l_forearm = WorldToScreen(world_position);
+
+				//r_hip
+				transform = player->get_bone_transform(13);
+				world_position = transform->get_bone_position();
+				Vector3 r_hip = WorldToScreen(world_position);
+
+				//l_knee
+				transform = player->get_bone_transform(2);
+				world_position = transform->get_bone_position();
+				Vector3 l_knee = WorldToScreen(world_position);
+
+				//l_hand
+				transform = player->get_bone_transform(26);
+				world_position = transform->get_bone_position();
+				Vector3 l_hand = WorldToScreen(world_position);
+
+				//r_hand
+				transform = player->get_bone_transform(57);
+				world_position = transform->get_bone_position();
+				Vector3 r_hand = WorldToScreen(world_position);
+
+				if (jaw.y >= 1080 || jaw.x >= 1920 || jaw.x <= 0 || jaw.y <= 0) return;
+				if (spine4.y >= 1080 || spine4.x >= 1920 || spine4.x <= 0 || spine4.y <= 0) return;
+				if (spine4.y >= 1080 || spine4.x >= 1920 || spine4.x <= 0 || spine4.y <= 0) return;
+				if (spine4.y >= 1080 || spine4.x >= 1920 || spine4.x <= 0 || spine4.y <= 0) return;
+				if (l_upperarm.y >= 1080 || l_upperarm.x >= 1920 || l_upperarm.x <= 0 || l_upperarm.y <= 0) return;
+				if (r_upperarm.y >= 1080 || r_upperarm.x >= 1920 || r_upperarm.x <= 0 || r_upperarm.y <= 0) return;
+				if (spine3.y >= 1080 || spine3.x >= 1920 || spine3.x <= 0 || spine3.y <= 0) return;
+				if (pelvis.y >= 1080 || pelvis.x >= 1920 || pelvis.x <= 0 || pelvis.y <= 0) return;
+				if (pelvis.y >= 1080 || pelvis.x >= 1920 || pelvis.x <= 0 || pelvis.y <= 0) return;
+				if (l_knee.y >= 1080 || l_knee.x >= 1920 || l_knee.x <= 0 || l_knee.y <= 0) return;
+				if (r_knee.y >= 1080 || r_knee.x >= 1920 || r_knee.x <= 0 || r_knee.y <= 0) return;
+				if (l_hand.y >= 1080 || l_hand.x >= 1920 || l_hand.x <= 0 || l_hand.y <= 0) return;
+				if (r_hand.y >= 1080 || r_hand.x >= 1920 || r_hand.x <= 0 || r_hand.y <= 0) return;
+				if (r_ankle_scale.y >= 1080 || r_ankle_scale.x >= 1920 || r_ankle_scale.x <= 0 || r_ankle_scale.y <= 0) return;
+				if (l_ankle_scale.y >= 1080 || l_ankle_scale.x >= 1920 || l_ankle_scale.x <= 0 || l_ankle_scale.y <= 0) return;
+
+				pelvis.y += 0.2;
+				l_hip.y += 0.2;
+
+				gui::line(Vector2(jaw.x, jaw.y), Vector2(spine4.x, spine4.y), health_color);
+				gui::line(Vector2(spine4.x, spine4.y), Vector2(spine3.x, spine3.y), health_color);
+				gui::line(Vector2(spine4.x, spine4.y), Vector2(l_upperarm.x, l_upperarm.y), health_color);
+				gui::line(Vector2(spine4.x, spine4.y), Vector2(r_upperarm.x, r_upperarm.y), health_color);
+				gui::line(Vector2(l_upperarm.x, l_upperarm.y), Vector2(l_forearm.x, l_forearm.y), health_color);
+				gui::line(Vector2(r_upperarm.x, r_upperarm.y), Vector2(r_forearm.x, r_forearm.y), health_color);
+				gui::line(Vector2(l_forearm.x, l_forearm.y), Vector2(l_hand.x, l_hand.y), health_color);
+				gui::line(Vector2(r_forearm.x, r_forearm.y), Vector2(r_hand.x, r_hand.y), health_color);
+				gui::line(Vector2(spine3.x, spine3.y), Vector2(pelvis.x, pelvis.y), health_color);
+
+				gui::line(Vector2(l_hip.x, l_hip.y), Vector2(l_knee.x, l_knee.y), health_color);
+				gui::line(Vector2(pelvis.x, pelvis.y), Vector2(r_knee.x, r_knee.y), health_color);
+
+				gui::line(Vector2(l_knee.x, l_knee.y), Vector2(l_ankle_scale.x, l_ankle_scale.y), health_color);
+				gui::line(Vector2(r_knee.x, r_knee.y), Vector2(r_ankle_scale.x, r_ankle_scale.y), health_color);
+
+				//gui::line(Vector2(l_ankle_scale.x, l_ankle_scale.y), Vector2(l_foot.x, l_foot.y), health_color);
+				gui::line(Vector2(r_ankle_scale.x, r_ankle_scale.y), Vector2(r_foot.x, r_foot.y), health_color);
+
+
+				//HANDS??
 			}
 		}
 	}

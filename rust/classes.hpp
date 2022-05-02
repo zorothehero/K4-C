@@ -620,6 +620,18 @@ public:
 		}
 	}
 
+	void set_repeat_delay(float r) {
+		__try
+		{
+			*reinterpret_cast<float*>((uintptr_t)this + repeatDelay) = r;
+			return;
+		}
+		__except (true)
+		{
+			//printf(_("Exception occured in %s!\n"), __FUNCTION__);
+		}
+	}
+
 	float get_reload_time() {
 		__try
 		{
@@ -814,6 +826,13 @@ public:
 	float& projectileVelocityScale()
 	{
 		return *reinterpret_cast<float*>((uintptr_t)this + projectileVelocityScale_addr);
+	}
+
+	void SetProjectileVelocityScale(float r)
+	{
+		__try {
+			*reinterpret_cast<float*>((uintptr_t)this + projectileVelocityScale_addr) = r;
+		} __except(true) {}
 	}
 
 	void set_current_velocity(Vector3 position)
@@ -1161,7 +1180,7 @@ public:
 		bool zooming = false;
 
 
-		if (settings::misc::zoomtoggle || unity::GetKey((rust::classes::KeyCode)settings::keybind::zoom)) {
+		if (settings::misc::zoomtoggle && unity::GetKey((rust::classes::KeyCode)settings::keybind::zoom)) {
 			zooming = true;
 		}
 		else {

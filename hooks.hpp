@@ -481,6 +481,17 @@ namespace hooks {
 			if (!settings::weapon::hitbox_override && !settings::weapon::random_hitbox)
 				break;
 
+			/*
+StringPool::Get(xorstr_("head")) = 698017942
+StringPool::Get(xorstr_("pelvis")) = 2811218643
+StringPool::Get(xorstr_("r_hip")) = 2331610670
+StringPool::Get(xorstr_("r_foot")) = 920055401
+StringPool::Get(xorstr_("spine1")) = 3771021956
+StringPool::Get(xorstr_("l_hand")) = 736328754
+StringPool::Get(xorstr_("r_upperarm")) = 3901657145
+StringPool::Get(xorstr_("l_knee")) = 3892428003
+StringPool::Get(xorstr_("spine4")) = 827230707
+*/
 
 			if (!target.is_heli && settings::weapon::hitbox_override) {
 				attack->hitBone = 698017942;
@@ -489,7 +500,7 @@ namespace hooks {
 				attack->hitNormalLocal = { 0, -1, 0 };
 			}
 			else if (!target.is_heli && settings::weapon::random_hitbox) {
-				switch (my_rand() % 4) {
+				switch (my_rand() % 10) {
 				case 0: // Head
 					attack->hitBone = 698017942;
 					attack->hitPartID = 2173623152;
@@ -504,6 +515,30 @@ namespace hooks {
 					break;
 				case 3: // RHand
 					attack->hitBone = 102231371;
+					attack->hitPartID = 1750816991;
+					break;
+				case 4: // pelvis
+					attack->hitBone = 2811218643;
+					attack->hitPartID = 1750816991;
+					break;
+				case 5: // r_hip
+					attack->hitBone = 2331610670;
+					attack->hitPartID = 1750816991;
+					break;
+				case 6: // r_foot
+					attack->hitBone = 920055401;
+					attack->hitPartID = 1750816991;
+					break;
+				case 7: // spine1
+					attack->hitBone = 3771021956;
+					attack->hitPartID = 1750816991;
+					break;
+				case 8: // l_upperarm
+					attack->hitBone = 3901657145;
+					attack->hitPartID = 1750816991;
+					break;
+				case 9: // l_knee
+					attack->hitBone = 3892428003;
 					attack->hitPartID = 1750816991;
 					break;
 				}
@@ -709,6 +744,10 @@ namespace hooks {
 				set_onLadder(model_state, true);
 			}
 		}
+
+		if (settings::misc::interactive_debug)
+			model_state->set_flag(rust::classes::ModelState_Flag::Mounted);
+
 		model_state->remove_flag(rust::classes::ModelState_Flag::Flying);
 
 		if (settings::misc::always_sprint) {
@@ -738,6 +777,8 @@ namespace hooks {
 			auto name = wpn->get_weapon_name();
 			if (LI_FIND(wcscmp)(name, _(L"Assault Rifle")) == 0)
 				reloadtime = 4.4f;
+			if (LI_FIND(wcscmp)(name, _(L"Assault Rifle - ICE")) == 0)
+				reloadtime = 4.4f;
 			//if (LI_FIND(wcscmp)(name, _(L"Bolt Action Rifle")) == 0)
 			//	reloadtime = 5.f;
 			if (LI_FIND(wcscmp)(name, _(L"Crossbow")) == 0)
@@ -750,8 +791,8 @@ namespace hooks {
 				reloadtime = 4.f;
 			if (LI_FIND(wcscmp)(name, _(L"M249")) == 0)
 				reloadtime = 7.5f;
-			//if (LI_FIND(wcscmp)(name, _(L"L96 Rifle")) == 0)
-			//	reloadtime = 3.f;
+			////if (LI_FIND(wcscmp)(name, _(L"L96 Rifle")) == 0)
+			////	reloadtime = 3.f;
 			if (LI_FIND(wcscmp)(name, _(L"M39 Rifle")) == 0)
 				reloadtime = 3.25f;
 			if (LI_FIND(wcscmp)(name, _(L"M92 Pistol")) == 0)
@@ -760,8 +801,8 @@ namespace hooks {
 				reloadtime = 4.f;
 			if (LI_FIND(wcscmp)(name, _(L"Nailgun")) == 0)
 				reloadtime = 3.1f;
-			//if (LI_FIND(wcscmp)(name, _(L"Pump Shotgun")) == 0)
-			//	reloadtime = 5.5f;
+			////if (LI_FIND(wcscmp)(name, _(L"Pump Shotgun")) == 0)
+			////	reloadtime = 5.5f;
 			if (LI_FIND(wcscmp)(name, _(L"Python Revolver")) == 0)
 				reloadtime = 3.75f;
 			if (LI_FIND(wcscmp)(name, _(L"Revolver")) == 0)
@@ -774,6 +815,8 @@ namespace hooks {
 			//	reloadtime = 5.8f;
 			if (LI_FIND(wcscmp)(name, _(L"Thompson")) == 0)
 				reloadtime = 4.f;
+
+			esp::rl_time = reloadtime;
 
 			if (misc::time_since_last_shot > reloadtime - 0.2f //-10% for faster reloads than normal >:)
 				&& !misc::did_reload)
@@ -1052,12 +1095,27 @@ namespace hooks {
 
 				float mm_eye = ((0.01f + ((settings::desyncTime + 2.f / 60.f + 0.125f) * baseplayer->max_velocity())));
 				float time = get_fixedTime();
-				if (esp::best_target.player && held)
+				if (esp::best_target.player && held && wpn)
 				{
 					Vector3 target = esp::best_target.player->get_bone_transform(48)->get_bone_position();
 					Sphere(target, 0.05, col(0.8, 0.9, 0.3, 1), 0.05f, 10.f);
-					auto mag = *reinterpret_cast<uintptr_t*>((uintptr_t)held + primaryMagazine);
-					auto mag_ammo = *reinterpret_cast<int*>((uintptr_t)mag + 0x1C); //0x1C = public int contents;
+					
+					auto getammo = [&](base_projectile* held)
+					{
+						__try {
+							if (held)
+							{
+								auto mag = *reinterpret_cast<uintptr_t*>((uintptr_t)held + primaryMagazine);
+								return *reinterpret_cast<int*>((uintptr_t)mag + 0x1C); //0x1C = public int contents;
+							}
+						}
+						__except (true) {
+							return 0;
+						}
+					};
+
+					auto mag_ammo = getammo(held);
+
 					if (settings::weapon::manipulator
 						&& ((unity::GetKey(rust::classes::KeyCode(settings::keybind::manipulator)))
 							|| misc::manipulate_vis))
@@ -1093,7 +1151,7 @@ namespace hooks {
 							updateammodisplay((uintptr_t)held);
 							shot_fired((uintptr_t)held);
 							did_attack_client_side((uintptr_t)held);
-							*reinterpret_cast<int*>((uintptr_t)mag + 0x1C) = (mag_ammo - 1);
+							*reinterpret_cast<int*>((uintptr_t) * reinterpret_cast<uintptr_t*>((uintptr_t)held + primaryMagazine) + 0x1C) = (mag_ammo - 1);
 							baseplayer->send_client_tick();
 						}
 						else if (!baseplayer->is_visible(baseplayer->get_bone_transform(48)->get_bone_position(), target)
@@ -1290,12 +1348,10 @@ namespace hooks {
 										break;
 									default:
 										if (settings::weapon::fast_bullet)
-										{
 											if (item_id != 1318558775)
-												baseprojectile->projectileVelocityScale() = 1.49f;
-											else
-												baseprojectile->projectileVelocityScale() = 1.2f;
-										}
+												baseprojectile->SetProjectileVelocityScale(1.49f);
+										if (settings::weapon::rapidfire)
+											baseprojectile->set_repeat_delay(0.02f);
 										//if (settings::weapon::ultraBullet)
 										//	baseprojectile->projectileVelocityScale() = 10.f; //????????????????????????????
 										if (settings::weapon::automatic)
