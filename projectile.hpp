@@ -108,7 +108,7 @@ class Projectile {
 public:
 	void initialVelocity(Vector3 d) { safe_write(this + O::Projectile::initialVelocity, d, Vector3); }
 	Vector3 initialVelocity() { return safe_read(this + O::Projectile::initialVelocity, Vector3); }
-
+	bool authoritative() { return safe_read(this + isAuthoritative, bool); }
 	Vector3 sentPosition() { return safe_read(this + O::Projectile::sentPosition, Vector3); }
 	void sentPosition(Vector3 d) { safe_write(this + O::Projectile::sentPosition, d, Vector3); }
 

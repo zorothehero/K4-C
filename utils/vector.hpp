@@ -859,7 +859,14 @@ public:
 
 		return false;
 	}
-
+	Vector3 MultiplyPoint3x4(Vector3 point)
+	{
+		Vector3 result;
+		result.x = m[0][0] * point.x + m[0][1] * point.y + m[0][2] * point.z + m[0][3];
+		result.y = m[1][0] * point.x + m[1][1] * point.y + m[1][2] * point.z + m[1][3];
+		result.z = m[2][0] * point.x + m[2][1] * point.y + m[2][2] * point.z + m[2][3];
+		return result;
+	}
 	Vector3 operator*(const Vector3& vec) {
 		VMatrix m;
 

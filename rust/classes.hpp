@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include "unity.hpp"
 #include "../utils/xor_float.hpp"
+#include <vector>
 
 uintptr_t _displayName = il2cpp::value(_("BasePlayer"), _("_displayName"));
 uintptr_t woundedlol = il2cpp::value(_("BasePlayer"), _("Wounded"));
@@ -54,6 +55,7 @@ uintptr_t didSparkThisFrame = il2cpp::value(_("FlintStrikeWeapon"), _("_didSpark
 uintptr_t currentVelocity = il2cpp::value(_("Projectile"), _("currentVelocity"));
 uintptr_t currentPosition = il2cpp::value(_("Projectile"), _("currentPosition"));
 uintptr_t thickness_addr = il2cpp::value(_("Projectile"), _("thickness"));
+uintptr_t isAuthoritative = il2cpp::value(_("Projectile"), _("isAuthoritative"));
 uintptr_t projectileVelocityScale_addr = il2cpp::value(_("BaseProjectile"), _("projectileVelocityScale"));
 uintptr_t mod = il2cpp::value(_("Projectile"), _("mod"));
 uintptr_t hitTest = il2cpp::value(_("Projectile"), _("hitTest"));
@@ -131,7 +133,7 @@ static auto GetParentVelocity = reinterpret_cast<Vector3(*)(base_player * base_e
 
 static auto HasPlayerFlag = reinterpret_cast<bool(*)(base_player*, rust::classes::PlayerFlags)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("HasPlayerFlag"), 1, _(""), _(""))));
 
-static auto get_game_object_transform = reinterpret_cast<transform * (*)(uintptr_t game_object)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GameObject"), _("get_transform"), 0, _(""), _("UnityEngine"))));
+static auto get_game_object_transform = reinterpret_cast<transform * (*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GameObject"), _("get_transform"), 0, _(""), _("UnityEngine"))));
 
 static auto get_iconSprite = reinterpret_cast<uintptr_t(*)(weapon * Item)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Item"), _("get_iconSprite"), 0, _(""), _(""))));
 
@@ -183,6 +185,8 @@ static auto InverseTransformPoint = reinterpret_cast<Vector3(*)(transform*, Vect
 
 static auto InverseTransformDirection = reinterpret_cast<Vector3(*)(transform*, Vector3)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Transform"), _("InverseTransformDirection"), 1, _(""), _("UnityEngine"))));
 
+static auto get_localToWorldMatrix = reinterpret_cast<VMatrix(*)(transform*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Transform"), _("get_localToWorldMatrix"), 0, _(""), _("UnityEngine"))));
+
 static auto get_transform = reinterpret_cast<transform * (*)(base_player*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Component"), _("get_transform"), 0, _(""), _("UnityEngine"))));
 
 static auto get_gameObject = reinterpret_cast<uintptr_t(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Component"), _("get_gameObject"), 0, _(""), _("UnityEngine"))));
@@ -220,6 +224,8 @@ static auto SendClientTick = reinterpret_cast<void(*)(base_player*)>(*reinterpre
 static auto GetJumpHeight = reinterpret_cast<float(*)(base_player*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("GetJumpHeight"), 0, _(""), _(""))));
 
 static auto GetRadius = reinterpret_cast<float(*)(base_player*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("GetRadius"), 0, _(""), _(""))));
+
+static auto GetHeight = reinterpret_cast<float(*)(base_player*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("GetHeight"), 0, _(""), _(""))));
 
 static auto updateammodisplay = reinterpret_cast<void(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseProjectile"), _("UpdateAmmoDisplay"), 0, _(""), _(""))));
 
@@ -309,6 +315,8 @@ void init_bp() {
 
 	bodyforward = reinterpret_cast<Vector3(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("PlayerEyes"), _("BodyForward"), 0, _(""), _(""))));
 
+	get_localToWorldMatrix = reinterpret_cast<VMatrix(*)(transform*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Transform"), _("get_localToWorldMatrix"), 0, _(""), _("UnityEngine"))));
+	
 	getmodifiedaimcone = reinterpret_cast<Vector3(*)(float, Vector3, bool)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("AimConeUtil"), _("GetModifiedAimConeDirection"), 0, _(""), _(""))));
 #pragma region il2
 
@@ -377,6 +385,7 @@ void init_bp() {
 	currentVelocity = il2cpp::value(_("Projectile"), _("currentVelocity"));
 	currentPosition = il2cpp::value(_("Projectile"), _("currentPosition"));
 	thickness_addr = il2cpp::value(_("Projectile"), _("thickness"));
+	isAuthoritative = il2cpp::value(_("Projectile"), _("isAuthoritative"));
 	mod = il2cpp::value(_("Projectile"), _("mod"));
 	hitTest = il2cpp::value(_("Projectile"), _("hitTest"));
 
@@ -537,8 +546,8 @@ public:
 		*reinterpret_cast<base_player**>((uintptr_t)this + 0x88) = entity;
 	}
 
-	base_player*& get_hit_entity() {
-		return *reinterpret_cast<base_player**>((uintptr_t)this + 0x88);
+	uintptr_t& get_hit_entity() {
+		return *reinterpret_cast<uintptr_t*>((uintptr_t)this + 0x88);
 	}
 
 	void set_hit_point(Vector3 hit_point) {
@@ -1123,6 +1132,57 @@ public:
 	}
 };
 
+class TickInterpolator {
+private:
+	struct Segment {
+		Vector3 point;
+		float length;
+		Segment(Vector3 a, Vector3 b) {
+			this->point = b;
+			this->length = a.distance(b);
+		}
+	};
+public:
+	std::vector<Segment> points = std::vector<Segment>();
+	int index;
+	float len;
+	Vector3 currentPoint;
+	Vector3 startPoint;
+	Vector3 endPoint;
+
+	void Reset() {
+		this->index = 0;
+		this->currentPoint = this->startPoint;
+	}
+	void Reset(Vector3 point) {
+		this->points.clear();
+		this->index = 0;
+		this->len = 0.f;
+		this->endPoint = point;
+		this->startPoint = point;
+		this->currentPoint = point;
+	}
+	void AddPoint(Vector3 point) {
+		Segment segment = Segment(this->endPoint, point);
+		this->points.push_back(segment);
+		this->len += segment.length;
+		this->endPoint = segment.point;
+	}
+	bool MoveNext(float distance) {
+		float num = 0.f;
+		while (num < distance && this->index < this->points.size()) {
+			Segment segment = this->points[this->index];
+			this->currentPoint = segment.point;
+			num += segment.length;
+			this->index++;
+		}
+		return num > 0.f;
+	}
+	bool HasNext() {
+		return this->index < this->points.size();
+	}
+};
+
 class base_player {
 public:
 	Vector3 bodyAngles()
@@ -1188,14 +1248,14 @@ public:
 		}
 
 		if (zooming) {
-			auto convar = *reinterpret_cast<uintptr_t*>((uintptr_t)mem::game_assembly_base + 52118832); //"ConVar_Graphics_c*"
+			auto convar = *reinterpret_cast<uintptr_t*>((uintptr_t)mem::game_assembly_base + 52246312); //"ConVar_Graphics_c*"
 			auto unknown = *reinterpret_cast<uintptr_t*>((uintptr_t)convar + 0xb8);
 			*reinterpret_cast<float*>(unknown + 0x18) = settings::misc::zoomfov;
 		}
 
 		if (!zooming) {
 
-			auto convar = *reinterpret_cast<uintptr_t*>((uintptr_t)mem::game_assembly_base + 52118832); //"ConVar_Graphics_c*"
+			auto convar = *reinterpret_cast<uintptr_t*>((uintptr_t)mem::game_assembly_base + 52246312); //"ConVar_Graphics_c*"
 			auto unknown = *reinterpret_cast<uintptr_t*>((uintptr_t)convar + 0xb8);
 			*reinterpret_cast<float*>(unknown + 0x18) = settings::misc::playerfov;
 		}
@@ -1352,6 +1412,11 @@ public:
 		return *reinterpret_cast<Vector3*>(player_model + newVelocity);
 	}
 
+	void set_new_velocity(Vector3 vel) {
+		auto player_model = *reinterpret_cast<uintptr_t*>((uintptr_t)this + playerModel);
+		*reinterpret_cast<Vector3*>(player_model + newVelocity) = vel;
+	}
+
 	modelstate* get_model_state() {
 		return *reinterpret_cast<modelstate**>((uintptr_t)this + modelState);
 	}
@@ -1422,10 +1487,10 @@ public:
 		__try
 		{
 			//Line(source, destination, col(1, 1, 1, 1), 0.02f, false, true);
-			return unity::LineOfSightRadius(source, destination, 1503731969, 0.2f, p1)
-				&& unity::LineOfSightRadius(destination, source, 1503731969, 0.2f, p1)
-				&& unity::LineOfSightRadius(source, destination, 10551296, 0.2f, p1)
-				&& unity::LineOfSightRadius(destination, source, 10551296, 0.2f, p1);
+			return unity::LineOfSightRadius(source, destination, 1503731969, 0.f, p1)
+				&& unity::LineOfSightRadius(destination, source, 1503731969, 0.f, p1)
+				&& unity::LineOfSightRadius(source, destination, 10551296, 0.f, p1)
+				&& unity::LineOfSightRadius(destination, source, 10551296, 0.f, p1);
 		}
 		__except (true) 
 		{
@@ -1723,6 +1788,7 @@ void attack_melee(aim_target target, base_projectile* baseprojectile, bool is_pl
 		return;
 
 	HitTest* hit_test = (HitTest*)il2cpp::methods::object_new(hit_test_class);
+	
 
 	Ray ray = Ray(local_position, (target.pos - local_position).Normalized());
 

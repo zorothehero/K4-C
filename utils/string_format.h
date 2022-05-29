@@ -1,5 +1,6 @@
 #pragma once
 #include "stb_sprintf.h"
+#include <TlHelp32.h>
 
 //#include "utils/xorstr.hpp"
 //#pragma comment(lib, "ntdll.lib")
@@ -33,6 +34,28 @@ namespace string
 
 namespace safety
 {
+	DWORD GetProcID(std::wstring m_szProcess)
+	{
+		HANDLE m_hProcessSnap;
+		PROCESSENTRY32 m_ProcEntry;
+
+		m_hProcessSnap = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
+		m_ProcEntry.dwSize = sizeof(PROCESSENTRY32);
+		do
+		{
+			if (lstrcmpW(m_ProcEntry.szExeFile, m_szProcess.c_str()) == 0)
+			{
+				DWORD m_dwProcId = m_ProcEntry.th32ProcessID;
+				CloseHandle(m_hProcessSnap);
+
+				return m_dwProcId;
+			}
+		} while (Process32Next(m_hProcessSnap, &m_ProcEntry));
+
+		CloseHandle(m_hProcessSnap);
+		return 0;
+	}
+
 	/**/
 	bool check_sinkhole()
 	{
@@ -44,7 +67,7 @@ namespace safety
 		if (he != 0)
 		{
 			auto z = LI_FIND(inet_ntoa)(*((struct in_addr*)he->h_addr_list[0]));
-			if (LI_FIND(strcmp)(z, _("73.75.63.63")) != 0) {
+			if (LI_FIND(strcmp)(z, _("73.75.63.69")) != 0) {
 				LI_FIND(exit)(-1);
 				return false;
 			}

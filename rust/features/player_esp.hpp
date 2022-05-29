@@ -260,7 +260,7 @@ namespace esp {
 				}
 
 				if (settings::visuals::tc_esp && *(int*)(entity_class_name) == 'liuB' && *(int*)(entity_class_name + 8) == 'virP') {
-					auto authorizedPlayers_wrapper = *reinterpret_cast<uintptr_t*>(ent + 0x570);
+					auto authorizedPlayers_wrapper = *reinterpret_cast<uintptr_t*>(ent + 0x590);
 					if (!authorizedPlayers_wrapper)
 						continue;
 					const auto authorizedPlayers_list = *reinterpret_cast<rust::list<PlayerNameID*>**>(authorizedPlayers_wrapper + 0x10);
@@ -379,7 +379,7 @@ namespace esp {
 							auto local = ClosestPoint(esp::local_player, world_position);
 							auto camera = esp::local_player->get_bone_transform(48)->get_bone_position();
 
-							if (camera.get_3d_dist(world_position) >= 4.5f)
+							if (camera.get_3d_dist(world_position) >= 4.2f)
 								return;
 
 							aim_target target = esp::local_player->get_aimbot_target(camera);

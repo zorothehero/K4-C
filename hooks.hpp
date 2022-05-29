@@ -1,6 +1,7 @@
 #pragma once
 #include "memory/il2cpp.hpp"
 #include "settings.hpp"
+#include "mmisc.hpp"
 #include "offsets.h"
 #include <math.h>
 #include "Keybind.h"
@@ -8,6 +9,15 @@
 //#include <vector>
 namespace misc
 {
+	float flyhackDistanceVertical = 0.f;
+	float flyhackDistanceHorizontal = 0.f;
+	float flyhackPauseTime = 0.f;
+	float desyncTimeRaw = 0.f;
+	float desyncTimeClamped = 0.f;
+	float tickDeltaTime = 0.f;
+	TickInterpolator ticks;
+	bool isInAir = false;
+
 	bool manual = false;
 	bool autoshot = false;
 	bool manipulate_vis = false;
@@ -94,10 +104,10 @@ namespace misc
 			if (!ply->is_visible(p, re_p))
 				return false;
 
-			if (!ply->is_visible(p - Vector3(0, 0.1, 0), re_p)) //double check not too low as likes to shoot from just under the ground
+			if (!ply->is_visible(p - Vector3(0, 0.2, 0), re_p)) //double check not too low as likes to shoot from just under the ground
 				return false;
 
-			Sphere(p, 0.05f, col(0.1, 0.3, 0.9, 1), 0.01f, 10);
+			Sphere(p, 0.00f, col(0.1, 0.3, 0.9, 0), 0.00f, 0);
 			if (!ply->is_visible(p, pos))
 				return false;
 
@@ -135,6 +145,122 @@ namespace misc
 		return false;
 	}
 
+	bool TestFlying2(base_player* ply,
+		Vector3 oldPos = Vector3(0,0,0),
+		Vector3 newPos = Vector3(0,0,0),
+		bool verifyGrounded = true)
+	{
+		if (verifyGrounded)
+		{
+			auto extrusion = 2.f;
+			Vector3 vec = (oldPos + newPos) * 0.5f;
+			auto margin = 0.05f;
+			float radius = GetRadius(ply);
+			float height = GetHeight(ply);
+			Vector3 vec2 = vec + Vector3(0.f, radius - extrusion, 0.f);
+			Vector3 vec3 = vec + Vector3(0.f, height - radius, 0.f);
+			float radius2 = radius - margin;
+			isInAir = !unity::CheckCapsule(vec2, vec3, radius2, 1503731969, 1);
+
+			if (isInAir)
+			{
+				bool flag = false;
+				Vector3 vec4 = newPos - oldPos;
+				float num2 = std::fabs(vec4.y);
+				float num3 = vec4.length_2d();
+
+				if (vec4.y >= 0.f)
+				{
+					flag = true;
+					flyhackDistanceVertical += vec4.y;
+				}
+
+				if (num2 < num3)
+				{
+					flag = true;
+					flyhackDistanceHorizontal += num3;
+				}
+
+				if (flag)
+				{
+					float num4 = max((flyhackPauseTime > 0.f ? 10.f : 1.5f), 0.f);
+					float num5 = GetJumpHeight(ply) + num4;
+					if (flyhackDistanceVertical > num5)
+						return true;
+					
+					float num6 = num4;
+					float num7 = 5.f + num6;
+					if (flyhackDistanceHorizontal > num7)
+						return true;
+				}
+			}
+			else
+			{
+				flyhackDistanceVertical = 0.0f;
+				flyhackDistanceHorizontal = 0.0f;
+			}
+		}
+		return false;
+	}
+
+	bool ValidateMove(float deltaTime) {
+		auto lp = esp::local_player;
+		bool result;
+		bool flag = deltaTime > 1.f;
+
+		flyhackPauseTime = max(0.f, flyhackPauseTime - deltaTime);
+		ticks.Reset();
+		auto trans = get_transform(esp::local_player);
+		
+		if (ticks.HasNext()) {
+			bool flag = trans ? !(!trans) : false;
+			VMatrix v; v.matrix_identity();
+			VMatrix matrix4x = flag ? v : get_localToWorldMatrix(trans);
+
+			Vector3 oldPos = flag ? ticks.startPoint :
+				matrix4x.MultiplyPoint3x4(ticks.startPoint);
+			Vector3 vector = flag ? ticks.startPoint :
+				matrix4x.MultiplyPoint3x4(ticks.endPoint);
+			float num = 0.1f;
+			float num2 = 15.0f;
+			num = max(ticks.len / num2, num);
+			while (ticks.MoveNext(num))
+			{
+				vector = (flag ? ticks.currentPoint
+					: matrix4x.MultiplyPoint3x4(ticks.currentPoint));
+
+				TestFlying2(lp, oldPos, vector, true);
+				oldPos = vector;
+			}
+		}
+		return true;
+	}
+
+	void FinalizeTick(float deltatime) {
+		if (esp::local_player->is_sleeping())
+			return;
+		tickDeltaTime += deltatime;
+		bool flag = ticks.startPoint != ticks.endPoint;
+		if (flag) {
+			if (ValidateMove(tickDeltaTime)
+				&& (settings::misc::flyhack_indicator || settings::misc::flyhack_stop)) {
+				//good
+			}
+			else {
+				//bad
+			}
+			settings::vert_flyhack = flyhackDistanceVertical;
+			settings::hor_flyhack = flyhackDistanceHorizontal;
+		}
+		ticks.Reset(get_transform(esp::local_player)->get_bone_position());
+	}
+
+	void ServerUpdate(float deltaTime, base_player* ply) {
+		desyncTimeRaw = max(ply->get_last_sent_tick_time() - deltaTime, 0.f);
+		desyncTimeClamped = max(desyncTimeRaw, 1.f);
+		FinalizeTick(deltaTime);
+	}
+
 	bool just_shot = false;
 	bool did_reload = false;
 	float time_since_last_shot = 0.0f;
@@ -160,6 +286,7 @@ namespace hooks {
 		static auto eokadoattack = reinterpret_cast<void(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("FlintStrikeWeapon"), _("DoAttack"), 0, _(""), _(""))));
 		static auto baseprojectile_launchprojectile = reinterpret_cast<void(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseProjectile"), _("LaunchProjectile"), 0, _(""), _(""))));
 		static auto baseprojectile_createprojectile = reinterpret_cast<uintptr_t(*)(base_projectile*, rust::classes::string, Vector3, Vector3, Vector3)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseProjectile"), _("CreateProjectile"), 0, _(""), _(""))));
+		static auto DoHit = reinterpret_cast<bool (*)(Projectile*, HitTest*, Vector3, Vector3)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Projectile"), _("DoHit"), -1, _(""), _(""))));
 
 		uintptr_t playerprojectileattack;
 		uintptr_t baseprojectilecreateprojectile;
@@ -193,7 +320,7 @@ namespace hooks {
 
 	static auto ServerRPC_int = reinterpret_cast<void (*)(base_projectile*, rust::classes::string funcName, unsigned int arg1, uintptr_t)>(mem::game_assembly_base + offsets::BaseEntity$$ServerRPC_uint_);
 
-	static auto DoHit = reinterpret_cast<bool (*)(base_projectile*, HitTest*, Vector3, Vector3)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Projectile"), _("DoHit"), 4, _(""), _(""))));
+	static auto DoHit = reinterpret_cast<bool (*)(Projectile*, HitTest*, Vector3, Vector3)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Projectile"), _("DoHit"), -1, _(""), _(""))));
 
 	void init_hooks() {
 		orig::IsConnected = reinterpret_cast<bool (*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Client"), _("IsConnected"), 0, _(""), _("Network"))));
@@ -217,6 +344,8 @@ namespace hooks {
 		orig::baseprojectile_launchprojectile = reinterpret_cast<void(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseProjectile"), _("LaunchProjectile"), 0, _(""), _(""))));
 
 		orig::baseprojectile_createprojectile = reinterpret_cast<uintptr_t(*)(base_projectile*, rust::classes::string, Vector3, Vector3, Vector3)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseProjectile"), _("CreateProjectile"), 0, _(""), _(""))));
+
+		orig::DoHit = reinterpret_cast<bool (*)(Projectile*, HitTest*, Vector3, Vector3)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Projectile"), _("DoHit"), -1, _(""), _(""))));
 
 		serverrpc_projecileshoot = rb::pattern::find_rel(
 			_("GameAssembly.dll"), _("4C 8B 0D ? ? ? ? 48 8B 75 28"));
@@ -245,7 +374,7 @@ namespace hooks {
 
 		OnLand = reinterpret_cast<void (*)(base_player*, float fVelocity)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("OnLand"), 1, _("fVelocity"), _(""), 1)));
 
-		DoHit = reinterpret_cast<bool (*)(base_projectile*, HitTest*, Vector3, Vector3)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Projectile"), _("DoHit"), 4, _(""), _(""))));
+		DoHit = reinterpret_cast<bool (*)(Projectile*, HitTest*, Vector3, Vector3)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Projectile"), _("DoHit"), -1, _(""), _(""))));
 	}
 
 	double CalcBulletDrop(double height, double DepthPlayerTarget, float velocity, float gravity) {
@@ -470,7 +599,7 @@ namespace hooks {
 			if (!target.player || !target.network_id)
 				break;
 
-			auto& hit_entity = hit_test->get_hit_entity();
+			auto hit_entity = (base_player*)hit_test->get_hit_entity();
 			if (layer == rust::classes::layer::Player_Server) {
 				if (hit_entity->is_teammate(esp::local_player)) {
 					hit_test->set_ignore_entity(hit_entity);
@@ -735,14 +864,19 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 
 		orig::playerwalkmovement_client_input(player_walk_movement, inputstate, model_state);
 
+		auto loco = esp::local_player;
+		if (loco && !loco->is_sleeping() && settings::desyncTime < 0.f) {
+			misc::cLastTickPos = get_transform(esp::local_player)->get_bone_position();//baseplayer->get_player_eyes()->get_position();
+			misc::ticks.AddPoint(misc::cLastTickPos);
+			misc::ServerUpdate(misc::tickDeltaTime, esp::local_player);
+		}
+
 		set_sprinting(model_state, true);
 
 		flying = player_walk_movement->get_flying();
 
-		if (!keybinds::silentwalkb || unity::GetKey(keybinds::silentwalkk)) {
-			if (settings::misc::silentwalk) {
-				set_onLadder(model_state, true);
-			}
+		if (settings::misc::silentwalk && settings::keybind::silentwalk) {
+			set_onLadder(model_state, true);
 		}
 
 		if (settings::misc::interactive_debug)
@@ -750,9 +884,9 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 
 		model_state->remove_flag(rust::classes::ModelState_Flag::Flying);
 
+		float max_speed = (player_walk_movement->get_swimming() || player_walk_movement->get_ducking() > 0.5) ? 1.7f : 5.5f;
 		if (settings::misc::always_sprint) {
 			Vector3 vel = player_walk_movement->get_TargetMovement();
-			float max_speed = (player_walk_movement->get_swimming() || player_walk_movement->get_ducking() > 0.5) ? 1.7f : 5.5f;
 			if (vel.length() > 0.f) {
 				Vector3 target_vel = Vector3(vel.x / vel.length() * max_speed, vel.y, vel.z / vel.length() * max_speed);
 				player_walk_movement->set_TargetMovement(target_vel);
@@ -824,6 +958,21 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 				hooks::ServerRPC((uintptr_t)held, rust::classes::string(_(L"Reload")));
 				misc::did_reload = true;
 				misc::time_since_last_shot = 0;
+			}
+		}		
+		if (loco)
+		{
+			if(!loco->is_sleeping()){
+				if (settings::misc::flyhack_stop) {
+					if (settings::vert_flyhack > 3.f
+						|| settings::hor_flyhack > 6.5f) {
+						auto closest = ClosestPoint(loco, loco->get_bone_transform(48)->get_bone_position());
+						//auto dir = (esp::local_player->get_player_eyes()->get_position() - closest).Normalized();
+						//auto dir = (esp::local_player->get_player_eyes()->get_position() - misc::cLastTickPos).Normalized();
+						player_walk_movement->set_TargetMovement(Vector3(0, 0, 0));
+						esp::local_player->set_new_velocity(Vector3(0, 0, 0));
+					}
+				}
 			}
 		}
 	}
@@ -923,14 +1072,14 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 			}
 		}
 		orig::baseprojectile_launchprojectile((uintptr_t)p);
-
+		/*
 		if (misc::manual) {
 			auto mag = *reinterpret_cast<uintptr_t*>((uintptr_t)p + primaryMagazine);
 			auto c = *reinterpret_cast<int*>((uintptr_t)mag + 0x1C); //0x1C = public int contents;
 			*reinterpret_cast<int*>((uintptr_t)mag + 0x1C) = (c - 1);
 			misc::manual = false;
 		}
-
+		*/
 		return;
 	}
 
@@ -947,7 +1096,6 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 		if (test)
 		{
 			test = false;
-			MessageBoxA(0, "WORKED", "AZ", 0);
 		}
 
 		//	if (!self->flying()) {
@@ -1001,6 +1149,42 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 		return SendClientTick(ply);
 	}
 
+	bool hk_DoHit(Projectile* p, HitTest* test, Vector3 point, Vector3 normal) {
+		auto hitent = test->get_hit_entity();
+		auto obj = test->get_gameobject();
+
+		if (settings::weapon::pierce) {
+			if (p->authoritative()) {
+				if (hitent) {
+					auto class_name = *(const char**)(*(uintptr_t*)(uintptr_t)hitent + 0x10);
+
+					if (*(int*)(class_name + 4) == 'Carg'
+						|| *(int*)(class_name + 4) == 'Base' //BaseOven
+						|| *(int*)(class_name + 4) == 'Tree'
+						|| *(int*)(class_name + 4) == 'OreR'
+						|| *(int*)(class_name + 4) == 'CH47'
+						|| *(int*)(class_name + 4) == 'Mini'
+						|| *(int*)(class_name + 4) == 'BoxS'
+						|| *(int*)(class_name + 4) == 'Work'
+						|| *(int*)(class_name + 4) == 'Vend'
+						|| *(int*)(class_name + 4) == 'Barr'
+						|| *(int*)(class_name + 4) == 'Buil'
+						|| *(int*)(class_name + 4) == 'Loot'
+						|| *(int*)(class_name + 4) == 'Hack'
+						|| *(int*)(class_name + 4) == 'Reso'
+						|| *(int*)(class_name + 4) == 'Rida'
+						|| *(int*)(class_name + 4) == 'Moto'
+						|| *(int*)(class_name + 4) == 'Scra'
+						|| *(int*)(class_name + 4) == 'Junk'
+						|| *(int*)(class_name + 4) == 'Mini'
+						|| *(int*)(class_name + 4) == 'Wate'
+						|| *(int*)(class_name + 4) == 'RHIB') return false;
+				}
+			}
+		}
+			
+		return orig::DoHit(p, test, point, normal);
+	}
 
 	void hk_baseplayer_ClientInput(base_player* baseplayer, input_state* state) {
 		//__try {
@@ -1025,6 +1209,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 			}
 
 #pragma region static_method_hooks
+			
 			static uintptr_t* serverrpc_projecshoot;
 			if (!serverrpc_projecshoot) {
 				auto method_serverrpc_projecshoot = *reinterpret_cast<uintptr_t*>(hooks::serverrpc_projecileshoot);
@@ -1050,6 +1235,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 					*serverrpc_playerprojectileattack = reinterpret_cast<uintptr_t>(&hooks::hk_serverrpc_playerprojectileattack);
 				}
 			}
+			
 #pragma endregion
 
 			if (baseplayer) {
@@ -1058,8 +1244,6 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 				auto tick_time = baseplayer->get_last_sent_tick_time();
 				settings::desyncTime = (unity::get_realtimesincestartup() - tick_time) - 0.03125 * 3;
 
-				if (settings::desyncTime < 0.f)
-					misc::cLastTickPos = baseplayer->get_player_eyes()->get_position();
 
 				auto wpn = baseplayer->get_active_weapon();
 
@@ -1098,7 +1282,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 				if (esp::best_target.player && held && wpn)
 				{
 					Vector3 target = esp::best_target.player->get_bone_transform(48)->get_bone_position();
-					Sphere(target, 0.05, col(0.8, 0.9, 0.3, 1), 0.05f, 10.f);
+					//Sphere(target, 0.05, col(0.8, 0.9, 0.3, 1), 0.05f, 10.f);
 					
 					auto getammo = [&](base_projectile* held)
 					{
@@ -1126,13 +1310,8 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 								&& held->get_time_since_deploy() > held->get_deploy_delay()
 								&& mag_ammo > 0)
 							{
-								//auto b4 = baseplayer->get_player_eyes()->get_view_offset();
-								//if(misc::best_lean != Vector3(0,0,0))
-								//	baseplayer->get_player_eyes()->set_view_offset(misc::best_lean);
 								hk_LaunchProjectile(held);
-								//*reinterpret_cast<int*>((uintptr_t)mag + 0x1C) = (mag_ammo - 1);
 								baseplayer->send_client_tick();
-								//baseplayer->get_player_eyes()->set_view_offset(b4);
 							}
 					}
 

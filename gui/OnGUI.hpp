@@ -4,7 +4,6 @@
 #include "../settings.hpp"
 #include "../utils/string_format.h"
 
-
 #define rgba(r,g,b,a) gui::Color(r / 255.f, g / 255.f, b / 255.f, a)
 
 namespace gui {
@@ -474,7 +473,7 @@ namespace gui {
 		label = mem::read<uintptr_t>(skin + 0x38);
 
 		//unity::bundle = methods::LoadFromFile(_(L"rust.assets"));
-		unity::bundle_font = methods::LoadFromFile(_(L"C:\\k4"));
+		//unity::bundle_font = methods::LoadFromFile(_(L"C:\\k4"));
 
 		if (unity::bundle)
 		{
@@ -821,6 +820,7 @@ namespace gui {
 					}
 					const float ScreenWidth = 1920;
 					const float ScreenHeight = 1080;
+					const Vector2 screen_center = Vector2(1920 / 2, 1080 / 2);
 
 					if (settings::misc::Crosshair) {
 						//gui::vertical_line(vector2{ (float)(ScreenWidth / 2), (float)(ScreenHeight / 2 + 2) }, 4.f, gui::Color(1, 0, 0, 0.5));
@@ -865,6 +865,36 @@ namespace gui {
 						if (settings::visuals::draw_fov) {
 							esp::draw_target_fov(Vector2(ScreenWidth / 2, ScreenHeight / 2), settings::weapon::aimbotfov);
 						}
+
+						if (settings::misc::flyhack_indicator) {
+							if (settings::vert_flyhack >= 4.f) {
+								Progbar({ screen_center.x - 300, screen_center.y - 500 },
+									{ 600, 5 },
+									settings::vert_flyhack,
+									settings::vert_flyhack);
+							}
+							else {
+								Progbar({ screen_center.x - 300, screen_center.y - 500 },
+									{ 600, 5 },
+									settings::vert_flyhack,
+									3.f);
+							}
+
+							if (settings::hor_flyhack >= 6.5f) {
+								Progbar({ screen_center.x - 300, screen_center.y - 470 },
+									{ 600, 5 },
+									settings::hor_flyhack,
+									settings::hor_flyhack);
+							}
+							else {
+								Progbar({ screen_center.x - 300, screen_center.y - 470 },
+									{ 600, 5 },
+									settings::vert_flyhack,
+									6.5f);
+							}
+
+
+						}
 					}
 
 
@@ -893,7 +923,7 @@ namespace gui {
 
 					//MENU TIME
 
-					gui::Label(rust::classes::Rect{ menu_pos.x + 2.0f + 1, menu_pos.y - 4 + 1, menu_size.x, 30 }, _(L"K4"), gui::Color(1, 1, 1, 1), true, 16);
+					gui::Label(rust::classes::Rect{ menu_pos.x + 2.0f + 1, menu_pos.y - 4 + 1, menu_size.x, 30 }, _(L"RUSTCHE.AT"), gui::Color(1, 1, 1, 1), true, 16);
 
 					menu_pos.y += 30;
 					menu_size.y -= 25;
@@ -941,9 +971,11 @@ namespace gui {
 						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Manipulator"), &settings::weapon::manipulator, weapon_tab, true, &settings::keybind::manipulator);
 						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Double-tap"), &settings::weapon::doubletap, weapon_tab);
 						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Always reload"), &settings::weapon::always_reload, weapon_tab);
+						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Penetrate"), &settings::weapon::pierce, weapon_tab);
 						break;
 					case 1:
 						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Desync indicator"), &settings::visuals::desync_indicator, visual_tab);
+						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Flyhack indicator"), &settings::misc::flyhack_indicator, visual_tab);
 						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Players"), &settings::visuals::player_esp, visual_tab);
 						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Full Box"), &settings::visuals::full_box, visual_tab);
 						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Corner Box"), &settings::visuals::corner_box, visual_tab);
@@ -983,7 +1015,11 @@ namespace gui {
 						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Stashes"), &settings::visuals::stash, other_esp);
 						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Airdrops"), &settings::visuals::airdrops, other_esp);
 						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Traps"), &settings::visuals::traps, other_esp);
-						//button(event_type, menu_pos, pos, mouse_pos, _(L"Toolcupboard Esp"), &settings::visuals::tc_esp, other_esp);
+						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Corpses"), &settings::visuals::corpses, other_esp);
+						//checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Food"), &settings::visuals::food, other_esp);
+						//checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Animals"), &settings::visuals::animal, other_esp);
+						//checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Barrels"), &settings::visuals::barrels, other_esp);
+						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Tool cupboard"), &settings::visuals::tc_esp, other_esp);
 						break;
 					case 3:
 						//checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Player Movement"), &settings::misc::Movement, misc_tab);
@@ -1005,6 +1041,7 @@ namespace gui {
 						pos.y = 0; //?
 
 						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Admin mode"), &settings::misc::admin_mode, misc_tab);
+						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Flyhack stop"), &settings::misc::flyhack_stop, misc_tab);
 						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"No collisions"), &settings::misc::no_playercollision, misc_tab);
 						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Interactive debug"), &settings::misc::interactive_debug, misc_tab);
 						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Instant med"), &settings::misc::instant_med, misc_tab);
@@ -1209,8 +1246,8 @@ namespace esp
 
 									gui::methods::set_color({ 1, 1, 1, 1 });
 									gui::methods::DrawTexture({ 663 + info_y, (unity::get_height() * 0.8f) + 5, rect.wid / 3.0f, rect.hei / 3.0f }, texture);
-									gui::Label(rust::classes::Rect{ x + 2.0f + 1, info_y - 4 + 13 + 1 + (unity::get_height() * 0.75f), width - 10, height / current_item }, item_name, gui::Color(0, 0, 0, 120), true, 12);
-									gui::Label(rust::classes::Rect{ x + 2.0f, info_y - 4 + 13 + (unity::get_height() * 0.75f), width - 10, height / current_item }, item_name, gui::Color(255, 255, 255, 220), true, 12);
+									//gui::Label(rust::classes::Rect{ x + 2.0f + 1, info_y - 4 + 13 + 1 + (unity::get_height() * 0.75f), width - 10, height / current_item }, item_name, gui::Color(0, 0, 0, 120), true, 12);
+									//gui::Label(rust::classes::Rect{ x + 2.0f, info_y - 4 + 13 + (unity::get_height() * 0.75f), width - 10, height / current_item }, item_name, gui::Color(255, 255, 255, 220), true, 12);
 
 									/*
 									gui::fill_box({ 20, 400, 200, 200 }, { 0, 0, 0, 0.12 });
@@ -1222,7 +1259,7 @@ namespace esp
 									gui::Label(rust::classes::Rect{ 20, 370 + info_y, 200, 200 }, il2cpp::methods::newstring(string::format(("(x%d) %ls"), getam, item_name)), gui::Color(1, 1, 1, 1), true, 9);
 									gui::Label(rust::classes::Rect{ 20, 370 + info_y, 200, 200 }, il2cpp::methods::newstring(string::format(("(x%d) %ls"), getam, item_name)), gui::Color(255, 255, 255, 220), true, 9);
 									*/
-									info_y += 15;
+									info_y += 95;
 								}
 							}
 						}
@@ -1307,7 +1344,7 @@ namespace esp
 			case 3: { b += 0.0004f; g -= 0.0004f; if (b >= 1) cases = 0; break; }
 			default: { r = 1.00f; g = 0.00f; b = 1.00f; break; }
 			}
-			auto _multiMesh = mem::read<uintptr_t>(player->get_player_model() + 0x2C0); //SkinnedMultiMesh _multiMesh;
+			auto _multiMesh = mem::read<uintptr_t>(player->get_player_model() + 0x2D0); //SkinnedMultiMesh _multiMesh;
 			if (_multiMesh) {
 				auto render = get_Renderers(_multiMesh);
 

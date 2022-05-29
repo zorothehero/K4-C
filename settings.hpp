@@ -1,8 +1,9 @@
 #pragma once
-
 namespace settings {
 	float desyncTime = 0.0f;
 	float time_since_last_shot = 0.0f;
+	float hor_flyhack = 0.f;
+	float vert_flyhack = 0.f;
 
 	namespace keybind {
 		int psilent = 0;
@@ -21,44 +22,51 @@ namespace settings {
 	namespace weapon {
 		bool hitbox_override  = false;
 		bool magic_bullet  = false;
+		bool pierce  = false;
 		bool rapidfire = false;
 		float aimbotfov = 500;
 		float thickness = 0.5;
 		bool random_hitbox  = false;
 		bool silent_melee = false;
-		bool weapon_removals  = true;
+		bool weapon_removals  = false;
 		bool always_shoot  = false;
-		bool psilent = true;
-		bool psilentvis = true;
+		bool psilent = false;
+		bool psilentvis = false;
 		bool thick_bullet = false;
 		bool legit_recoil = false;
 		bool fast_bullet = false;
 		bool bullet_tp = false;
 		bool ultraBullet = false;
-		bool norecoil = true;
-		bool nospread = true;
-		bool nosway = true;
+		bool norecoil = false;
+		bool nospread = false;
+		bool nosway = false;
 		bool automatic = false;
 		bool mods = false;
 
-		bool manipulator = true;
-		bool doubletap = true;
-		bool always_reload = true;
+		bool manipulator = false;
+		bool doubletap = false;
+		bool always_reload = false;
 		bool autoshoot = false;
 	}
 
 	namespace visuals {
-		bool player_esp = true;
-		bool draw_fov = true;
-		bool rainbow_chams = true;
+		bool berry = false;
+		bool food = false;
+		bool animal = false;
+		bool lootesp = false;
+		bool card = false;
+		bool corpses = false;
+		bool player_esp = false;
+		bool draw_fov = false;
+		bool rainbow_chams = false;
 		bool hotbar_esp = false;
-		bool chams = true;
-		bool boxesp = true;
+		bool chams = false;
+		bool boxesp = false;
 		bool spriteitem = false;
 		bool snaplines = false;
 		bool show_fov = false;
 		bool cancer = false;
-		bool misc_esp  = true;
+		bool misc_esp  = false;
 		bool sleeper_esp  = false;
 		bool heli_esp = false;
 		bool outline = false;
@@ -77,7 +85,7 @@ namespace settings {
 		float nameGcolor = 130.f / 255.f;
 		float nameBcolor = 109.f / 255.f;
 		bool stash = false;
-		bool materials = true;
+		bool materials = false;
 		bool sulfur_ore = false;
 		bool stone_ore = false;
 		bool metal_ore = false;
@@ -88,51 +96,53 @@ namespace settings {
 		bool vehicles = false;
 		bool airdrops = false;
 		bool cloth = false;
-		bool corpses = false;
+		bool barrels = false;
 		bool tc_esp = false;
 		bool raid_esp = false;
 		bool hackable_crate_esp = false;
 		bool full_box = false;
-		bool corner_box = true;
+		bool corner_box = false;
 		bool bottomhealth = false;
 		bool steamid = false;
-		bool sidehealth = true;
-		bool skeleton = true;
-		bool nameesp = true;
+		bool sidehealth = false;
+		bool skeleton = false;
+		bool nameesp = false;
 		bool woundedflag = false;
-		bool distance = true;
+		bool distance = false;
 
 		bool weaponesp = false;
 		bool vehicle = false;
 
-		bool desync_indicator = true;
+		bool desync_indicator = false;
 	}
 
 	namespace misc {
+		bool flyhack_indicator = false;
+		bool flyhack_stop = false;
 		float    m_idebugcam_speed = 1.f;
 		float code_lock_code = 1000;
-		bool playerfovtoggle = true;
+		bool playerfovtoggle = false;
 		float playerfov = 90;
 		bool zoomtoggle = false;
 		bool desync = false;
 		float zoomfov = 10;
-		bool Movement = true;
+		bool Movement = false;
 		bool eyeoffset = false;
 		float playereyes = 1.4;
 		bool spinbot  = false;
 		bool always_shoot = false;
 		bool attack_on_mountables = false;
 		bool speedhack = false;
-		bool hitsound = true;
+		bool hitsound = false;
 		float speedhackspeed = 5;
 		bool TakeFallDamage = false;
 		bool silent_farm = false;
 		bool auto_lock = false;
-		bool always_sprint = true;
-		bool gravity = true;
+		bool always_sprint = false;
+		bool gravity = false;
 		bool infinite_jump = false;
 		bool fake_lag = false;
-		bool brightnight = true;
+		bool brightnight = false;
 		float staramount = 350;
 		bool admin_mode = false;
 		bool view_offset  = false;
@@ -140,7 +150,7 @@ namespace settings {
 		bool instant_revive = false;
 		bool no_playercollision = false;
 		bool spiderman = false;
-		bool Crosshair = true;
+		bool Crosshair = false;
 		bool silentwalk = false;
 		bool interactive_debug = false;
 		bool trollface = false;
