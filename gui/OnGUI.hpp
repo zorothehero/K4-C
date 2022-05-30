@@ -1364,7 +1364,7 @@ namespace esp
 							if (settings::visuals::rainbow_chams) {
 								SetColor(material, _(L"_Color"), col(r, g, b, 1));
 							}
-							else if (get_IsNpc(player->get_player_model()) && unity::is_visible(local_player->get_bone_transform((int)rust::classes::Bone_List::head)->get_bone_position(), player->get_bone_transform((int)rust::classes::Bone_List::head)->get_bone_position())) {
+							else if (get_IsNpc(player->get_player_model()) && unity::is_visible(local_player->get_bone_transform((int)rust::classes::Bone_List::head)->get_bone_position(), player->get_bone_transform((int)rust::classes::Bone_List::head)->get_bone_position(), (uintptr_t)esp::local_player)) {
 								SetColor(material, _(L"_Color"), col(0, 0.5, 1, 0.5));
 							}
 							else if (get_IsNpc(player->get_player_model())) {
@@ -1376,7 +1376,7 @@ namespace esp
 							else if (player->is_teammate(local_player)) {
 								SetColor(material, _(L"_Color"), col(0, 1, 1, 1));
 							}
-							else if (unity::is_visible(local_player->get_bone_transform((int)rust::classes::Bone_List::head)->get_bone_position(), player->get_bone_transform((int)rust::classes::Bone_List::head)->get_bone_position())) {
+							else if (unity::is_visible(local_player->get_bone_transform((int)rust::classes::Bone_List::head)->get_bone_position(), player->get_bone_transform((int)rust::classes::Bone_List::head)->get_bone_position(), (uintptr_t)esp::local_player)) {
 								SetColor(material, _(L"_Color"), col(settings::visuals::VisRcolor, settings::visuals::VisGcolor, settings::visuals::VisBcolor, 1));
 							}
 							else {
@@ -1518,8 +1518,16 @@ namespace esp
 		};
 
 		if (get_bounds(bounds, 4)) {
-			if (!is_visible)
-				is_visible = unity::is_visible(camera_position, bones[16].world_position);
+			//if (!is_visible)
+			__try
+			{
+				for (auto& [bone_screen, bone_idx, on_screen, world_position, visible] : bones) {
+					if (is_visible) break;
+					is_visible = unity::is_visible(camera_position, world_position, (uintptr_t)esp::local_player);
+				}
+			}
+			__except (true) { is_visible = false; }
+			//is_visible = unity::is_visible(camera_position, bones[47].world_position, (uintptr_t)esp::local_player);
 
 			gui::Color clr = !is_teammate ? (is_visible ? visible_color : invisible_color) : teammate_color;
 			if (HasPlayerFlag(player, rust::classes::PlayerFlags::SafeZone))
@@ -1547,7 +1555,7 @@ namespace esp
 			wchar_t* name = player->get_player_name();
 			auto player_weapon = player->get_active_weapon();
 
-			if (settings::visuals::full_box && settings::visuals::boxesp) {
+			if (settings::visuals::full_box) {
 				//full box
 				gui::outline_box(Vector2{ bounds.left - 1, bounds.top - 1 }, Vector2{ box_width + 2, box_height + 2 }, gui::Color(0, 0, 0, 120));
 				gui::outline_box(Vector2{ bounds.left, bounds.top }, Vector2{ box_width, box_height }, clr);
@@ -1555,7 +1563,7 @@ namespace esp
 				//full box
 			}
 
-			if (settings::visuals::corner_box && settings::visuals::boxesp) {
+			if (settings::visuals::corner_box) {
 				//corner box
 				auto wid = box_width / 4;
 				gui::horizontal_line(Vector2{ bounds.left, bounds.top }, wid, clr); //tl

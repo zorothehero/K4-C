@@ -292,7 +292,7 @@ public:
 		auto target = esp::local_player->get_aimbot_target(point, maxdist);
 
 		if (get_isAlive((base_projectile*)pr) && target.player && !target.teammate) {
-			if (!unity::is_visible(target.pos, point), 0.5f) {
+			if (!unity::is_visible(target.pos, point, (uintptr_t)esp::local_player), 0.5f) {
 				return false;
 			}
 

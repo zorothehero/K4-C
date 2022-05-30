@@ -28,7 +28,7 @@ namespace unity {
 
 	//static auto LineOfSightRadius = reinterpret_cast<bool(*)(Vector3, Vector3, int, float, float)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GamePhysics"), _("LineOfSightRadius"), -1, _(""), _(""))));
 
-	static auto LineOfSightRadius = reinterpret_cast<bool(*)(Vector3, Vector3, int, float, float)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GamePhysics"), _("LineOfSightRadius"), -1, _(""), _(""))));
+	static auto LineOfSightRadius = reinterpret_cast<bool(*)(Vector3, Vector3, int, float, float, uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GamePhysics"), _("LineOfSightRadius"), -1, _(""), _(""))));
 
 	static auto LineOfSightInternal = reinterpret_cast<bool(*)(Vector3, Vector3, int, float, float, float)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GamePhysics"), _("LineOfSightInternal"), -1, _(""), _(""))));
 
@@ -74,7 +74,7 @@ namespace unity {
 
 		LineOfSight = reinterpret_cast<bool(*)(Vector3, Vector3, int, float)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GamePhysics"), _("LineOfSight"), -1, _(""), _(""))));
 
-		LineOfSightRadius = reinterpret_cast<bool(*)(Vector3, Vector3, int, float, float)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GamePhysics"), _("LineOfSightRadius"), -1, _(""), _(""))));
+		LineOfSightRadius = reinterpret_cast<bool(*)(Vector3, Vector3, int, float, float, uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GamePhysics"), _("LineOfSightRadius"), -1, _(""), _(""))));
 
 		GetKey = reinterpret_cast<bool(*)(rust::classes::KeyCode)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Input"), _("GetKeyInt"), 1, _(""), _("UnityEngine"))));
 
@@ -99,11 +99,11 @@ namespace unity {
 		return LineOfSightRadius(source, destination, rust::classes::Layers(10551296), radius, 0, entity) && LineOfSightRadius(destination, source, rust::classes::Layers(10551296), radius, 0, entity);
 	}
 */
-	bool is_visible(Vector3 source, Vector3 destination, float p1 = 0.f) {
-		return LineOfSightRadius(source, destination, 1503731969, 0.5f, p1)
-			&& LineOfSightRadius(destination, source, 1503731969, 0.5f, p1)
-			&& LineOfSightRadius(source, destination, 10551296, 0.5f, p1)
-			&& LineOfSightRadius(destination, source, 10551296, 0.5f, p1);
+	bool is_visible(Vector3 source, Vector3 destination, uintptr_t player, float p1 = 0.f) {
+		return LineOfSightRadius(source, destination, 1503731969, 0.5f, p1, (uintptr_t)player)
+			&& LineOfSightRadius(destination, source, 1503731969, 0.5f, p1, (uintptr_t)player)
+			&& LineOfSightRadius(source, destination, 10551296, 0.5f, p1, (uintptr_t)player)
+			&& LineOfSightRadius(destination, source, 10551296, 0.5f, p1, (uintptr_t)player);
 	}
 
 	auto camera = unity::get_main_camera();

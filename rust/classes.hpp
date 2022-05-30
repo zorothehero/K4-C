@@ -1487,10 +1487,10 @@ public:
 		__try
 		{
 			//Line(source, destination, col(1, 1, 1, 1), 0.02f, false, true);
-			return unity::LineOfSightRadius(source, destination, 1503731969, 0.f, p1)
-				&& unity::LineOfSightRadius(destination, source, 1503731969, 0.f, p1)
-				&& unity::LineOfSightRadius(source, destination, 10551296, 0.f, p1)
-				&& unity::LineOfSightRadius(destination, source, 10551296, 0.f, p1);
+			return unity::LineOfSightRadius(source, destination, 1503731969, 0.f, p1, (uintptr_t)this)
+				&& unity::LineOfSightRadius(destination, source, 1503731969, 0.f, p1, (uintptr_t)this)
+				&& unity::LineOfSightRadius(source, destination, 10551296, 0.f, p1, (uintptr_t)this)
+				&& unity::LineOfSightRadius(destination, source, 10551296, 0.f, p1, (uintptr_t)this);
 		}
 		__except (true) 
 		{
