@@ -22,6 +22,7 @@ namespace settings {
 	namespace weapon {
 		bool hitbox_override  = false;
 		bool magic_bullet  = false;
+		bool ricochet = false;
 		bool pierce  = false;
 		bool rapidfire = false;
 		float aimbotfov = 500;
@@ -30,23 +31,33 @@ namespace settings {
 		bool silent_melee = false;
 		bool weapon_removals  = false;
 		bool always_shoot  = false;
-		bool psilent = false;
+		bool psilent = true;
 		bool psilentvis = false;
 		bool thick_bullet = false;
 		bool legit_recoil = false;
 		bool fast_bullet = false;
 		bool bullet_tp = false;
 		bool ultraBullet = false;
-		bool norecoil = false;
-		bool nospread = false;
+		bool norecoil = true;
+		bool nospread = true;
 		bool nosway = false;
 		bool automatic = false;
 		bool mods = false;
 
 		bool manipulator = false;
-		bool doubletap = false;
-		bool always_reload = false;
+		bool doubletap = true;
+		bool always_reload = true;
 		bool autoshoot = false;
+
+		namespace hitboxes {
+			bool Head = true;
+			bool Body = false;
+			bool Upperbody = false;
+			bool Penis = false;
+			bool Hands = false;
+			bool Legs = false;
+			bool Feet = false;
+		}
 	}
 
 	namespace visuals {
@@ -56,17 +67,17 @@ namespace settings {
 		bool lootesp = false;
 		bool card = false;
 		bool corpses = false;
-		bool player_esp = false;
+		bool player_esp = true;
 		bool draw_fov = false;
 		bool rainbow_chams = false;
 		bool hotbar_esp = false;
 		bool chams = false;
 		bool boxesp = false;
 		bool spriteitem = false;
-		bool snaplines = false;
+		bool snaplines = true;
 		bool show_fov = false;
 		bool cancer = false;
-		bool misc_esp  = false;
+		bool misc_esp  = true;
 		bool sleeper_esp  = false;
 		bool heli_esp = false;
 		bool outline = false;
@@ -101,19 +112,26 @@ namespace settings {
 		bool raid_esp = false;
 		bool hackable_crate_esp = false;
 		bool full_box = false;
-		bool corner_box = false;
+		bool corner_box = true;
 		bool bottomhealth = false;
 		bool steamid = false;
-		bool sidehealth = false;
-		bool skeleton = false;
-		bool nameesp = false;
+		bool sidehealth = true;
+		bool skeleton = true;
+		bool nameesp = true;
 		bool woundedflag = false;
-		bool distance = false;
+		bool distance = true;
 
 		bool weaponesp = false;
 		bool vehicle = false;
 
-		bool desync_indicator = false;
+		bool desync_indicator = true;
+
+		namespace shaders {
+			bool normal = false;
+			bool seethrough = false;
+			bool wireframe = true;
+			bool lit = false;
+		}
 	}
 
 	namespace misc {
@@ -146,6 +164,7 @@ namespace settings {
 		float staramount = 350;
 		bool admin_mode = false;
 		bool view_offset  = false;
+		bool norecycler = false;
 		bool instant_med  = false;
 		bool instant_revive = false;
 		bool no_playercollision = false;

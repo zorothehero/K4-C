@@ -514,6 +514,12 @@ public:
 		return pitch * r_to_deg;
 	}
 
+	Vector3 Lerp(Vector3 value1, float amount) {
+		return Vector3(
+			value1.x + (x - value1.x) * amount,
+			value1.y + (y - value1.y) * amount,
+			value1.z + (z - value1.z) * amount);
+	}
 	Vector3 lerp(Vector3 v, float x, bool clamp = true)
 	{
 		auto delta = (v - *this);

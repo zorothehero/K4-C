@@ -18,6 +18,8 @@ namespace unity {
 
 	static auto GetKeyDown = reinterpret_cast<bool(*)(rust::classes::KeyCode key)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Input"), _("GetKeyDown"), 1, _("key"), _("UnityEngine"), 1)));
 
+	static auto GetMouseButtonDown = reinterpret_cast<bool(*)(rust::classes::KeyCode button)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Input"), _("GetMouseButton"), 1, _("button"), _("UnityEngine"), 1)));
+
 	static auto get_main_camera = reinterpret_cast<uintptr_t(*)()>(il2cpp::methods::resolve_icall(_("UnityEngine.Camera::get_main()")));
 
 	static auto IgnoreLayerCollision = reinterpret_cast<void(*)(rust::classes::layer, rust::classes::layer, bool)>(il2cpp::methods::resolve_icall(_("UnityEngine.Physics::IgnoreLayerCollision()")));
@@ -29,6 +31,7 @@ namespace unity {
 	//static auto LineOfSightRadius = reinterpret_cast<bool(*)(Vector3, Vector3, int, float, float)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GamePhysics"), _("LineOfSightRadius"), -1, _(""), _(""))));
 
 	static auto LineOfSightRadius = reinterpret_cast<bool(*)(Vector3, Vector3, int, float, float, uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GamePhysics"), _("LineOfSightRadius"), -1, _(""), _(""))));
+	//static auto LineOfSightRadius = reinterpret_cast<bool(*)(Vector3, Vector3, int, float, float)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GamePhysics"), _("LineOfSightRadius"), -1, _(""), _(""))));
 
 	static auto LineOfSightInternal = reinterpret_cast<bool(*)(Vector3, Vector3, int, float, float, float)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GamePhysics"), _("LineOfSightInternal"), -1, _(""), _(""))));
 
@@ -45,9 +48,14 @@ namespace unity {
 	static auto Raycast = reinterpret_cast<bool (*)(Ray, float, int)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Physics"), _("Raycast"), 0, _(""), _("UnityEngine"))));
 	
 	static auto CheckCapsule = reinterpret_cast<bool (*)(Vector3, Vector3, float, int, int)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GamePhysics"), _("CheckCapsule"), 0, _(""), _(""))));
+	
+	static auto LoadAllAssets = reinterpret_cast<uintptr_t(*)(uintptr_t bundle, uintptr_t type)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("AssetBundle"), _("LoadAllAssets"), 1, _("type"), _("UnityEngine"), 1)));
 
+	static auto LoadFromFile = reinterpret_cast<uintptr_t(*)(rust::classes::string path)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("AssetBundle"), _("LoadFromFile"), 1, _("path"), _("UnityEngine"), 1)));
 
+	static auto LoadAsset = reinterpret_cast<uintptr_t(*)(uintptr_t bundle, rust::classes::string path, uintptr_t type)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("AssetBundle"), _("LoadAsset_Internal"), 2, _("name"), _("UnityEngine"), 1)));
 
+	static auto ServerRPC = reinterpret_cast<void (*)(uintptr_t, rust::classes::string funcName)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseEntity"), _("ServerRPC"), 1, _("funcName"), _(""), 1)));
 	//static auto Spherecast = reinterpret_cast<bool (*)(Vector3, float, Vector3, RaycastHit*, float, int)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Physics"), _("SphereCast"), 6, _("origin"), _("UnityEngine"), 1)));
 	//static auto Spherecast = reinterpret_cast<bool (*)(Ray, float, float, int)>(mem::game_assembly_base + 35705904);
 
@@ -83,13 +91,27 @@ namespace unity {
 		Raycast = reinterpret_cast<bool (*)(Ray, float, int)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Physics"), _("Raycast"), 0, _(""), _("UnityEngine"))));
 
 		LineOfSightInternal = reinterpret_cast<bool(*)(Vector3, Vector3, int, float, float, float)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GamePhysics"), _("LineOfSightInternal"), -1, _(""), _(""))));
+
+		LoadAllAssets = reinterpret_cast<uintptr_t(*)(uintptr_t bundle, uintptr_t type)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("AssetBundle"), _("LoadAllAssets"), 1, _("type"), _("UnityEngine"), 1)));
+
+		LoadFromFile = reinterpret_cast<uintptr_t(*)(rust::classes::string path)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("AssetBundle"), _("LoadFromFile"), 1, _("path"), _("UnityEngine"), 1)));
+
+		LoadAsset = reinterpret_cast<uintptr_t(*)(uintptr_t bundle, rust::classes::string path, uintptr_t type)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("AssetBundle"), _("LoadAsset"), 2, _("name"), _("UnityEngine"), 1)));
+
+		GetMouseButtonDown = reinterpret_cast<bool(*)(rust::classes::KeyCode button)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Input"), _("GetMouseButton"), 1, _("button"), _("UnityEngine"), 1)));
+
+		ServerRPC = reinterpret_cast<void (*)(uintptr_t, rust::classes::string funcName)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseEntity"), _("ServerRPC"), 1, _("funcName"), _(""), 1)));
+
 		//Spherecast = reinterpret_cast<bool (*)(Vector3, float, Vector3, RaycastHit*, float, int)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Physics"), _("SphereCast"), 6, _("origin"), _("UnityEngine"), 1)));
 		//Spherecast = reinterpret_cast<bool (*)(Ray, float, float, int)>(/*instead of il2cpp because seems to hate me use static offset*/ mem::game_assembly_base + 35705904);
 	}
 
 	uintptr_t bundle;
 	uintptr_t bundle_font;
-	uintptr_t chams_shader;
+	uintptr_t chams_shader_normal;
+	uintptr_t chams_shader_seethru;
+	uintptr_t chams_shader_wireframe;
+	uintptr_t chams_shader_lit;
 	uintptr_t font_ptr;
 
 	/*
@@ -99,11 +121,15 @@ namespace unity {
 		return LineOfSightRadius(source, destination, rust::classes::Layers(10551296), radius, 0, entity) && LineOfSightRadius(destination, source, rust::classes::Layers(10551296), radius, 0, entity);
 	}
 */
+	uintptr_t GetType(const wchar_t* name) {
+		static auto o = il2cpp::method(_("Type"), _("GetType"), -1, _(""), _("mscorlib"));
+		auto n = rust::classes::string(name);
+		return reinterpret_cast<uintptr_t(*)(rust::classes::string*)>(o)(&n);
+	}
+
 	bool is_visible(Vector3 source, Vector3 destination, uintptr_t player, float p1 = 0.f) {
 		return LineOfSightRadius(source, destination, 1503731969, 0.5f, p1, (uintptr_t)player)
-			&& LineOfSightRadius(destination, source, 1503731969, 0.5f, p1, (uintptr_t)player)
-			&& LineOfSightRadius(source, destination, 10551296, 0.5f, p1, (uintptr_t)player)
-			&& LineOfSightRadius(destination, source, 10551296, 0.5f, p1, (uintptr_t)player);
+			&& LineOfSightRadius(destination, source, 1503731969, 0.5f, p1, (uintptr_t)player);
 	}
 
 	auto camera = unity::get_main_camera();

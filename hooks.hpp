@@ -24,6 +24,17 @@ namespace misc
 	Vector3 cLastTickPos{};
 	Vector3 best_lean{};
 
+	struct fired_projectile {
+		Projectile* pr;
+		float fired_at;
+		int updates;
+	};
+	std::array<fired_projectile*, 32> fired_projectiles;
+	// ADD PROJECTILES TO THIS LIST WHEN FIRED FROM RPC, MAYBE STRUCT THAT CONTAINS SHOOT TIME AND AMOUNT OF UPDATES ALREADY?
+	// LOOP LIST IN CLIENTINPUT, ONLY CALL UPDATE WHENEVER TIME MORE THAN 0.03125f FROM PREVIOUS?
+	// MIGHT NOT EVEN WORK, MIGHT BE TOO FAST, MAYBE WE JUST CALL IT ONCE PER 0.03125f?
+	//
+
 	double fabs(double x)
 	{
 		union { double f; uint64_t i; } u = { x };
@@ -88,15 +99,7 @@ namespace misc
 	{
 		Vector3 v = *reinterpret_cast<Vector3*>((uintptr_t)ply + eyes);
 		Vector3 re_p = ply->get_bone_transform(47)->get_bone_position() + ply->get_bone_transform(47)->up() * (ply->get_player_eyes()->get_view_offset().y + v.y);
-		//std::vector<Vector3> ar{};
-		//get_cyl(mm_eye, 10, ar);
 
-		/*
-		if (ply->is_visible(re_p, pos))
-		{
-			misc::best_lean = Vector3(0, 0, 0);
-			return true;
-		}*/
 
 		auto do_check = [&](Vector3 a) {
 			Vector3 p = re_p + a;
@@ -289,6 +292,8 @@ namespace hooks {
 		static auto DoHit = reinterpret_cast<bool (*)(Projectile*, HitTest*, Vector3, Vector3)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Projectile"), _("DoHit"), -1, _(""), _(""))));
 
 		uintptr_t playerprojectileattack;
+		uintptr_t playerprojectilericochet;
+		uintptr_t playerprojectileupdate;
 		uintptr_t baseprojectilecreateprojectile;
 		uintptr_t serverrpc_projectileshoot;
 		uintptr_t serverrpc_processattack;
@@ -311,8 +316,6 @@ namespace hooks {
 	static auto get_ducked = reinterpret_cast<bool (*)(modelstate*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("ModelState"), _("get_ducked"), 0, _(""), _(""))));
 
 	static auto IsSwimming = reinterpret_cast<bool (*)(base_player*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("IsSwimming"), 0, _(""), _(""))));
-
-	static auto ServerRPC = reinterpret_cast<void (*)(uintptr_t, rust::classes::string funcName)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseEntity"), _("ServerRPC"), 1, _("funcName"), _(""), 1)));
 
 	static auto OnLand = reinterpret_cast<void (*)(base_player*, float fVelocity)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("OnLand"), 1, _("fVelocity"), _(""), 1)));
 
@@ -370,7 +373,6 @@ namespace hooks {
 
 		IsSwimming = reinterpret_cast<bool (*)(base_player*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("IsSwimming"), 0, _(""), _(""))));
 
-		ServerRPC = ServerRPC = reinterpret_cast<void (*)(uintptr_t, rust::classes::string funcName)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseEntity"), _("ServerRPC"), 1, _("funcName"), _(""), 1)));
 
 		OnLand = reinterpret_cast<void (*)(base_player*, float fVelocity)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("OnLand"), 1, _("fVelocity"), _(""), 1)));
 
@@ -386,6 +388,11 @@ namespace hooks {
 	}
 
 	void Prediction(Vector3 local, Vector3& target, Vector3 targetvel, float bulletspeed, float gravity) {
+
+		//new prediction
+
+
+
 		float Dist = local.get_3d_dist(target);
 		float BulletTime = Dist / bulletspeed;
 
@@ -420,24 +427,20 @@ namespace hooks {
 #pragma code_seg(pop)
 #pragma optimize("", on)
 
-	bool is_lagging;
-
-	bool flying = false, is_speeding = false;
-
+	bool flying = false, is_speeding = false, is_lagging = false;
 	bool has_intialized_methods = false;
-
 	float nextActionTime = 0, period = 1.4721;
-
 	Vector3 m_debugcam_toggle_pos;
-
 	Vector3 m_debugcam_pos;
-
 	uintptr_t do_fixed_update_ptr, client_input_ptr, bodylean_ptr, mounteyepos_ptr, isdown_ptr;
 
 	//////////////////////////
 	///////// PSILENT ////////
 	//////////////////////////
 	void hk_serverrpc_projectileshoot(int64_t rcx, int64_t rdx, int64_t r9, int64_t projectileShoot, int64_t arg5) {
+		Projectile* p;
+		Vector3 rpc_position;
+		float time = get_fixedTime();
 		do {
 			if (!esp::local_player)
 				break;
@@ -456,7 +459,7 @@ namespace hooks {
 				break;
 
 			base_projectile* projectile_list = *reinterpret_cast<base_projectile**>(
-				*reinterpret_cast<uintptr_t*>((uintptr_t)baseprojectile + 0x358) + 0x10); //createdProjectiles;
+				*reinterpret_cast<uintptr_t*>((uintptr_t)baseprojectile + 0x370) + 0x10); //createdProjectiles;
 
 			esp::matrix = unity::get_view_matrix();
 			auto camera_pos = unity::get_camera_pos();
@@ -467,22 +470,34 @@ namespace hooks {
 
 			auto size = *(int*)(*(uintptr_t*)(projectileShoot + 0x18) + 0x18);
 
-			Vector3 aimbot_velocity;
+			Vector3 aimbot_velocity = Vector3(0,0,0);
 
 			const auto stats = baseprojectile->get_stats(weapon->get_item_definition_id());
 
 			Vector3 aim_angle;
-			Vector3 rpc_position;
 
 			bool manipulated = false;
 
 			Vector3 original_vel{};
 
+			//get position of player with velocity
+			//get direction to that
+			//calculate perfect Y velocity in loop to find where projectile lands
+
+			//calc new target position with velocity
+			Vector3 target_velocity, target_pos;
+			if (target.player)
+			{
+				target_pos = target.player->get_bone_transform(47)->get_bone_position();
+				target_velocity = target.player->get_new_velocity();
+			}
+			//new_pos = new_pos.multiply(target_velocity);
+
 			for (int i = 0; i < size; i++) {
-				auto projectile = *(uintptr_t*)(shoot_list + 0x20 + i * 0x8);
+				auto projectileshoot = *(uintptr_t*)(shoot_list + 0x20 + i * 0x8);
 
-				rpc_position = *reinterpret_cast<Vector3*>(projectile + 0x18);
-
+				original_vel = *reinterpret_cast<Vector3*>(projectileshoot + 0x24);
+				rpc_position = *reinterpret_cast<Vector3*>(projectileshoot + 0x18);
 
 				if (settings::weapon::manipulator
 					&& (unity::GetKey((rust::classes::KeyCode)settings::keybind::manipulator)
@@ -497,21 +512,89 @@ namespace hooks {
 						{
 							manipulated = true;
 							target.visible = true;
-							*reinterpret_cast<Vector3*>(projectile + 0x18) = rpc_position;
+							*reinterpret_cast<Vector3*>(projectileshoot + 0x18) = rpc_position;
 							//Sphere(rpc_position, 0.05f, col(0.9, 0.1, 0.1, 3), 5.f, 25.f);
 						}
 					}
 				}
+			}
+			/*
+			for (int i = 0; i < projectile_list->get_size(); i++) 
+			{
+				auto projectile = *(base_projectile**)((uintptr_t)projectile_list + 0x20 + i * 0x8);
+				p = *(Projectile**)((uintptr_t)projectile_list + 0x20 + i * 0x8);
 
-				original_vel = *reinterpret_cast<Vector3*>(projectile + 0x24);
+				
+				//call get modified aimcone with target direction but 
+				//change Y on direction until point hits or intersects head?
 
+				for (int iii = 0; iii < 1000; iii++)
+				{
+					__try
+					{
+						Vector3 orig = rpc_position;
+						Vector3 velocity = original_vel;
+						Vector3 new_position = orig;
+						float	partialtime = p->partialTime();
+						float	traveltime = 0.f;
+						Vector3 grav = get_gravity();
+						float	drag = p->drag();
+						float timestep = 0.03125f;
 
+						Vector3 target_direction = target_pos - rpc_position;
+						//Vector3 v = getmodifiedaimcone(0, Vector3(0, 0, target_direction.z), true);
+						velocity = target_direction.Normalized() * velocity.length();
+						Vector3 original_velocity = velocity;
+
+						for (float f = 0.f; f < 8.f; f += timestep) {
+							Projectile::SimulateProjectile(new_position, velocity, partialtime, traveltime, grav, drag, timestep);
+
+							traveltime += timestep;
+
+							if (orig.distance(target_pos) > 400.f)
+								break;
+
+							for (float z = 0.f; z < 1.f; z += 0.001f)
+							{
+								Vector3 a = new_position.Lerp(orig, z);
+								//Line(a, target_pos, col(1, 1, 1, 1), 10, false, true);
+								if (a.distance(target_pos) < 0.1f)
+								{
+									aimbot_velocity = original_velocity;
+									//Sphere(a, 0.2f, col(1, 1, 1, 1), 10, 100);
+									//aim_angle = original_velocity;
+									break;
+								}
+							}
+							if (!aimbot_velocity.is_empty())
+								break;
+
+							//Line(orig, new_position, col(0.2, 0.5, 0.9, 1), 10.f, false, true);
+							//Sphere(orig, 0.2f, col(0.3, 0.8, 0.9, 1), 10, 100);
+							orig = new_position;
+						}
+						if (!aimbot_velocity.is_empty())
+							break;
+
+						target_pos.y += 0.01;
+					}
+					__except (true) { continue; }
+				}
+				break;
+				//orig = position end
+			}
+			*/
+
+			for (int i = 0; i < size; i++) {
+				auto projectile = *(uintptr_t*)(shoot_list + 0x20 + i * 0x8);
+
+				
 				if (target.player && (target.visible || manipulated || misc::autoshot) && !target.teammate) {
 					if (!settings::weapon::bullet_tp)
 						Prediction(rpc_position, target.pos, target.velocity, original_vel.Length(), stats.gravity_modifier);
 					else if (settings::desyncTime < (target.distance / original_vel.Length()))
 						Prediction(rpc_position, target.pos, target.velocity, original_vel.Length(), stats.gravity_modifier);
-
+					
 					aim_angle = /*get_aim_angle(rpc_position, target.pos, target.velocity, false, stats)*/target.pos - rpc_position;
 
 					aimbot_velocity = (aim_angle).Normalized() * original_vel.Length();
@@ -522,6 +605,7 @@ namespace hooks {
 
 			for (int i = 0; i < projectile_list->get_size(); i++) {
 				auto projectile = *(base_projectile**)((uintptr_t)projectile_list + 0x20 + i * 0x8);
+				p = *(Projectile**)((uintptr_t)projectile_list + 0x20 + i * 0x8);
 
 				if (!projectile)
 					continue;
@@ -529,11 +613,21 @@ namespace hooks {
 				if (settings::weapon::bullet_tp)
 				{
 					//check traveltime
-					auto p = *(Projectile**)((uintptr_t)projectile_list + 0x20 + i * 0x8);
 					if (settings::desyncTime > (target.distance / original_vel.Length()))
 						p->SetInitialDistance(target.distance);
 					else p->SetInitialDistance(0);
 				}
+
+				//simulate loop?
+				/*
+				Vector3 pos = rpc_position, vel = aimbot_velocity;
+				float partialtime = 0.f;
+				for (float f = 0.03125f; f < 8.f; f += 0.03125f) {
+					vel = p->Simulate(true, true, pos, partialtime);
+					Sphere(pos, 0.2f, col(1, 0.2, 0.7, 1), 10.f, 100.f);
+					pos = pos.multiply(vel * 0.03125f);
+				}
+				*/
 
 				if (settings::weapon::psilent || unity::GetKey(rust::classes::KeyCode(settings::keybind::psilent))) {
 					if (target.player && !target.teammate) {
@@ -554,18 +648,81 @@ namespace hooks {
 					projectile->set_projectile_thickness(settings::weapon::thickness);
 				else
 					projectile->set_projectile_thickness(projectile->thickness);
+				
+				p->integrity(1.f);
+				misc::fired_projectile f = { p, time, 1 };
+
+
+				for (size_t i = 0; i < 32; i++)
+					if (misc::fired_projectiles[i]->fired_at == 0) {
+						misc::fired_projectiles[i] = &f;
+						break;
+					}
 			}
+
+			if (misc::autoshot)
+				misc::autoshot = false;
 		} while (0);
 
-		if (misc::autoshot)
-			misc::autoshot = false;
 		reinterpret_cast<void (*)(int64_t, int64_t, int64_t, int64_t, int64_t)>(hooks::orig::serverrpc_projectileshoot)(rcx, rdx, r9, projectileShoot, arg5);
-
+		
+		//calls base.serverrpc<projectileshoot>("clproject", x) ^^
+		//loops through created projectiles and launches with
+		//projectile.launch(); - this function has a while loop
+		//based upon is alive? && (traveleddist < initialdist OR time < 0.1f)
+		//while loop calls only UpdateVelocity(fixedDeltaTime);
+		// 
 		misc::fixed_time_last_shot = get_fixedTime();
 		misc::just_shot = true;
 		misc::did_reload = false;
 	}
 
+	void hk_serverrpc_playerprojectileupdate(int64_t rcx, int64_t rdx, int64_t r9, int64_t _ppa, int64_t arg5) {
+		auto        projectile = reinterpret_cast<Projectile*>(get_rbx_value());
+		auto  ppu = reinterpret_cast<rust::classes::PlayerProjectileUpdate*>(_ppa);
+
+		const auto orig_fn =
+			reinterpret_cast<void (*)(int64_t, int64_t, int64_t, int64_t, int64_t)>(
+				hooks::orig::playerprojectileupdate);
+
+		//call fake domovement? after called set current position etc
+		//projectile->DoMovement(misc::tickDeltaTime, projectile);
+		//return;
+		return orig_fn(rcx, rdx, r9, _ppa, arg5);
+	}
+
+	void hk_serverrpc_playerprojectilericochet(int64_t rcx, int64_t rdx, int64_t r9, int64_t _ppa, int64_t arg5) {
+		auto        projectile = reinterpret_cast<Projectile*>(get_rbx_value());
+		auto  ppa = reinterpret_cast<rust::classes::PlayerProjectileRicochet*>(_ppa);
+		
+
+		const auto orig_fn =
+			reinterpret_cast<void (*)(int64_t, int64_t, int64_t, int64_t, int64_t)>(
+				hooks::orig::playerprojectilericochet);
+
+		if (settings::weapon::ricochet
+			&& projectile->authoritative())
+		{
+			Vector3 hitpos = ppa->hitPosition;
+			Vector3 normal = ppa->hitNormal;
+			Vector3 invel = ppa->inVelocity;
+			Vector3 outvel = ppa->outVelocity;
+
+			Vector3 direction = outvel.Normalized();
+
+			Vector3 targetpos = esp::best_target.player->get_bone_transform(48)->get_bone_position();
+			Vector3 direction_to_target = targetpos - hitpos;
+
+			Vector3 newVelocity = direction_to_target.Normalized() * outvel.Length();
+
+			safe_write((uintptr_t)_ppa + 0x30, newVelocity, Vector3);
+			projectile->currentVelocity(newVelocity);
+			//safe_write((uintptr_t)ppa + 0x18, targetpos, Vector3);
+
+			Sphere(hitpos, 0.2f, col(1, 0.1, 0.2, 1), 10, 100);
+		}
+		return orig_fn(rcx, rdx, r9, _ppa, arg5);
+	}
 
 	void hk_serverrpc_playerprojectileattack(int64_t rcx, int64_t rdx, int64_t r9, int64_t _ppa, int64_t arg5) {
 		auto        projectile = reinterpret_cast<base_projectile*>(get_rbx_value());
@@ -623,51 +780,98 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 */
 
 			if (!target.is_heli && settings::weapon::hitbox_override) {
-				attack->hitBone = 698017942;
-				attack->hitPartID = 2173623152;
+
+				int hitbone = 698017942;
+				int hitpartid = 2173623152;
+
+				struct hitt {
+					int64_t hitbone;
+					int64_t partid;
+				};
+
+				srand(time(0));
+				hitt test[7] = { 
+					{ 0, 0 }, 
+					{ 0, 0 }, 
+					{ 0, 0 }, 
+					{ 0, 0 }, 
+					{ 0, 0 }, 
+					{ 0, 0 }, 
+					{ 0, 0 }, 
+				};
+				
+				if (settings::weapon::hitboxes::Head)
+					test[0] = { 698017942, 2173623152 };
+				if (settings::weapon::hitboxes::Body)
+					test[1] = { 1031402764, 1750816991 };
+				if (settings::weapon::hitboxes::Upperbody)
+					test[2] = { 3901657145, 1750816991 };
+				if (settings::weapon::hitboxes::Hands)
+					test[3] = { 102231371, 1750816991 };
+				if (settings::weapon::hitboxes::Penis)
+					test[4] = { 3771021956, 1750816991 };
+				if (settings::weapon::hitboxes::Legs)
+					test[5] = { 3892428003, 1750816991 };
+				if (settings::weapon::hitboxes::Feet)
+					test[6] = { 920055401, 1750816991 };
+
+				int d = rand() % 6;
+				int t = 0;
+				while (test[d].hitbone == 0)
+				{
+					if (t++ > 100) {
+						test[d] = { 698017942, 2173623152 };
+						break;
+					}
+					srand(time(0));
+					d = rand() % 7;
+				}
+				
+				attack->hitBone = test[d].hitbone;
+				attack->hitPartID = test[d].partid;
 				attack->hitPositionLocal = { -.1f, -.1f, 0 };
 				attack->hitNormalLocal = { 0, -1, 0 };
 			}
 			else if (!target.is_heli && settings::weapon::random_hitbox) {
 				switch (my_rand() % 10) {
 				case 0: // Head
-					attack->hitBone = 698017942;
+					attack->hitBone   = 698017942;
 					attack->hitPartID = 2173623152;
 					break;
 				case 1: // Chest
-					attack->hitBone = 1031402764;
+					attack->hitBone	  = 1031402764;
 					attack->hitPartID = 1750816991;
 					break;
 				case 2: // LHand
-					attack->hitBone = 182688154;
+					attack->hitBone   = 182688154;
 					attack->hitPartID = 1750816991;
 					break;
 				case 3: // RHand
-					attack->hitBone = 102231371;
+					attack->hitBone   = 102231371;
 					attack->hitPartID = 1750816991;
 					break;
 				case 4: // pelvis
-					attack->hitBone = 2811218643;
+					attack->hitBone   = 2811218643;
 					attack->hitPartID = 1750816991;
 					break;
 				case 5: // r_hip
-					attack->hitBone = 2331610670;
+					attack->hitBone   = 2331610670;
 					attack->hitPartID = 1750816991;
 					break;
 				case 6: // r_foot
-					attack->hitBone = 920055401;
+					attack->hitBone   = 920055401;
 					attack->hitPartID = 1750816991;
 					break;
 				case 7: // spine1
-					attack->hitBone = 3771021956;
+					attack->hitBone =   3771021956;
 					attack->hitPartID = 1750816991;
 					break;
 				case 8: // l_upperarm
-					attack->hitBone = 3901657145;
+					attack->hitBone   = 3901657145;
 					attack->hitPartID = 1750816991;
 					break;
 				case 9: // l_knee
-					attack->hitBone = 3892428003;
+					attack->hitBone   = 3892428003;
 					attack->hitPartID = 1750816991;
 					break;
 				}
@@ -753,56 +957,6 @@ StringPool::Get(xorstr_("spine4")) = 827230707
     if(val == 0)        \
     return
 	uintptr_t client_entities;
-
-	/**void hk_dofixedupdate(playerwalkmovement* base_movement, modelstate* modelstate) {
-		if (esp::local_player && settings::misc::always_sprint && settings::misc::Movement) {
-			bool is_busy = get_ducked(modelstate) || IsSwimming(esp::local_player);
-
-			float speed = GetSpeed(esp::local_player, 1, is_busy);
-
-			Vector3 vel = *reinterpret_cast<Vector3*>(base_movement + 0x34); // private Vector3 <TargetMovement>k__BackingField;
-			Vector3 xz = Vector3(vel.x, 0, vel.z).normalize() * speed;
-			vel = Vector3(xz.x, vel.y, xz.z);
-
-			if (!flying) {
-				*reinterpret_cast<Vector3*>(base_movement + 0x34) = vel;
-
-				set_sprinting(modelstate, true);
-			}
-		}
-
-		orig::DoFixedUpdate(base_movement, modelstate);
-	}
-	/*/
-
-	void hk_blocksprint(base_player* player, float duration) {
-		if (!settings::weapon::always_shoot && settings::misc::Movement)
-			return hooks::orig::blocksprint(player, duration);
-
-		return;
-	}
-
-
-	void DoFatBullet(uintptr_t projectile)
-	{
-		auto p = (Projectile*)projectile;
-
-
-		return Update(p);
-	}
-
-	void AimConeDir_hk(float aimcone, Vector3 input, bool anywhereInside)
-	{
-		//return orig::getmodifiedaimcone(aimcone, input, anywhereInside);
-	}
-
-
-	void hk_OnNetworkMessage(uintptr_t client, uintptr_t packet)
-	{
-		//	draw_raid();
-		orig::OnNetworkMessage(client, packet);
-	}
-
 
 	void get_skydome()
 	{
@@ -902,7 +1056,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 			settings::time_since_last_shot = misc::time_since_last_shot;
 			if (misc::just_shot && (misc::time_since_last_shot > 0.2f))
 			{
-				hooks::ServerRPC((uintptr_t)held, rust::classes::string(_(L"StartReload")));
+				unity::ServerRPC((uintptr_t)held, rust::classes::string(_(L"StartReload")));
 				esp::local_player->SendSignalBroadcast(rust::classes::Signal::Reload); //does this cause animation?
 				misc::just_shot = false;
 			}
@@ -955,7 +1109,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 			if (misc::time_since_last_shot > reloadtime - 0.2f //-10% for faster reloads than normal >:)
 				&& !misc::did_reload)
 			{
-				hooks::ServerRPC((uintptr_t)held, rust::classes::string(_(L"Reload")));
+				unity::ServerRPC((uintptr_t)held, rust::classes::string(_(L"Reload")));
 				misc::did_reload = true;
 				misc::time_since_last_shot = 0;
 			}
@@ -976,74 +1130,6 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 			}
 		}
 	}
-
-	Vector3 hook_test(playereyes* e)
-	{
-		return Vector3(0, 69, 0);
-	}
-	Vector3 hook_test2(playereyes* e)
-	{
-		return Vector3(0, 69, 0);
-	}
-	Vector3 hook_test3(playereyes* e)
-	{
-		return Vector3(0, 69, 0);
-	}
-
-	Vector3 hk_bodylean(playereyes* e)
-	{
-		__try
-		{
-			if (!esp::local_player)
-				return orig::get_bodyleanoffset(e);
-			if (settings::weapon::manipulator && misc::best_lean != Vector3(0, 0, 0))
-				return misc::best_lean;
-
-			return orig::get_bodyleanoffset(e);
-			//return Vector3(0, 0, 0);
-		}
-		__except (true)
-		{
-			return orig::get_bodyleanoffset(e);
-		}
-	}
-
-
-	Vector3 hk_EyePositionForPlayer(playereyes* eyes)
-	{
-		if (!esp::local_player)
-			return eyes->get_position();
-		if (misc::best_lean == Vector3(0, 0, 0))
-			return eyes->get_position();
-		else if (settings::weapon::manipulator
-			&& (unity::GetKey(rust::classes::KeyCode(settings::keybind::manipulator))))
-			return eyes->get_position() + misc::best_lean;
-		return eyes->get_position();
-	}
-
-
-	bool hk_IsDown(input_state* self, rust::classes::BUTTON button)
-	{
-		if ((settings::weapon::autoshoot || unity::GetKey(rust::classes::KeyCode(settings::keybind::autoshoot)))
-			&& (esp::best_target.visible)
-			&& esp::local_player->get_active_weapon()->is_weapon()
-			&& button == rust::classes::BUTTON::FIRE_PRIMARY)
-			if (esp::local_player->get_active_weapon()->GetAmount() > 0)
-				return true;
-
-		return orig::isdown(self, button);
-	}
-
-	void EokaDoAttack_hk(uintptr_t w)
-	{
-		/*void set_did_hit(bool did_hit) {
-		*reinterpret_cast<bool*>((uintptr_t)this + 0x66) = did_hit;
-	}*/
-		if (settings::weapon::weapon_removals)
-			*reinterpret_cast<bool*>((uintptr_t)w + 0x370) = true;
-		return orig::eokadoattack(w);
-	}
-
 
 	void hk_LaunchProjectile(base_projectile* p)
 	{
@@ -1083,428 +1169,375 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 		return;
 	}
 
-
-	void hk_DoFirstPersonCamera(playereyes* eyes, uintptr_t cam)
-	{
-
-	}
-
-
-	bool test = true;
-	void hk_UpdateVelocity(playerwalkmovement* self)
-	{
-		if (test)
-		{
-			test = false;
-		}
-
-		//	if (!self->flying()) {
-
-
-		return orig::UpdateVelocity(self);
-	}
-
-
-	void hk_HandleJumping(playerwalkmovement* self, modelstate* state, bool jump, bool in_dir = false)
-	{
-
-	}
-
-
-	void hk_DoMovement(Projectile* p, float deltaTime)
-	{
-
-	}
-
-
-	void hk_DoHitNotify(uintptr_t basecombatentity, uintptr_t hitinfo)
-	{
-
-	}
-
-	//int64_t rcx, int64_t rdx, int64_t r9, int64_t projectileShoot, int64_t arg5
-	uintptr_t hk_CreateProjectile(uintptr_t self, rust::classes::string prefabPath, Vector3 pos, Vector3 forward, Vector3 velocity)
-	{
-		//reinterpret_cast<void (*)(int64_t, int64_t, int64_t, int64_t, int64_t)>(hooks::orig::baseprojectilecreateprojectile)(rcx, rdx, r9, projectileShoot, arg5);
-		auto p = orig::baseprojectile_createprojectile((base_projectile*)self, prefabPath, pos, forward, velocity);
-		if (settings::weapon::bullet_tp)
-		{
-			auto p = *(Projectile**)(self);
-			//check traveltime
-			float time = 0;
-			Vector3 pos{};
-			Vector3 vel = p->Simulate(0, 0, pos, time);
-			Sphere(pos, 1, col(0.5, 0.5, 0.8, 1), 60, 500);
-			if (settings::desyncTime > time)
-				p->SetInitialDistance(esp::local_player->get_bone_transform(47)->get_bone_position().distance(pos));
-		}
-		return p;
-	}
-
-
-	void hk_SendClientTick(uintptr_t self)
-	{
-		auto ply = (base_player*)(self);
-		misc::cLastTickPos = ply->get_player_eyes()->get_position();
-		return SendClientTick(ply);
-	}
-
-	bool hk_DoHit(Projectile* p, HitTest* test, Vector3 point, Vector3 normal) {
-		auto hitent = test->get_hit_entity();
-		auto obj = test->get_gameobject();
-
-		if (settings::weapon::pierce) {
-			if (p->authoritative()) {
-				if (hitent) {
-					auto class_name = *(const char**)(*(uintptr_t*)(uintptr_t)hitent + 0x10);
-
-					if (*(int*)(class_name + 4) == 'Carg'
-						|| *(int*)(class_name + 4) == 'Base' //BaseOven
-						|| *(int*)(class_name + 4) == 'Tree'
-						|| *(int*)(class_name + 4) == 'OreR'
-						|| *(int*)(class_name + 4) == 'CH47'
-						|| *(int*)(class_name + 4) == 'Mini'
-						|| *(int*)(class_name + 4) == 'BoxS'
-						|| *(int*)(class_name + 4) == 'Work'
-						|| *(int*)(class_name + 4) == 'Vend'
-						|| *(int*)(class_name + 4) == 'Barr'
-						|| *(int*)(class_name + 4) == 'Buil'
-						|| *(int*)(class_name + 4) == 'Loot'
-						|| *(int*)(class_name + 4) == 'Hack'
-						|| *(int*)(class_name + 4) == 'Reso'
-						|| *(int*)(class_name + 4) == 'Rida'
-						|| *(int*)(class_name + 4) == 'Moto'
-						|| *(int*)(class_name + 4) == 'Scra'
-						|| *(int*)(class_name + 4) == 'Junk'
-						|| *(int*)(class_name + 4) == 'Mini'
-						|| *(int*)(class_name + 4) == 'Wate'
-						|| *(int*)(class_name + 4) == 'RHIB') return false;
-				}
-			}
-		}
-			
-		return orig::DoHit(p, test, point, normal);
-	}
-
 	void hk_baseplayer_ClientInput(base_player* baseplayer, input_state* state) {
 		//__try {
 			//if(!do_fixed_update_ptr)
 			//do_fixed_update_ptr = mem::hook_virtual_function(_("PlayerWalkMovement"), _("DoFixedUpdate"), &hk_dofixedupdate);
 
-			if (!client_input_ptr)
-				client_input_ptr = mem::hook_virtual_function(_("PlayerWalkMovement"), _("ClientInput"), &hk_playerwalkmovement_ClientInput);
+		if (!client_input_ptr)
+			client_input_ptr = mem::hook_virtual_function(_("PlayerWalkMovement"), _("ClientInput"), &hk_playerwalkmovement_ClientInput);
 
-			if (!mounteyepos_ptr)
-				mounteyepos_ptr = mem::hook_virtual_function(_("BaseMountable"), _("EyePositionForPlayer"), &hooks::hk_EyePositionForPlayer);
+		misc::fired_projectile placeholder = { nullptr, 0, 1 };
+		if (!has_intialized_methods) {
+			for (size_t i = 0; i < 32; i++)
+				misc::fired_projectiles[i] = &placeholder;
 
-			if (!has_intialized_methods) {
-				auto il2cpp_codegen_initialize_method = reinterpret_cast<void (*)(unsigned int)>(il2cpp::methods::intialize_method);
-				//56229 for real rust or 56204 for cracked rust
-				for (int i = 0; i <
-					56229//56204 //56229 = real rust
-					; i++) {
-					il2cpp_codegen_initialize_method(i);
-				}
-				has_intialized_methods = true;
+
+			auto il2cpp_codegen_initialize_method = reinterpret_cast<void (*)(unsigned int)>(il2cpp::methods::intialize_method);
+			//56229 for real rust or 56204 for cracked rust
+			for (int i = 0; i <
+				56229//56204 //56229 = real rust
+				; i++) {
+				il2cpp_codegen_initialize_method(i);
 			}
+			has_intialized_methods = true;
+		}
 
 #pragma region static_method_hooks
-			
-			static uintptr_t* serverrpc_projecshoot;
-			if (!serverrpc_projecshoot) {
-				auto method_serverrpc_projecshoot = *reinterpret_cast<uintptr_t*>(hooks::serverrpc_projecileshoot);
 
-				if (method_serverrpc_projecshoot) {
-					serverrpc_projecshoot = **(uintptr_t***)(method_serverrpc_projecshoot + 0x30);
+		static uintptr_t* serverrpc_projecshoot;
+		if (!serverrpc_projecshoot) {
+			auto method_serverrpc_projecshoot = *reinterpret_cast<uintptr_t*>(hooks::serverrpc_projecileshoot);
 
-					hooks::orig::serverrpc_projectileshoot = *serverrpc_projecshoot;
+			if (method_serverrpc_projecshoot) {
+				serverrpc_projecshoot = **(uintptr_t***)(method_serverrpc_projecshoot + 0x30);
 
-					*serverrpc_projecshoot = reinterpret_cast<uintptr_t>(&hooks::hk_serverrpc_projectileshoot);
-				}
+				hooks::orig::serverrpc_projectileshoot = *serverrpc_projecshoot;
+
+				*serverrpc_projecshoot = reinterpret_cast<uintptr_t>(&hooks::hk_serverrpc_projectileshoot);
 			}
+		}
 
-			static uintptr_t* serverrpc_playerprojectileattack;
-			if (!serverrpc_playerprojectileattack) {
-				auto method_serverrpc_playerprojectileattack = *reinterpret_cast<uintptr_t*>(mem::game_assembly_base + offsets::Method$BaseEntity_ServerRPC_PlayerProjectileAttack___);//Method$BaseEntity_ServerRPC_PlayerProjectileAttack___
+		static uintptr_t* serverrpc_playerprojectileattack;
+		if (!serverrpc_playerprojectileattack) {
+			auto method_serverrpc_playerprojectileattack = *reinterpret_cast<uintptr_t*>(mem::game_assembly_base + offsets::Method$BaseEntity_ServerRPC_PlayerProjectileAttack___);//Method$BaseEntity_ServerRPC_PlayerProjectileAttack___
 
-				if (method_serverrpc_playerprojectileattack) {
-					serverrpc_playerprojectileattack = **(uintptr_t***)(method_serverrpc_playerprojectileattack + 0x30);
+			if (method_serverrpc_playerprojectileattack) {
+				serverrpc_playerprojectileattack = **(uintptr_t***)(method_serverrpc_playerprojectileattack + 0x30);
 
-					hooks::orig::playerprojectileattack = *serverrpc_playerprojectileattack;
+				hooks::orig::playerprojectileattack = *serverrpc_playerprojectileattack;
 
-					*serverrpc_playerprojectileattack = reinterpret_cast<uintptr_t>(&hooks::hk_serverrpc_playerprojectileattack);
-				}
+				*serverrpc_playerprojectileattack = reinterpret_cast<uintptr_t>(&hooks::hk_serverrpc_playerprojectileattack);
 			}
-			
+		}
+
+		static uintptr_t* serverrpc_playerprojectilericochet;
+		if (!serverrpc_playerprojectilericochet) {
+			auto method_serverrpc_playerprojectilericochet = *reinterpret_cast<uintptr_t*>(mem::game_assembly_base + offsets::Method$BaseEntity_ServerRPC_PlayerProjectileRicochet___);//Method$BaseEntity_ServerRPC_PlayerProjectileAttack___
+
+			if (method_serverrpc_playerprojectilericochet) {
+				serverrpc_playerprojectilericochet = **(uintptr_t***)(method_serverrpc_playerprojectilericochet + 0x30);
+
+				hooks::orig::playerprojectilericochet = *serverrpc_playerprojectilericochet;
+
+				*serverrpc_playerprojectilericochet = reinterpret_cast<uintptr_t>(&hooks::hk_serverrpc_playerprojectilericochet);
+			}
+		}
+
+		static uintptr_t* serverrpc_playerprojectileupdate;
+		if (!serverrpc_playerprojectileupdate) {
+			auto method_serverrpc_playerprojectileupdate = *reinterpret_cast<uintptr_t*>(mem::game_assembly_base + offsets::Method$BaseEntity_ServerRPC_PlayerProjectileUpdate___);//Method$BaseEntity_ServerRPC_PlayerProjectileAttack___
+
+			if (method_serverrpc_playerprojectileupdate) {
+				serverrpc_playerprojectileupdate = **(uintptr_t***)(method_serverrpc_playerprojectileupdate + 0x30);
+
+				hooks::orig::playerprojectileupdate = *serverrpc_playerprojectileupdate;
+
+				*serverrpc_playerprojectileupdate = reinterpret_cast<uintptr_t>(&hooks::hk_serverrpc_playerprojectileupdate);
+			}
+		}
+
 #pragma endregion
 
-			if (baseplayer) {
-				get_skydome();
+		if (baseplayer) {
+			get_skydome();
 
-				auto tick_time = baseplayer->get_last_sent_tick_time();
-				settings::desyncTime = (unity::get_realtimesincestartup() - tick_time) - 0.03125 * 3;
+			auto fixed_time = get_fixedTime();
+			auto tick_time = baseplayer->get_last_sent_tick_time();
+			settings::desyncTime = (unity::get_realtimesincestartup() - tick_time) - 0.03125 * 3;
 
 
-				auto wpn = baseplayer->get_active_weapon();
+			auto wpn = baseplayer->get_active_weapon();
 
-				auto held = wpn ? wpn->get_base_projectile() : nullptr;
+			auto held = wpn ? wpn->get_base_projectile() : nullptr;
 
-				if (settings::misc::attack_on_mountables) {
-					auto mountable = baseplayer->get_mountable();
-					if (mountable)
-						mountable->canwielditem() = true;
-				}
+			if (settings::misc::attack_on_mountables) {
+				auto mountable = baseplayer->get_mountable();
+				if (mountable)
+					mountable->canwielditem() = true;
+			}
 
-				bool kyslol = false;
+			bool kyslol = false;
 
-				if (settings::misc::TakeFallDamage && unity::GetKey(rust::classes::KeyCode(settings::keybind::suicide))) {
+			if (settings::misc::TakeFallDamage && unity::GetKey(rust::classes::KeyCode(settings::keybind::suicide))) {
 
-					OnLand(baseplayer, -8.0001f - 100);
-				}
+				OnLand(baseplayer, -8.0001f - 100);
+			}
 
-				bool t1 = orig::isdown(state, rust::classes::BUTTON::FIRE_PRIMARY);
-				auto t2 = orig::get_bodyleanoffset(baseplayer->get_player_eyes());
+			bool t1 = orig::isdown(state, rust::classes::BUTTON::FIRE_PRIMARY);
+			auto t2 = orig::get_bodyleanoffset(baseplayer->get_player_eyes());
 
-				if (settings::misc::admin_mode)
-					baseplayer->set_admin_flag(rust::classes::PlayerFlags::IsAdmin);
+			if (settings::misc::admin_mode)
+				baseplayer->set_admin_flag(rust::classes::PlayerFlags::IsAdmin);
 
-				if (settings::misc::spiderman && settings::misc::Movement) {
-					baseplayer->SpiderMan();
-				}
+			if (settings::misc::spiderman && settings::misc::Movement) {
+				baseplayer->SpiderMan();
+			}
 
-				if (settings::misc::playerfovtoggle) {
-					baseplayer->fov();
+			if (settings::misc::playerfovtoggle) {
+				baseplayer->fov();
 
-				}
+			}
 
-				float mm_eye = ((0.01f + ((settings::desyncTime + 2.f / 60.f + 0.125f) * baseplayer->max_velocity())));
-				float time = get_fixedTime();
-				if (esp::best_target.player && held && wpn)
+			float mm_eye = ((0.01f + ((settings::desyncTime + 2.f / 60.f + 0.125f) * baseplayer->max_velocity())));
+			float time = get_fixedTime();
+			if (esp::best_target.player && held && wpn)
+			{
+				Vector3 target = esp::best_target.player->get_bone_transform(48)->get_bone_position();
+				//Sphere(target, 0.05, col(0.8, 0.9, 0.3, 1), 0.05f, 10.f);
+
+				auto getammo = [&](base_projectile* held)
 				{
-					Vector3 target = esp::best_target.player->get_bone_transform(48)->get_bone_position();
-					//Sphere(target, 0.05, col(0.8, 0.9, 0.3, 1), 0.05f, 10.f);
-					
-					auto getammo = [&](base_projectile* held)
-					{
-						__try {
-							if (held)
-							{
-								auto mag = *reinterpret_cast<uintptr_t*>((uintptr_t)held + primaryMagazine);
-								return *reinterpret_cast<int*>((uintptr_t)mag + 0x1C); //0x1C = public int contents;
-							}
+					__try {
+						if (held)
+						{
+							auto mag = *reinterpret_cast<uintptr_t*>((uintptr_t)held + primaryMagazine);
+							return *reinterpret_cast<int*>((uintptr_t)mag + 0x1C); //0x1C = public int contents;
 						}
-						__except (true) {
-							return 0;
-						}
-					};
-
-					auto mag_ammo = getammo(held);
-
-					if (settings::weapon::manipulator
-						&& ((unity::GetKey(rust::classes::KeyCode(settings::keybind::manipulator)))
-							|| misc::manipulate_vis))
-					{
-						float nextshot = misc::fixed_time_last_shot + held->get_repeat_delay();
-						if (misc::can_manipulate(baseplayer, target, mm_eye))
-							if (nextshot < time
-								&& held->get_time_since_deploy() > held->get_deploy_delay()
-								&& mag_ammo > 0)
-							{
-								hk_LaunchProjectile(held);
-								baseplayer->send_client_tick();
-							}
 					}
+					__except (true) {
+						return 0;
+					}
+				};
 
-					if ((settings::weapon::autoshoot || unity::GetKey(rust::classes::KeyCode(settings::keybind::autoshoot))))
-					{
-						float nextshot = misc::fixed_time_last_shot + held->get_repeat_delay();
-						Sphere(target, 0.05f, col(0.6, 0.6, 0.6, 1), 0.02f, 100.f);
-						Sphere(baseplayer->get_bone_transform(48)->get_bone_position(), 0.05f, col(0.6, 0.6, 0.6, 1), 0.02f, 100.f);
-						if (baseplayer->is_visible(target, baseplayer->get_bone_transform(48)->get_bone_position())
-							&& get_fixedTime() > nextshot
+				auto mag_ammo = getammo(held);
+
+				if (settings::weapon::manipulator
+					&& ((unity::GetKey(rust::classes::KeyCode(settings::keybind::manipulator)))
+						|| misc::manipulate_vis))
+				{
+					float nextshot = misc::fixed_time_last_shot + held->get_repeat_delay();
+					if (misc::can_manipulate(baseplayer, target, mm_eye))
+						if (nextshot < time
 							&& held->get_time_since_deploy() > held->get_deploy_delay()
 							&& mag_ammo > 0)
 						{
-							misc::autoshot = true;
 							hk_LaunchProjectile(held);
-							updateammodisplay((uintptr_t)held);
-							shot_fired((uintptr_t)held);
-							did_attack_client_side((uintptr_t)held);
-							*reinterpret_cast<int*>((uintptr_t) * reinterpret_cast<uintptr_t*>((uintptr_t)held + primaryMagazine) + 0x1C) = (mag_ammo - 1);
 							baseplayer->send_client_tick();
 						}
-						else if (!baseplayer->is_visible(baseplayer->get_bone_transform(48)->get_bone_position(), target)
-							//&& get_fixedTime() > nextshot
-							&& settings::weapon::manipulator
-							&& mag_ammo > 0)
-						{
-							if (misc::can_manipulate(baseplayer, target, 5.f))
-							{//maybe check more later idk
-								misc::manipulate_vis = true;
-							}
-							else misc::manipulate_vis = false;
-						}
+				}
+
+				if ((settings::weapon::autoshoot || unity::GetKey(rust::classes::KeyCode(settings::keybind::autoshoot))))
+				{
+					float nextshot = misc::fixed_time_last_shot + held->get_repeat_delay();
+					Sphere(target, 0.05f, col(0.6, 0.6, 0.6, 1), 0.02f, 100.f);
+					Sphere(baseplayer->get_bone_transform(48)->get_bone_position(), 0.05f, col(0.6, 0.6, 0.6, 1), 0.02f, 100.f);
+					if (baseplayer->is_visible(target, baseplayer->get_bone_transform(48)->get_bone_position())
+						&& get_fixedTime() > nextshot
+						&& held->get_time_since_deploy() > held->get_deploy_delay()
+						&& mag_ammo > 0)
+					{
+						misc::autoshot = true;
+						hk_LaunchProjectile(held);
+						updateammodisplay((uintptr_t)held);
+						shot_fired((uintptr_t)held);
+						did_attack_client_side((uintptr_t)held);
+						*reinterpret_cast<int*>((uintptr_t) * reinterpret_cast<uintptr_t*>((uintptr_t)held + primaryMagazine) + 0x1C) = (mag_ammo - 1);
+						baseplayer->send_client_tick();
 					}
-					else misc::manipulate_vis = false;
+					else if (!baseplayer->is_visible(baseplayer->get_bone_transform(48)->get_bone_position(), target)
+						//&& get_fixedTime() > nextshot
+						&& settings::weapon::manipulator
+						&& mag_ammo > 0)
+					{
+						if (misc::can_manipulate(baseplayer, target, 5.f))
+						{//maybe check more later idk
+							misc::manipulate_vis = true;
+						}
+						else misc::manipulate_vis = false;
+					}
 				}
 				else misc::manipulate_vis = false;
-				//desync on key
-				if (unity::GetKey(rust::classes::KeyCode(settings::keybind::desync_ok))
-					|| (settings::weapon::manipulator
-						&& (unity::GetKey(rust::classes::KeyCode(settings::keybind::manipulator))
-							|| misc::manipulate_vis)))
-					baseplayer->set_client_tick_interval(0.99f);
-				else if (!is_lagging && !is_speeding)
-					baseplayer->set_client_tick_interval(0.05f);
+			}
+			else misc::manipulate_vis = false;
+			//desync on key
+			if (unity::GetKey(rust::classes::KeyCode(settings::keybind::desync_ok))
+				|| (settings::weapon::manipulator
+					&& (unity::GetKey(rust::classes::KeyCode(settings::keybind::manipulator))
+						|| misc::manipulate_vis)))
+				baseplayer->set_client_tick_interval(0.99f);
+			else if (!is_lagging && !is_speeding)
+				baseplayer->set_client_tick_interval(0.05f);
 
 
-				if (!keybinds::fakelagb || unity::GetKey(keybinds::fakelagk)) {
-					if (!is_lagging && !flying && settings::misc::fake_lag && !is_speeding) {
-						baseplayer->set_client_tick_interval(0.4f);
-						is_lagging = true;
+			if (!keybinds::fakelagb || unity::GetKey(keybinds::fakelagk)) {
+				if (!is_lagging && !flying && settings::misc::fake_lag && !is_speeding) {
+					baseplayer->set_client_tick_interval(0.4f);
+					is_lagging = true;
+				}
+			}
+			else if (is_lagging && flying || is_lagging && is_speeding) {
+				esp::local_player->set_client_tick_interval(0.03f);
+				is_lagging = false;
+			}
+			else if (is_lagging && !settings::misc::fake_lag) {
+				esp::local_player->set_client_tick_interval(0.05f);
+				is_lagging = false;
+			}
+
+			if (settings::misc::eyeoffset || unity::GetKey((rust::classes::KeyCode)settings::keybind::neck))
+			{
+				baseplayer->get_player_eyes()->set_view_offset(Vector3(0, settings::misc::playereyes, 0));
+			}
+
+			if (auto movement = baseplayer->get_movement()) {
+				if (settings::misc::spiderman) {
+					movement->set_ground_angles_new(-1);
+				}
+				if (settings::misc::infinite_jump && settings::misc::Movement) {
+					movement->set_land_time(0);
+					movement->set_jump_time(0);
+					movement->set_ground_time(100000);
+				}
+
+				if (settings::misc::gravity && settings::misc::Movement)
+					movement->set_gravity_multiplier(1.75f);
+				else
+					movement->set_gravity_multiplier(2.35f);
+
+				if (settings::weapon::always_shoot && settings::misc::Movement) {
+					if (auto modelstate = baseplayer->get_model_state()) {
+						modelstate->set_flag(rust::classes::ModelState_Flag::OnGround);
+						mem::write<float>((uint64_t)movement + 0x4C, 1); //private float <Grounded>k__BackingField; // 0x4C
 					}
 				}
-				else if (is_lagging && flying || is_lagging && is_speeding) {
-					esp::local_player->set_client_tick_interval(0.03f);
-					is_lagging = false;
-				}
-				else if (is_lagging && !settings::misc::fake_lag) {
-					esp::local_player->set_client_tick_interval(0.05f);
-					is_lagging = false;
-				}
+			}
 
-				if (settings::misc::eyeoffset || unity::GetKey((rust::classes::KeyCode)settings::keybind::neck))
-				{
-					baseplayer->get_player_eyes()->set_view_offset(Vector3(0, settings::misc::playereyes, 0));
-				}
+			auto item = baseplayer->get_active_weapon();
 
-				if (auto movement = baseplayer->get_movement()) {
-					if (settings::misc::spiderman) {
-						movement->set_ground_angles_new(-1);
+			if (settings::misc::auto_lock) {
+				auto closest_ent = baseplayer->resolve_closest_entity(3);
+
+				auto addr = mem::read<uintptr_t>(mem::game_assembly_base + offsets::Method_BaseEntity_ServerRPC_string_bool_address); //Method$BaseEntity.ServerRPC<string, bool>() address
+
+				if (closest_ent.first.found && addr) {
+					if (closest_ent.second) {
+						auto code_str = string::format(_("%d"), (int)settings::misc::code_lock_code);
+						change_code_rpc(closest_ent.first.player, rust::classes::string(_(L"RPC_ChangeCode")), il2cpp::methods::new_string(code_str), false, addr);
+						unity::ServerRPC((uintptr_t)closest_ent.first.player, rust::classes::string(_(L"TryLock")));
+						unity::ServerRPC((uintptr_t)closest_ent.first.player, rust::classes::string(_(L"RPC_Lock")));
 					}
-					if (settings::misc::infinite_jump && settings::misc::Movement) {
-						movement->set_land_time(0);
-						movement->set_jump_time(0);
-						movement->set_ground_time(100000);
-					}
-
-					if (settings::misc::gravity && settings::misc::Movement)
-						movement->set_gravity_multiplier(1.75f);
 					else
-						movement->set_gravity_multiplier(2.35f);
+						unity::ServerRPC((uintptr_t)closest_ent.first.player, rust::classes::string(_(L"RPC_Lock")));
+				}
+			}
 
-					if (settings::weapon::always_shoot && settings::misc::Movement) {
-						if (auto modelstate = baseplayer->get_model_state()) {
-							modelstate->set_flag(rust::classes::ModelState_Flag::OnGround);
-							mem::write<float>((uint64_t)movement + 0x4C, 1); //private float <Grounded>k__BackingField; // 0x4C
+			if (settings::misc::speedhack || unity::GetKey(rust::classes::KeyCode(settings::keybind::timescale))) {
+				set_timeScale(settings::misc::speedhackspeed);
+				is_speeding = true;
+			}
+			else {
+				set_timeScale(1);
+				is_speeding = false;
+			}
+
+			if (item) {
+				auto baseprojectile = item->get_base_projectile();
+				if (baseprojectile) {
+					for (int i = 0; i < 32; i++)
+					{
+						bool ret = false;
+						auto current = misc::fired_projectiles[i];
+						if (current->fired_at < 1.f) 
+							continue;
+						auto updates = current->updates;
+						float update_time = current->fired_at + (updates * 0.03125f);
+						current->updates = updates + 1;
+						if (time < update_time) 
+							continue;
+						float lifetime = time - current->fired_at;
+						if (current->pr->IsAlive())
+							current->pr->UpdateVelocity(0.03125f, current->pr, ret);
+						//current.pr->UpdateVelocity(get_fixeddeltaTime(), current.pr, ret);
+						else {
+							//has died
+							//Retire(current->pr);
+							misc::fired_projectiles[i] = &placeholder;
+							continue;
+						}
+						if (lifetime > 8.f) {
+							//Retire(current->pr);
+							misc::fired_projectiles[i] = &placeholder;
+							continue;
 						}
 					}
-				}
 
-				auto item = baseplayer->get_active_weapon();
 
-				if (settings::misc::auto_lock) {
-					auto closest_ent = baseplayer->resolve_closest_entity(3);
 
-					auto addr = mem::read<uintptr_t>(mem::game_assembly_base + offsets::Method_BaseEntity_ServerRPC_string_bool_address); //Method$BaseEntity.ServerRPC<string, bool>() address
+					auto wep_class_name = *(const char**)(*(uintptr_t*)(uintptr_t)baseprojectile + 0x10);
 
-					if (closest_ent.first.found && addr) {
-						if (closest_ent.second) {
-							auto code_str = string::format(_("%d"), (int)settings::misc::code_lock_code);
-							change_code_rpc(closest_ent.first.player, rust::classes::string(_(L"RPC_ChangeCode")), il2cpp::methods::new_string(code_str), false, addr);
-							ServerRPC((uintptr_t)closest_ent.first.player, rust::classes::string(_(L"TryLock")));
-							ServerRPC((uintptr_t)closest_ent.first.player, rust::classes::string(_(L"RPC_Lock")));
+					auto attack = [&](aim_target target, bool is_tree) {
+						auto gathering = baseprojectile->Gathering();
+
+						if (is_tree) {
+							if (!(gathering->tree()->gatherDamage() > 1)) {
+								return;
+							}
 						}
-						else
-							ServerRPC((uintptr_t)closest_ent.first.player, rust::classes::string(_(L"RPC_Lock")));
-					}
-				}
-
-				if (settings::misc::speedhack || unity::GetKey(rust::classes::KeyCode(settings::keybind::timescale))) {
-					set_timeScale(settings::misc::speedhackspeed);
-					is_speeding = true;
-				}
-				/*
-				else if (!keybinds::speedkeyb || unity::GetKey(rust::classes::KeyCode::Mouse0)) {	-	fast bullet
-					if (settings::weapon::rapidfire) {
-						set_timeScale(1.2);
-						is_speeding = true;
-					}
-				}
-				*/
-				else {
-					set_timeScale(1);
-					is_speeding = false;
-				}
-
-				if (item) {
-					auto baseprojectile = item->get_base_projectile();
-					if (baseprojectile) {
-						auto wep_class_name = *(const char**)(*(uintptr_t*)(uintptr_t)baseprojectile + 0x10);
-
-						auto attack = [&](aim_target target, bool is_tree) {
-							auto gathering = baseprojectile->Gathering();
-
-							if (is_tree) {
-								if (!(gathering->tree()->gatherDamage() > 1)) {
-									return;
-								}
-							}
-							else {
-								if (!(gathering->ore()->gatherDamage() > 1)) {
-									return;
-								}
-							}
-
-							attack_melee(target, baseprojectile);
-						};
-
-						if (settings::misc::silent_farm) {
-							auto entity = baseplayer->resolve_closest_entity(3, false);
-							if (entity.first.found && entity.first.player) {
-								if (*(int*)(wep_class_name + 4) == 'eleM' || *(int*)(wep_class_name + 4) == 'mmah') {
-									attack(entity.first, entity.second);
-								}
+						else {
+							if (!(gathering->ore()->gatherDamage() > 1)) {
+								return;
 							}
 						}
 
-						if (!(*(int*)(wep_class_name + 4) == 'eleM' && *(int*)(wep_class_name) == 'esaB')) {
-							if (unity::GetKey(rust::classes::KeyCode::Mouse0) && settings::misc::instant_med) {
-								const auto item_id = item->get_item_definition_id();
+						attack_melee(target, baseprojectile);
+					};
 
-								if (item_id == 1079279582 || item_id == -2072273936) {
-									auto time = get_time();
-									if (baseprojectile->get_time_since_deploy() > baseprojectile->get_deploy_delay() && baseprojectile->get_next_attack_time() <= get_time()) {
-										if (time > nextActionTime) {
-											nextActionTime = time + period;
-											ServerRPC((uintptr_t)baseprojectile, rust::classes::string(_(L"UseSelf")));
-										}
+					if (settings::misc::silent_farm) {
+						auto entity = baseplayer->resolve_closest_entity(3, false);
+						if (entity.first.found && entity.first.player) {
+							if (*(int*)(wep_class_name + 4) == 'eleM' || *(int*)(wep_class_name + 4) == 'mmah') {
+								attack(entity.first, entity.second);
+							}
+						}
+					}
+
+					if (!(*(int*)(wep_class_name + 4) == 'eleM' && *(int*)(wep_class_name) == 'esaB')) {
+						if (unity::GetKey(rust::classes::KeyCode::Mouse0) && settings::misc::instant_med) {
+							const auto item_id = item->get_item_definition_id();
+
+							if (item_id == 1079279582 || item_id == -2072273936) {
+								auto time = get_time();
+								if (baseprojectile->get_time_since_deploy() > baseprojectile->get_deploy_delay() && baseprojectile->get_next_attack_time() <= get_time()) {
+									if (time > nextActionTime) {
+										nextActionTime = time + period;
+										unity::ServerRPC((uintptr_t)baseprojectile, rust::classes::string(_(L"UseSelf")));
 									}
 								}
 							}
-							else if (unity::GetKey(rust::classes::KeyCode::Mouse1) && settings::misc::instant_med) {
-								const auto item_id = item->get_item_definition_id();
+						}
+						else if (unity::GetKey(rust::classes::KeyCode::Mouse1) && settings::misc::instant_med) {
+							const auto item_id = item->get_item_definition_id();
 
-								if (item_id == 1079279582 || item_id == -2072273936) {
-									esp::matrix = unity::get_view_matrix();
-									auto camera_pos = unity::get_camera_pos();
+							if (item_id == 1079279582 || item_id == -2072273936) {
+								esp::matrix = unity::get_view_matrix();
+								auto camera_pos = unity::get_camera_pos();
 
-									auto target = baseplayer->get_aimbot_target(camera_pos);
+								auto target = baseplayer->get_aimbot_target(camera_pos);
 
-									if (target.player && target.distance < 5) {
-										auto net = target.player->get_networkable();
-										if (net) {
-											auto id = net->get_id();
-											if (id) {
+								if (target.player && target.distance < 5) {
+									auto net = target.player->get_networkable();
+									if (net) {
+										auto id = net->get_id();
+										if (id) {
 
-												auto method_addr = mem::read<uintptr_t>(mem::game_assembly_base + offsets::Method$BaseEntity_ServerRPC_uint);
-												if (method_addr) {
-													auto time = get_time();
-													if (baseprojectile->get_time_since_deploy() > baseprojectile->get_deploy_delay() && baseprojectile->get_next_attack_time() <= get_time()) {
-														if (time > nextActionTime) {
-															nextActionTime = time + period;
-															ServerRPC_int(baseprojectile, rust::classes::string(_(L"UseOther")), id, method_addr);
-														}
+											auto method_addr = mem::read<uintptr_t>(mem::game_assembly_base + offsets::Method$BaseEntity_ServerRPC_uint);
+											if (method_addr) {
+												auto time = get_time();
+												if (baseprojectile->get_time_since_deploy() > baseprojectile->get_deploy_delay() && baseprojectile->get_next_attack_time() <= get_time()) {
+													if (time > nextActionTime) {
+														nextActionTime = time + period;
+														ServerRPC_int(baseprojectile, rust::classes::string(_(L"UseOther")), id, method_addr);
 													}
 												}
 											}
@@ -1512,72 +1545,73 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 									}
 								}
 							}
+						}
 
-							//////weapon mods/////
-							if (*(int*)(wep_class_name) == 'esaB' && *(int*)(wep_class_name + 4) == 'jorP' || *(int*)(wep_class_name) == 'nilF') {
-								if (item->is_weapon()) {
-									const auto item_id = item->get_item_definition_id();
+						//////weapon mods/////
+						if (*(int*)(wep_class_name) == 'esaB' && *(int*)(wep_class_name + 4) == 'jorP' || *(int*)(wep_class_name) == 'nilF') {
+							if (item->is_weapon()) {
+								const auto item_id = item->get_item_definition_id();
 
-									switch (item_id) {
-									case -75944661:
-										if (settings::weapon::weapon_removals) {
-											mem::write<float>((uint64_t)baseprojectile + 0x360, 1.f); //eoka success fraction
-											mem::write<bool>((uint64_t)baseprojectile + 0x370, true); //eoka _didSparkThisFrame
-										}
-										break;
-									default:
-										if (settings::weapon::fast_bullet)
-											if (item_id != 1318558775)
-												baseprojectile->SetProjectileVelocityScale(1.49f);
-										if (settings::weapon::rapidfire)
-											baseprojectile->set_repeat_delay(0.02f);
-										//if (settings::weapon::ultraBullet)
-										//	baseprojectile->projectileVelocityScale() = 10.f; //????????????????????????????
-										if (settings::weapon::automatic)
-											baseprojectile->is_automatic() = true;
-										if (settings::weapon::nospread)
-											baseprojectile->set_no_spread();
-										if (settings::weapon::norecoil)
-											baseprojectile->set_recoil(0, 0, 0, 0);
-										if (settings::weapon::legit_recoil)
-											baseprojectile->set_recoil(1, 1, -1, 0);
-										if (settings::weapon::nosway)
-											baseprojectile->set_no_sway();
-										break;
-
+								switch (item_id) {
+								case -75944661:
+									if (settings::weapon::weapon_removals) {
+										mem::write<float>((uint64_t)baseprojectile + 0x360, 1.f); //eoka success fraction
+										mem::write<bool>((uint64_t)baseprojectile + 0x370, true); //eoka _didSparkThisFrame
 									}
+									break;
+								default:
+									if (settings::weapon::fast_bullet)
+										if (item_id != 1318558775)
+											baseprojectile->SetProjectileVelocityScale(1.49f);
+									if (settings::weapon::rapidfire)
+										baseprojectile->set_repeat_delay(0.02f);
+									//if (settings::weapon::ultraBullet)
+									//	baseprojectile->projectileVelocityScale() = 10.f; //????????????????????????????
+									if (settings::weapon::automatic)
+										baseprojectile->is_automatic() = true;
+									if (settings::weapon::nospread)
+										baseprojectile->set_no_spread();
+									if (settings::weapon::norecoil)
+										baseprojectile->set_recoil(0, 0, 0, 0);
+									if (settings::weapon::legit_recoil)
+										baseprojectile->set_recoil(1, 1, -1, 0);
+									if (settings::weapon::nosway)
+										baseprojectile->set_no_sway();
+									break;
+
 								}
 							}
 						}
 					}
 				}
-
-				if (settings::misc::instant_revive) {
-					auto target = baseplayer->get_aimbot_target(unity::get_camera_pos());
-					if (!target.is_heli && target.player && target.distance <= 5 && target.player->get_health() <= 4 && target.visible)
-						ServerRPC((uintptr_t)target.player, rust::classes::string(_(L"RPC_Assist")));
-				}
-
-				unity::IgnoreLayerCollision(rust::classes::layer::PlayerMovement, rust::classes::layer::Water, !settings::misc::no_playercollision);
-				unity::IgnoreLayerCollision(rust::classes::layer::PlayerMovement, rust::classes::layer::Tree, settings::misc::no_playercollision);
-				unity::IgnoreLayerCollision(rust::classes::layer::PlayerMovement, rust::classes::layer::AI, settings::misc::no_playercollision);
-
-				draw_get();
-				if (tick_time > gui::tick_time_when_called + 10) {
-					unity::camera = unity::get_main_camera();
-					gui::tick_time_when_called = tick_time;
-				}
 			}
 
-			orig::baseplayer_client_input(baseplayer, state);
-
-			auto model_state = baseplayer->get_model_state();
-
-			//model_state->set_water_level(99999);
-
-			if (settings::misc::spinbot) {
-				state->set_aim_angles(Vector3(100, my_rand() % 999 + -999, 100));
+			if (settings::misc::instant_revive) {
+				auto target = baseplayer->get_aimbot_target(unity::get_camera_pos());
+				if (!target.is_heli && target.player && target.distance <= 5 && target.player->get_health() <= 4 && target.visible)
+					unity::ServerRPC((uintptr_t)target.player, rust::classes::string(_(L"RPC_Assist")));
 			}
+
+			unity::IgnoreLayerCollision(rust::classes::layer::PlayerMovement, rust::classes::layer::Water, !settings::misc::no_playercollision);
+			unity::IgnoreLayerCollision(rust::classes::layer::PlayerMovement, rust::classes::layer::Tree, settings::misc::no_playercollision);
+			unity::IgnoreLayerCollision(rust::classes::layer::PlayerMovement, rust::classes::layer::AI, settings::misc::no_playercollision);
+
+			draw_get();
+			if (tick_time > gui::tick_time_when_called + 10) {
+				unity::camera = unity::get_main_camera();
+				gui::tick_time_when_called = tick_time;
+			}
+		}
+
+		orig::baseplayer_client_input(baseplayer, state);
+
+		auto model_state = baseplayer->get_model_state();
+
+		//model_state->set_water_level(99999);
+
+		if (settings::misc::spinbot) {
+			state->set_aim_angles(Vector3(100, my_rand() % 999 + -999, 100));
+		}
 		//}
 		//__except (true)
 		//{

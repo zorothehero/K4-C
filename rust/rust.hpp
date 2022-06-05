@@ -200,6 +200,25 @@ namespace rust {
 			};
 		};
 
+		class PlayerProjectileRicochet {
+		public:
+			union {
+				DEFINE_MEMBER_N(Vector3, hitPosition, 0x18);
+				DEFINE_MEMBER_N(Vector3, inVelocity, 0x24);
+				DEFINE_MEMBER_N(Vector3, outVelocity, 0x30);
+				DEFINE_MEMBER_N(Vector3, hitNormal, 0x3C);
+			};
+		};
+
+		class PlayerProjectileUpdate {
+		public:
+			union {
+				DEFINE_MEMBER_N(Vector3, position, 0x18);
+				DEFINE_MEMBER_N(Vector3, velocity, 0x24);
+				DEFINE_MEMBER_N(float, traveltime, 0x30);
+			};
+		};
+
 		enum class Layers
 		{
 			Terrain = 8388608,

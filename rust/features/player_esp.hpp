@@ -302,6 +302,12 @@ namespace esp {
 				if (settings::visuals::stash && *(int*)(object_name.zpad + 46) == '_hsa') {
 					esp_name = il2cpp::methods::new_string(_("Stash"));
 				}
+				else if (settings::misc::norecycler && *(int*)(entity_class_name) == 'yceR') {
+					esp_name = il2cpp::methods::new_string(_("Recycler"));
+					esp_color = Vector4(232, 232, 232, 255);
+					if (esp::local_player->get_bone_transform(48)->get_bone_position().distance(world_position) < 4.5f)
+						unity::ServerRPC(ent, _(L"SVSwitch"));
+				}
 				else if (settings::visuals::stone_ore && settings::visuals::materials && (*(int*)(object_name.zpad + 52) == 'nots' || *(int*)(object_name.zpad + 47) == 'nots')) {
 					esp_name = il2cpp::methods::new_string(_("Stone Ore"));
 					esp_color = Vector4(232, 232, 232, 255);

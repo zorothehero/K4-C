@@ -135,8 +135,8 @@ public:
 	void sentTraveledTime(float d) { safe_write(this + O::Projectile::closeFlybyDistance, d, float); }
 	float lastUpdateTime() { return safe_read(this + O::Projectile::ricochetChance, float); }
 	void lastUpdateTime(float d) { safe_write(this + O::Projectile::ricochetChance, d, float); }
-	Vector3 prevSentPosition() { return safe_read(this + O::Projectile::swimScale, Vector3); }
-	void prevSentPosition(Vector3 d) { safe_write(this + O::Projectile::swimScale, d, Vector3); }
+	Vector3 prevSentPosition() { return safe_read(this + O::Projectile::sentPosition, Vector3); }
+	void prevSentPosition(Vector3 d) { safe_write(this + O::Projectile::sentPosition, d, Vector3); }
 	bool needsLOS() { return safe_read(this + O::Projectile::createDecals, bool); }
 	void needsLOS(bool d) { safe_write(this + O::Projectile::createDecals, d, bool); }
 
@@ -169,7 +169,10 @@ public:
 	void launchTime(float d) { safe_write(this + O::Projectile::launchTime, d, float); }
 
 	bool IsAlive() {
-		return (this->integrity() > 0.001f && this->traveledDistance() < this->maxDistance() && this->traveledTime() < 8);
+		__try {
+			return (this->integrity() > 0.001f && this->traveledDistance() < this->maxDistance() && this->traveledTime() < 8);
+		}
+		__except (true) { return false; }
 	}
 
 	struct TraceInfo {
@@ -193,9 +196,9 @@ public:
 		return maxdist;
 	}
 
-	Vector3 SimulateProjectile(Vector3& position, Vector3& velocity, float& partialTime, float travelTime, Vector3 gravity, float drag)
+	static Vector3 SimulateProjectile(Vector3& position, Vector3& velocity, float& partialTime, float travelTime, Vector3 gravity, float drag, float timestep)
 	{
-		float num = 0.03125f;
+		float num = timestep;
 		Vector3 origin = position;
 		if (partialTime > 0)
 		{
@@ -272,7 +275,7 @@ public:
 		Vector3 gr = get_gravity(); //static Vector3 get_gravity();
 
 
-		Vector3 origin = SimulateProjectile(pos, prev, part, travel, gr * gravityModifier(), drag());
+		Vector3 origin = SimulateProjectile(pos, prev, part, travel, gr * gravityModifier(), drag(), 0.03125f);
 
 		if (sendtoserver) {
 			prevSentPosition(pos);
@@ -292,7 +295,7 @@ public:
 		auto target = esp::local_player->get_aimbot_target(point, maxdist);
 
 		if (get_isAlive((base_projectile*)pr) && target.player && !target.teammate) {
-			if (!unity::is_visible(target.pos, point, (uintptr_t)esp::local_player), 0.5f) {
+			if (!unity::is_visible(target.pos, point, (uintptr_t)esp::local_player)) {
 				return false;
 			}
 
@@ -329,7 +332,12 @@ public:
 
 		auto material = info.material != 0 ? GetName(info.material)->str : (_(L"generic"));
 
-		bool canIgnore = unity::is_visible(sentPosition(), currentPosition() + currentVelocity().Normalized() * 0.01f, 0.5f);
+		bool canIgnore = true;
+		__try
+		{
+			canIgnore = unity::is_visible(sentPosition(), currentPosition() + currentVelocity().Normalized() * 0.01f, 0);//(uintptr_t)esp::local_player);
+		}
+		__except(true) {  }
 		if (!canIgnore) {
 			integrity(0);
 			return true;
@@ -343,7 +351,7 @@ public:
 
 			safe_write(ht + 0x14, Ray(attackStart, Vector3()), Ray);
 		}
-
+		Sphere(currentPosition(), 0.2f, col(0, 0, 1, 1), 10.f, 100.f);
 		if (canIgnore && m_wcsicmp(material, _(L"Flesh"))) {
 			DWORD64 Tra = safe_read(ht + 0xB0, DWORD64);
 			if (Tra) {
@@ -358,7 +366,6 @@ public:
 		}
 		return result;
 	}
-
 
 	bool DoMovement(float deltaTime, Projectile* pr) {
 		Vector3 a = currentVelocity() * deltaTime;
@@ -429,8 +436,8 @@ public:
 				Vector3 vec4 = HitPointWorld(ht); //Vector3 HitPointWorld();
 				Vector3 normal = HitNormalWorld(ht); //Vector3 HitNormalWorld();
 
-				//Line(currentPosition(), vec4, col(1, 1, 1, 1), 20, true, true);
-				//Sphere(Trace.point, 0.05f, col(0.5, 0, 0, 1), 20, true);
+				Line(currentPosition(), vec4, col(1, 1, 1, 1), 20, true, true);
+				Sphere(Trace.point, 0.05f, col(0.5, 0, 0, 1), 20, true);
 
 				float magnitude2 = (vec4 - currentPosition()).Length();
 				float num5 = magnitude2 * num2 * deltaTime;
@@ -438,6 +445,7 @@ public:
 				traveledDistance(traveledDistance() + magnitude2);
 				traveledTime(traveledTime() + num5);
 				currentPosition(vec4);
+
 
 				bool exit = false;
 				if (this->DoHit(pr, ht, vec4, normal, Trace, exit)) {
@@ -490,6 +498,7 @@ public:
 			partialTime(0); sentTraveledTime(0);  prevSentVelocity(initialVelocity()); prevSentPosition(sentPosition()); needsLOS(false);
 		}
 
+
 		deltaTime *= get_timeScale();
 
 
@@ -498,6 +507,8 @@ public:
 			this->DoVelocityUpdate(deltaTime, pr);
 		}
 
+		Line(this->currentPosition(), this->previousPosition(), col(0.5, 0.2, 0.7, 1), 10.f, false, true);
+		
 		auto Trans = get_transform((base_player*)pr); //Component | Transform get_transform(); 
 		set_position(Trans, currentPosition()); //Transform | void set_position(Vector3 value); 
 
@@ -508,37 +519,44 @@ public:
 };
 
 void OnProjectileUpdate(Projectile* unk) {
-	if (!unk)
-		return;
+	__try {
+		if (!unk)
+			return;
 
-	if(!settings::weapon::magic_bullet)
-		return Update(unk);
+		if (settings::weapon::doubletap && settings::desyncTime > 0.f)
+			return Update(unk);
+		//if(!settings::weapon::magic_bullet)
+		//	return Update(unk);
 
-	base_player* owner = (base_player*)safe_read(unk + 0xD0, DWORD64);
-	if (!owner)
-		return;
+		base_player* owner = (base_player*)safe_read(unk + 0xD0, DWORD64);
+		if (!owner)
+			return;
 
-	if (owner->is_local_player()) {
-		bool ret = false;
-		if (get_isAlive((base_projectile*)unk)) {
-			for (; unk->IsAlive(); unk->UpdateVelocity(0.03125f, unk, ret)) {
-				if (ret) {
-					break;
-				}
+		if (owner->is_local_player()) {
+			bool ret = false;
+			if (get_isAlive((base_projectile*)unk)) {
+				for (; unk->IsAlive(); unk->UpdateVelocity(0.03125f, unk, ret)) {
+					if (ret) {
+						break;
+					}
 
-				if (unk->launchTime() <= 0) {
-					break;
-				}
+					if (unk->launchTime() <= 0) {
+						break;
+					}
 
-				float time = get_time();
+					float time = get_time();
 
-				if (time - unk->launchTime() < unk->traveledTime() + 0.03125f) {
-					break;
+					//if (time - unk->launchTime() < unk->traveledTime() + 0.03125f) {
+					//	break;
+					//}
 				}
 			}
+			else {
+				Retire(unk);
+			}
 		}
-		else {
-			Retire(unk);
-		}
+	}
+	__except (true) {
+		//error?
 	}
 }

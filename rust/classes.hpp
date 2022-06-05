@@ -55,6 +55,7 @@ uintptr_t didSparkThisFrame = il2cpp::value(_("FlintStrikeWeapon"), _("_didSpark
 uintptr_t currentVelocity = il2cpp::value(_("Projectile"), _("currentVelocity"));
 uintptr_t currentPosition = il2cpp::value(_("Projectile"), _("currentPosition"));
 uintptr_t thickness_addr = il2cpp::value(_("Projectile"), _("thickness"));
+uintptr_t traveledTime = il2cpp::value(_("Projectile"), _("traveledTime"));
 uintptr_t isAuthoritative = il2cpp::value(_("Projectile"), _("isAuthoritative"));
 uintptr_t projectileVelocityScale_addr = il2cpp::value(_("BaseProjectile"), _("projectileVelocityScale"));
 uintptr_t mod = il2cpp::value(_("Projectile"), _("mod"));
@@ -837,6 +838,10 @@ public:
 		return *reinterpret_cast<float*>((uintptr_t)this + projectileVelocityScale_addr);
 	}
 
+	void set_travel_time(float f) {
+		*reinterpret_cast<float*>((uintptr_t)this + traveledTime) = f;
+	}
+
 	void SetProjectileVelocityScale(float r)
 	{
 		__try {
@@ -853,11 +858,19 @@ public:
 
 	void set_recoil(float yaw_min, float yaw_max, float pitch_min, float pitch_max) {
 		auto recoil_properties = *reinterpret_cast<uintptr_t*>((uintptr_t)this + recoil);
+		auto new_recoil_properties = *reinterpret_cast<uintptr_t*>((uintptr_t)recoil_properties + 0x78);
 
-		*reinterpret_cast<float*>(recoil_properties + 0x18) = yaw_min;
-		*reinterpret_cast<float*>(recoil_properties + 0x1C) = yaw_max;
-		*reinterpret_cast<float*>(recoil_properties + 0x20) = pitch_min;
-		*reinterpret_cast<float*>(recoil_properties + 0x24) = pitch_max;
+		
+		//after update June 5th 2022
+
+		*reinterpret_cast<float*>(new_recoil_properties + 0x18) = yaw_min;
+		*reinterpret_cast<float*>(new_recoil_properties + 0x1C) = yaw_max;
+		*reinterpret_cast<float*>(new_recoil_properties + 0x20) = pitch_min;
+		*reinterpret_cast<float*>(new_recoil_properties + 0x24) = pitch_max;
+
+		//*reinterpret_cast<float*>(recoil_properties + 0x28) = 0.f; //timeToTakeMin
+		*reinterpret_cast<float*>(new_recoil_properties + 0x2C) = 9999.f; //timeToTakeMax
+		*reinterpret_cast<float*>(new_recoil_properties + 0x30) = 0.f; //ADSScale
 	}
 
 	void set_no_sway() {
@@ -869,12 +882,16 @@ public:
 		return *reinterpret_cast<bool*>((uintptr_t)this + automatic);
 	}
 
-	void set_no_spread() {
-		*reinterpret_cast<float*>((uintptr_t)this + aimCone) = 0;
-		*reinterpret_cast<float*>((uintptr_t)this + hipAimCone) = 0;
-		*reinterpret_cast<float*>((uintptr_t)this + aimConePenaltyMax) = 0;
-		*reinterpret_cast<float*>((uintptr_t)this + aimconePenaltyPerShot) = 0;
-		*reinterpret_cast<float*>((uintptr_t)this + stancePenaltyScale) = 0;
+	void set_no_spread(float scale = 0.f) {
+		auto recoil_properties = *reinterpret_cast<uintptr_t*>((uintptr_t)this + recoil);
+		auto new_recoil_properties = *reinterpret_cast<uintptr_t*>((uintptr_t)recoil_properties + 0x78);
+		*reinterpret_cast<float*>((uintptr_t)this + aimCone) = scale;
+		*reinterpret_cast<float*>((uintptr_t)this + hipAimCone) = scale;
+		*reinterpret_cast<float*>((uintptr_t)this + aimConePenaltyMax) = scale;
+		*reinterpret_cast<float*>((uintptr_t)this + aimconePenaltyPerShot) = scale;
+		*reinterpret_cast<float*>((uintptr_t)this + stancePenaltyScale) = scale;
+
+		*reinterpret_cast<float*>(new_recoil_properties + 0x60) = scale; //aimconeCurveScale
 	}
 
 	void set_success_fraction() {
@@ -1248,14 +1265,14 @@ public:
 		}
 
 		if (zooming) {
-			auto convar = *reinterpret_cast<uintptr_t*>((uintptr_t)mem::game_assembly_base + 52246312); //"ConVar_Graphics_c*"
+			auto convar = *reinterpret_cast<uintptr_t*>((uintptr_t)mem::game_assembly_base + 52527840); //"ConVar_Graphics_c*"
 			auto unknown = *reinterpret_cast<uintptr_t*>((uintptr_t)convar + 0xb8);
 			*reinterpret_cast<float*>(unknown + 0x18) = settings::misc::zoomfov;
 		}
 
 		if (!zooming) {
 
-			auto convar = *reinterpret_cast<uintptr_t*>((uintptr_t)mem::game_assembly_base + 52246312); //"ConVar_Graphics_c*"
+			auto convar = *reinterpret_cast<uintptr_t*>((uintptr_t)mem::game_assembly_base + 52527840); //"ConVar_Graphics_c*"
 			auto unknown = *reinterpret_cast<uintptr_t*>((uintptr_t)convar + 0xb8);
 			*reinterpret_cast<float*>(unknown + 0x18) = settings::misc::playerfov;
 		}
@@ -1472,7 +1489,7 @@ public:
 
 	transform* get_bone_transform(int bone_id) {
 		__try {
-			uintptr_t entity_model = *reinterpret_cast<uintptr_t*>((uintptr_t)this + 0x128); //public Model model; // 
+			uintptr_t entity_model = *reinterpret_cast<uintptr_t*>((uintptr_t)this + 0x130); //public Model model; // 
 			uintptr_t bone_dict = *reinterpret_cast<uintptr_t*>(entity_model + 0x48);
 			transform* BoneValue = *reinterpret_cast<transform**>(bone_dict + 0x20 + bone_id * 0x8);
 
@@ -1487,10 +1504,10 @@ public:
 		__try
 		{
 			//Line(source, destination, col(1, 1, 1, 1), 0.02f, false, true);
-			return unity::LineOfSightRadius(source, destination, 1503731969, 0.f, p1, (uintptr_t)this)
-				&& unity::LineOfSightRadius(destination, source, 1503731969, 0.f, p1, (uintptr_t)this)
-				&& unity::LineOfSightRadius(source, destination, 10551296, 0.f, p1, (uintptr_t)this)
-				&& unity::LineOfSightRadius(destination, source, 10551296, 0.f, p1, (uintptr_t)this);
+			return unity::LineOfSightRadius(source, destination, 1503731969, 0.5f, p1, (uintptr_t)this)
+				&& unity::LineOfSightRadius(destination, source, 1503731969, 0.5f, p1, (uintptr_t)this);
+				//&& unity::LineOfSightRadius(source, destination, 10551296, 0.f, p1, this)
+				//&& unity::LineOfSightRadius(destination, source, 10551296, 0.f, p1, this);
 		}
 		__except (true) 
 		{
@@ -1715,7 +1732,7 @@ public:
 	}
 
 	networkable* get_networkable() {
-		return *reinterpret_cast<networkable**>((uintptr_t)this + 0x50);
+		return *reinterpret_cast<networkable**>((uintptr_t)this + 0x58);
 	}
 
 	playerwalkmovement* get_movement() {

@@ -29,8 +29,6 @@
 
 bool has_initialized = false;
 
-//Vars* vars = new Vars();
-//extern DWORD D3DThread();
 
 bool DllMain(HMODULE hmodule)
 {
@@ -45,7 +43,7 @@ bool DllMain(HMODULE hmodule)
 
 			il2cpp::init();
 
-			unity::init_unity();
+			unity::init_unity();	
 			gui::init_gui();
 			hooks::init_hooks();
 

@@ -47,12 +47,6 @@ namespace gui {
 
 		static auto get_type = reinterpret_cast<rust::classes::EventType(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Event"), _("get_type"), 0, _(""), _("UnityEngine"))));
 
-		static auto LoadAllAssets = reinterpret_cast<uintptr_t(*)(uintptr_t bundle, uintptr_t type)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("AssetBundle"), _("LoadAllAssets"), 1, _("type"), _("UnityEngine"), 1)));
-
-		static auto LoadFromFile = reinterpret_cast<uintptr_t(*)(rust::classes::string path)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("AssetBundle"), _("LoadFromFile"), 1, _("path"), _("UnityEngine"), 1)));
-
-		static auto LoadAsset = reinterpret_cast<uintptr_t(*)(uintptr_t bundle, rust::classes::string path, uintptr_t type)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("AssetBundle"), _("LoadAsset"), 2, _("name"), _("UnityEngine"), 1)));
-
 		static auto DrawTexture = reinterpret_cast<void (*)(rust::classes::Rect, uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GUI"), _("DrawTexture"), 2, _("image"), _("UnityEngine"), 2)));
 
 		static auto Box = reinterpret_cast<void (*)(rust::classes::Rect, rust::classes::string)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GUI"), _("Box"), 2, _("text"), _("UnityEngine"), 2)));
@@ -95,11 +89,11 @@ namespace gui {
 
 		methods::get_type = reinterpret_cast<rust::classes::EventType(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Event"), _("get_type"), 0, _(""), _("UnityEngine"))));
 
-		methods::LoadAllAssets = reinterpret_cast<uintptr_t(*)(uintptr_t bundle, uintptr_t type)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("AssetBundle"), _("LoadAllAssets"), 1, _("type"), _("UnityEngine"), 1)));
+		unity::LoadAllAssets = reinterpret_cast<uintptr_t(*)(uintptr_t bundle, uintptr_t type)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("AssetBundle"), _("LoadAllAssets"), 1, _("type"), _("UnityEngine"), 1)));
 
-		methods::LoadFromFile = reinterpret_cast<uintptr_t(*)(rust::classes::string path)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("AssetBundle"), _("LoadFromFile"), 1, _("path"), _("UnityEngine"), 1)));
+		unity::LoadFromFile = reinterpret_cast<uintptr_t(*)(rust::classes::string path)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("AssetBundle"), _("LoadFromFile"), 1, _("path"), _("UnityEngine"), 1)));
 
-		methods::LoadAsset = reinterpret_cast<uintptr_t(*)(uintptr_t bundle, rust::classes::string path, uintptr_t type)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("AssetBundle"), _("LoadAsset"), 2, _("name"), _("UnityEngine"), 1)));
+		unity::LoadAsset = reinterpret_cast<uintptr_t(*)(uintptr_t bundle, rust::classes::string path, uintptr_t type)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("AssetBundle"), _("LoadAsset"), 2, _("name"), _("UnityEngine"), 1)));
 
 		methods::DrawTexture = reinterpret_cast<void (*)(rust::classes::Rect, uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GUI"), _("DrawTexture"), 2, _("image"), _("UnityEngine"), 2)));
 
@@ -358,31 +352,31 @@ namespace gui {
 		case 126:
 			return _(L"~");
 		case 300:
-			return _(L"numlock");
+			return _(L"numlk");
 		case 301:
-			return _(L"capslock");
+			return _(L"caps");
 		case 302:
-			return _(L"scrolllock");
+			return _(L"scrl");
 		case 303:
 			return _(L"rshift");
 		case 304:
 			return _(L"lshift");
 		case 305:
-			return _(L"rcontrol");
+			return _(L"rctrl");
 		case 306:
-			return _(L"lcontrol");
+			return _(L"lctrl");
 		case 307:
 			return _(L"ralt");
 		case 308:
 			return _(L"lalt");
 		case 310:
-			return _(L"lcommand");
+			return _(L"lcmd");
 		case 311:
-			return _(L"lwindows");
+			return _(L"lwin");
 		case 309:
-			return _(L"rcommand");
+			return _(L"rcmd");
 		case 312:
-			return _(L"rwindows");
+			return _(L"rwin");
 		case 313:
 			return _(L"altgr");
 		case 315:
@@ -396,19 +390,19 @@ namespace gui {
 		case 319:
 			return _(L"menu");
 		case 323:
-			return _(L"mouse0");
+			return _(L"m0");
 		case 324:
-			return _(L"mouse1");
+			return _(L"m1");
 		case 325:
-			return _(L"mouse2");
+			return _(L"m2");
 		case 326:
-			return _(L"mouse3");
+			return _(L"m3");
 		case 327:
-			return _(L"mouse4");
+			return _(L"m4");
 		case 328:
-			return _(L"mouse5");
+			return _(L"m5");
 		case 329:
-			return _(L"mouse");
+			return _(L"m");
 		}
 		return _(L"undefined");
 	}
@@ -472,13 +466,18 @@ namespace gui {
 		skin = methods::get_skin();
 		label = mem::read<uintptr_t>(skin + 0x38);
 
-		//unity::bundle = methods::LoadFromFile(_(L"rust.assets"));
+		unity::bundle = unity::LoadFromFile(_(L"rust.assets"));
 		//unity::bundle_font = methods::LoadFromFile(_(L"C:\\k4"));
 
 		if (unity::bundle)
 		{
-			//unity::chams_shader = methods::LoadAsset(unity::bundle, _(L"Chams"), unity::GetType(_(L"UnityEngine.Shader, UnityEngine.CoreModule")));
+			unity::chams_shader_normal = unity::LoadAsset(unity::bundle, _(L"Chams"), unity::GetType(_(L"UnityEngine.Shader, UnityEngine.CoreModule")));
+			unity::chams_shader_seethru = unity::LoadAsset(unity::bundle, _(L"SeethroughShader"), unity::GetType(_(L"UnityEngine.Shader, UnityEngine.CoreModule")));
+			unity::chams_shader_wireframe = unity::LoadAsset(unity::bundle, _(L"WireframeTransparent"), unity::GetType(_(L"UnityEngine.Shader, UnityEngine.CoreModule")));
+			unity::chams_shader_lit = unity::LoadAsset(unity::bundle, _(L"chamslit"), unity::GetType(_(L"UnityEngine.Shader, UnityEngine.CoreModule")));
 		}
+
+
 
 
 		//static auto font = methods::LoadAsset(unity::bundle_font, rust::classes::string(_(L"minecraftchmc.ttf")), il2cpp::type_object(_("UnityEngine"), _("Font")));
@@ -581,13 +580,82 @@ namespace gui {
 	int* kbref = 0;
 	int* ref_clicked = 0;
 	bool getting_keybind = false;
+	bool combo_clicked = false;
+	bool true_placehold = true;
+	bool false_placehold = false;
 
+	void combobox(rust::classes::EventType event, Vector2 pos, Vector2& current_pos, Vector2 mouse, const wchar_t* name, std::array<wchar_t*, 8> combo_str, std::array<bool*, 8> combo) {
+		pos.x += 10;
+		rust::classes::Rect poz = rust::classes::Rect(pos.x + tab_size.x + 2.0f, pos.y + current_pos.y, 150, 20);
+		fill_box(poz, rgba(14.f, 18.f, 24.f, 255.f));
+
+		if (poz.Contains(mouse))
+		{
+			poz = rust::classes::Rect(pos.x + tab_size.x + 2.0f, pos.y + current_pos.y + 18, 150, 2);
+			fill_box(poz, rgba(181, 140, 132, (opacity / 255.f)));
+			poz = rust::classes::Rect(pos.x + tab_size.x + 2.0f, pos.y + current_pos.y, 150, 20);
+		}
+
+		gui::Label({ poz.x + 5, poz.y, poz.wid, poz.hei }, rust::classes::string(name), rgba(159.f, 163.f, 169.f, (opacity / 255.f)), false, 13);
+
+		if (combo_clicked)
+		{
+			gui::line({ poz.x + 130, poz.y + 13 }, { poz.x + 135, poz.y + 8 }, rgba(159.f, 163.f, 169.f, (opacity / 255.f)));
+			gui::line({ poz.x + 140, poz.y + 13 }, { poz.x + 135, poz.y + 8 }, rgba(159.f, 163.f, 169.f, (opacity / 255.f)));
+
+			poz = rust::classes::Rect(pos.x + tab_size.x + 2.0f, pos.y + current_pos.y + 18, 150, 2);
+			fill_box(poz, rgba(249.f, 130.f, 109.f, (opacity / 255.f)));
+			poz = rust::classes::Rect(pos.x + tab_size.x + 2.0f, pos.y + current_pos.y, 150, 20);
+		}
+		else {
+			gui::line({ poz.x + 130, poz.y + 8 }, { poz.x + 135, poz.y + 13 }, rgba(159.f, 163.f, 169.f, (opacity / 255.f)));
+			gui::line({ poz.x + 140, poz.y + 8 }, { poz.x + 135, poz.y + 13 }, rgba(159.f, 163.f, 169.f, (opacity / 255.f)));
+		}
+
+		if (event == rust::classes::EventType::MouseDown) 
+		{
+			if (poz.Contains(mouse))
+				combo_clicked = !combo_clicked;
+			if (combo_clicked)
+			{
+				for (size_t i = 1; i < 8; i++)
+				{
+					poz = rust::classes::Rect(pos.x + tab_size.x + 2.0f, pos.y + current_pos.y + (i * 20), 150, 15);
+					if (poz.Contains(mouse))
+					{
+						if (&combo[i])
+							*combo[i] = !*combo[i];
+					}
+				}
+			}
+		}
+		if (combo_clicked)
+		{
+			for (size_t i = 1; i < 8; i++)
+			{
+				poz = rust::classes::Rect(pos.x + tab_size.x + 2.0f, pos.y + current_pos.y + (i * 20), 150, 20);
+				fill_box(poz, rgba(14.f, 18.f, 24.f, 255.f));
+
+				auto name = combo_str[i];
+
+				gui::Label({ poz.x + 1, poz.y, poz.wid, poz.hei }, rust::classes::string(name), rgba(159.f, 163.f, 169.f, (opacity / 255.f)), true, 10);
+
+				bool s = *combo[i];
+				if (s)
+					gui::Label({ poz.x + 1, poz.y, poz.wid, poz.hei }, rust::classes::string(name), rgba(249.f, 130.f, 109.f, (opacity / 255.f)), true, 10);
+
+				if (poz.Contains(mouse))
+					gui::Label({ poz.x + 1, poz.y, poz.wid, poz.hei }, rust::classes::string(name), rgba(181, 140, 132, (opacity / 255.f)), true, 10);
+			}
+		}
+		current_pos.y += 30;
+	}
 
 	void checkbox(rust::classes::EventType event, Vector2 pos, Vector2& current_pos, Vector2 mouse, const wchar_t* button_name, bool* checked_ref, int id, bool keybind = false, int* keybind_ref = 0, Color col = Color(255, 255, 255, 220)) {
 
 		pos.x += 5;
 		const float button_size = 20;
-		if (event == rust::classes::EventType::MouseDown) {
+		if (event == rust::classes::EventType::MouseDown && !combo_clicked) {
 			if (rust::classes::Rect(pos.x + tab_size.x + 3 + 2.0f, pos.y + current_pos.y - 4 + 3 + 2.0f, 100, button_size + 3).Contains(mouse)) {
 				*checked_ref = !*checked_ref;
 			}
@@ -597,7 +665,7 @@ namespace gui {
 		{
 			rust::classes::Rect poz = rust::classes::Rect(pos.x + tab_size.x + 100 + 2.0f, pos.y + current_pos.y, 31, 15);
 			fill_box(poz, rgba(14.f, 18.f, 24.f, 255.f));
-			if (event == rust::classes::EventType::MouseDown) {
+			if (event == rust::classes::EventType::MouseDown && !combo_clicked) {
 				if (poz.Contains(mouse)) {
 					getting_keybind = !getting_keybind;
 					if (getting_keybind)
@@ -793,10 +861,36 @@ namespace gui {
 
 			auto current = methods::get_current();
 			auto event_type = methods::get_type(current);
+			
+			bool md = false;
+			rust::classes::KeyCode k;
+			if (LI_FIND(GetAsyncKeyState)(VK_RBUTTON) & 0x8000)
+			{
+				k = rust::classes::KeyCode::Mouse1;
+				md = true;
+			}
+			if (LI_FIND(GetAsyncKeyState)(VK_MBUTTON) & 0x8000)
+			{
+				k = rust::classes::KeyCode::Mouse2;
+				md = true;
+			}
+			if (LI_FIND(GetAsyncKeyState)(VK_XBUTTON1) & 0x8000)
+			{
+				k = rust::classes::KeyCode::Mouse3;
+				md = true;
+			}
+			if (LI_FIND(GetAsyncKeyState)(VK_XBUTTON2) & 0x8000)
+			{
+				k = rust::classes::KeyCode::Mouse4;
+				md = true;
+			}
 
-			if (event_type == rust::classes::EventType::KeyDown || event_type == rust::classes::EventType::KeyUp) {
-				rust::classes::KeyCode cur = unity::get_keyCode(current);
-				if (event_type == rust::classes::EventType::KeyDown)
+			if (event_type == rust::classes::EventType::KeyDown || event_type == rust::classes::EventType::KeyUp
+				|| event_type == rust::classes::EventType::MouseDown || event_type == rust::classes::EventType::MouseUp
+				|| md) {
+				rust::classes::KeyCode cur = md ? k : unity::get_keyCode(current);
+				if (event_type == rust::classes::EventType::KeyDown || event_type == rust::classes::EventType::MouseDown
+					|| md)
 					OnKeyDown(cur);
 				else
 					OnKeyUp(cur);
@@ -945,6 +1039,27 @@ namespace gui {
 					else if (settings::misc::code_lock_code > 9999)
 						settings::misc::code_lock_code = 9999;
 
+					std::array<wchar_t*, 8> combo1_names = {
+							_(L"Null"),
+							_(L"Head"),
+							_(L"Body"),
+							_(L"Upper arms"),
+							_(L"Penis"),
+							_(L"Hands"),
+							_(L"Legs"),
+							_(L"Feet")
+					};
+					std::array<bool*, 8> combo1_refs = {
+						&settings::weapon::hitboxes::Head,
+						&settings::weapon::hitboxes::Head,
+						&settings::weapon::hitboxes::Body,
+						&settings::weapon::hitboxes::Upperbody,
+						&settings::weapon::hitboxes::Penis,
+						&settings::weapon::hitboxes::Hands,
+						&settings::weapon::hitboxes::Legs,
+						&settings::weapon::hitboxes::Feet
+					};
+
 					switch (active_tab) {
 					case 0:
 						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"PSilent"), &settings::weapon::psilent, weapon_tab, true, &settings::keybind::psilent);
@@ -962,8 +1077,10 @@ namespace gui {
 						menu_pos.x += 170;
 						pos.y = 0; //?
 
-						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Force head"), &settings::weapon::hitbox_override, weapon_tab);
-						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Force random"), &settings::weapon::random_hitbox, weapon_tab);
+						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Override hitboxes"), &settings::weapon::hitbox_override, weapon_tab);
+
+						pos.y += 30;
+						//checkbox(event_type, menu_pos, pos, mouse_pos, _(L""), &settings::weapon::random_hitbox, weapon_tab);
 						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Rapid fire"), &settings::weapon::rapidfire, weapon_tab);
 						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Fast bullet"), &settings::weapon::fast_bullet, weapon_tab);
 						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Bullet tp"), &settings::weapon::bullet_tp, weapon_tab);
@@ -971,7 +1088,13 @@ namespace gui {
 						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Manipulator"), &settings::weapon::manipulator, weapon_tab, true, &settings::keybind::manipulator);
 						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Double-tap"), &settings::weapon::doubletap, weapon_tab);
 						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Always reload"), &settings::weapon::always_reload, weapon_tab);
+						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Ricochet"), &settings::weapon::ricochet, weapon_tab);
 						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Penetrate"), &settings::weapon::pierce, weapon_tab);
+
+						pos.y -= 210;
+						pos.x += 5;
+						combobox(event_type, menu_pos, pos, mouse_pos, _(L"Choose hitboxes"), combo1_names, combo1_refs);
+
 						break;
 					case 1:
 						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Desync indicator"), &settings::visuals::desync_indicator, visual_tab);
@@ -1045,6 +1168,7 @@ namespace gui {
 						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"No collisions"), &settings::misc::no_playercollision, misc_tab);
 						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Interactive debug"), &settings::misc::interactive_debug, misc_tab);
 						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Instant med"), &settings::misc::instant_med, misc_tab);
+						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"No recycler"), &settings::misc::norecycler, misc_tab);
 						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Suicide"), &settings::misc::TakeFallDamage, misc_tab, true, &settings::keybind::suicide);
 						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Longneck"), &settings::misc::eyeoffset, misc_tab, true, &settings::keybind::neck);
 						Slider(event_type, menu_pos, mouse_pos, il2cpp::methods::new_string(_("Size")), pos, settings::misc::playereyes, 1.5f, misc_tab);
@@ -1335,6 +1459,22 @@ namespace esp
 	void do_chams(base_player* player)
 	{
 		if (settings::visuals::chams) {
+			if (unity::bundle)
+			{
+				//unity::chams_shader = unity::LoadAsset(unity::bundle, _(L"Chams"), unity::GetType(_(L"UnityEngine.Shader, UnityEngine.CoreModule")));
+				uintptr_t shader = unity::chams_shader_normal;
+
+				if (settings::visuals::shaders::seethrough) {
+					shader = unity::chams_shader_seethru;
+				}
+				else if (settings::visuals::shaders::wireframe) {
+					shader = unity::chams_shader_wireframe;
+				}
+				else if (settings::visuals::shaders::lit) {
+					shader = unity::chams_shader_lit;
+				}
+			}
+
 			static int cases = 0;
 			static float r = 1.00f, g = 0.00f, b = 1.00f;
 			switch (cases) {
@@ -1356,31 +1496,43 @@ namespace esp
 					if (renderer) {
 						auto material = get_material(renderer);
 						if (material) {
-							if (!shader)
-								shader = Find(_(L"Hidden/Internal-Colored"));
-							unity::set_shader(material, shader);
-							SetInt(material, _(L"_ZTest"), 8); // through walls
+							if (shader)
+							{
+								if (shader != unity::get_shader(material)) {
+									unity::set_shader(material, shader);
+								}
+								else {
+									SetInt(material, _(L"_ZTest"), 8); // through walls
+									//SetInt(material, _(L"_ZCull"), 8); // through walls
 
-							if (settings::visuals::rainbow_chams) {
-								SetColor(material, _(L"_Color"), col(r, g, b, 1));
-							}
-							else if (get_IsNpc(player->get_player_model()) && unity::is_visible(local_player->get_bone_transform((int)rust::classes::Bone_List::head)->get_bone_position(), player->get_bone_transform((int)rust::classes::Bone_List::head)->get_bone_position(), (uintptr_t)esp::local_player)) {
-								SetColor(material, _(L"_Color"), col(0, 0.5, 1, 0.5));
-							}
-							else if (get_IsNpc(player->get_player_model())) {
-								SetColor(material, _(L"_Color"), col(0, 0, 0.6, 0.5));
-							}
-							else if (get_IsNpc(player->get_player_model())) {
-								SetColor(material, _(L"_Color"), col(0, 0, 0.6, 0.5));
-							}
-							else if (player->is_teammate(local_player)) {
-								SetColor(material, _(L"_Color"), col(0, 1, 1, 1));
-							}
-							else if (unity::is_visible(local_player->get_bone_transform((int)rust::classes::Bone_List::head)->get_bone_position(), player->get_bone_transform((int)rust::classes::Bone_List::head)->get_bone_position(), (uintptr_t)esp::local_player)) {
-								SetColor(material, _(L"_Color"), col(settings::visuals::VisRcolor, settings::visuals::VisGcolor, settings::visuals::VisBcolor, 1));
-							}
-							else {
-								SetColor(material, _(L"_Color"), col(settings::visuals::InvRcolor, settings::visuals::InvGcolor, settings::visuals::InvBcolor, 1));
+									if (settings::visuals::rainbow_chams) {
+										SetColor(material, _(L"_Color"), col(r, g, b, 1));
+									}
+									else if (get_IsNpc(player->get_player_model()) && unity::is_visible(local_player->get_bone_transform((int)rust::classes::Bone_List::head)->get_bone_position(), player->get_bone_transform((int)rust::classes::Bone_List::head)->get_bone_position(), (uintptr_t)esp::local_player)) {
+										SetColor(material, _(L"_Color"), col(0, 0.5, 1, 0.5));
+									}
+									else if (get_IsNpc(player->get_player_model())) {
+										SetColor(material, _(L"_Color"), col(0, 0, 0.6, 0.5));
+									}
+									else if (get_IsNpc(player->get_player_model())) {
+										SetColor(material, _(L"_Color"), col(0, 0, 0.6, 0.5));
+									}
+									else if (player->is_teammate(local_player)) {
+										SetColor(material, _(L"_Color"), col(0, 1, 1, 1));
+									}
+									else if (unity::is_visible(local_player->get_bone_transform((int)rust::classes::Bone_List::head)->get_bone_position(), player->get_bone_transform((int)rust::classes::Bone_List::head)->get_bone_position(), (uintptr_t)esp::local_player)) {
+										if (settings::visuals::shaders::wireframe) {
+											SetColor(material, _(L"_WireColor"), col(settings::visuals::VisRcolor, settings::visuals::VisGcolor, settings::visuals::VisBcolor, 1));
+										}
+										SetColor(material, _(L"_Color"), col(settings::visuals::VisRcolor, settings::visuals::VisGcolor, settings::visuals::VisBcolor, 1));
+									}
+									else {
+										if (settings::visuals::shaders::wireframe) {
+											SetColor(material, _(L"_WireColor"), col(settings::visuals::InvRcolor, settings::visuals::InvGcolor, settings::visuals::InvBcolor, 1));
+										}
+										SetColor(material, _(L"_Color"), col(settings::visuals::InvRcolor, settings::visuals::InvGcolor, settings::visuals::InvBcolor, 1));
+									}
+								}
 							}
 						}
 					}
@@ -1519,6 +1671,8 @@ namespace esp
 
 		if (get_bounds(bounds, 4)) {
 			//if (!is_visible)
+			is_visible = unity::is_visible(camera_position, player->get_bone_transform(48)->get_bone_position(), (uintptr_t)esp::local_player);
+			/*
 			__try
 			{
 				for (auto& [bone_screen, bone_idx, on_screen, world_position, visible] : bones) {
@@ -1526,7 +1680,7 @@ namespace esp
 					is_visible = unity::is_visible(camera_position, world_position, (uintptr_t)esp::local_player);
 				}
 			}
-			__except (true) { is_visible = false; }
+			__except (true) { is_visible = false; }*/
 			//is_visible = unity::is_visible(camera_position, bones[47].world_position, (uintptr_t)esp::local_player);
 
 			gui::Color clr = !is_teammate ? (is_visible ? visible_color : invisible_color) : teammate_color;
