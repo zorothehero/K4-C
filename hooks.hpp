@@ -149,8 +149,8 @@ namespace misc
 			return true;
 		};
 
-		for (float y = 1.5f; y > -1.5f; y -= 0.1f) {
-			int points = 20;
+		for (float y = 1.5f; y > -1.5f; y -= settings::weapon::thick_bullet ? 0.2f : 0.1f) {
+			int points = settings::weapon::thick_bullet ? 11 : 20;
 			float step = (M_PI_2) / points;
 			float x, z, current = 0;
 			for (size_t i = 0; i < points; i++)
@@ -522,6 +522,7 @@ namespace hooks {
 		Projectile* p;
 		Vector3 rpc_position;
 		float time = get_fixedTime();
+		float travel_t = 0.f;
 		do {
 			if (!esp::local_player)
 				break;
@@ -604,18 +605,17 @@ namespace hooks {
 
 			bool vis_fat = false;
 
-			//check if can shoot with fat bullet lol
-			//if (!target.visible && settings::weapon::thick_bullet && target.player)
-			//{
-			//	target_pos = target.player->get_bone_transform(48)->get_bone_position();
-			//	for (auto v : bigfatvector) {
-			//		if (target.player->is_visible(rpc_position, target_pos + v)) {
-			//			vis_fat = true;
-			//			target_pos = target_pos + v;
-			//			break;
-			//		}
-			//	}
-			//}
+			if (!target.visible && settings::weapon::thick_bullet && target.player)
+			{
+				target_pos = target.player->get_bone_transform(48)->get_bone_position();
+				for (auto v : bigfatvector) {
+					if (target.player->is_visible(rpc_position, target_pos + v)) {
+						vis_fat = true;
+						target_pos = target_pos + v;
+						break;
+					}
+				}
+			}
 
 			for (int i = 0; i < projectile_list->get_size(); i++) 
 			{
@@ -637,6 +637,7 @@ namespace hooks {
 					auto offset = 0.1f;
 					int simulations = 0;
 					auto targetvel = target.player->get_new_velocity();
+					travel_t = 0.f;
 
 					while (simulations < 3000) {
 						auto pos = rpc_position;
@@ -657,6 +658,7 @@ namespace hooks {
 							pos += velocity * num;
 							velocity += gravity * grav * num;
 							velocity -= velocity * drag * num;
+							travel_t += num;
 
 							if (misc::LineCircleIntersection(target_pos, 0.1f, origin, pos, offset))
 							{
@@ -764,8 +766,24 @@ namespace hooks {
 				if (settings::weapon::bullet_tp)
 				{
 					//check traveltime
-					if (settings::desyncTime > (target.distance / original_vel.Length()))
+					if (settings::desyncTime > travel_t)
 						p->SetInitialDistance(target.distance);
+					else if (settings::desyncTime > 0)
+					{
+						Vector3 r = rpc_position;
+						Vector3 v = aimbot_velocity;
+						v = v * settings::desyncTime;
+						r = r.Normalized() * v.Length();
+						float d = target.distance - r.distance(rpc_position);
+						float a = 0.f;
+						while (d < 0)
+						{
+							a += 0.1f;
+							d += 0.1f;
+						}
+						d += a;
+						p->SetInitialDistance(d);
+					}
 					else p->SetInitialDistance(0);
 				}
 
@@ -782,7 +800,7 @@ namespace hooks {
 
 				if (settings::weapon::psilent || unity::GetKey(rust::classes::KeyCode(settings::keybind::psilent))) {
 					if (target.player && !target.teammate) {
-						if (target.visible)
+						if (target.visible || vis_fat)
 						{
 							projectile->set_current_velocity(aimbot_velocity);
 
@@ -795,10 +813,10 @@ namespace hooks {
 					}
 				}
 
-				if (settings::weapon::thick_bullet)
-					projectile->set_projectile_thickness(settings::weapon::thickness);
-				else
-					projectile->set_projectile_thickness(projectile->thickness);
+				//if (settings::weapon::thick_bullet)
+				//	projectile->set_projectile_thickness(settings::weapon::thickness);
+				//else
+				//	projectile->set_projectile_thickness(projectile->thickness);
 				
 				p->integrity(1.f);
 				misc::fired_projectile f = { p, time, 1 };
@@ -1400,6 +1418,22 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 
 			}
 
+			if (held) {
+				if (!LI_FIND(strcmp)(held->get_class_name(), _("Planner"))) {
+					auto planner = reinterpret_cast<Planner*>(held);
+					if (unity::GetKeyDown(rust::classes::KeyCode::RightArrow))
+					{
+						auto v = planner->rotationoffset();
+						planner->rotationoffset(Vector3(v.x, v.y += 10, v.z));
+					}
+					else if (unity::GetKeyDown(rust::classes::KeyCode::LeftArrow))
+					{
+						auto v = planner->rotationoffset();
+						planner->rotationoffset(Vector3(v.x, v.y -= 10, v.z));
+					}
+				}
+			}
+
 			float mm_eye = ((0.01f + ((settings::desyncTime + 2.f / 60.f + 0.125f) * baseplayer->max_velocity())));
 			float time = get_fixedTime();
 			if (esp::best_target.player && held && wpn)
@@ -1571,39 +1605,61 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 							&& projectile->IsAlive())
 						{
 							auto target = esp::best_target;
-							auto current_position = get_position((uintptr_t)get_transform((base_player*)projectile));
-							Sphere(current_position, 0.05f, col(1, 1, 1, 1), 10.f, 100.f);
-							auto target_bone = target.player->get_bone_transform(48)->get_bone_position();//check for closest bone to current_position
+							if (target.player) {
+								auto current_position = get_position((uintptr_t)get_transform((base_player*)projectile));
+								Vector3 target_bone = target.player->get_bone_transform(48)->get_bone_position();
+								//Vector3 target_bone = Vector3(0, 0, 0);
+								//determine closest bone by checking intersect on desired bone list
+								//std::array<int, 8> bonelist = {
+								//		48, //head
+								//		22, //spine4
+								//		14, //r_knee
+								//		16, //r_foot
+								//		3, //l_knee
+								//		4, //l_foot
+								//		25, //l_upperarm
+								//		56 //r_upperarm
+								//};
+								//
+								//for (auto b : bonelist) {
+								//	//we could pick closest but we can also just pick the first
+								//
+								//	auto p = target.player->get_bone_transform(b)->get_bone_position();
+								//	if (misc::LineCircleIntersection(p, 2.2f, current_position, projectile->previousPosition(), offset))
+								//	{
+								//		current_position = Vector3::move_towards(target_bone, current_position, 2.2f);
+								//		target_bone = current_position;
+								//		break;
+								//	}
+								//}
 
-							if (misc::LineCircleIntersection(target_bone, 2.2f, current_position, projectile->previousPosition(), offset))
-							{
-								current_position = Vector3::move_towards(target_bone, current_position, 2.2f);
-							}
-
-							if (target_bone.distance(current_position) <= 2.2f)
-							{
-								Sphere(current_position, 0.1f, col(1, 0, 0, 1), 10.f, 100.f);
-								current_position = Vector3::move_towards(current_position, target_bone, 1.0f);
-								set_position(get_transform((base_player*)projectile), current_position);
-								Sphere(current_position, 0.1f, col(0, 1, 0, 0), 10.f, 100.f);
-
-								if (current_position.distance(target_bone) <= 1.2f)
+								if (misc::LineCircleIntersection(target_bone, settings::weapon::thickness, current_position, projectile->previousPosition(), offset))
 								{
-									current_position = Vector3::move_towards(current_position, target_bone, 0.2f);
-									auto bonetrans = target.player->get_bone_transform(48);
-									HitTest* ht = (HitTest*)projectile->hitTest();
-									ht->set_did_hit(true);
-									ht->set_hit_entity(target.player);
-									ht->set_hit_transform(bonetrans);
-									ht->set_hit_point(InverseTransformPoint(bonetrans, current_position));
-									ht->set_hit_normal(InverseTransformDirection(bonetrans, current_position));
+									current_position = Vector3::move_towards(target_bone, current_position, settings::weapon::thickness);
+								}
 
-									Ray r(get_position((uintptr_t)get_transform((base_player*)projectile)), current_position);
-									safe_write(ht + 0x14, r, Ray);
-									projectile->integrity(999.f);
-									Sphere(current_position, 0.1f, col(0, 0, 1, 1), 10.f, 100.f);
-									DoHit(projectile, ht, current_position, HitNormalWorld((uintptr_t)ht));
-									misc::fired_projectiles[i] = { nullptr, 1, 0 };
+								if (target_bone.distance(current_position) <= settings::weapon::thickness)
+								{
+									current_position = Vector3::move_towards(current_position, target_bone, 1.0f);
+									set_position(get_transform((base_player*)projectile), current_position);
+
+									if (current_position.distance(target_bone) <= 1.2f)
+									{
+										current_position = Vector3::move_towards(current_position, target_bone, 0.2f);
+										auto bonetrans = target.player->get_bone_transform(48);
+										HitTest* ht = (HitTest*)projectile->hitTest();
+										ht->set_did_hit(true);
+										ht->set_hit_entity(target.player);
+										ht->set_hit_transform(bonetrans);
+										ht->set_hit_point(InverseTransformPoint(bonetrans, current_position));
+										ht->set_hit_normal(InverseTransformDirection(bonetrans, current_position));
+
+										Ray r(get_position((uintptr_t)get_transform((base_player*)projectile)), current_position);
+										safe_write(ht + 0x14, r, Ray);
+										projectile->integrity(999.f);
+										DoHit(projectile, ht, current_position, HitNormalWorld((uintptr_t)ht));
+										misc::fired_projectiles[i] = { nullptr, 1, 0 };
+									}
 								}
 							}
 						}

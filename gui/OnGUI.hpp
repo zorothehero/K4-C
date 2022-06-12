@@ -831,7 +831,7 @@ namespace gui {
 	void Slider(rust::classes::EventType event, Vector2 pos, Vector2 mouse, uintptr_t text, Vector2& current_pos, float& out, float max, int id, float font_size = 0, const char* fmt = _("%.1f"))
 	{
 		pos.x += 100;
-		pos.y += 4;
+		pos.y += 9;
 		const float button_size = 8;
 
 		int wid = 150;
@@ -869,7 +869,7 @@ namespace gui {
 		gui::Label(rust::classes::Rect{ pos.x + id + val, pos.y + current_pos.y - 3, 200, 16 }, nstr, gui::Color(0, 0, 0, (opacity / 255.f) > 120 ? 120 : opacity), false, 8);
 		gui::Label(rust::classes::Rect{ pos.x + id + val, pos.y + current_pos.y - 4, 200, 16 }, nstr, Color(255, 255, 255, (opacity / 255.f)), false, 8);
 
-		current_pos.y += button_size + 5;
+		current_pos.y += button_size + 8;
 	}
 
 	void Progbar(Vector2 start, Vector2 end, float a, float b)
@@ -1107,8 +1107,9 @@ namespace gui {
 						Slider(event_type, menu_pos, mouse_pos, il2cpp::methods::new_string(_("Fov")), pos, settings::weapon::aimbotfov, 2500.f, weapon_tab);
 						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Silent melee"), &settings::weapon::silent_melee, weapon_tab, true, &settings::keybind::silentmelee);
 						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Thick bullet"), &settings::weapon::thick_bullet, weapon_tab);
-						Slider(event_type, menu_pos, mouse_pos, il2cpp::methods::new_string(_("Size")), pos, settings::weapon::thickness, 1.f, weapon_tab);
+						Slider(event_type, menu_pos, mouse_pos, il2cpp::methods::new_string(_("Bullet size")), pos, settings::weapon::thickness, 2.2f, weapon_tab);
 						//checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Removals"), &settings::weapon::weapon_removals, weapon_tab);
+
 						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Legit recoil"), &settings::weapon::legit_recoil, weapon_tab); //
 						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"No Recoil"), &settings::weapon::norecoil, weapon_tab);		 // make into slider?
 						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"No Spread"), &settings::weapon::nospread, weapon_tab);		 //

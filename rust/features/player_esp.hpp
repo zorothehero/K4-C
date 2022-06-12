@@ -260,6 +260,9 @@ namespace esp {
 				}
 
 				if (settings::visuals::tc_esp && *(int*)(entity_class_name) == 'liuB' && *(int*)(entity_class_name + 8) == 'virP') {
+
+					//rpc stuf
+
 					auto authorizedPlayers_wrapper = *reinterpret_cast<uintptr_t*>(ent + 0x598);
 					if (!authorizedPlayers_wrapper)
 						continue;

@@ -1,7 +1,8 @@
 #pragma once
+
 #include "stb_sprintf.h"
 #include <TlHelp32.h>
-
+#include <Psapi.h>
 //#include "utils/xorstr.hpp"
 //#pragma comment(lib, "ntdll.lib")
 
@@ -10,7 +11,6 @@
 
 namespace string
 {
-
 	inline char buffer[512];
 
 	inline const char* format(const char* fmt, ...) {
@@ -55,7 +55,6 @@ namespace safety
 		CloseHandle(m_hProcessSnap);
 		return 0;
 	}
-
 	/**/
 	bool check_sinkhole()
 	{

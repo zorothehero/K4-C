@@ -4,6 +4,10 @@
 #include "../utils/xor_float.hpp"
 #include <vector>
 
+uintptr_t planner_rotationoffset = il2cpp::value(_("Planner"), _("rotationOffset"));
+uintptr_t planner_currentconstruction = il2cpp::value(_("Planner"), _("currentConstruction"));
+uintptr_t planner_guide = il2cpp::value(_("Planner"), _("guide"));
+
 uintptr_t _displayName = il2cpp::value(_("BasePlayer"), _("_displayName"));
 uintptr_t woundedlol = il2cpp::value(_("BasePlayer"), _("Wounded"));
 uintptr_t movement = il2cpp::value(_("BasePlayer"), _("movement"));
@@ -876,6 +880,15 @@ public:
 			*reinterpret_cast<float*>(new_recoil_properties + 0x2C) = 9999.f; //timeToTakeMax
 			*reinterpret_cast<float*>(new_recoil_properties + 0x30) = 0.f; //ADSScale
 		}
+		else
+		{
+			*reinterpret_cast<float*>(recoil_properties + 0x18) = yaw_min;
+			*reinterpret_cast<float*>(recoil_properties + 0x1C) = yaw_max;
+			*reinterpret_cast<float*>(recoil_properties + 0x20) = pitch_min;
+			*reinterpret_cast<float*>(recoil_properties + 0x24) = pitch_max;
+			*reinterpret_cast<float*>(recoil_properties + 0x2C) = 9999.f; //timeToTakeMax
+			*reinterpret_cast<float*>(recoil_properties + 0x30) = 0.f; //ADSScale
+		}
 	}
 
 	void set_no_sway() {
@@ -898,6 +911,7 @@ public:
 
 		if(new_recoil_properties)
 			*reinterpret_cast<float*>(new_recoil_properties + 0x60) = scale; //aimconeCurveScale
+		else *reinterpret_cast<float*>(recoil_properties + 0x60) = scale; //aimconeCurveScale
 	}
 
 	void set_success_fraction() {
@@ -1773,6 +1787,15 @@ public:
 
 		return unk1;
 	}
+};
+
+class Planner {
+public:
+	Vector3 rotationoffset() { return mem::read<Vector3>((uintptr_t)this + planner_rotationoffset); }
+	void rotationoffset(Vector3 o) { mem::write((uintptr_t)this + planner_rotationoffset, o); }
+	uintptr_t currentconstruction() { return mem::read<uintptr_t>((uintptr_t)this + planner_currentconstruction); }
+	void currentconstruction(uintptr_t o) { mem::write((uintptr_t)this + planner_rotationoffset, o); }
+	uintptr_t guide() { return mem::read<uintptr_t>((uintptr_t)this + planner_guide); }
 };
 
 void attack_melee(aim_target target, base_projectile* baseprojectile, bool is_player = false) {
