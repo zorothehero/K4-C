@@ -85,5 +85,6 @@
       <Filter>utils</Filter>
     </ClInclude>
     <ClInclude Include="mmisc.hpp" />
+    <ClInclude Include="spherearray.h" />
   </ItemGroup>
 </Project>

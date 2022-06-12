@@ -50,6 +50,13 @@ bool DllMain(HMODULE hmodule)
 			init_bp();
 
 			init_projectile();
+
+			//LI_FIND(AllocConsole)();
+			//LI_FIND(SetConsoleTitleA)(_("dbg"));
+			//LI_FIND(freopen_s)(reinterpret_cast<FILE**>(stdin), _("CONIN$"), _("r"), stdin);
+			//LI_FIND(freopen_s)(reinterpret_cast<FILE**>(stdout), _("CONOUT$"), _("w"), stdout);
+			//ShowWindow(GetCon, SW_HIDE);
+
 			has_initialized = true;
 		}
 	}

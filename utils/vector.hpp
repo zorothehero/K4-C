@@ -21,6 +21,10 @@ public:
 			value1.x + (value2.x - value1.x) * amount,
 			value1.y + (value2.y - value1.y) * amount);
 	}
+
+	inline float Distance(const Vector2& Dst) {
+		return sqrt(powf(this->x - Dst.x, 2) + powf(this->y - Dst.y, 2));
+	}
 };
 struct weapon_stats_t {
 	float initial_velocity;
@@ -123,6 +127,24 @@ public:
 	inline float Length()
 	{
 		return my_sqrt((x * x) + (y * y) + (z * z));
+	}
+
+	Vector3 MoveTowards(Vector3 current, Vector3 target, float maxDistanceDelta)
+	{
+		// avoid vector ops because current scripting backends are terrible at inlining
+		float toVector_x = target.x - current.x;
+		float toVector_y = target.y - current.y;
+		float toVector_z = target.z - current.z;
+
+		float sqdist = toVector_x * toVector_x + toVector_y * toVector_y + toVector_z * toVector_z;
+
+		if (sqdist == 0 || (maxDistanceDelta >= 0 && sqdist <= maxDistanceDelta * maxDistanceDelta))
+			return target;
+		auto dist = (float)my_sqrt(sqdist);
+
+		return Vector3(current.x + toVector_x / dist * maxDistanceDelta,
+			current.y + toVector_y / dist * maxDistanceDelta,
+			current.z + toVector_z / dist * maxDistanceDelta);
 	}
 
 	static double my_atan(double x)

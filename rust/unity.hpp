@@ -127,9 +127,14 @@ namespace unity {
 		return reinterpret_cast<uintptr_t(*)(rust::classes::string*)>(o)(&n);
 	}
 
-	bool is_visible(Vector3 source, Vector3 destination, uintptr_t player, float p1 = 0.f) {
-		return LineOfSightRadius(source, destination, 1503731969, 0.5f, p1, (uintptr_t)player)
-			&& LineOfSightRadius(destination, source, 1503731969, 0.5f, p1, (uintptr_t)player);
+	bool is_visible(Vector3 source, Vector3 destination, uintptr_t player, float p1 = 0.18f) {
+		__try {
+			auto layer = (int)rust::classes::Layers::ProjectileLineOfSightCheck | (int)rust::classes::Layers::Terrain | (int)rust::classes::Layers::z;
+			typedef bool (*AAA)(Vector3, Vector3, rust::classes::Layers, float, uintptr_t);//real rust 0x50F790         //cracked 0x50ED80
+			return ((AAA)(mem::game_assembly_base + 0x529DD0))(source, destination, rust::classes::Layers(layer), p1, player)
+				&& ((AAA)(mem::game_assembly_base + 0x529DD0))(destination, source, rust::classes::Layers(layer), p1, player);
+		}
+		__except (true) { return false; }
 	}
 
 	auto camera = unity::get_main_camera();

@@ -109,6 +109,7 @@ namespace settings {
 		bool cloth = false;
 		bool barrels = false;
 		bool tc_esp = false;
+		bool angles = true;
 		bool raid_esp = false;
 		bool hackable_crate_esp = false;
 		bool full_box = false;
@@ -160,7 +161,7 @@ namespace settings {
 		bool gravity = false;
 		bool infinite_jump = false;
 		bool fake_lag = false;
-		bool brightnight = false;
+		bool always_day = false;
 		float staramount = 350;
 		bool admin_mode = false;
 		bool view_offset  = false;
@@ -174,5 +175,6 @@ namespace settings {
 		bool interactive_debug = false;
 		bool trollface = false;
 
+		wchar_t* current_config = _(L"");
 	}
 }

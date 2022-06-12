@@ -103,6 +103,8 @@ uintptr_t gravityMultiplier = il2cpp::value(_("PlayerWalkMovement"), _("gravityM
 uintptr_t flying = il2cpp::value(_("PlayerWalkMovement"), _("flying"));
 
 uintptr_t model = il2cpp::value(_("BaseEntity"), _("model"));
+
+
 class base_projectile;
 
 class transform;
@@ -561,6 +563,9 @@ public:
 	void set_damage_properties(uintptr_t damage_properties) {
 		*reinterpret_cast<uintptr_t*>((uintptr_t)this + 0x68) = damage_properties;
 	}
+	Vector3 get_hit_normal_world() {
+
+	}
 };
 
 class GatherPropertyEntry {
@@ -858,19 +863,19 @@ public:
 
 	void set_recoil(float yaw_min, float yaw_max, float pitch_min, float pitch_max) {
 		auto recoil_properties = *reinterpret_cast<uintptr_t*>((uintptr_t)this + recoil);
-		auto new_recoil_properties = *reinterpret_cast<uintptr_t*>((uintptr_t)recoil_properties + 0x78);
-
 		
 		//after update June 5th 2022
+		auto new_recoil_properties = *reinterpret_cast<uintptr_t*>((uintptr_t)recoil_properties + 0x78);
 
-		*reinterpret_cast<float*>(new_recoil_properties + 0x18) = yaw_min;
-		*reinterpret_cast<float*>(new_recoil_properties + 0x1C) = yaw_max;
-		*reinterpret_cast<float*>(new_recoil_properties + 0x20) = pitch_min;
-		*reinterpret_cast<float*>(new_recoil_properties + 0x24) = pitch_max;
-
-		//*reinterpret_cast<float*>(recoil_properties + 0x28) = 0.f; //timeToTakeMin
-		*reinterpret_cast<float*>(new_recoil_properties + 0x2C) = 9999.f; //timeToTakeMax
-		*reinterpret_cast<float*>(new_recoil_properties + 0x30) = 0.f; //ADSScale
+		if (new_recoil_properties)
+		{
+			*reinterpret_cast<float*>(new_recoil_properties + 0x18) = yaw_min;
+			*reinterpret_cast<float*>(new_recoil_properties + 0x1C) = yaw_max;
+			*reinterpret_cast<float*>(new_recoil_properties + 0x20) = pitch_min;
+			*reinterpret_cast<float*>(new_recoil_properties + 0x24) = pitch_max;
+			*reinterpret_cast<float*>(new_recoil_properties + 0x2C) = 9999.f; //timeToTakeMax
+			*reinterpret_cast<float*>(new_recoil_properties + 0x30) = 0.f; //ADSScale
+		}
 	}
 
 	void set_no_sway() {
@@ -891,7 +896,8 @@ public:
 		*reinterpret_cast<float*>((uintptr_t)this + aimconePenaltyPerShot) = scale;
 		*reinterpret_cast<float*>((uintptr_t)this + stancePenaltyScale) = scale;
 
-		*reinterpret_cast<float*>(new_recoil_properties + 0x60) = scale; //aimconeCurveScale
+		if(new_recoil_properties)
+			*reinterpret_cast<float*>(new_recoil_properties + 0x60) = scale; //aimconeCurveScale
 	}
 
 	void set_success_fraction() {
@@ -1236,7 +1242,7 @@ public:
 		if (!this) return 0.f;
 
 		float s = get_maxspeed(this);
-		auto m = get_mountable();
+		auto m = get_mountable() || settings::misc::interactive_debug;
 		if (m)
 			return s * 4;
 		return s;
@@ -1490,6 +1496,7 @@ public:
 	transform* get_bone_transform(int bone_id) {
 		__try {
 			uintptr_t entity_model = *reinterpret_cast<uintptr_t*>((uintptr_t)this + 0x130); //public Model model; // 
+			//uintptr_t entity_model = *reinterpret_cast<uintptr_t*>((uintptr_t)this + 0x128); //public Model model; // 
 			uintptr_t bone_dict = *reinterpret_cast<uintptr_t*>(entity_model + 0x48);
 			transform* BoneValue = *reinterpret_cast<transform**>(bone_dict + 0x20 + bone_id * 0x8);
 
@@ -1500,25 +1507,8 @@ public:
 		}
 	}
 
-	bool is_visible(Vector3 source, Vector3 destination, float p1 = 0.f) {
-		__try
-		{
-			//Line(source, destination, col(1, 1, 1, 1), 0.02f, false, true);
-			return unity::LineOfSightRadius(source, destination, 1503731969, 0.5f, p1, (uintptr_t)this)
-				&& unity::LineOfSightRadius(destination, source, 1503731969, 0.5f, p1, (uintptr_t)this);
-				//&& unity::LineOfSightRadius(source, destination, 10551296, 0.f, p1, this)
-				//&& unity::LineOfSightRadius(destination, source, 10551296, 0.f, p1, this);
-		}
-		__except (true) 
-		{
-			return false;
-		}
-
-		return false;
-		//return LineOfSightRadius(source, destination, 10551296, radius, p1)
-		//	&& LineOfSightRadius(destination, source, 10551296, radius, p1)
-		//	&& LineOfSightRadius(source, destination, 2162688, radius, p1)
-		//	&& LineOfSightRadius(destination, source, 2162688, radius, p1);
+	bool is_visible(Vector3 source, Vector3 destination, float p1 = 0.2f) {
+		return unity::is_visible(source, destination, (uintptr_t)this, p1);
 	}
 
 	rust::list<weapon*>* get_belt_items()

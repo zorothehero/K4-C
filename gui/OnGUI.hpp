@@ -445,6 +445,8 @@ namespace gui {
 			y += addy;
 		}
 	}
+
+
 	void vertical_line(Vector2 pos, float size, Color clr)
 	{
 		methods::set_color(clr);
@@ -583,6 +585,40 @@ namespace gui {
 	bool combo_clicked = false;
 	bool true_placehold = true;
 	bool false_placehold = false;
+	wchar_t* current_text;
+	bool inputting_text = false;
+
+	void textbox(rust::classes::EventType event, Vector2 pos, Vector2& current_pos, Vector2 mouse, wchar_t* name, const wchar_t* str) {
+
+		pos.x += 5;
+
+		rust::classes::Rect poz = rust::classes::Rect(pos.x + tab_size.x + 2.0f, pos.y + current_pos.y, 150, 20);
+		fill_box(poz, rgba(14.f, 18.f, 24.f, 255.f));
+		if (poz.Contains(mouse))
+		{
+			rust::classes::Rect t = rust::classes::Rect(pos.x + tab_size.x + 2.0f, pos.y + current_pos.y + 18, 200, 2);
+			fill_box(poz, rgba(159.f, 163.f, 169.f, 255.f));
+		}
+		if (event == rust::classes::EventType::MouseDown)
+		{
+			if (poz.Contains(mouse)
+				&& LI_FIND(wcscmp)(current_text, str)) //if clicked and current_text is not desired
+				LI_FIND(wcscpy)(current_text, str); //set current text to desired
+			else if (poz.Contains(mouse) && !LI_FIND(wcscmp)(current_text, str)) //user has clicked the control again
+				LI_FIND(wcscpy)(current_text, _(L"")); //set current text empty
+		}
+
+		if (!LI_FIND(wcscmp)(current_text, str)) //
+		{
+			//current text has been clicked
+			poz = rust::classes::Rect(pos.x + tab_size.x + 2.0f, pos.y + current_pos.y + 18, 200, 2);
+			fill_box(poz, rgba(249.f, 130.f, 109.f, 255.f));
+		}
+
+		//draw label of current_text
+		gui::Label({ poz.x + 2, poz.y, poz.wid, poz.hei }, rust::classes::string(str), rgba(249.f, 130.f, 109.f, (opacity / 255.f)), true, 10);
+		current_pos.y += 20;
+	}
 
 	void combobox(rust::classes::EventType event, Vector2 pos, Vector2& current_pos, Vector2 mouse, const wchar_t* name, std::array<wchar_t*, 8> combo_str, std::array<bool*, 8> combo) {
 		pos.x += 10;
@@ -724,6 +760,11 @@ namespace gui {
 			*kbref = (int)(key);
 			getting_keybind = false;
 			//keybind_map[keybind_str] = key;
+		}
+
+		if (current_text) {
+			auto c = get_keystr((int)(key));
+			LI_FIND(wcscat)(current_text, c);
 		}
 	}
 
@@ -1074,6 +1115,8 @@ namespace gui {
 						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"No Sway"), &settings::weapon::nosway, weapon_tab); //doesnt work?
 						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Automatic"), &settings::weapon::automatic, weapon_tab);
 
+						//textbox(event_type, menu_pos, pos, mouse_pos, _(L"Config"), settings::misc::current_config);
+
 						menu_pos.x += 170;
 						pos.y = 0; //?
 
@@ -1143,6 +1186,7 @@ namespace gui {
 						//checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Animals"), &settings::visuals::animal, other_esp);
 						//checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Barrels"), &settings::visuals::barrels, other_esp);
 						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Tool cupboard"), &settings::visuals::tc_esp, other_esp);
+						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Manipulator angles"), &settings::visuals::angles, other_esp);
 						break;
 					case 3:
 						//checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Player Movement"), &settings::misc::Movement, misc_tab);
@@ -1164,6 +1208,7 @@ namespace gui {
 						pos.y = 0; //?
 
 						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Admin mode"), &settings::misc::admin_mode, misc_tab);
+						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Always day"), &settings::misc::always_day, misc_tab);
 						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Flyhack stop"), &settings::misc::flyhack_stop, misc_tab);
 						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"No collisions"), &settings::misc::no_playercollision, misc_tab);
 						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Interactive debug"), &settings::misc::interactive_debug, misc_tab);
@@ -1171,6 +1216,8 @@ namespace gui {
 						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"No recycler"), &settings::misc::norecycler, misc_tab);
 						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Suicide"), &settings::misc::TakeFallDamage, misc_tab, true, &settings::keybind::suicide);
 						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Longneck"), &settings::misc::eyeoffset, misc_tab, true, &settings::keybind::neck);
+
+
 						Slider(event_type, menu_pos, mouse_pos, il2cpp::methods::new_string(_("Size")), pos, settings::misc::playereyes, 1.5f, misc_tab);
 						//checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Player FOV"), &settings::misc::playerfovtoggle, misc_tab);
 						Slider(event_type, menu_pos, mouse_pos, il2cpp::methods::new_string(_("Player fov")), pos, settings::misc::playerfov, 150, misc_tab);
@@ -1178,6 +1225,8 @@ namespace gui {
 						Slider(event_type, menu_pos, mouse_pos, il2cpp::methods::new_string(_("Zoom fov")), pos, settings::misc::zoomfov, 50, misc_tab);
 						//checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Brightnight"), &settings::misc::brightnight, misc_tab);
 						Slider(event_type, menu_pos, mouse_pos, il2cpp::methods::new_string(_("Stars")), pos, settings::misc::staramount, 1000, misc_tab);
+
+
 						break;
 					case 4:
 						buttonvis(event_type, menu_pos, pos, mouse_pos, _(L"Visible color"), &settings::misc::trollface, color_tab, Color(settings::visuals::VisRcolor, settings::visuals::VisGcolor, settings::visuals::VisBcolor, 1)); {
@@ -1546,7 +1595,7 @@ namespace esp
 		if (!local_player)
 			return;
 
-		do_chams(player);
+		//do_chams(player);
 
 		//   esp colors
 		auto visible_color = gui::Color(settings::visuals::VisRcolor, settings::visuals::VisGcolor, settings::visuals::VisBcolor, 1);
@@ -1563,38 +1612,38 @@ namespace esp
 			bool visible;
 		};
 
-		std::array<bone_t, 50> bones = {
+		std::array<bone_t, 20> bones = {
 			//additional to original 20 (15 * 2) = 50
-			bone_t{ Vector3{}, 58, false, Vector3{}, false },  // r_index1
-			bone_t{ Vector3{}, 59, false, Vector3{}, false },  // r_index2
-			bone_t{ Vector3{}, 60, false, Vector3{}, false },  // r_index3
-			bone_t{ Vector3{}, 61, false, Vector3{}, false },  // r_little1
-			bone_t{ Vector3{}, 62, false, Vector3{}, false },  // r_little2
-			bone_t{ Vector3{}, 63, false, Vector3{}, false },  // r_little3
-			bone_t{ Vector3{}, 64, false, Vector3{}, false },  // r_middle1
-			bone_t{ Vector3{}, 65, false, Vector3{}, false },  // r_middle2
-			bone_t{ Vector3{}, 66, false, Vector3{}, false },  // r_middle3
-			bone_t{ Vector3{}, 68, false, Vector3{}, false },  // r_ring1
-			bone_t{ Vector3{}, 69, false, Vector3{}, false },  // r_ring2
-			bone_t{ Vector3{}, 70, false, Vector3{}, false },  // r_ring3
-			bone_t{ Vector3{}, 71, false, Vector3{}, false },  // r_thumb1
-			bone_t{ Vector3{}, 72, false, Vector3{}, false },  // r_thumb2
-			bone_t{ Vector3{}, 73, false, Vector3{}, false },  // r_thumb3
-			bone_t{ Vector3{}, 27, false, Vector3{}, false },  // l_index1
-			bone_t{ Vector3{}, 28, false, Vector3{}, false },  // l_index2
-			bone_t{ Vector3{}, 29, false, Vector3{}, false },  // l_index3
-			bone_t{ Vector3{}, 30, false, Vector3{}, false },  // l_little1
-			bone_t{ Vector3{}, 31, false, Vector3{}, false },  // l_little2
-			bone_t{ Vector3{}, 32, false, Vector3{}, false },  // l_little3
-			bone_t{ Vector3{}, 33, false, Vector3{}, false },  // l_middle1
-			bone_t{ Vector3{}, 34, false, Vector3{}, false },  // l_middle2
-			bone_t{ Vector3{}, 35, false, Vector3{}, false },  // l_middle3
-			bone_t{ Vector3{}, 37, false, Vector3{}, false },  // l_ring1
-			bone_t{ Vector3{}, 38, false, Vector3{}, false },  // l_ring2
-			bone_t{ Vector3{}, 39, false, Vector3{}, false },  // l_ring3
-			bone_t{ Vector3{}, 40, false, Vector3{}, false },  // l_thumb1
-			bone_t{ Vector3{}, 41, false, Vector3{}, false },  // l_thumb2
-			bone_t{ Vector3{}, 42, false, Vector3{}, false },  // l_thumb3
+			//bone_t{ Vector3{}, 58, false, Vector3{}, false },  // r_index1
+			//bone_t{ Vector3{}, 59, false, Vector3{}, false },  // r_index2
+			//bone_t{ Vector3{}, 60, false, Vector3{}, false },  // r_index3
+			//bone_t{ Vector3{}, 61, false, Vector3{}, false },  // r_little1
+			//bone_t{ Vector3{}, 62, false, Vector3{}, false },  // r_little2
+			//bone_t{ Vector3{}, 63, false, Vector3{}, false },  // r_little3
+			//bone_t{ Vector3{}, 64, false, Vector3{}, false },  // r_middle1
+			//bone_t{ Vector3{}, 65, false, Vector3{}, false },  // r_middle2
+			//bone_t{ Vector3{}, 66, false, Vector3{}, false },  // r_middle3
+			//bone_t{ Vector3{}, 68, false, Vector3{}, false },  // r_ring1
+			//bone_t{ Vector3{}, 69, false, Vector3{}, false },  // r_ring2
+			//bone_t{ Vector3{}, 70, false, Vector3{}, false },  // r_ring3
+			//bone_t{ Vector3{}, 71, false, Vector3{}, false },  // r_thumb1
+			//bone_t{ Vector3{}, 72, false, Vector3{}, false },  // r_thumb2
+			//bone_t{ Vector3{}, 73, false, Vector3{}, false },  // r_thumb3
+			//bone_t{ Vector3{}, 27, false, Vector3{}, false },  // l_index1
+			//bone_t{ Vector3{}, 28, false, Vector3{}, false },  // l_index2
+			//bone_t{ Vector3{}, 29, false, Vector3{}, false },  // l_index3
+			//bone_t{ Vector3{}, 30, false, Vector3{}, false },  // l_little1
+			//bone_t{ Vector3{}, 31, false, Vector3{}, false },  // l_little2
+			//bone_t{ Vector3{}, 32, false, Vector3{}, false },  // l_little3
+			//bone_t{ Vector3{}, 33, false, Vector3{}, false },  // l_middle1
+			//bone_t{ Vector3{}, 34, false, Vector3{}, false },  // l_middle2
+			//bone_t{ Vector3{}, 35, false, Vector3{}, false },  // l_middle3
+			//bone_t{ Vector3{}, 37, false, Vector3{}, false },  // l_ring1
+			//bone_t{ Vector3{}, 38, false, Vector3{}, false },  // l_ring2
+			//bone_t{ Vector3{}, 39, false, Vector3{}, false },  // l_ring3
+			//bone_t{ Vector3{}, 40, false, Vector3{}, false },  // l_thumb1
+			//bone_t{ Vector3{}, 41, false, Vector3{}, false },  // l_thumb2
+			//bone_t{ Vector3{}, 42, false, Vector3{}, false },  // l_thumb3
 
 			bone_t{ Vector3{}, 2, false, Vector3{}, false },  // l_hip
 			bone_t{ Vector3{}, 3, false, Vector3{}, false },  // l_knee
@@ -1671,8 +1720,8 @@ namespace esp
 
 		if (get_bounds(bounds, 4)) {
 			//if (!is_visible)
-			is_visible = unity::is_visible(camera_position, player->get_bone_transform(48)->get_bone_position(), (uintptr_t)esp::local_player);
-			/*
+			//is_visible = unity::is_visible(camera_position, player->get_bone_transform(48)->get_bone_position(), (uintptr_t)esp::local_player);
+			
 			__try
 			{
 				for (auto& [bone_screen, bone_idx, on_screen, world_position, visible] : bones) {
@@ -1680,7 +1729,7 @@ namespace esp
 					is_visible = unity::is_visible(camera_position, world_position, (uintptr_t)esp::local_player);
 				}
 			}
-			__except (true) { is_visible = false; }*/
+			__except (true) { is_visible = false; }
 			//is_visible = unity::is_visible(camera_position, bones[47].world_position, (uintptr_t)esp::local_player);
 
 			gui::Color clr = !is_teammate ? (is_visible ? visible_color : invisible_color) : teammate_color;
@@ -1837,6 +1886,29 @@ namespace esp
 				// PLAYER NAME
 			}
 
+			std::array<int, 18> skeleton_boneids = {
+					48, //jaw
+					22, //spine4
+					21, //spine3
+					7, //pelvis
+					3, //l_hip
+					14, //r_knee
+					6,
+					17,
+					15,
+					4,
+					55,
+					24,
+					56,
+					25,
+					13,
+					2,
+					26,
+					57
+			};
+
+
+
 			if (settings::visuals::skeleton)
 			{
 				//jaw -> spine4
@@ -1846,8 +1918,23 @@ namespace esp
 				//spine3 -> pelvis
 				//pelvis -- l_knee -> l_ankle_scale -> l_foot
 				//pelvis -- r_knee -> r_ankle_scale -> r_foot
-
-
+				/*
+				for (size_t i = 0; i < 17; i++)
+				{
+					int id = skeleton_boneids[i++];
+					auto transform = player->get_bone_transform(id);
+					Vector3 world_position = transform->get_bone_position();
+					Vector3 v1 = WorldToScreen(world_position);
+					if (id > 17) break;
+					transform = player->get_bone_transform(id);
+					world_position = transform->get_bone_position();
+					Vector3 v2 = WorldToScreen(world_position);
+					if (v1.y >= 1080 || v1.x >= 1920 || v1.x <= 0 || v1.y <= 0) continue;
+					if (v2.y >= 1080 || v2.x >= 1920 || v2.x <= 0 || v2.y <= 0) continue;
+					gui::line(Vector2(v1.x, v1.y), Vector2(v2.x, v2.y), health_color);
+				}
+				*/
+				
 				//jaw
 				auto transform = player->get_bone_transform(48);
 				Vector3 world_position = transform->get_bone_position();
@@ -1976,7 +2063,7 @@ namespace esp
 				//gui::line(Vector2(l_ankle_scale.x, l_ankle_scale.y), Vector2(l_foot.x, l_foot.y), health_color);
 				gui::line(Vector2(r_ankle_scale.x, r_ankle_scale.y), Vector2(r_foot.x, r_foot.y), health_color);
 
-
+				
 				//HANDS??
 			}
 		}

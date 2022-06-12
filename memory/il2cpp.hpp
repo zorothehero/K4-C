@@ -54,7 +54,8 @@ namespace il2cpp {
 
 		static auto runtime_class_init = LI_FIND_DEF(il2cpp_runtime_class_init);
 
-		static auto intialize_method = rb::pattern::find(_("GameAssembly.dll"), _("48 83 EC 48 48 8B 05 ? ? ? ? 48 63 90 ? ? ? ?"));
+		//static auto intialize_method = rb::pattern::find(_("GameAssembly.dll"), _("48 83 EC 48 48 8B 05 ? ? ? ? 48 63 90 ? ? ? ?"));
+		static auto intialize_method = rb::pattern::find(_("GameAssembly.dll"), _("48 83 EC 48 48 8B 05 ? ? ? ? 48 3B 05 ? ? ? ?"));
 
 		using il2cpp_string_new_wrapper = uintptr_t(*)(const char*);
 		static auto new_string = LI_FIND_DEF(il2cpp_string_new_wrapper);
@@ -67,7 +68,8 @@ namespace il2cpp {
 	}
 
 	void init() {
-		methods::intialize_method = rb::pattern::find(_("GameAssembly.dll"), _("48 83 EC 48 48 8B 05 ? ? ? ? 48 63 90 ? ? ? ?"));
+		//methods::intialize_method = rb::pattern::find(_("GameAssembly.dll"), _("48 83 EC 48 48 8B 05 ? ? ? ? 48 63 90 ? ? ? ?"));
+		methods::intialize_method = rb::pattern::find(_("GameAssembly.dll"), _("48 83 EC 48 48 8B 05 ? ? ? ? 48 3B 05 ? ? ? ?"));
 
 		using il2cpp_string_new_wrapper = uintptr_t(*)(const char*);
 		methods::new_string = LI_FIND_DEF(il2cpp_string_new_wrapper);
