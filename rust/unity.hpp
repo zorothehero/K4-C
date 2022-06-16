@@ -121,18 +121,19 @@ namespace unity {
 		return LineOfSightRadius(source, destination, rust::classes::Layers(10551296), radius, 0, entity) && LineOfSightRadius(destination, source, rust::classes::Layers(10551296), radius, 0, entity);
 	}
 */
-	uintptr_t GetType(const wchar_t* name) {
-		static auto o = il2cpp::method(_("Type"), _("GetType"), -1, _(""), _("mscorlib"));
-		auto n = rust::classes::string(name);
-		return reinterpret_cast<uintptr_t(*)(rust::classes::string*)>(o)(&n);
+	uintptr_t GetType(const char* space, const char* name) {
+		//static auto o = il2cpp::method(_("Type"), _("GetType"), -1, _(""), _("mscorlib"));
+		//auto n = rust::classes::string(name);
+		//return reinterpret_cast<uintptr_t(*)(rust::classes::string*)>(o)(&n);
+		return il2cpp::type_object(space, name);
 	}
 
 	bool is_visible(Vector3 source, Vector3 destination, uintptr_t player, float p1 = 0.18f) {
 		__try {
 			auto layer = (int)rust::classes::Layers::ProjectileLineOfSightCheck | (int)rust::classes::Layers::Terrain | (int)rust::classes::Layers::z;
 			typedef bool (*AAA)(Vector3, Vector3, rust::classes::Layers, float, uintptr_t);//real rust 0x50F790         //cracked 0x50ED80
-			return ((AAA)(mem::game_assembly_base + 0x529DD0))(source, destination, rust::classes::Layers(layer), p1, player)
-				&& ((AAA)(mem::game_assembly_base + 0x529DD0))(destination, source, rust::classes::Layers(layer), p1, player);
+			return ((AAA)(mem::game_assembly_base + 0x529DD0/*0x50E9A0*/))(source, destination, rust::classes::Layers(layer), p1, player)
+				&& ((AAA)(mem::game_assembly_base + 0x529DD0/*0x50E9A0*/))(destination, source, rust::classes::Layers(layer), p1, player);
 		}
 		__except (true) { return false; }
 	}

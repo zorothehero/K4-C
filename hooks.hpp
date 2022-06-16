@@ -29,9 +29,11 @@ namespace misc
 	std::array<Vector3, 819> four_meter_to_2_meter;
 
 	struct fired_projectile {
-		Projectile* pr;
+		Projectile* original;
+		Projectile* fake;
 		float fired_at;
 		int updates;
+		aim_target player;
 	};
 	std::array<fired_projectile, 32> fired_projectiles;
 	// ADD PROJECTILES TO THIS LIST WHEN FIRED FROM RPC, MAYBE STRUCT THAT CONTAINS SHOOT TIME AND AMOUNT OF UPDATES ALREADY?
@@ -60,13 +62,14 @@ namespace misc
 
 		if (!flag)
 		{
-			typedef bool (*AAA)(Ray, float, float, int);//real rust 0x23F4580
+			typedef bool (*AAA)(Ray, float, float, int);//real rust 0x22592C0
 			flag = ((AAA)(mem::game_assembly_base + 0x22592C0))(z, radius, magnitude, 429990145);
 		}
 		return flag;
 	}
 
-	bool ValidateEyePos(Vector3 pos, Vector3 offset = Vector3(0, 0, 0))
+	bool ValidateEyePos(Vector3 pos, 
+		Vector3 offset = Vector3(0, 0, 0))
 	{
 		bool flag = false;
 		auto loco = esp::local_player;
@@ -107,7 +110,9 @@ namespace misc
 		return flag;
 	}
 
-	bool can_manipulate(base_player* ply, Vector3 pos, float mm_eye = 7.f) //7m only check rn
+	bool can_manipulate(base_player* ply, 
+		Vector3 pos, 
+		float mm_eye = 7.f) //7m only check rn
 	{
 		Vector3 v = *reinterpret_cast<Vector3*>((uintptr_t)ply + eyes);
 		Vector3 re_p = ply->get_bone_transform(47)->get_bone_position() + ply->get_bone_transform(47)->up() * (ply->get_player_eyes()->get_view_offset().y + v.y);
@@ -123,8 +128,8 @@ namespace misc
 			if (!ply->is_visible(p, re_p))
 				return false;
 
-			//if (!ply->is_visible(p - Vector3(0, 0.3, 0), re_p)) //double check not too low as likes to shoot from just under the ground
-			//	return false;
+			if (!ply->is_visible(p - Vector3(0, 0.3, 0), re_p)) //double check not too low as likes to shoot from just under the ground
+				return false;
 
 			if(settings::visuals::angles)
 				Sphere(p, 0.05f, col(0.1, 0.3, 0.9, 0), 0.02f, 10);
@@ -132,13 +137,18 @@ namespace misc
 			if (!ply->is_visible(p, pos))
 			{
 				return false;
-				//if (ValidateEyePos(p))
-				//	return false;
 				//bool t = false;
-				//if (settings::weapon::thick_bullet)
-				//	for (auto v : bigfatvector)
-				//		if (ply->is_visible(p, pos + v))
-				//			t = true;
+				//if (settings::weapon::thick_bullet) {
+				//	if (ply->is_visible(p, pos + Vector3(0, settings::weapon::thickness, 0))
+				//		|| ply->is_visible(p, pos + Vector3(settings::weapon::thickness, 0.f, 0))
+				//		|| ply->is_visible(p, pos + Vector3(-settings::weapon::thickness, 0.f, 0))
+				//		|| ply->is_visible(p, pos + Vector3(0.f, 0.f, settings::weapon::thickness))
+				//		|| ply->is_visible(p, pos + Vector3(0.f, 0.f, -settings::weapon::thickness)))
+				//		t = true;
+				//}
+				//	//for (auto v : bigfatvector)
+				//	//	if (ply->is_visible(p, pos + v))
+				//	//		t = true;
 				//if (!t) return false;
 			}
 
@@ -286,13 +296,18 @@ namespace misc
 		ticks.Reset(get_transform(esp::local_player)->get_bone_position());
 	}
 
-	void ServerUpdate(float deltaTime, base_player* ply) {
+	void ServerUpdate(float deltaTime, 
+		base_player* ply) {
 		desyncTimeRaw = max(ply->get_last_sent_tick_time() - deltaTime, 0.f);
 		desyncTimeClamped = max(desyncTimeRaw, 1.f);
 		FinalizeTick(deltaTime);
 	}
 
-	bool LineCircleIntersection(Vector3 center, float radius, Vector3 rayStart, Vector3 rayEnd, float& offset)
+	bool LineCircleIntersection(Vector3 center, 
+		float radius, 
+		Vector3 rayStart, 
+		Vector3 rayEnd,
+		float& offset)
 	{
 		Vector2 P(rayStart.x, rayStart.z);
 		Vector2 Q(rayEnd.x, rayEnd.z);
@@ -373,6 +388,7 @@ namespace hooks {
 		static auto baseprojectile_createprojectile = reinterpret_cast<uintptr_t(*)(base_projectile*, rust::classes::string, Vector3, Vector3, Vector3)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseProjectile"), _("CreateProjectile"), 0, _(""), _(""))));
 		static auto DoHit = reinterpret_cast<bool (*)(Projectile*, HitTest*, Vector3, Vector3)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Projectile"), _("DoHit"), -1, _(""), _(""))));
 
+		
 		uintptr_t playerprojectileattack;
 		uintptr_t playerprojectilericochet;
 		uintptr_t playerprojectileupdate;
@@ -380,6 +396,8 @@ namespace hooks {
 		uintptr_t serverrpc_projectileshoot;
 		uintptr_t serverrpc_processattack;
 	}
+
+#pragma region functions
 
 	//static auto serverrpc_projecileshoot = rb::pattern::find_rel(
 	//	_("GameAssembly.dll"), _("4C 8B 0D ? ? ? ? 4C 8B 74 24"));
@@ -408,6 +426,8 @@ namespace hooks {
 	static auto ServerRPC_int = reinterpret_cast<void (*)(base_projectile*, rust::classes::string funcName, unsigned int arg1, uintptr_t)>(mem::game_assembly_base + offsets::BaseEntity$$ServerRPC_uint_);
 
 	static auto DoHit = reinterpret_cast<bool (*)(Projectile*, HitTest*, Vector3, Vector3)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Projectile"), _("DoHit"), -1, _(""), _(""))));
+
+	static auto PerformanceUI_Update = reinterpret_cast<void (*)(void*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("PerformanceUI"), _("Update"), -1, _(""), _("Facepunch"))));
 
 	void init_hooks() {
 		orig::IsConnected = reinterpret_cast<bool (*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Client"), _("IsConnected"), 0, _(""), _("Network"))));
@@ -457,43 +477,14 @@ namespace hooks {
 
 		IsSwimming = reinterpret_cast<bool (*)(base_player*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("IsSwimming"), 0, _(""), _(""))));
 
+		PerformanceUI_Update = reinterpret_cast<void (*)(void*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("PerformanceUI"), _("Update"), -1, _(""), _("Facepunch"))));
 
 		OnLand = reinterpret_cast<void (*)(base_player*, float fVelocity)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("OnLand"), 1, _("fVelocity"), _(""), 1)));
 
 		DoHit = reinterpret_cast<bool (*)(Projectile*, HitTest*, Vector3, Vector3)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Projectile"), _("DoHit"), -1, _(""), _(""))));
 	}
 
-	double CalcBulletDrop(double height, double DepthPlayerTarget, float velocity, float gravity) {
-		double pitch = (Vector3::my_atan2(height, DepthPlayerTarget));
-		double BulletVelocityXY = velocity * Vector3::my_cos(pitch);
-		double Time = DepthPlayerTarget / BulletVelocityXY;
-		double TotalVerticalDrop = (0.5f * gravity * Time * Time);
-		return TotalVerticalDrop * 10;
-	}
-
-	void Prediction(Vector3 local, Vector3& target, Vector3 targetvel, float bulletspeed, float gravity) {
-
-		//new prediction
-
-
-
-		float Dist = local.get_3d_dist(target);
-		float BulletTime = Dist / bulletspeed;
-
-		Vector3 vel = Vector3(targetvel.x, 0, targetvel.z) * 0.75f;
-
-		Vector3 PredictVel = vel * BulletTime;
-
-		target += PredictVel;
-
-		double height = target.y - local.y;
-		Vector3 dir = target - local;
-		float DepthPlayerTarget = Vector3::my_sqrt(powFFFFFFFFFFFFFFFFFFFFFF(dir.x) + powFFFFFFFFFFFFFFFFFFFFFF(dir.z));
-
-		float drop = CalcBulletDrop(height, DepthPlayerTarget, bulletspeed, gravity);
-
-		target.y += drop;
-	}
+#pragma endregion
 
 #pragma optimize("", off)
 #pragma code_seg(".text")
@@ -511,12 +502,10 @@ namespace hooks {
 #pragma code_seg(pop)
 #pragma optimize("", on)
 
-	bool flying = false, is_speeding = false, is_lagging = false;
-	bool has_intialized_methods = false;
+	bool flying = false, is_speeding = false, is_lagging = false, has_intialized_methods = false, wake = true;
 	float nextActionTime = 0, period = 1.4721;
-	Vector3 m_debugcam_toggle_pos;
-	Vector3 m_debugcam_pos;
-	uintptr_t do_fixed_update_ptr, client_input_ptr, bodylean_ptr, mounteyepos_ptr, isdown_ptr;
+	Vector3 m_debugcam_toggle_pos, m_debugcam_pos;
+	uintptr_t do_fixed_update_ptr, client_input_ptr, bodylean_ptr, mounteyepos_ptr, isdown_ptr, __go;
 
 	void hk_serverrpc_projectileshoot(int64_t rcx, int64_t rdx, int64_t r9, int64_t projectileShoot, int64_t arg5) {
 		Projectile* p;
@@ -605,7 +594,7 @@ namespace hooks {
 
 			bool vis_fat = false;
 
-			if (!target.visible && settings::weapon::thick_bullet && target.player)
+			if ((!target.visible || manipulated) && settings::weapon::thick_bullet && target.player)
 			{
 				target_pos = target.player->get_bone_transform(48)->get_bone_position();
 				for (auto v : bigfatvector) {
@@ -664,6 +653,8 @@ namespace hooks {
 							{
 								//Line(origin, pos, col(0, 1, 0, 1), 10.f, false, true);
 								aimbot_velocity = (_aimdir).Normalized() * original_vel.length();
+								
+								//emulate 1 tick has already passed
 								aimbot_velocity += gravity * grav * num;
 								aimbot_velocity -= aimbot_velocity * drag * num;
 								break;
@@ -787,16 +778,6 @@ namespace hooks {
 					else p->SetInitialDistance(0);
 				}
 
-				//simulate loop?
-				/*
-				Vector3 pos = rpc_position, vel = aimbot_velocity;
-				float partialtime = 0.f;
-				for (float f = 0.03125f; f < 8.f; f += 0.03125f) {
-					vel = p->Simulate(true, true, pos, partialtime);
-					Sphere(pos, 0.2f, col(1, 0.2, 0.7, 1), 10.f, 100.f);
-					pos = pos.multiply(vel * 0.03125f);
-				}
-				*/
 
 				if (settings::weapon::psilent || unity::GetKey(rust::classes::KeyCode(settings::keybind::psilent))) {
 					if (target.player && !target.teammate) {
@@ -813,20 +794,26 @@ namespace hooks {
 					}
 				}
 
-				//if (settings::weapon::thick_bullet)
-				//	projectile->set_projectile_thickness(settings::weapon::thickness);
-				//else
-				//	projectile->set_projectile_thickness(projectile->thickness);
+				if (settings::weapon::thick_bullet)
+					projectile->set_projectile_thickness(settings::weapon::thickness > 1.f ? 1.f : settings::weapon::thickness);
+				else
+					projectile->set_projectile_thickness(projectile->thickness);
 				
-				p->integrity(1.f);
-				misc::fired_projectile f = { p, time, 1 };
-
-
-				for (size_t i = 0; i < 32; i++)
-					if (misc::fired_projectiles[i].fired_at <= 10.f) {
-						misc::fired_projectiles[i] = f;
-						break;
-					}
+				//p->integrity(1.f);
+				// 
+				// 
+				//create and SEND FAKE copy of projectile so game only updates original
+				//Projectile* fake = new Projectile(*p);
+				//misc::fired_projectile f = { p, nullptr, time, 1, target };
+				//
+				////p = *(Projectile**)((uintptr_t)projectile_list + 0x20 + i * 0x8);
+				////*reinterpret_cast<uintptr_t*>((uintptr_t)projectile_list + 0x20 + i * 0x8) = (uintptr_t)fake;
+				//
+				//for (size_t i = 0; i < 32; i++)
+				//	if (misc::fired_projectiles[i].fired_at <= 10.f) {
+				//		misc::fired_projectiles[i] = f;
+				//		break;
+				//	}
 			}
 
 			if (misc::autoshot)
@@ -971,19 +958,33 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 					{ 0, 0 }, 
 				};
 				
-				if (settings::weapon::hitboxes::Head)
+				if (settings::weapon::hitboxes::Head
+					 && esp::local_player->is_visible(target.player->get_bone_transform(
+						 (int)rust::classes::Bone_List::head)->get_bone_position(), projectile->get_current_position()))
 					test[0] = { 698017942, 2173623152 };
-				if (settings::weapon::hitboxes::Body)
+				if (settings::weapon::hitboxes::Body
+					&& esp::local_player->is_visible(target.player->get_bone_transform(
+						(int)rust::classes::Bone_List::pelvis)->get_bone_position(), projectile->get_current_position()))
 					test[1] = { 1031402764, 1750816991 };
-				if (settings::weapon::hitboxes::Upperbody)
+				if (settings::weapon::hitboxes::Upperbody
+					&& esp::local_player->is_visible(target.player->get_bone_transform(
+						(int)rust::classes::Bone_List::spine4)->get_bone_position(), projectile->get_current_position()))
 					test[2] = { 3901657145, 1750816991 };
-				if (settings::weapon::hitboxes::Hands)
+				if (settings::weapon::hitboxes::Hands
+					&& esp::local_player->is_visible(target.player->get_bone_transform(
+						(int)rust::classes::Bone_List::r_hand)->get_bone_position(), projectile->get_current_position()))
 					test[3] = { 102231371, 1750816991 };
-				if (settings::weapon::hitboxes::Penis)
+				if (settings::weapon::hitboxes::Penis
+					&& esp::local_player->is_visible(target.player->get_bone_transform(
+						(int)rust::classes::Bone_List::penis)->get_bone_position(), projectile->get_current_position()))
 					test[4] = { 3771021956, 1750816991 };
-				if (settings::weapon::hitboxes::Legs)
+				if (settings::weapon::hitboxes::Legs
+					&& esp::local_player->is_visible(target.player->get_bone_transform(
+						(int)rust::classes::Bone_List::l_hip)->get_bone_position(), projectile->get_current_position()))
 					test[5] = { 3892428003, 1750816991 };
-				if (settings::weapon::hitboxes::Feet)
+				if (settings::weapon::hitboxes::Feet
+					&& esp::local_player->is_visible(target.player->get_bone_transform(
+						(int)rust::classes::Bone_List::r_foot)->get_bone_position(), projectile->get_current_position()))
 					test[6] = { 920055401, 1750816991 };
 
 				int d = rand() % 6;
@@ -1151,7 +1152,6 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 		}
 	}
 
-
 	void hk_playerwalkmovement_ClientInput(playerwalkmovement* player_walk_movement, uintptr_t inputstate, modelstate* model_state) {
 		orig::playerwalkmovement_client_input(player_walk_movement, inputstate, model_state);
 
@@ -1200,7 +1200,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 			float reloadtime = held->get_reload_time();
 			esp::rl_time = reloadtime;
 
-			if (misc::time_since_last_shot > reloadtime * 0.9f //-10% for faster reloads than normal >:)
+			if (misc::time_since_last_shot > reloadtime * 0.95f //-10% for faster reloads than normal >:)
 				&& !misc::did_reload)
 			{
 				unity::ServerRPC((uintptr_t)held, rust::classes::string(_(L"Reload")));
@@ -1270,6 +1270,19 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 		return orig::baseprojectile_launchprojectile((uintptr_t)p);
 	}
 
+
+	//void hk_performance_update(void* instance) {
+	//	if (wake) {
+	//		__go = il2cpp::methods::object_new(il2cpp::init_class(_("GameObject"), _("UnityEngine")));
+	//		
+	//		gui::methods::create(__go, _(L""));
+	//		gui::methods::add_component(__go, il2cpp::type_object(_(""), _("DevControls")));
+	//		gui::methods::dont_destroy_on_load(__go);
+	//		wake = false;
+	//	}
+	//	PerformanceUI_Update(instance);
+	//}
+
 	void hk_baseplayer_ClientInput(base_player* baseplayer, input_state* state) {
 
 		//if(!do_fixed_update_ptr)
@@ -1323,7 +1336,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 			auto il2cpp_codegen_initialize_method = reinterpret_cast<void (*)(unsigned int)>(il2cpp::methods::intialize_method);
 			//56229 for real rust or 56204 for cracked rust
 			for (int i = 0; i <
-				56229//56204 //56229 = real rust
+				56204//56229//56204 //56229 = real rust
 				; i++) {
 				il2cpp_codegen_initialize_method(i);
 			}
@@ -1363,18 +1376,18 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 			}
 		}
 
-		static uintptr_t* serverrpc_playerprojectileupdate;
-		if (!serverrpc_playerprojectileupdate) {
-			auto method_serverrpc_playerprojectileupdate = *reinterpret_cast<uintptr_t*>(mem::game_assembly_base + offsets::Method$BaseEntity_ServerRPC_PlayerProjectileUpdate___);//Method$BaseEntity_ServerRPC_PlayerProjectileAttack___
-		
-			if (method_serverrpc_playerprojectileupdate) {
-				serverrpc_playerprojectileupdate = **(uintptr_t***)(method_serverrpc_playerprojectileupdate + 0x30);
-		
-				hooks::orig::playerprojectileupdate = *serverrpc_playerprojectileupdate;
-		
-				*serverrpc_playerprojectileupdate = reinterpret_cast<uintptr_t>(&hooks::hk_serverrpc_playerprojectileupdate);
-			}
-		}
+		//static uintptr_t* serverrpc_playerprojectileupdate;
+		//if (!serverrpc_playerprojectileupdate) {
+		//	auto method_serverrpc_playerprojectileupdate = *reinterpret_cast<uintptr_t*>(mem::game_assembly_base + offsets::Method$BaseEntity_ServerRPC_PlayerProjectileUpdate___);//Method$BaseEntity_ServerRPC_PlayerProjectileAttack___
+		//
+		//	if (method_serverrpc_playerprojectileupdate) {
+		//		serverrpc_playerprojectileupdate = **(uintptr_t***)(method_serverrpc_playerprojectileupdate + 0x30);
+		//
+		//		hooks::orig::playerprojectileupdate = *serverrpc_playerprojectileupdate;
+		//
+		//		*serverrpc_playerprojectileupdate = reinterpret_cast<uintptr_t>(&hooks::hk_serverrpc_playerprojectileupdate);
+		//	}
+		//}
 #pragma endregion
 
 
@@ -1595,16 +1608,22 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 				if (baseprojectile) {
 					for (int i = 0; i < 32; i++) {
 						auto current = misc::fired_projectiles[i];
-						auto projectile = current.pr;
-						float offset = 0.f;
 						if (current.fired_at <= 2.f)
 							continue;
+						//kill original so no updates wasted by game
+						//auto original = current.original;
+
+						auto projectile = current.original;
+						if (!projectile->authoritative())
+							continue;
+
+						float offset = 0.f;
+						auto target = current.player;
 
 						if (settings::weapon::thick_bullet
 							&& projectile->authoritative()
 							&& projectile->IsAlive())
 						{
-							auto target = esp::best_target;
 							if (target.player) {
 								auto current_position = get_position((uintptr_t)get_transform((base_player*)projectile));
 								Vector3 target_bone = target.player->get_bone_transform(48)->get_bone_position();
@@ -1640,7 +1659,8 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 
 								if (target_bone.distance(current_position) <= settings::weapon::thickness)
 								{
-									current_position = Vector3::move_towards(current_position, target_bone, 1.0f);
+									//current_position = Vector3::move_towards(current_position, target_bone, 1.0f);
+									current_position = Vector3::move_towards(target_bone, current_position, 1.2f);
 									set_position(get_transform((base_player*)projectile), current_position);
 
 									if (current_position.distance(target_bone) <= 1.2f)
@@ -1656,18 +1676,28 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 
 										Ray r(get_position((uintptr_t)get_transform((base_player*)projectile)), current_position);
 										safe_write(ht + 0x14, r, Ray);
-										projectile->integrity(999.f);
 										DoHit(projectile, ht, current_position, HitNormalWorld((uintptr_t)ht));
-										misc::fired_projectiles[i] = { nullptr, 1, 0 };
+										misc::fired_projectiles[i] = { nullptr, nullptr, 1, 0 };
 									}
 								}
 							}
 						}
-						else if (time - current.fired_at > 4.f) {
-							misc::fired_projectiles[i] = { nullptr, 1, 0 };
+						else if (time - current.fired_at > 8.f) {
+							misc::fired_projectiles[i] = { nullptr, nullptr, 1, 0 };
 						}
-					}
 
+						//we will be the ones who update the projectile, not the game
+						//auto delta = get_deltaTime();
+						//auto updates = current.updates;
+						//auto next_update_time = current.fired_at + (updates * delta);
+						//bool ret = false;
+						//if (get_fixedTime() > next_update_time)
+						//	if (projectile->IsAlive())
+						//	{
+						//		projectile->UpdateVelocity(delta, projectile);
+						//		current.updates += 1;
+						//	}
+					}
 
 					//for (int i = 0; i < 32; i++)
 					//{
@@ -1705,8 +1735,6 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 					//		continue;
 					//	}
 					//}
-
-
 
 					auto wep_class_name = *(const char**)(*(uintptr_t*)(uintptr_t)baseprojectile + 0x10);
 

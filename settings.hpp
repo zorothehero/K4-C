@@ -20,31 +20,31 @@ namespace settings {
 	}
 
 	namespace weapon {
-		bool hitbox_override  = false;
+		bool hitbox_override  = true;
 		bool magic_bullet  = false;
 		bool ricochet = false;
 		bool pierce  = false;
 		bool rapidfire = false;
-		float aimbotfov = 500;
-		float thickness = 0.5;
+		float aimbotfov = 500.f;
+		float thickness = 2.2f;
 		bool random_hitbox  = false;
 		bool silent_melee = false;
 		bool weapon_removals  = false;
 		bool always_shoot  = false;
 		bool psilent = true;
 		bool psilentvis = false;
-		bool thick_bullet = false;
+		bool thick_bullet = true;
 		bool legit_recoil = false;
-		bool fast_bullet = false;
-		bool bullet_tp = false;
+		bool fast_bullet = true;
+		bool bullet_tp = true;
 		bool ultraBullet = false;
-		bool norecoil = true;
-		bool nospread = true;
+		bool norecoil = false;
+		bool nospread = false;
 		bool nosway = false;
-		bool automatic = false;
+		bool automatic = true;
 		bool mods = false;
 
-		bool manipulator = false;
+		bool manipulator = true;
 		bool doubletap = true;
 		bool always_reload = true;
 		bool autoshoot = false;
@@ -53,7 +53,7 @@ namespace settings {
 			bool Head = true;
 			bool Body = false;
 			bool Upperbody = false;
-			bool Penis = false;
+			bool Penis = true;
 			bool Hands = false;
 			bool Legs = false;
 			bool Feet = false;
@@ -77,7 +77,7 @@ namespace settings {
 		bool snaplines = true;
 		bool show_fov = false;
 		bool cancer = false;
-		bool misc_esp  = true;
+		bool misc_esp  = false;
 		bool sleeper_esp  = false;
 		bool heli_esp = false;
 		bool outline = false;
@@ -109,14 +109,14 @@ namespace settings {
 		bool cloth = false;
 		bool barrels = false;
 		bool tc_esp = false;
-		bool angles = true;
+		bool angles = false;
 		bool raid_esp = false;
 		bool hackable_crate_esp = false;
 		bool full_box = false;
 		bool corner_box = true;
-		bool bottomhealth = false;
+		bool bottomhealth = true;
 		bool steamid = false;
-		bool sidehealth = true;
+		bool sidehealth = false;
 		bool skeleton = true;
 		bool nameesp = true;
 		bool woundedflag = false;
@@ -130,12 +130,14 @@ namespace settings {
 		namespace shaders {
 			bool normal = false;
 			bool seethrough = false;
-			bool wireframe = true;
+			bool wireframe = false;
 			bool lit = false;
 		}
 	}
 
 	namespace misc {
+		bool auto_upgrade = false;
+		int upgrade_tier = 1;
 		bool flyhack_indicator = false;
 		bool flyhack_stop = false;
 		float    m_idebugcam_speed = 1.f;
@@ -143,7 +145,7 @@ namespace settings {
 		bool playerfovtoggle = false;
 		float playerfov = 90;
 		bool zoomtoggle = false;
-		bool desync = false;
+		bool desync = true;
 		float zoomfov = 10;
 		bool Movement = false;
 		bool eyeoffset = false;
@@ -153,12 +155,12 @@ namespace settings {
 		bool attack_on_mountables = false;
 		bool speedhack = false;
 		bool hitsound = false;
-		float speedhackspeed = 5;
+		float speedhackspeed = 2.5f;
 		bool TakeFallDamage = false;
 		bool silent_farm = false;
 		bool auto_lock = false;
-		bool always_sprint = false;
-		bool gravity = false;
+		bool always_sprint = true;
+		bool gravity = true;
 		bool infinite_jump = false;
 		bool fake_lag = false;
 		bool always_day = false;
@@ -166,10 +168,10 @@ namespace settings {
 		bool admin_mode = false;
 		bool view_offset  = false;
 		bool norecycler = false;
-		bool instant_med  = false;
-		bool instant_revive = false;
-		bool no_playercollision = false;
-		bool spiderman = false;
+		bool instant_med  = true;
+		bool instant_revive = true;
+		bool no_playercollision = true;
+		bool spiderman = true;
 		bool Crosshair = false;
 		bool silentwalk = false;
 		bool interactive_debug = false;

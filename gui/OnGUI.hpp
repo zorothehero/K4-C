@@ -56,6 +56,14 @@ namespace gui {
 		static auto set_gizmos_color = reinterpret_cast<void(*)(gui::Color)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Gizmos"), _("set_color"), -1, _(""), _("UnityEngine"))));
 
 		static auto HorizontalSlider = reinterpret_cast<float(*)(rust::classes::Rect position, float value, float leftValue, float rightValue)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GUI"), _("HorizontalSlider"), 4, _(""), _("UnityEngine"))));
+		
+		//static auto dont_destroy_on_load = reinterpret_cast<void(*)(uintptr_t target)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Object"), _("DontDestroyOnLoad"), 0, _(""), _("UnityEngine"))));
+		//
+		//static auto create = reinterpret_cast<void(*)(uintptr_t self, rust::classes::string shader)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GameObject"), _("InternalCreateGameObject"), 0, _(""), _("UnityEngine"))));
+		//
+		//static auto add_component = reinterpret_cast<void(*)(uintptr_t self, uintptr_t componentType)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GameObject"), _("InternalAddComponentWithType"), 0, _(""), _("UnityEngine"))));
+
+		//static auto name = reinterpret_cast<void(*)( )>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_(""), _(""), 0, _(""), _(""))));
 	}
 
 	uintptr_t white_texture;
@@ -102,6 +110,12 @@ namespace gui {
 		methods::DrawLine = reinterpret_cast<void (*)(Vector3, Vector3, gui::Color)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Debug"), _("DrawLine"), 3, _("color"), _("UnityEngine"), 3)));
 
 		methods::set_gizmos_color = reinterpret_cast<void(*)(gui::Color)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Gizmos"), _("set_color"), -1, _(""), _("UnityEngine"))));
+
+		//methods::dont_destroy_on_load = reinterpret_cast<void(*)(uintptr_t target)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Object"), _("DontDestroyOnLoad"), 0, _(""), _("UnityEngine"))));
+		//
+		//methods::create = reinterpret_cast<void(*)(uintptr_t self, rust::classes::string shader)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GameObject"), _("InternalCreateGameObject"), 0, _(""), _("UnityEngine"))));
+		//
+		//methods::add_component = reinterpret_cast<void(*)(uintptr_t self, uintptr_t componentType)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GameObject"), _("InternalAddComponentWithType"), 0, _(""), _("UnityEngine"))));
 
 		white_texture = methods::get_whiteTexture();
 	}
@@ -473,10 +487,10 @@ namespace gui {
 
 		if (unity::bundle)
 		{
-			unity::chams_shader_normal = unity::LoadAsset(unity::bundle, _(L"Chams"), unity::GetType(_(L"UnityEngine.Shader, UnityEngine.CoreModule")));
-			unity::chams_shader_seethru = unity::LoadAsset(unity::bundle, _(L"SeethroughShader"), unity::GetType(_(L"UnityEngine.Shader, UnityEngine.CoreModule")));
-			unity::chams_shader_wireframe = unity::LoadAsset(unity::bundle, _(L"WireframeTransparent"), unity::GetType(_(L"UnityEngine.Shader, UnityEngine.CoreModule")));
-			unity::chams_shader_lit = unity::LoadAsset(unity::bundle, _(L"chamslit"), unity::GetType(_(L"UnityEngine.Shader, UnityEngine.CoreModule")));
+			//unity::chams_shader_normal = unity::LoadAsset(unity::bundle, _(L"Chams"), unity::GetType(_(L"UnityEngine.Shader, UnityEngine.CoreModule")));
+			//unity::chams_shader_seethru = unity::LoadAsset(unity::bundle, _(L"SeethroughShader"), unity::GetType(_(L"UnityEngine.Shader, UnityEngine.CoreModule")));
+			//unity::chams_shader_wireframe = unity::LoadAsset(unity::bundle, _(L"WireframeTransparent"), unity::GetType(_(L"UnityEngine.Shader, UnityEngine.CoreModule")));
+			//unity::chams_shader_lit = unity::LoadAsset(unity::bundle, _(L"chamslit"), unity::GetType(_(L"UnityEngine.Shader, UnityEngine.CoreModule")));
 		}
 
 
@@ -1217,6 +1231,7 @@ namespace gui {
 						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"No recycler"), &settings::misc::norecycler, misc_tab);
 						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Suicide"), &settings::misc::TakeFallDamage, misc_tab, true, &settings::keybind::suicide);
 						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Longneck"), &settings::misc::eyeoffset, misc_tab, true, &settings::keybind::neck);
+						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Auto upgrade"), &settings::misc::auto_upgrade, misc_tab);
 
 
 						Slider(event_type, menu_pos, mouse_pos, il2cpp::methods::new_string(_("Size")), pos, settings::misc::playereyes, 1.5f, misc_tab);
@@ -1938,91 +1953,109 @@ namespace esp
 				
 				//jaw
 				auto transform = player->get_bone_transform(48);
+				if (!transform) return;
 				Vector3 world_position = transform->get_bone_position();
 				Vector3 jaw = WorldToScreen(world_position);
 
 				//spine4
 				transform = player->get_bone_transform(22);
+				if (!transform) return;
 				world_position = transform->get_bone_position();
 				Vector3 spine4 = WorldToScreen(world_position);
 
 				//spine3
 				transform = player->get_bone_transform(21);
+				if (!transform) return;
 				world_position = transform->get_bone_position();
 				Vector3 spine3 = WorldToScreen(world_position);
 
 				//pelvis
 				transform = player->get_bone_transform(7);
+				if (!transform) return;
 				world_position = transform->get_bone_position();
 				Vector3 pelvis = WorldToScreen(world_position);
 
 				//l_hip
 				transform = player->get_bone_transform(3);
+				if (!transform) return;
 				world_position = transform->get_bone_position();
 				Vector3 l_hip = WorldToScreen(world_position);
 
 				//r_knee
 				transform = player->get_bone_transform(14);
+				if (!transform) return;
 				world_position = transform->get_bone_position();
 				Vector3 r_knee = WorldToScreen(world_position);
 
 				//l_ankle_scale
 				transform = player->get_bone_transform(6);
+				if (!transform) return;
 				world_position = transform->get_bone_position();
 				Vector3 l_ankle_scale = WorldToScreen(world_position);
 
 				//r_ankle_scale
 				transform = player->get_bone_transform(17);
+				if (!transform) return;
 				world_position = transform->get_bone_position();
 				Vector3 r_ankle_scale = WorldToScreen(world_position);
 
 				//r_foot
 				transform = player->get_bone_transform(15);
+				if (!transform) return;
 				world_position = transform->get_bone_position();
 				Vector3 r_foot = WorldToScreen(world_position);
 
 				//l_foot
 				transform = player->get_bone_transform(4);
+				if (!transform) return;
 				world_position = transform->get_bone_position();
 				Vector3 l_foot = WorldToScreen(world_position);
 
 				//r_upperarm
 				transform = player->get_bone_transform(55);
+				if (!transform) return;
 				world_position = transform->get_bone_position();
 				Vector3 r_upperarm = WorldToScreen(world_position);
 
 				//l_upperarm
 				transform = player->get_bone_transform(24);
+				if (!transform) return;
 				world_position = transform->get_bone_position();
 				Vector3 l_upperarm = WorldToScreen(world_position);
 
 				//r_forearm
 				transform = player->get_bone_transform(56);
+				if (!transform) return;
 				world_position = transform->get_bone_position();
 				Vector3 r_forearm = WorldToScreen(world_position);
 
 				//l_forearm
 				transform = player->get_bone_transform(25);
+				if (!transform) return;
 				world_position = transform->get_bone_position();
 				Vector3 l_forearm = WorldToScreen(world_position);
 
 				//r_hip
 				transform = player->get_bone_transform(13);
+				if (!transform) return;
 				world_position = transform->get_bone_position();
 				Vector3 r_hip = WorldToScreen(world_position);
 
 				//l_knee
 				transform = player->get_bone_transform(2);
+				if (!transform) return;
 				world_position = transform->get_bone_position();
 				Vector3 l_knee = WorldToScreen(world_position);
 
 				//l_hand
 				transform = player->get_bone_transform(26);
+				if (!transform) return;
 				world_position = transform->get_bone_position();
 				Vector3 l_hand = WorldToScreen(world_position);
 
 				//r_hand
 				transform = player->get_bone_transform(57);
+				if (!transform) return;
 				world_position = transform->get_bone_position();
 				Vector3 r_hand = WorldToScreen(world_position);
 

@@ -252,6 +252,17 @@ namespace rust {
 			z = 1503731969,
 		};
 
+		enum class BuildingGrade
+		{
+			None = -1,
+			Twigs = 0,
+			Wood = 1,
+			Stone = 2,
+			Metal = 3,
+			TopTier = 4,
+			Count = 5
+		};
+
 		enum class Bone_List : int
 		{
 			pelvis = 1,

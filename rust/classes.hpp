@@ -27,6 +27,10 @@ uintptr_t itemList = il2cpp::value(_("ItemContainer"), _("itemList"));
 uintptr_t userID = il2cpp::value(_("BasePlayer"), _("userID"));
 uintptr_t mounted = il2cpp::value(_("BasePlayer"), _("mounted"));
 
+
+uintptr_t building_grade = il2cpp::value(_("BuildingBlock"), _("grade"));
+
+
 uintptr_t newVelocity = il2cpp::value(_("PlayerModel"), _("newVelocity"));
 uintptr_t isLocalPlayer = il2cpp::value(_("PlayerModel"), _("isLocalPlayer"));
 
@@ -198,6 +202,8 @@ static auto get_transform = reinterpret_cast<transform * (*)(base_player*)>(*rei
 
 static auto get_gameObject = reinterpret_cast<uintptr_t(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Component"), _("get_gameObject"), 0, _(""), _("UnityEngine"))));
 
+static auto get_component = reinterpret_cast<uintptr_t(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Component"), _("GetComponent"), 0, _(""), _("UnityEngine"))));
+
 static auto set_position = reinterpret_cast<void(*)(transform*, Vector3 value)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Transform"), _("set_position"), 1, _(""), _("UnityEngine"))));
 
 static auto get_up = reinterpret_cast<Vector3(*)(transform*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Transform"), _("get_up"), 0, _(""), _("UnityEngine"))));
@@ -241,6 +247,16 @@ static auto shot_fired = reinterpret_cast<void(*)(uintptr_t)>(*reinterpret_cast<
 static auto did_attack_client_side = reinterpret_cast<void(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseProjectile"), _("DidAttackClientside"), 0, _(""), _(""))));
 
 static auto getmodifiedaimcone = reinterpret_cast<Vector3(*)(float, Vector3, bool)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("AimConeUtil"), _("GetModifiedAimConeDirection"), 0, _(""), _(""))));
+
+static auto canaffordupgrade = reinterpret_cast<bool(*)(uintptr_t, rust::classes::BuildingGrade, base_player*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BuildingBlock"), _("CanAffordUpgrade"), 0, _(""), _(""))));
+
+static auto canchangetograde = reinterpret_cast<bool(*)(uintptr_t, rust::classes::BuildingGrade, base_player*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BuildingBlock"), _("CanChangeToGrade"), 0, _(""), _(""))));
+
+static auto upgradetograde = reinterpret_cast<void(*)(uintptr_t, rust::classes::BuildingGrade, base_player*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BuildingBlock"), _("UpgradeToGrade"), 0, _(""), _(""))));
+
+
+
+//static auto name = reinterpret_cast<void*(*)(void* args_here)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("class"), _("function name"), 0, _(""), _(""))));
 
 
 class col {
@@ -293,6 +309,8 @@ void init_bp() {
 	FindBone = reinterpret_cast<transform * (*)(base_player*, rust::classes::string)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseEntity"), _("FindBone"), 1, _(""), _(""))));
 	get_isAlive = reinterpret_cast<bool (*)(base_projectile*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Projectile"), _("get_isAlive"), 0, _(""), _(""))));
 	get_mousePosition = reinterpret_cast<Vector3(*)()>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Input"), _("get_mousePosition"), 0, _(""), _("UnityEngine"))));
+
+	get_component = reinterpret_cast<uintptr_t(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Component"), _("GetComponent"), 0, _(""), _("UnityEngine"))));
 
 	PEyes_get_position = reinterpret_cast<Vector3(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("PlayerEyes"), _("get_position"), 0, _(""), _(""))));
 
@@ -999,6 +1017,7 @@ public:
 	base_projectile* get_base_projectile() {
 		__try
 		{
+			if (!this) return nullptr;
 			return *reinterpret_cast<base_projectile**>((uintptr_t)this + heldEntity);
 		}
 		__except (true)
@@ -1095,6 +1114,12 @@ class networkable {
 public:
 	unsigned int get_id() {
 		return *reinterpret_cast<unsigned int*>((uintptr_t)this + 0x10);
+	}
+
+	template<typename T = uintptr_t>
+	T* GetComponent(uintptr_t type) {
+		if (!this || !type) return nullptr;
+		return (T*)get_component(type);
 	}
 };
 
@@ -1284,15 +1309,14 @@ public:
 			zooming = false;
 		}
 
-		if (zooming) {
-			auto convar = *reinterpret_cast<uintptr_t*>((uintptr_t)mem::game_assembly_base + 52527840); //"ConVar_Graphics_c*"
+		if (zooming) {//0x32182E0
+			auto convar = *reinterpret_cast<uintptr_t*>((uintptr_t)mem::game_assembly_base + 52531944); //"ConVar_Graphics_c*"
 			auto unknown = *reinterpret_cast<uintptr_t*>((uintptr_t)convar + 0xb8);
 			*reinterpret_cast<float*>(unknown + 0x18) = settings::misc::zoomfov;
 		}
 
 		if (!zooming) {
-
-			auto convar = *reinterpret_cast<uintptr_t*>((uintptr_t)mem::game_assembly_base + 52527840); //"ConVar_Graphics_c*"
+			auto convar = *reinterpret_cast<uintptr_t*>((uintptr_t)mem::game_assembly_base + 52531944); //"ConVar_Graphics_c*"
 			auto unknown = *reinterpret_cast<uintptr_t*>((uintptr_t)convar + 0xb8);
 			*reinterpret_cast<float*>(unknown + 0x18) = settings::misc::playerfov;
 		}
@@ -1511,6 +1535,7 @@ public:
 		__try {
 			uintptr_t entity_model = *reinterpret_cast<uintptr_t*>((uintptr_t)this + 0x130); //public Model model; // 
 			//uintptr_t entity_model = *reinterpret_cast<uintptr_t*>((uintptr_t)this + 0x128); //public Model model; // 
+			if (!entity_model) return nullptr;
 			uintptr_t bone_dict = *reinterpret_cast<uintptr_t*>(entity_model + 0x48);
 			transform* BoneValue = *reinterpret_cast<transform**>(bone_dict + 0x20 + bone_id * 0x8);
 
@@ -1569,6 +1594,64 @@ public:
 			return {};
 
 		return item_list;
+	}
+
+	template<typename T = networkable*>
+	T find_closest(char* class_name , networkable* target_entity, float max_distance) {
+		auto client_entities = il2cpp::value(_("BaseNetworkable"), _("clientEntities"), false);
+		if (!client_entities)
+			return { nullptr };
+
+		rust::classes::list* entity_list = (rust::classes::list*)client_entities; 
+		
+		auto list_value = entity_list->get_value<uintptr_t>();
+		if (!list_value)
+			return { nullptr };
+
+		auto size = entity_list->get_size();
+		if (!size)
+			return { nullptr };
+
+		auto buffer = entity_list->get_buffer<uintptr_t>();
+		if (!buffer)
+			return { nullptr };
+
+		auto closest_entity_distance = 9999;
+		T best_ent = nullptr;
+
+		for (int i = 0; i <= size; i++) {
+			auto current_object = *reinterpret_cast<uintptr_t*>(buffer + 0x20 + (i * 0x8));
+			if (!current_object)
+				continue;
+
+			auto base_object = *reinterpret_cast<uintptr_t*>(current_object + 0x10);
+			if (!base_object)
+				continue;
+
+			auto object = *reinterpret_cast<uintptr_t*>(base_object + 0x30);
+			if (!object)
+				continue;
+
+			auto ent = *reinterpret_cast<uintptr_t*>(base_object + 0x28);
+			auto ent_class = *reinterpret_cast<uintptr_t*>(ent);
+			auto entity_class_name = (char*)*reinterpret_cast<uintptr_t*>(ent_class + 0x10);
+
+			auto name = *(int*)(entity_class_name);
+
+			auto target_position = get_position((uintptr_t)get_transform((base_player*)target_entity));
+			auto ent_position = get_position((uintptr_t)get_transform((base_player*)ent));
+			auto best_position = Vector3(0, 0, 0);
+			if(best_ent)
+				best_position = get_position((uintptr_t)get_transform((base_player*)best_ent));
+
+			if (!LI_FIND(strcmp)(entity_class_name, class_name)
+				&& ent_position.distance(target_position) < max_distance
+				&& (!best_ent || ent_position.distance(target_position) < best_position.distance(target_position)))
+			{
+				best_ent = reinterpret_cast<T>(ent);
+			}
+		}
+		return best_ent;
 	}
 
 	std::pair<aim_target, bool> resolve_closest_entity(float max_distance, bool get_code = true) {
@@ -1796,6 +1879,36 @@ public:
 	uintptr_t currentconstruction() { return mem::read<uintptr_t>((uintptr_t)this + planner_currentconstruction); }
 	void currentconstruction(uintptr_t o) { mem::write((uintptr_t)this + planner_rotationoffset, o); }
 	uintptr_t guide() { return mem::read<uintptr_t>((uintptr_t)this + planner_guide); }
+};
+
+
+
+class BuildingBlock {
+public:
+	rust::classes::BuildingGrade grade() { 
+		return *reinterpret_cast<rust::classes::BuildingGrade*>((uintptr_t)this + building_grade);
+	}
+
+	bool CanAffordUpgrade(rust::classes::BuildingGrade g, base_player* p) {
+		if (!this) return false;
+
+		typedef bool (*AAA)(uintptr_t, int, base_player*);//real rust 0x6BB6A0
+		return ((AAA)(mem::game_assembly_base + 0x6BB6A0))((uintptr_t)this, (int)g, p);
+		//return canaffordupgrade((uintptr_t)this, g, p);
+	}
+
+	bool CanChangeToGrade(rust::classes::BuildingGrade g, base_player* p) {
+		if (!this) return false;
+
+		typedef bool (*AAA)(uintptr_t, int, base_player*);//real rust 0x6BB870
+		return ((AAA)(mem::game_assembly_base + 0x6BB870))((uintptr_t)this, (int)g, p);
+		//return canchangetograde((uintptr_t)this, g, p);
+	}
+
+	void Upgrade(rust::classes::BuildingGrade g, base_player* p) {
+		if (!this) return;
+		return upgradetograde((uintptr_t)this, g, p);
+	}
 };
 
 void attack_melee(aim_target target, base_projectile* baseprojectile, bool is_player = false) {

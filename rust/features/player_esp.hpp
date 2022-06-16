@@ -9,6 +9,8 @@
 #include "../rust.hpp"
 
 namespace esp {
+
+	float time_last_upgrade = 0.f;
 	float rl_time = 0.f;
 	uintptr_t client_entities;
 	base_player* local_player;
@@ -109,6 +111,8 @@ namespace esp {
 			get_client_entities();
 			return;
 		}
+
+		uintptr_t closest_building_block = 0;
 
 		for (int i = 0; i <= size; i++) {
 			auto current_object = *reinterpret_cast<uintptr_t*>(buffer + 0x20 + (i * 0x8));
@@ -217,6 +221,7 @@ namespace esp {
 			if (!object_name.zpad)
 				continue;
 
+
 			if (*(int*)(entity_class_name) == 'kcaH' && *(int*)(entity_class_name + 14) == 'tarC') {
 				auto flag = *reinterpret_cast<int*>(ent + 0x128);
 				if (flag != 128 && flag != 256)
@@ -225,6 +230,19 @@ namespace esp {
 				Vector2 w2s_position = {};
 				if (out_w2s(world_position, w2s_position))
 					esp::draw_hackable_crate(w2s_position, ent, { 0.45, 0.72, 1, 0.8 });
+			}
+
+			if (settings::misc::auto_upgrade)
+			{
+				if (LI_FIND(strcmp)(entity_class_name, _("BuildingBlock")))
+				{
+					auto lpos = local_player->get_player_eyes()->get_position();
+					float dist_to_new = lpos.distance(get_position((uintptr_t)get_transform((base_player*)ent)));
+					if (!closest_building_block)
+						closest_building_block = ent;
+					else if (dist_to_new < lpos.distance(get_position((uintptr_t)get_transform((base_player*)closest_building_block))))
+						closest_building_block = ent;
+				}
 			}
 
 			if (settings::visuals::misc_esp) {
@@ -443,6 +461,65 @@ namespace esp {
 				}
 			}
 		}
+
+
+		if (settings::misc::auto_upgrade
+			&& closest_building_block)
+		{
+			//auto closest = baseplayer->find_closest(_("BuildingBlock"), (networkable*)baseplayer, 4.2f);
+			////auto block = closest->GetComponent<BuildingBlock>(unity::GetType(_(L"BuildingBlock, Assembly-CSharp")));
+			//auto block = closest->GetComponent<BuildingBlock>(unity::GetType(_("Assembly-CSharp"), _("BuildingBlock")));
+
+			auto block = (BuildingBlock*)closest_building_block;
+			auto tranny = get_transform((base_player*)block);
+			auto pos = get_position((uintptr_t)tranny);
+			auto distance = local_player->get_player_eyes()->get_position().distance(pos);
+
+			rust::classes::BuildingGrade upgrade_tier = rust::classes::BuildingGrade::Stone;
+
+			if (distance < 4.2f) {
+				auto grade = block->grade();
+				if (block && (get_fixedTime() > esp::time_last_upgrade + 0.35f))
+				{
+					switch ((int)upgrade_tier)
+					{
+					case 1:
+						if (block->CanAffordUpgrade(rust::classes::BuildingGrade::Wood, local_player)
+							&& block->CanChangeToGrade(rust::classes::BuildingGrade::Wood, local_player)
+							&& grade != rust::classes::BuildingGrade::Wood)
+						{
+							block->Upgrade(rust::classes::BuildingGrade::Wood, local_player);
+							esp::time_last_upgrade = get_fixedTime();
+						}
+					case 2:
+						if (block->CanAffordUpgrade(rust::classes::BuildingGrade::Stone, local_player)
+							&& block->CanChangeToGrade(rust::classes::BuildingGrade::Stone, local_player)
+							&& grade != rust::classes::BuildingGrade::Stone)
+						{
+							block->Upgrade(rust::classes::BuildingGrade::Stone, local_player);
+							esp::time_last_upgrade = get_fixedTime();
+						}
+					case 3:
+						if (block->CanAffordUpgrade(rust::classes::BuildingGrade::Metal, local_player)
+							&& block->CanChangeToGrade(rust::classes::BuildingGrade::Metal, local_player)
+							&& grade != rust::classes::BuildingGrade::Metal)
+						{
+							block->Upgrade(rust::classes::BuildingGrade::Metal, local_player);
+							esp::time_last_upgrade = get_fixedTime();
+						}
+					case 4:
+						if (block->CanAffordUpgrade(rust::classes::BuildingGrade::TopTier, local_player)
+							&& block->CanChangeToGrade(rust::classes::BuildingGrade::TopTier, local_player)
+							&& grade != rust::classes::BuildingGrade::TopTier)
+						{
+							block->Upgrade(rust::classes::BuildingGrade::TopTier, local_player);
+							esp::time_last_upgrade = get_fixedTime();
+						}
+					}
+				}
+			}
+		}
+
 		esp::draw_target_hotbar(best_target);
 		esp::draw_middle(best_target);
 	}

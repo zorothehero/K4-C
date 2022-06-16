@@ -151,6 +151,12 @@ namespace il2cpp {
 		return 0;
 	}
 
+	uintptr_t type_object(const char* name_space, const char* name)
+	{
+		auto klass = init_class(name, name_space);
+		return methods::type_get_object(methods::class_get_type(klass));
+	}
+
 	//selected_argument is the argument to be checked if the name is right
 	uintptr_t method(const char* kl, const char* name, int argument_number = -1, char* arg_name = _(""), const char* name_space = _(""), int selected_argument = -1) {
 		uintptr_t iter = 0;
@@ -255,12 +261,6 @@ namespace il2cpp {
 		}
 
 		return 0;
-	}
-
-	inline auto type_object(const char* name_space, const char* name) -> const uintptr_t
-	{
-		auto klass = find_class(name, name_space);
-		return methods::type_get_object(methods::class_get_type(klass));
 	}
 }
 

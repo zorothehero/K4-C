@@ -485,7 +485,7 @@ public:
 		currentVelocity(currentVelocity() - dr);
 	}
 
-	void UpdateVelocity(float deltaTime, Projectile* pr, bool& rett) {
+	void UpdateVelocity(float deltaTime, Projectile* pr) {
 		if (traveledTime() != 0) {
 			previousPosition(this->currentPosition());
 			previoustraveledTime(this->traveledTime());
@@ -514,7 +514,7 @@ public:
 			this->DoVelocityUpdate(deltaTime, pr);
 		}
 
-		Line(this->currentPosition(), this->previousPosition(), col(0.5, 0.2, 0.7, 1), 10.f, false, true);
+		Line(this->currentPosition(), this->previousPosition(), col(0.6, 0.1, 0.7, 1), 10.f, false, true);
 		
 		auto Trans = get_transform((base_player*)pr); //Component | Transform get_transform(); 
 		set_position(Trans, currentPosition()); //Transform | void set_position(Vector3 value); 
@@ -540,12 +540,8 @@ void OnProjectileUpdate(Projectile* unk) {
 			return;
 
 		if (owner->is_local_player()) {
-			bool ret = false;
 			if (get_isAlive((base_projectile*)unk)) {
-				for (; unk->IsAlive(); unk->UpdateVelocity(0.03125f, unk, ret)) {
-					if (ret) {
-						break;
-					}
+				for (; unk->IsAlive(); unk->UpdateVelocity(0.03125f, unk)) {
 
 					if (unk->launchTime() <= 0) {
 						break;
@@ -553,9 +549,9 @@ void OnProjectileUpdate(Projectile* unk) {
 
 					float time = get_time();
 
-					//if (time - unk->launchTime() < unk->traveledTime() + 0.03125f) {
-					//	break;
-					//}
+					if (time - unk->launchTime() < unk->traveledTime() + 0.03125f) {
+						break;
+					}
 				}
 			}
 			else {

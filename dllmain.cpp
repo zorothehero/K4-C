@@ -125,7 +125,8 @@ bool DllMain(HMODULE hmodule)
 			has_initialized = true;
 		}
 	}
-
+    //il2cpp::hook(&hooks::hk_performance_update, _("Update"), _("PerformanceUI"), _("Facepunch"), 0);
+    //il2cpp::hook(&gui::OnGUI, _("OnGUI"), _("DevControls"), _(""), 0);
 	il2cpp::hook(&gui::OnGUI, _("OnGUI"), _("DDraw"), _("UnityEngine"), 0);
 	//il2cpp::hook(&hooks::DoFatBullet, _("Update"), _("Projectile"), _(""), 0);
 	//il2cpp::hook(&hooks::AimConeDir_hk, _("GetModifiedAimConeDirection"), _("AimConeUtil"));
