@@ -102,6 +102,7 @@ namespace unity {
 
 		ServerRPC = reinterpret_cast<void (*)(uintptr_t, rust::classes::string funcName)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseEntity"), _("ServerRPC"), 1, _("funcName"), _(""), 1)));
 
+		CheckCapsule = reinterpret_cast<bool (*)(Vector3, Vector3, float, int, int)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GamePhysics"), _("CheckCapsule"), 0, _(""), _(""))));
 		//Spherecast = reinterpret_cast<bool (*)(Vector3, float, Vector3, RaycastHit*, float, int)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Physics"), _("SphereCast"), 6, _("origin"), _("UnityEngine"), 1)));
 		//Spherecast = reinterpret_cast<bool (*)(Ray, float, float, int)>(/*instead of il2cpp because seems to hate me use static offset*/ mem::game_assembly_base + 35705904);
 	}
@@ -132,8 +133,12 @@ namespace unity {
 		__try {
 			auto layer = (int)rust::classes::Layers::ProjectileLineOfSightCheck | (int)rust::classes::Layers::Terrain | (int)rust::classes::Layers::z;
 			typedef bool (*AAA)(Vector3, Vector3, rust::classes::Layers, float, uintptr_t);//real rust 0x50F790         //cracked 0x50ED80
-			return ((AAA)(mem::game_assembly_base + 0x529DD0/*0x50E9A0*/))(source, destination, rust::classes::Layers(layer), p1, player)
-				&& ((AAA)(mem::game_assembly_base + 0x529DD0/*0x50E9A0*/))(destination, source, rust::classes::Layers(layer), p1, player);
+
+			//real rust 0x529DD0
+			//alkad rust 0x50E9A0
+
+			return ((AAA)(mem::game_assembly_base + 0x529DD0))(source, destination, rust::classes::Layers(layer), p1, player)
+				&& ((AAA)(mem::game_assembly_base + 0x529DD0))(destination, source, rust::classes::Layers(layer), p1, player);
 		}
 		__except (true) { return false; }
 	}

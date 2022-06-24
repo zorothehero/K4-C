@@ -62,6 +62,7 @@ namespace settings {
 
 	namespace visuals {
 		bool berry = false;
+		bool offscreen_indicator = false;
 		bool food = false;
 		bool animal = false;
 		bool lootesp = false;
@@ -137,6 +138,7 @@ namespace settings {
 
 	namespace misc {
 		bool auto_upgrade = false;
+		bool force_privlidge = false;
 		int upgrade_tier = 1;
 		bool flyhack_indicator = false;
 		bool flyhack_stop = false;

@@ -27,7 +27,6 @@ uintptr_t itemList = il2cpp::value(_("ItemContainer"), _("itemList"));
 uintptr_t userID = il2cpp::value(_("BasePlayer"), _("userID"));
 uintptr_t mounted = il2cpp::value(_("BasePlayer"), _("mounted"));
 
-
 uintptr_t building_grade = il2cpp::value(_("BuildingBlock"), _("grade"));
 
 
@@ -230,6 +229,8 @@ static auto BoundsPadding = reinterpret_cast<float(*)(base_player*)>(*reinterpre
 
 static auto PEyes_get_position = reinterpret_cast<Vector3(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("PlayerEyes"), _("get_position"), 0, _(""), _(""))));
 
+static auto PEyes_get_rotation = reinterpret_cast<Vector4(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("PlayerEyes"), _("get_rotation"), 0, _(""), _(""))));
+
 static auto bodyforward = reinterpret_cast<Vector3(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("PlayerEyes"), _("BodyForward"), 0, _(""), _(""))));
 
 static auto SendClientTick = reinterpret_cast<void(*)(base_player*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("SendClientTick"), 0, _(""), _(""))));
@@ -343,6 +344,8 @@ void init_bp() {
 	get_localToWorldMatrix = reinterpret_cast<VMatrix(*)(transform*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Transform"), _("get_localToWorldMatrix"), 0, _(""), _("UnityEngine"))));
 	
 	getmodifiedaimcone = reinterpret_cast<Vector3(*)(float, Vector3, bool)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("AimConeUtil"), _("GetModifiedAimConeDirection"), 0, _(""), _(""))));
+
+	PEyes_get_rotation = reinterpret_cast<Vector4(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("PlayerEyes"), _("get_rotation"), 0, _(""), _(""))));
 #pragma region il2
 
 	containerWear = il2cpp::value(_("PlayerInventory"), _("containerWear"));
@@ -1171,6 +1174,11 @@ public:
 		if (!this) return Vector3(0, 0, 0);
 		return PEyes_get_position((uintptr_t)this);
 	}
+	
+	Vector4 get_rotation() {
+		if (!this) return Vector4(0, 0, 0, 0);
+		return PEyes_get_rotation((uintptr_t)this);
+	}
 
 	Vector3 body_forward() {
 		if (!this) return Vector3(0, 0, 0);
@@ -1310,13 +1318,15 @@ public:
 		}
 
 		if (zooming) {//0x32182E0
-			auto convar = *reinterpret_cast<uintptr_t*>((uintptr_t)mem::game_assembly_base + 52531944); //"ConVar_Graphics_c*"
+			auto convar = *reinterpret_cast<uintptr_t*>((uintptr_t)mem::game_assembly_base + 52531944); //"ConVar_Graphics_c*" real rust
+			//auto convar = *reinterpret_cast<uintptr_t*>((uintptr_t)mem::game_assembly_base + 52527840); //"ConVar_Graphics_c*" alkad rust
 			auto unknown = *reinterpret_cast<uintptr_t*>((uintptr_t)convar + 0xb8);
 			*reinterpret_cast<float*>(unknown + 0x18) = settings::misc::zoomfov;
 		}
 
 		if (!zooming) {
-			auto convar = *reinterpret_cast<uintptr_t*>((uintptr_t)mem::game_assembly_base + 52531944); //"ConVar_Graphics_c*"
+			auto convar = *reinterpret_cast<uintptr_t*>((uintptr_t)mem::game_assembly_base + 52531944); //"ConVar_Graphics_c*" real rust
+			//auto convar = *reinterpret_cast<uintptr_t*>((uintptr_t)mem::game_assembly_base + 52527840); //"ConVar_Graphics_c*" alkad rust
 			auto unknown = *reinterpret_cast<uintptr_t*>((uintptr_t)convar + 0xb8);
 			*reinterpret_cast<float*>(unknown + 0x18) = settings::misc::playerfov;
 		}
@@ -1870,6 +1880,34 @@ public:
 
 		return unk1;
 	}
+
+	transform* find_closest_bone(Vector3 worldpos, bool visible_check = false) {
+		if (!this) return nullptr;
+		std::array<uintptr_t, 12> bonelist = {
+			*reinterpret_cast<uintptr_t*>(this->get_bone_transform(47)),
+			*reinterpret_cast<uintptr_t*>(this->get_bone_transform(48)),
+			*reinterpret_cast<uintptr_t*>(this->get_bone_transform(56)),
+			*reinterpret_cast<uintptr_t*>(this->get_bone_transform(55)),
+			*reinterpret_cast<uintptr_t*>(this->get_bone_transform(25)),
+			*reinterpret_cast<uintptr_t*>(this->get_bone_transform(24)),
+			*reinterpret_cast<uintptr_t*>(this->get_bone_transform(57)),
+			*reinterpret_cast<uintptr_t*>(this->get_bone_transform(26)),
+			*reinterpret_cast<uintptr_t*>(this->get_bone_transform(3)),
+			*reinterpret_cast<uintptr_t*>(this->get_bone_transform(14)),
+			*reinterpret_cast<uintptr_t*>(this->get_bone_transform(13)),
+			*reinterpret_cast<uintptr_t*>(this->get_bone_transform(2))
+		};
+		uintptr_t closest = bonelist[0];
+		for (auto bone : bonelist) {
+			auto bonepos = get_position(bone);
+			auto closestpos = get_position(closest);
+			if (bonepos.distance(worldpos) < closestpos.distance(worldpos)
+				&& (visible_check ? this->is_visible(bonepos, worldpos) : true)) {
+				closest = bone;
+			}
+		}
+		return *reinterpret_cast<transform**>(closest);
+	}
 };
 
 class Planner {
@@ -1880,8 +1918,6 @@ public:
 	void currentconstruction(uintptr_t o) { mem::write((uintptr_t)this + planner_rotationoffset, o); }
 	uintptr_t guide() { return mem::read<uintptr_t>((uintptr_t)this + planner_guide); }
 };
-
-
 
 class BuildingBlock {
 public:

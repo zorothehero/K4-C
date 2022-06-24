@@ -16,6 +16,7 @@ namespace esp {
 	base_player* local_player;
 	VMatrix matrix;
 	aim_target best_target;
+	uintptr_t closest_building_block = 0;
 
 	struct bounds_t {
 		float left, right, top, bottom;
@@ -80,6 +81,8 @@ namespace esp {
 
 	void draw_weapon_icon(weapon* item, Vector2 w2s_position);
 
+	void offscreen_indicator(Vector3 position);
+
 	void draw_target_fov(Vector2 o, float r);
 
 	uintptr_t shader;
@@ -111,8 +114,6 @@ namespace esp {
 			get_client_entities();
 			return;
 		}
-
-		uintptr_t closest_building_block = 0;
 
 		for (int i = 0; i <= size; i++) {
 			auto current_object = *reinterpret_cast<uintptr_t*>(buffer + 0x20 + (i * 0x8));
@@ -232,7 +233,8 @@ namespace esp {
 					esp::draw_hackable_crate(w2s_position, ent, { 0.45, 0.72, 1, 0.8 });
 			}
 
-			if (settings::misc::auto_upgrade)
+			if (settings::misc::auto_upgrade
+				|| settings::misc::force_privlidge)
 			{
 				if (LI_FIND(strcmp)(entity_class_name, _("BuildingBlock")))
 				{
@@ -456,6 +458,12 @@ namespace esp {
 
 					draw_player(player, is_npc);
 
+					if (settings::visuals::offscreen_indicator
+						&& !is_npc)
+					{
+						offscreen_indicator(player->get_player_eyes()->get_position());
+					}
+
 					if (settings::weapon::silent_melee || unity::GetKey(rust::classes::KeyCode(settings::keybind::silentmelee)))
 						hit_player();
 				}
@@ -467,7 +475,7 @@ namespace esp {
 			&& closest_building_block)
 		{
 			//auto closest = baseplayer->find_closest(_("BuildingBlock"), (networkable*)baseplayer, 4.2f);
-			////auto block = closest->GetComponent<BuildingBlock>(unity::GetType(_(L"BuildingBlock, Assembly-CSharp")));
+			//auto block = closest->GetComponent<BuildingBlock>(unity::GetType(_(L"BuildingBlock, Assembly-CSharp")));
 			//auto block = closest->GetComponent<BuildingBlock>(unity::GetType(_("Assembly-CSharp"), _("BuildingBlock")));
 
 			auto block = (BuildingBlock*)closest_building_block;

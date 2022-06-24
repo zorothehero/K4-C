@@ -4,6 +4,50 @@
 #include "../settings.hpp"
 #include "../utils/string_format.h"
 
+inline float NormalizeAngle(float angle) {
+	while (angle > 360.0f) {
+		angle -= 360.0f;
+	}
+	while (angle < 0.0f) {
+		angle += 360.0f;
+	}
+	return angle;
+}
+
+inline Vector3 NormalizeAngles(Vector3 angles) {
+	angles.x = NormalizeAngle(angles.x);
+	angles.y = NormalizeAngle(angles.y);
+	angles.z = NormalizeAngle(angles.z);
+	return angles;
+}
+
+inline Vector3 EulerAngles(Vector4 q1) {
+	float num = q1.w * q1.w;
+	float num2 = q1.x * q1.x;
+	float num3 = q1.y * q1.y;
+	float num4 = q1.z * q1.z;
+	float num5 = num2 + num3 + num4 + num;
+	float num6 = q1.x * q1.w - q1.y * q1.z;
+	Vector3 vector;
+	if (num6 > 0.4995f * num5) {
+		vector.y = 2.0f * std::atan2f(q1.y, q1.x);
+		vector.x = 1.57079637f;
+		vector.z = 0.0f;
+		return NormalizeAngles(vector * 57.2958f);
+	}
+	if (num6 < -0.4995f * num5) {
+		vector.y = -2.0f * std::atan2f(q1.y, q1.x);
+		vector.x = -1.57079637f;
+		vector.z = 0.0f;
+		return NormalizeAngles(vector * 57.2958f);
+	}
+	Vector4 quaternion = Vector4(q1.w, q1.z, q1.x, q1.y);
+	vector.y = std::atan2f(2.0f * quaternion.x * quaternion.w + 2.0f * quaternion.y * quaternion.z, 1.0f - 2.0f * (quaternion.z * quaternion.z + quaternion.w * quaternion.w));
+	vector.x = std::asin(2.0f * (quaternion.x * quaternion.z - quaternion.w * quaternion.y));
+	vector.z = std::atan2f(2.0f * quaternion.x * quaternion.y + 2.0f * quaternion.z * quaternion.w, 1.0f - 2.0f * (quaternion.y * quaternion.y + quaternion.z * quaternion.z));
+	return NormalizeAngles(vector * 57.2958f);
+}
+
 #define rgba(r,g,b,a) gui::Color(r / 255.f, g / 255.f, b / 255.f, a)
 
 namespace gui {
@@ -48,7 +92,8 @@ namespace gui {
 		static auto get_type = reinterpret_cast<rust::classes::EventType(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Event"), _("get_type"), 0, _(""), _("UnityEngine"))));
 
 		static auto DrawTexture = reinterpret_cast<void (*)(rust::classes::Rect, uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GUI"), _("DrawTexture"), 2, _("image"), _("UnityEngine"), 2)));
-
+		
+		//Rect position, Texture image, ScaleMode scaleMode, bool alphaBlend, float imageAspect, Color color, float borderWidth, float borderRadius
 		static auto Box = reinterpret_cast<void (*)(rust::classes::Rect, rust::classes::string)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GUI"), _("Box"), 2, _("text"), _("UnityEngine"), 2)));
 
 		static auto DrawLine = reinterpret_cast<void (*)(Vector3, Vector3, gui::Color)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Debug"), _("DrawLine"), 3, _("color"), _("UnityEngine"), 3)));
@@ -1126,8 +1171,8 @@ namespace gui {
 
 						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Legit recoil"), &settings::weapon::legit_recoil, weapon_tab); //
 						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"No Recoil"), &settings::weapon::norecoil, weapon_tab);		 // make into slider?
-						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"No Spread"), &settings::weapon::nospread, weapon_tab);		 //
-						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"No Sway"), &settings::weapon::nosway, weapon_tab); //doesnt work?
+						//checkbox(event_type, menu_pos, pos, mouse_pos, _(L"No Spread"), &settings::weapon::nospread, weapon_tab);		 //
+						//checkbox(event_type, menu_pos, pos, mouse_pos, _(L"No Sway"), &settings::weapon::nosway, weapon_tab); //doesnt work?
 						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Automatic"), &settings::weapon::automatic, weapon_tab);
 
 						//textbox(event_type, menu_pos, pos, mouse_pos, _(L"Config"), settings::misc::current_config);
@@ -1182,7 +1227,8 @@ namespace gui {
 						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Held icons"), &settings::visuals::spriteitem, visual_tab);
 						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Skeleton"), &settings::visuals::skeleton, visual_tab);
 						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Snaplines"), &settings::visuals::snaplines, visual_tab);
-						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Show fov"), &settings::visuals::show_fov, visual_tab);
+						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Offscreen indicator"), &settings::visuals::offscreen_indicator, visual_tab);
+						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Show fov"), &settings::visuals::draw_fov, visual_tab);
 						break;
 					case 2:
 						//checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Materials"), &settings::visuals::materials, other_esp);
@@ -1231,7 +1277,7 @@ namespace gui {
 						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"No recycler"), &settings::misc::norecycler, misc_tab);
 						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Suicide"), &settings::misc::TakeFallDamage, misc_tab, true, &settings::keybind::suicide);
 						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Longneck"), &settings::misc::eyeoffset, misc_tab, true, &settings::keybind::neck);
-						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Auto upgrade"), &settings::misc::auto_upgrade, misc_tab);
+						//checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Auto upgrade"), &settings::misc::auto_upgrade, misc_tab);
 
 
 						Slider(event_type, menu_pos, mouse_pos, il2cpp::methods::new_string(_("Size")), pos, settings::misc::playereyes, 1.5f, misc_tab);
@@ -1314,6 +1360,24 @@ void ColorConvertHSVtoRGB(float h, float s, float v, float& out_r, float& out_g,
 }
 
 gui::Color HSV(float h, float s, float v, float a = 1.0f) { float r, g, b; ColorConvertHSVtoRGB(h, s, v, r, g, b); return gui::Color(r, g, b, a); }
+
+Vector2 CosTanSinLineH(float flAngle, float range, int x, int y, int LineLength) {
+	float mainAngle = flAngle;
+	mainAngle += 45.f;
+
+	float flYaw = (mainAngle) * (M_PI / 180.0);
+
+	float viewcosyawzzzzzzz = cos(flYaw);
+	float viewsinyawzzzzzzz = sin(flYaw);
+
+	float x2 = range * (-viewcosyawzzzzzzz) + range * viewsinyawzzzzzzz;
+	float y2 = range * (-viewcosyawzzzzzzz) - range * viewsinyawzzzzzzz;
+
+	int posonscreenX = x + int(x2 / range * (LineLength));
+	int posonscreenY = y + int(y2 / range * (LineLength));
+
+	return Vector2(posonscreenX, posonscreenY);
+}
 
 namespace esp
 {
@@ -1492,15 +1556,33 @@ namespace esp
 	}
 
 	void draw_target_fov(Vector2 o, float r) {
-		int segments = 0;
-		for (size_t i = 0; i < segments; i++)
-		{
-			float theta = 2.0f * 3.1415926f * float(i) / float(segments);//get the current angle
+		//int segments = 50;
+		//for (size_t i = 0; i < segments; i++)
+		//{
+		//	float theta = 2.0f * 3.1415926f * float(i) / float(segments);//get the current angle
+		//
+		//	float x = r * LI_FIND(cosf)(theta);//calculate the x component
+		//	float y = r * LI_FIND(sinf)(theta);//calculate the y component
+		//
+		//}
 
-			float x = r * LI_FIND(cosf)(theta);//calculate the x component
-			float y = r * LI_FIND(sinf)(theta);//calculate the y component
-			gui::horizontal_line(Vector2(o.x+x, o.y+y), 1, gui::Color(1,1,1,1));
-		}
+		gui::methods::set_color({ 1, 1, 1, 1 });
+		
+	}
+
+	void offscreen_indicator(Vector3 position) {
+		Vector3 local = esp::local_player->get_player_eyes()->get_position();
+
+		float num = atan2(local.x - position.x, local.z - position.z) * 57.29578f - 180.f - EulerAngles(esp::local_player->get_player_eyes()->get_rotation()).y;
+
+		Vector2 tp0 = CosTanSinLineH(num, 5.f,		 1920 / 2, 1080 / 2, 150.f);
+		Vector2 tp1 = CosTanSinLineH(num + 2.f, 5.f, 1920 / 2, 1080 / 2, 140.f);
+		Vector2 tp2 = CosTanSinLineH(num - 2.f, 5.f, 1920 / 2, 1080 / 2, 140.f);
+
+		Vector2 p = { tp0.x, tp0.y }, p1 = { tp1.x, tp1.y }, p2 = { tp2.x, tp2.y };
+		gui::line(tp0, tp1, rgba(249.f, 130.f, 109.f, 255.f));
+		gui::line(tp0, tp2, rgba(249.f, 130.f, 109.f, 255.f));
+		gui::line(tp1, tp2, rgba(249.f, 130.f, 109.f, 255.f));
 	}
 
 	void draw_weapon_icon(weapon* item, Vector2 w2s_position) {
