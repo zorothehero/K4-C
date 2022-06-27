@@ -73,12 +73,13 @@ namespace settings {
 		bool rainbow_chams = false;
 		bool hotbar_esp = false;
 		bool chams = false;
+		bool hand_chams = false;
 		bool boxesp = false;
 		bool spriteitem = false;
 		bool snaplines = true;
 		bool show_fov = false;
 		bool cancer = false;
-		bool misc_esp  = false;
+		bool misc_esp  = true;
 		bool sleeper_esp  = false;
 		bool heli_esp = false;
 		bool outline = false;
@@ -176,8 +177,11 @@ namespace settings {
 		bool spiderman = true;
 		bool Crosshair = false;
 		bool silentwalk = false;
+		bool autofarm = false;
 		bool interactive_debug = false;
 		bool trollface = false;
+		
+		int gesture_spam = 0;
 
 		wchar_t* current_config = _(L"");
 	}

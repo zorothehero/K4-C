@@ -102,6 +102,20 @@ namespace gui {
 
 		static auto HorizontalSlider = reinterpret_cast<float(*)(rust::classes::Rect position, float value, float leftValue, float rightValue)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GUI"), _("HorizontalSlider"), 4, _(""), _("UnityEngine"))));
 		
+		static auto get_activemodel = reinterpret_cast<uintptr_t(*)()>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseViewModel"), _("get_ActiveModel"), 0, _(""), _(""))));
+		
+
+
+		//gl stuff?
+
+		static auto Vertex = reinterpret_cast<void(*)(Vector3)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GL"), _("Vertex"), 0, _(""), _("UnityEngine"))));
+
+		static auto Begin = reinterpret_cast<void(*)(int)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GL"), _("Begin"), 0, _(""), _("UnityEngine"))));
+
+		static auto End = reinterpret_cast<void(*)()>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GL"), _("End"), 0, _(""), _("UnityEngine"))));
+
+		static auto Color = reinterpret_cast<void(*)(col)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GL"), _("Color"), 0, _(""), _("UnityEngine"))));
+		
 		//static auto dont_destroy_on_load = reinterpret_cast<void(*)(uintptr_t target)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Object"), _("DontDestroyOnLoad"), 0, _(""), _("UnityEngine"))));
 		//
 		//static auto create = reinterpret_cast<void(*)(uintptr_t self, rust::classes::string shader)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GameObject"), _("InternalCreateGameObject"), 0, _(""), _("UnityEngine"))));
@@ -156,6 +170,15 @@ namespace gui {
 
 		methods::set_gizmos_color = reinterpret_cast<void(*)(gui::Color)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Gizmos"), _("set_color"), -1, _(""), _("UnityEngine"))));
 
+		methods::get_activemodel = reinterpret_cast<uintptr_t(*)()>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseViewModel"), _("get_ActiveModel"), 0, _(""), _(""))));
+
+		methods::Vertex = reinterpret_cast<void(*)(Vector3)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GL"), _("Vertex"), 0, _(""), _("UnityEngine"))));
+
+		methods::Begin = reinterpret_cast<void(*)(int)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GL"), _("Begin"), 0, _(""), _("UnityEngine"))));
+
+		methods::End = reinterpret_cast<void(*)()>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GL"), _("End"), 0, _(""), _("UnityEngine"))));
+
+		methods::Color = reinterpret_cast<void(*)(col)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GL"), _("Color"), 0, _(""), _("UnityEngine"))));
 		//methods::dont_destroy_on_load = reinterpret_cast<void(*)(uintptr_t target)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Object"), _("DontDestroyOnLoad"), 0, _(""), _("UnityEngine"))));
 		//
 		//methods::create = reinterpret_cast<void(*)(uintptr_t self, rust::classes::string shader)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GameObject"), _("InternalCreateGameObject"), 0, _(""), _("UnityEngine"))));
@@ -746,6 +769,80 @@ namespace gui {
 		current_pos.y += 30;
 	}
 
+	
+	bool list_clicked = false;
+	void listbox(rust::classes::EventType event,
+		Vector2 pos,
+		Vector2& current_pos,
+		Vector2 mouse,
+		const wchar_t* button_name,
+		std::array<wchar_t*, 13> str_list,
+		int* selected = 0) 
+	{
+		pos.x += 10;
+		rust::classes::Rect poz = rust::classes::Rect(pos.x + tab_size.x + 2.0f, pos.y + current_pos.y, 150, 20);
+
+		auto sz = sizeof(str_list) / sizeof(str_list[0]);
+
+		gui::Label({ poz.x + 5, poz.y, poz.wid, poz.hei }, rust::classes::string(string::wformat(_(L"%s: %s"), button_name, str_list[*selected])), rgba(159.f, 163.f, 169.f, (opacity / 255.f)), false, 13);
+
+		if (list_clicked)
+		{
+			gui::line({ poz.x + 130, poz.y + 13 }, { poz.x + 135, poz.y + 8 }, rgba(159.f, 163.f, 169.f, (opacity / 255.f)));
+			gui::line({ poz.x + 140, poz.y + 13 }, { poz.x + 135, poz.y + 8 }, rgba(159.f, 163.f, 169.f, (opacity / 255.f)));
+
+			poz = rust::classes::Rect(pos.x + tab_size.x + 2.0f, pos.y + current_pos.y + 18, 150, 2);
+			fill_box(poz, rgba(249.f, 130.f, 109.f, (opacity / 255.f)));
+			poz = rust::classes::Rect(pos.x + tab_size.x + 2.0f, pos.y + current_pos.y, 150, 20);
+		}
+		else
+		{
+			gui::line({ poz.x + 130, poz.y + 8 }, { poz.x + 135, poz.y + 13 }, rgba(159.f, 163.f, 169.f, (opacity / 255.f)));
+			gui::line({ poz.x + 140, poz.y + 8 }, { poz.x + 135, poz.y + 13 }, rgba(159.f, 163.f, 169.f, (opacity / 255.f)));
+		}
+
+
+		if (event == rust::classes::EventType::MouseDown)
+		{
+			poz = rust::classes::Rect(pos.x + tab_size.x + 2.0f, pos.y + current_pos.y, 150, 20);
+			if (poz.Contains(mouse))
+				list_clicked = !list_clicked;
+			if (list_clicked)
+			{
+				for (size_t i = 1; i < sz; i++)
+				{
+					if (str_list[i][0] == '\x00') continue;
+					poz = rust::classes::Rect(pos.x + tab_size.x + 2.0f, pos.y + current_pos.y + (i * 20), 150, 15);
+					if (poz.Contains(mouse))
+						if (str_list[i])
+							*selected = i;
+				}
+			}
+		}
+
+		if (list_clicked) {
+			for (size_t i = 1; i < sz; i++)
+			{
+				if (str_list[i][0] == '\x00') continue;
+				poz = rust::classes::Rect(pos.x + tab_size.x + 2.0f, pos.y + current_pos.y + (i * 20), 150, 20);
+				fill_box(poz, rgba(14.f, 18.f, 24.f, 255.f));
+
+				auto name = str_list[i];
+
+				gui::Label({ poz.x + 1, poz.y, poz.wid, poz.hei }, rust::classes::string(name), rgba(159.f, 163.f, 169.f, (opacity / 255.f)), true, 10);
+
+				bool s = LI_FIND(wcscmp)(str_list[*selected], str_list[i]) == 0;
+				if (s)
+					gui::Label({ poz.x + 1, poz.y, poz.wid, poz.hei }, rust::classes::string(name), rgba(249.f, 130.f, 109.f, (opacity / 255.f)), true, 10);
+
+				if (poz.Contains(mouse))
+					gui::Label({ poz.x + 1, poz.y, poz.wid, poz.hei }, rust::classes::string(name), rgba(181, 140, 132, (opacity / 255.f)), true, 10);
+			}
+		}
+
+		current_pos.y += 30;
+	}
+
 	void checkbox(rust::classes::EventType event, Vector2 pos, Vector2& current_pos, Vector2 mouse, const wchar_t* button_name, bool* checked_ref, int id, bool keybind = false, int* keybind_ref = 0, Color col = Color(255, 255, 255, 220)) {
 
 		pos.x += 5;
@@ -1057,7 +1154,7 @@ namespace gui {
 							}
 						}
 						if (settings::visuals::draw_fov) {
-							esp::draw_target_fov(Vector2(ScreenWidth / 2, ScreenHeight / 2), settings::weapon::aimbotfov);
+							esp::draw_target_fov(col(settings::visuals::VisRcolor, settings::visuals::VisGcolor, settings::visuals::VisBcolor, 1), Vector2(ScreenWidth / 2, ScreenHeight / 2), settings::weapon::aimbotfov);
 						}
 
 						if (settings::misc::flyhack_indicator) {
@@ -1139,6 +1236,21 @@ namespace gui {
 					else if (settings::misc::code_lock_code > 9999)
 						settings::misc::code_lock_code = 9999;
 
+					std::array<wchar_t*, 13> list1_names = {
+							_(L"none"),
+							_(L"none"),
+							_(L"clap"),
+							_(L"friendly"),
+							_(L"thumbsdown"),
+							_(L"thumbsup"),
+							_(L"ok"),
+							_(L"point"),
+							_(L"shrug"),
+							_(L"victory"),
+							_(L"wave"),
+							_(L"cabbagepatch"),
+							_(L"twist")
+					};
 					std::array<wchar_t*, 8> combo1_names = {
 							_(L"Null"),
 							_(L"Head"),
@@ -1163,7 +1275,7 @@ namespace gui {
 					switch (active_tab) {
 					case 0:
 						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"PSilent"), &settings::weapon::psilent, weapon_tab, true, &settings::keybind::psilent);
-						Slider(event_type, menu_pos, mouse_pos, il2cpp::methods::new_string(_("Fov")), pos, settings::weapon::aimbotfov, 2500.f, weapon_tab);
+						Slider(event_type, menu_pos, mouse_pos, il2cpp::methods::new_string(_("Fov")), pos, settings::weapon::aimbotfov, 1100.f, weapon_tab);
 						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Silent melee"), &settings::weapon::silent_melee, weapon_tab, true, &settings::keybind::silentmelee);
 						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Thick bullet"), &settings::weapon::thick_bullet, weapon_tab);
 						Slider(event_type, menu_pos, mouse_pos, il2cpp::methods::new_string(_("Bullet size")), pos, settings::weapon::thickness, 2.2f, weapon_tab);
@@ -1220,6 +1332,7 @@ namespace gui {
 						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Side healthbar"), &settings::visuals::sidehealth, visual_tab);
 						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Chams"), &settings::visuals::chams, visual_tab);
 						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Rainbow chams"), &settings::visuals::rainbow_chams, visual_tab);
+						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Hand chams"), &settings::visuals::hand_chams, visual_tab);
 						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Sleeper"), &settings::visuals::sleeper_esp, visual_tab);
 						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"NPC"), &settings::visuals::npc_esp, visual_tab);
 						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Corpse"), &settings::visuals::corpses, visual_tab);
@@ -1248,6 +1361,11 @@ namespace gui {
 						//checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Barrels"), &settings::visuals::barrels, other_esp);
 						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Tool cupboard"), &settings::visuals::tc_esp, other_esp);
 						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Manipulator angles"), &settings::visuals::angles, other_esp);
+						menu_pos.x += 170;
+						pos.y = 0; //?
+
+						listbox(event_type, menu_pos, pos, mouse_pos, _(L"Gesture: "), list1_names, &settings::misc::gesture_spam);
+
 						break;
 					case 3:
 						//checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Player Movement"), &settings::misc::Movement, misc_tab);
@@ -1275,6 +1393,7 @@ namespace gui {
 						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Interactive debug"), &settings::misc::interactive_debug, misc_tab);
 						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Instant med"), &settings::misc::instant_med, misc_tab);
 						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"No recycler"), &settings::misc::norecycler, misc_tab);
+						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Auto farm"), &settings::misc::autofarm, misc_tab);
 						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Suicide"), &settings::misc::TakeFallDamage, misc_tab, true, &settings::keybind::suicide);
 						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Longneck"), &settings::misc::eyeoffset, misc_tab, true, &settings::keybind::neck);
 						//checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Auto upgrade"), &settings::misc::auto_upgrade, misc_tab);
@@ -1555,19 +1674,15 @@ namespace esp
 		}
 	}
 
-	void draw_target_fov(Vector2 o, float r) {
-		//int segments = 50;
-		//for (size_t i = 0; i < segments; i++)
-		//{
-		//	float theta = 2.0f * 3.1415926f * float(i) / float(segments);//get the current angle
-		//
-		//	float x = r * LI_FIND(cosf)(theta);//calculate the x component
-		//	float y = r * LI_FIND(sinf)(theta);//calculate the y component
-		//
-		//}
-
-		gui::methods::set_color({ 1, 1, 1, 1 });
-		
+	void draw_target_fov(col color, Vector2 o, float r) {
+		gui::methods::Begin(1.5);
+		gui::methods::Color(color);
+		for (float num = 0.f; num < 6.2831855f; num += 0.05f)
+		{
+			gui::methods::Vertex(Vector3(cos(num) * r + o.x, sin(num) * r + o.y, 0));
+			gui::methods::Vertex(Vector3(cos(num + 0.05f) * r + o.x, sin(num + 0.05f) * r + o.y, 0));
+		}
+		gui::methods::End();
 	}
 
 	void offscreen_indicator(Vector3 position) {
@@ -1575,6 +1690,7 @@ namespace esp
 
 		float num = atan2(local.x - position.x, local.z - position.z) * 57.29578f - 180.f - EulerAngles(esp::local_player->get_player_eyes()->get_rotation()).y;
 
+		if (num < -450 || num > -270) return;
 		Vector2 tp0 = CosTanSinLineH(num, 5.f,		 1920 / 2, 1080 / 2, 150.f);
 		Vector2 tp1 = CosTanSinLineH(num + 2.f, 5.f, 1920 / 2, 1080 / 2, 140.f);
 		Vector2 tp2 = CosTanSinLineH(num - 2.f, 5.f, 1920 / 2, 1080 / 2, 140.f);
@@ -1603,8 +1719,28 @@ namespace esp
 		}
 	}
 
+	static float r = 1.00f, g = 0.00f, b = 1.00f;
 	void do_chams(base_player* player)
 	{
+		if (settings::visuals::hand_chams) {
+			auto model = gui::methods::get_activemodel();
+			auto renderers = ((networkable*)model)->GetComponentsInChildren(unity::GetType(_("UnityEngine"), _("Renderer")));
+
+			auto sz = *reinterpret_cast<int*>(renderers + 0x18);	
+
+			for (int i = 0; i < sz; i++) {
+				//if (sz == 2) i == 1; //skips front of weapon
+				auto renderer = *reinterpret_cast<uintptr_t*>(renderers + 0x20 + i * 0x8);
+
+				if (!renderer) continue;
+				auto material = get_material(renderer);
+				if (!material) continue;
+				auto s = FindShader(rust::classes::string(_(L"Standard")));
+				unity::set_shader(material, s);
+				SetColor(material, _(L"_Color"), col(r, g, b, 0.5));
+			}
+		}
+
 		if (settings::visuals::chams) {
 			if (unity::bundle)
 			{
@@ -1623,12 +1759,11 @@ namespace esp
 			}
 
 			static int cases = 0;
-			static float r = 1.00f, g = 0.00f, b = 1.00f;
 			switch (cases) {
-			case 0: { r -= 0.0004f; if (r <= 0) cases += 1; break; }
-			case 1: { g += 0.0004f; b -= 0.0004f; if (g >= 1) cases += 1; break; }
-			case 2: { r += 0.0004f; if (r >= 1) cases += 1; break; }
-			case 3: { b += 0.0004f; g -= 0.0004f; if (b >= 1) cases = 0; break; }
+			case 0: { r -= 0.004f; if (r <= 0) cases += 1; break; }
+			case 1: { g += 0.004f; b -= 0.004f; if (g >= 1) cases += 1; break; }
+			case 2: { r += 0.004f; if (r >= 1) cases += 1; break; }
+			case 3: { b += 0.004f; g -= 0.004f; if (b >= 1) cases = 0; break; }
 			default: { r = 1.00f; g = 0.00f; b = 1.00f; break; }
 			}
 			auto _multiMesh = mem::read<uintptr_t>(player->get_player_model() + 0x2D0); //SkinnedMultiMesh _multiMesh;
@@ -1639,12 +1774,11 @@ namespace esp
 					auto renderer = render->get_value(i);
 
 					//////// CHAMMINGS ///////
-
 					if (renderer) {
 						auto material = get_material(renderer);
 						if (material) {
-							if (shader)
-							{
+							//if (shader)
+							//{
 								if (shader != unity::get_shader(material)) {
 									unity::set_shader(material, shader);
 								}
@@ -1680,7 +1814,7 @@ namespace esp
 										SetColor(material, _(L"_Color"), col(settings::visuals::InvRcolor, settings::visuals::InvGcolor, settings::visuals::InvBcolor, 1));
 									}
 								}
-							}
+							//}
 						}
 					}
 				}
@@ -1693,7 +1827,7 @@ namespace esp
 		if (!local_player)
 			return;
 
-		//do_chams(player);
+		do_chams(player);
 
 		//   esp colors
 		auto visible_color = gui::Color(settings::visuals::VisRcolor, settings::visuals::VisGcolor, settings::visuals::VisBcolor, 1);

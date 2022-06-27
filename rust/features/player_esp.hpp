@@ -83,7 +83,7 @@ namespace esp {
 
 	void offscreen_indicator(Vector3 position);
 
-	void draw_target_fov(Vector2 o, float r);
+	void draw_target_fov(col color, Vector2 o, float r);
 
 	uintptr_t shader;
 

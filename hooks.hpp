@@ -35,6 +35,15 @@ namespace misc
 		int updates;
 		aim_target player;
 	};
+
+	struct NodeTarget {
+		Vector3 pos;
+		int steps;
+		std::vector<Vector3> path;
+		uintptr_t ent;
+	};
+	NodeTarget node;
+
 	std::array<fired_projectile, 32> fired_projectiles;
 	// ADD PROJECTILES TO THIS LIST WHEN FIRED FROM RPC, MAYBE STRUCT THAT CONTAINS SHOOT TIME AND AMOUNT OF UPDATES ALREADY?
 	// LOOP LIST IN CLIENTINPUT, ONLY CALL UPDATE WHENEVER TIME MORE THAN 0.03125f FROM PREVIOUS?
@@ -145,34 +154,35 @@ namespace misc
 			if (!ply->is_visible(p, re_p))
 				return false;
 
-			if (!ply->is_visible(p - Vector3(0, 0.3, 0), re_p)) //double check not too low as likes to shoot from just under the ground
-				return false;
+			//if (!ply->is_visible(p - Vector3(0, 0.3, 0), re_p)) //double check not too low as likes to shoot from just under the ground
+			//	return false;
 
 			if(settings::visuals::angles)
 				Sphere(p, 0.05f, col(0.1, 0.3, 0.9, 0), 0.02f, 10);
 
 			if (!ply->is_visible(p, pos))
 			{
-				//return false;
-				bool t = false;
-
-				std::array<Vector3, 6> positions = {
-					pos + Vector3(0, settings::weapon::thickness, 0),
-					pos + Vector3(0, -settings::weapon::thickness, 0),
-					pos + Vector3(settings::weapon::thickness, 0, 0),
-					pos + Vector3(-settings::weapon::thickness, 0, 0),
-					pos + Vector3(0, 0, settings::weapon::thickness),
-					pos + Vector3(0, 0, -settings::weapon::thickness)
-				};
-
-				for (auto v : positions) {
-					if (ply->is_visible(p, v)
-						&& ply->is_visible(pos, v)) {
-						t = true;
-					}
-				}
-
-				if (!t) return false;
+				return false;
+				//bool t = false;
+				//
+				//std::array<Vector3, 6> positions = {
+				//	pos + Vector3(0, settings::weapon::thickness, 0),
+				//	//pos + Vector3(0, -settings::weapon::thickness, 0),
+				//	//pos + Vector3(settings::weapon::thickness, 0, 0),
+				//	//pos + Vector3(-settings::weapon::thickness, 0, 0),
+				//	//pos + Vector3(0, 0, settings::weapon::thickness),
+				//	//pos + Vector3(0, 0, -settings::weapon::thickness)
+				//};
+				//
+				//for (auto v : positions) {
+				//	if (ply->is_visible(p, v)
+				//		&& ply->is_visible(pos, v)) {
+				//		t = true;
+				//		break;
+				//	}
+				//}
+				//
+				//if (!t) return false;
 			}
 
 			if (ValidateEyePos(p))
@@ -383,6 +393,210 @@ namespace misc
 
 		return false;
 	};
+
+
+	//AUTO BOT STUFF LOLLLL
+	//
+	// AIMS:
+	// AUTO FARM { 
+	//	FORCE LOOKING TO WALKING DIRECTION
+	//	CONSTANTLY CHECK FOR PLAYERS, 
+	//   -HAVE THEY ALREADY LOOKED AT ME MORE THAN TWICE? CHEATER?
+	//   -ARE THEY VISIBLE?
+	//	 -SHOOT AT PLAYER?
+	// 
+	//	RETURN TO BASE?
+	//	AUTO DEPOT????
+	// }
+	// 
+	// 
+	// AUTO BOT? {
+	//	IF NOT FARMING LOOK FOR PLACE TO PEEK WITH MANIP ??
+	//	HVH MODE?
+	//  ....??????
+	// }
+	//
+
+	Vector3 lowest_pos(Vector3 in)
+	{
+		Vector3 current = in;
+		for (size_t i = 0; i < 100; i++)
+		{
+			if (esp::local_player->is_visible(current, Vector3(current.x, current.z -= 1.f, current.z)))
+			{
+				current = Vector3(current.x, current.z -= 1.f, current.z);
+			}
+			else break;
+		}
+		return Vector3(current.x, current.y += 1.6f, current.z);
+	}
+
+	float dist_from_ground(Vector3 v)
+	{
+		Vector3 p = v;
+		int t = 0;
+		while (t++ < 100)
+		{
+			if (!esp::local_player->is_visible(v, p))
+				return v.distance(p);
+			p.y -= 0.1;
+		}
+	}
+
+	namespace autobot {
+		bool needs_to_jump = false;
+		int psteps = 0;
+
+		void CreatePath(Vector3 marker_pos, 
+			Vector3 point)
+		{
+			node.pos = marker_pos;
+			node.steps = 1;
+			//create path
+			std::vector<Vector3> path;
+			Vector3 original = point;
+			bool failed = false;
+			Vector3 old_point = point;
+			float control = 0.f;
+			int iterations = 0;
+			while (point.distance(node.pos) > 0.5f)
+			{
+				if (iterations++ > 10000)
+					break;
+
+
+				path.push_back(point);
+				Vector3 new_point = lowest_pos(Vector3::move_towards(point, node.pos, 1.0f));
+
+				bool flag = false;
+
+				if (esp::local_player->is_visible(point, new_point))
+				{
+					old_point = point;
+					point = new_point;
+				}
+				else
+				{
+					std::vector<Vector3> ps = {};
+
+					for (auto e : sphere1m) //create sphere if cannot find LOS straight ahead
+						if ((esp::local_player->is_visible(point, point + e) &&
+							 esp::local_player->is_visible(Vector3((point + e).x, (point + e).y + 1000, (point + e).z), point + e))
+							&& (point + e).distance(node.pos) < point.distance(node.pos)
+							&& (point + e).distance(point) > 0.9f)
+						{
+							if (flag) continue;
+							bool y = false;
+							for (auto z : node.path) //check if new point passes by any previous points
+								if ((point + e).distance(z) < 0.9f)
+									y = true;
+							if (y) continue;
+							ps.push_back(point + e);
+						}
+					Vector3 best = ps[0];
+					for (auto e : ps)
+						if (e.distance(node.pos) < best.distance(node.pos)
+							&& dist_from_ground(e) < 1.6f)
+							best = e;
+					old_point = point;
+					point = best;
+				}
+			}
+			node.path = path;
+		}
+
+		void do_jump(playerwalkmovement* pwm, 
+			modelstate* state) {
+			if (!pwm || !state) return;
+			state->set_flag(rust::classes::ModelState_Flag::OnGround);
+			state->setjumped(true);
+			pwm->set_jump_time(get_time());
+			auto vel = pwm->get_body_velocity();
+			pwm->set_body_velocity(Vector3(vel.x, 10, vel.z));
+		}
+
+		void auto_farm(playerwalkmovement* pwm) {
+			auto lp = esp::local_player;
+			if (!lp || !pwm) return; 
+
+			networkable* marker;
+			//check if farming stone or wood
+			marker = lp->find_closest(_("OreResourceEntity"), (networkable*)lp, 200.f);
+			
+			node.ent = (uintptr_t)marker;
+			Vector3 vel = pwm->get_TargetMovement();
+			vel = Vector3(vel.x / vel.length() * 5.5f, vel.y, vel.z / vel.length() * 5.5f);
+			auto eyepos = lp->get_player_eyes()->get_position();
+
+			auto transform = get_transform((base_player*)marker);
+			if (transform) {
+				auto marker_pos = get_position((uintptr_t)transform);
+				Sphere(marker_pos, 2.f, col(1, 1, 1, 1), 0.02f, 100.f);
+				if (node.steps > 0
+					&& eyepos.distance(node.pos) < 0.5f)
+				{
+					node.path.clear();
+					node.pos = Vector3(0, 0, 0);
+					node.steps = 0;
+					vel = Vector3(0, 0, 0);
+				}
+
+				if (eyepos.distance(node.pos) >= 0.5f)
+				{
+					if (node.path.empty() && (node.pos.is_empty() || node.pos == Vector3(0, 0, 0))
+						&& eyepos.distance(node.pos) > 1.f)
+						CreatePath(marker_pos, eyepos);
+
+					Vector3 current_step = node.path[node.steps];
+
+					psteps = node.steps;
+					if (current_step.distance(node.pos) <= 0.5f)
+					{
+						vel = Vector3(0, 0, 0);
+						node.path.clear();
+						node.pos = Vector3(0, 0, 0);
+						node.steps = 0;
+						return;
+					}
+
+					//draw path
+					if (!node.path.empty())
+					{
+						for (size_t i = 1; i < node.path.size(); i++)
+						{
+							if (node.path[i] == current_step)
+								Line(node.path[i - 1], node.path[i], col(1, 0, 0, 50), 0.02f, false, true);
+							else
+								Line(node.path[i - 1], node.path[i], col(1, 1, 1, 50) , 0.02f, false, true);
+						}
+					}
+
+					if (eyepos.distance(current_step) < 1.6f)
+						node.steps += 1;
+
+					if (node.steps >= node.path.size() - 1)
+					{
+						vel = Vector3(0, 0, 0);
+						node.path.clear();
+						node.pos = Vector3(0, 0, 0);
+						node.steps = 0;
+						return;
+					}
+
+					Vector3 dir = ((Vector3(current_step.x, current_step.y - dist_from_ground(current_step) + 0.1f, current_step.z)) - eyepos).Normalized();
+					vel = { (dir.x / dir.length() * 5.5f), vel.y, (dir.z / dir.length() * 5.5f) };
+					pwm->set_TargetMovement(vel);
+					if (node.path[node.steps].y - eyepos.y > 1.6f)
+					{
+						needs_to_jump = true;
+						do_jump(pwm, lp->get_model_state());
+					}
+				}
+			}
+		}
+	}
+
+
 
 	bool just_shot = false;
 	bool did_reload = false;
@@ -1149,7 +1363,6 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 					}
 				}
 
-
 				if (!m_skydome)
 				{
 					if (tag == 20011) {
@@ -1181,7 +1394,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 
 	void hk_playerwalkmovement_ClientInput(playerwalkmovement* player_walk_movement, uintptr_t inputstate, modelstate* model_state) {
 		orig::playerwalkmovement_client_input(player_walk_movement, inputstate, model_state);
-
+		Vector3 vel = player_walk_movement->get_TargetMovement();
 		auto loco = esp::local_player;
 
 		if (!loco)
@@ -1208,7 +1421,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 
 		float max_speed = (player_walk_movement->get_swimming() || player_walk_movement->get_ducking() > 0.5) ? 1.7f : 5.5f;
 		if (settings::misc::always_sprint) {
-			Vector3 vel = player_walk_movement->get_TargetMovement();
+			
 			if (vel.length() > 0.f) {
 				Vector3 target_vel = Vector3(vel.x / vel.length() * max_speed, vel.y, vel.z / vel.length() * max_speed);
 				player_walk_movement->set_TargetMovement(target_vel);
@@ -1246,6 +1459,11 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 		if (loco)
 		{
 			if(!loco->is_sleeping()){
+				if (settings::misc::autofarm)
+				{
+					misc::autobot::auto_farm(player_walk_movement);
+				}
+
 				if (settings::misc::flyhack_stop) {
 					if (settings::vert_flyhack > 3.f
 						|| settings::hor_flyhack > 6.5f) {
@@ -1562,8 +1780,8 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 				if ((settings::weapon::autoshoot || unity::GetKey(rust::classes::KeyCode(settings::keybind::autoshoot))))
 				{
 					float nextshot = misc::fixed_time_last_shot + held->get_repeat_delay();
-					Sphere(target, 0.05f, col(0.6, 0.6, 0.6, 1), 0.02f, 100.f);
-					Sphere(baseplayer->get_bone_transform(48)->get_bone_position(), 0.05f, col(0.6, 0.6, 0.6, 1), 0.02f, 100.f);
+					//Sphere(target, 0.05f, col(0.6, 0.6, 0.6, 1), 0.02f, 100.f);
+					//Sphere(baseplayer->get_bone_transform(48)->get_bone_position(), 0.05f, col(0.6, 0.6, 0.6, 1), 0.02f, 100.f);
 					if (baseplayer->is_visible(target, baseplayer->get_bone_transform(48)->get_bone_position())
 						&& get_fixedTime() > nextshot
 						&& held->get_time_since_deploy() > held->get_deploy_delay()
@@ -1703,23 +1921,26 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 						__try {
 							if (settings::weapon::thick_bullet
 								&& projectile->authoritative()
-								&& projectile->IsAlive())
+								&& projectile->IsAlive()
+								&& settings::weapon::thickness > 0.99f)
 							{
 								if (target.player) {
 									auto current_position = get_position((uintptr_t)get_transform((base_player*)projectile));
 									
 									
-									transform* bonetrans = target.player->find_closest_bone(current_position, true);
+									//transform* bonetrans = target.player->find_closest_bone(current_position, true);
+									transform* bonetrans = target.player->get_bone_transform(47);
 
 									Vector3 target_bone = get_position((uintptr_t)bonetrans);
-									Sphere(target_bone, 0.1f, col(12, 150, 100, 50), 10.f, 100.f);
+									//Sphere(target_bone, 0.1f, col(12, 150, 100, 50), 10.f, 100.f);
 
 									if (misc::LineCircleIntersection(target_bone, settings::weapon::thickness, current_position, projectile->previousPosition(), offset))
 									{
 										current_position = Vector3::move_towards(target_bone, current_position, settings::weapon::thickness);
 									}
 
-									if (target_bone.distance(current_position) <= settings::weapon::thickness)
+									if (target_bone.distance(current_position) <= settings::weapon::thickness
+										&& target.player->is_visible(target_bone, current_position))
 									{
 										//current_position = Vector3::move_towards(current_position, target_bone, 1.0f);
 										current_position = Vector3::move_towards(target_bone, current_position, 1.2f);
@@ -1901,6 +2122,46 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 				auto target = baseplayer->get_aimbot_target(unity::get_camera_pos());
 				if (!target.is_heli && target.player && target.distance <= 5 && target.player->get_health() <= 4 && target.visible)
 					unity::ServerRPC((uintptr_t)target.player, rust::classes::string(_(L"RPC_Assist")));
+			}
+
+			switch (settings::misc::gesture_spam) {
+			case 0:
+				break;
+			case 1:
+				break;
+			case 2:
+				esp::local_player->SendSignalBroadcast(rust::classes::Signal::Gesture, _(L"clap"));
+				break;
+			case 3:
+				esp::local_player->SendSignalBroadcast(rust::classes::Signal::Gesture, _(L"friendly"));
+				break;
+			case 4:
+				esp::local_player->SendSignalBroadcast(rust::classes::Signal::Gesture, _(L"thumbsdown"));
+				break;
+			case 5:
+				esp::local_player->SendSignalBroadcast(rust::classes::Signal::Gesture, _(L"thumbsup"));
+				break;
+			case 6:
+				esp::local_player->SendSignalBroadcast(rust::classes::Signal::Gesture, _(L"ok"));
+				break;
+			case 7:
+				esp::local_player->SendSignalBroadcast(rust::classes::Signal::Gesture, _(L"point"));
+				break;
+			case 8:
+				esp::local_player->SendSignalBroadcast(rust::classes::Signal::Gesture, _(L"shrug"));
+				break;
+			case 9:
+				esp::local_player->SendSignalBroadcast(rust::classes::Signal::Gesture, _(L"victory"));
+				break;
+			case 10:
+				esp::local_player->SendSignalBroadcast(rust::classes::Signal::Gesture, _(L"wave"));
+				break;
+			case 11:
+				esp::local_player->SendSignalBroadcast(rust::classes::Signal::Gesture, _(L"dance.cabbagepatch"));
+				break;
+			case 12:
+				esp::local_player->SendSignalBroadcast(rust::classes::Signal::Gesture, _(L"dance.twist"));
+				break;
 			}
 
 			unity::IgnoreLayerCollision(rust::classes::layer::PlayerMovement, rust::classes::layer::Water, !settings::misc::no_playercollision);
