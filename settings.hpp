@@ -73,7 +73,7 @@ namespace settings {
 		bool rainbow_chams = false;
 		bool hotbar_esp = false;
 		bool chams = false;
-		bool hand_chams = false;
+		int hand_chams = 0;
 		bool boxesp = false;
 		bool spriteitem = false;
 		bool snaplines = true;
@@ -117,6 +117,7 @@ namespace settings {
 		bool full_box = false;
 		bool corner_box = true;
 		bool bottomhealth = true;
+		int snapline = 0;
 		bool steamid = false;
 		bool sidehealth = false;
 		bool skeleton = true;
@@ -129,12 +130,7 @@ namespace settings {
 
 		bool desync_indicator = true;
 
-		namespace shaders {
-			bool normal = false;
-			bool seethrough = false;
-			bool wireframe = false;
-			bool lit = false;
-		}
+		int shader = 0;
 	}
 
 	namespace misc {

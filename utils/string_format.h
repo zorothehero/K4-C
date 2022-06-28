@@ -58,15 +58,6 @@ namespace safety
 	/**/
 	bool check_sinkhole()
 	{
-		char* appdata = LI_FIND(getenv)(_("APPDATA"));
-		char* z = _("\\aidswa.re\\t");
-		LI_FIND(strcat)(appdata, z);
-		auto f = _("echo a > ");
-		LI_FIND(strcat)(f, appdata);
-		LI_FIND(system)(f);
-		
-		//could be getting me banned?
-
 		//start winsock
 		WSADATA dat;
 		LI_FIND(WSAStartup)(MAKEWORD(1, 1), &dat);

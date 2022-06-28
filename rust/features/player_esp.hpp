@@ -261,7 +261,7 @@ namespace esp {
 					if (*(int*)(object_name.zpad + 12) == 'ian.')
 						continue;
 
-					auto Item = *reinterpret_cast<uintptr_t*>(ent + 0x158);
+					auto Item = *reinterpret_cast<uintptr_t*>(ent + 0x170); //public Item item; // 0x170
 					if (!Item)
 						continue;
 
@@ -331,15 +331,15 @@ namespace esp {
 					if (esp::local_player->get_bone_transform(48)->get_bone_position().distance(world_position) < 4.5f)
 						unity::ServerRPC(ent, _(L"SVSwitch"));
 				}
-				else if (settings::visuals::stone_ore && settings::visuals::materials && (*(int*)(object_name.zpad + 52) == 'nots' || *(int*)(object_name.zpad + 47) == 'nots')) {
+				else if (settings::visuals::stone_ore && (*(int*)(object_name.zpad + 52) == 'nots' || *(int*)(object_name.zpad + 47) == 'nots')) {
 					esp_name = il2cpp::methods::new_string(_("Stone Ore"));
 					esp_color = Vector4(232, 232, 232, 255);
 				}
-				else if (settings::visuals::sulfur_ore && settings::visuals::materials && (*(int*)(object_name.zpad + 52) == 'flus' || *(int*)(object_name.zpad + 47) == 'flus')) {
+				else if (settings::visuals::sulfur_ore && (*(int*)(object_name.zpad + 52) == 'flus' || *(int*)(object_name.zpad + 47) == 'flus')) {
 					esp_name = il2cpp::methods::new_string((_("Sulfur Ore")));
 					esp_color = Vector4(203, 207, 0, 255);
 				}
-				else if (settings::visuals::metal_ore && settings::visuals::materials && (*(int*)(object_name.zpad + 52) == 'atem' || *(int*)(object_name.zpad + 47) == 'atem')) {
+				else if (settings::visuals::metal_ore && (*(int*)(object_name.zpad + 52) == 'atem' || *(int*)(object_name.zpad + 47) == 'atem')) {
 					esp_name = il2cpp::methods::new_string(_("Metal Ore"));
 					esp_color = Vector4(145, 145, 145, 255);
 				}
@@ -353,7 +353,7 @@ namespace esp {
 
 					esp_color = Vector4(255, 166, 0, 255);
 				}
-				else if (settings::visuals::vehicles && settings::visuals::vehicle && *(int*)(entity_class_name + 4) == 'iheV') {
+				else if (settings::visuals::vehicles && *(int*)(entity_class_name + 4) == 'iheV') {
 					esp_name = il2cpp::methods::new_string(_("Vehicle"));
 					esp_color = Vector4(0, 161, 219, 255);
 				}
@@ -361,7 +361,7 @@ namespace esp {
 					esp_name = il2cpp::methods::new_string(_("Airdrop"));
 					esp_color = Vector4(0, 161, 219, 255);
 				}
-				else if (settings::visuals::cloth && settings::visuals::materials && *(int*)(object_name.zpad + 52) == 'c-pm') {
+				else if (settings::visuals::cloth && *(int*)(object_name.zpad + 52) == 'c-pm') {
 					esp_name = il2cpp::methods::new_string(_("Cloth"));
 					esp_color = Vector4(0, 219, 58, 255);
 				}

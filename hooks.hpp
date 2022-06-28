@@ -422,9 +422,10 @@ namespace misc
 		Vector3 current = in;
 		for (size_t i = 0; i < 100; i++)
 		{
-			if (esp::local_player->is_visible(current, Vector3(current.x, current.z -= 1.f, current.z)))
+			if (esp::local_player->is_visible(in, current))
 			{
 				current = Vector3(current.x, current.z -= 1.f, current.z);
+				continue;
 			}
 			else break;
 		}
@@ -459,18 +460,15 @@ namespace misc
 			Vector3 old_point = point;
 			float control = 0.f;
 			int iterations = 0;
-			while (point.distance(node.pos) > 0.5f)
+			while (point.distance(node.pos) > 1.f)
 			{
-				if (iterations++ > 10000)
+				if (iterations++ > 3000)
 					break;
-
 
 				path.push_back(point);
 				Vector3 new_point = lowest_pos(Vector3::move_towards(point, node.pos, 1.0f));
 
-				bool flag = false;
-
-				if (esp::local_player->is_visible(point, new_point))
+				if (esp::local_player->is_visible(point, new_point, 1.5f))
 				{
 					old_point = point;
 					point = new_point;
@@ -480,20 +478,20 @@ namespace misc
 					std::vector<Vector3> ps = {};
 
 					for (auto e : sphere1m) //create sphere if cannot find LOS straight ahead
-						if ((esp::local_player->is_visible(point, point + e) &&
-							 esp::local_player->is_visible(Vector3((point + e).x, (point + e).y + 1000, (point + e).z), point + e))
+						if (esp::local_player->is_visible(point, point + e, 1.5f)
 							&& (point + e).distance(node.pos) < point.distance(node.pos)
-							&& (point + e).distance(point) > 0.9f)
+							&& (point + e).distance(point) > 0.5f)
 						{
-							if (flag) continue;
 							bool y = false;
-							for (auto z : node.path) //check if new point passes by any previous points
-								if ((point + e).distance(z) < 0.9f)
+							for (auto z : node.path) //check if new point passes (closely) by any previous points
+								if ((point + e).distance(z) < 0.5f)
 									y = true;
 							if (y) continue;
 							ps.push_back(point + e);
 						}
-					Vector3 best = ps[0];
+
+					Vector3 best = Vector3(0, 0, 0);
+
 					for (auto e : ps)
 						if (e.distance(node.pos) < best.distance(node.pos)
 							&& dist_from_ground(e) < 1.6f)
@@ -1428,6 +1426,12 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 			}
 		}
 
+		if (unity::GetKeyDown(rust::classes::KeyCode::Space)
+			&& settings::misc::infinite_jump)
+		{
+			misc::autobot::do_jump(player_walk_movement, model_state);
+		}
+		
 		auto wpn = esp::local_player->get_active_weapon();
 		auto held = wpn ? wpn->get_base_projectile() : nullptr;
 		if (settings::weapon::always_reload
@@ -1462,6 +1466,12 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 				if (settings::misc::autofarm)
 				{
 					misc::autobot::auto_farm(player_walk_movement);
+				}
+				else
+				{
+					misc::node.path.clear();
+					misc::node.pos = Vector3(0, 0, 0);
+					misc::node.steps = 0;
 				}
 
 				if (settings::misc::flyhack_stop) {
@@ -1709,14 +1719,11 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 			if (settings::misc::admin_mode)
 				baseplayer->set_admin_flag(rust::classes::PlayerFlags::IsAdmin);
 
-			if (settings::misc::spiderman && settings::misc::Movement) {
+			if (settings::misc::spiderman) {
 				baseplayer->SpiderMan();
 			}
 
-			if (settings::misc::playerfovtoggle) {
-				baseplayer->fov();
-
-			}
+			baseplayer->fov();
 
 			if (held) {
 				if (!LI_FIND(strcmp)(held->get_class_name(), _("Planner"))) {
@@ -1865,22 +1872,6 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 
 			auto item = baseplayer->get_active_weapon();
 
-			if (settings::misc::auto_lock) {
-				auto closest_ent = baseplayer->resolve_closest_entity(3);
-
-				auto addr = mem::read<uintptr_t>(mem::game_assembly_base + offsets::Method_BaseEntity_ServerRPC_string_bool_address); //Method$BaseEntity.ServerRPC<string, bool>() address
-
-				if (closest_ent.first.found && addr) {
-					if (closest_ent.second) {
-						auto code_str = string::format(_("%d"), (int)settings::misc::code_lock_code);
-						change_code_rpc(closest_ent.first.player, rust::classes::string(_(L"RPC_ChangeCode")), il2cpp::methods::new_string(code_str), false, addr);
-						unity::ServerRPC((uintptr_t)closest_ent.first.player, rust::classes::string(_(L"TryLock")));
-						unity::ServerRPC((uintptr_t)closest_ent.first.player, rust::classes::string(_(L"RPC_Lock")));
-					}
-					else
-						unity::ServerRPC((uintptr_t)closest_ent.first.player, rust::classes::string(_(L"RPC_Lock")));
-				}
-			}
 
 			if (settings::misc::speedhack || unity::GetKey(rust::classes::KeyCode(settings::keybind::timescale))) {
 				set_timeScale(settings::misc::speedhackspeed);
@@ -1888,7 +1879,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 			}
 			else {
 				set_timeScale(1);
-				is_speeding = false;
+				is_speeding = false;	
 			}
 
 			if (item) {

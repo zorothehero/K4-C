@@ -185,6 +185,8 @@ namespace gui {
 		//
 		//methods::add_component = reinterpret_cast<void(*)(uintptr_t self, uintptr_t componentType)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GameObject"), _("InternalAddComponentWithType"), 0, _(""), _("UnityEngine"))));
 
+		//set font????????????
+
 		white_texture = methods::get_whiteTexture();
 	}
 
@@ -769,7 +771,7 @@ namespace gui {
 		current_pos.y += 30;
 	}
 
-	
+	int* list_open = 0;
 	bool list_clicked = false;
 	void listbox(rust::classes::EventType event,
 		Vector2 pos,
@@ -781,12 +783,13 @@ namespace gui {
 	{
 		pos.x += 10;
 		rust::classes::Rect poz = rust::classes::Rect(pos.x + tab_size.x + 2.0f, pos.y + current_pos.y, 150, 20);
+		fill_box(poz, rgba(14.f, 18.f, 24.f, 255.f));
 
 		auto sz = sizeof(str_list) / sizeof(str_list[0]);
 
 		gui::Label({ poz.x + 5, poz.y, poz.wid, poz.hei }, rust::classes::string(string::wformat(_(L"%s: %s"), button_name, str_list[*selected])), rgba(159.f, 163.f, 169.f, (opacity / 255.f)), false, 13);
 
-		if (list_clicked)
+		if (list_clicked && list_open == selected)
 		{
 			gui::line({ poz.x + 130, poz.y + 13 }, { poz.x + 135, poz.y + 8 }, rgba(159.f, 163.f, 169.f, (opacity / 255.f)));
 			gui::line({ poz.x + 140, poz.y + 13 }, { poz.x + 135, poz.y + 8 }, rgba(159.f, 163.f, 169.f, (opacity / 255.f)));
@@ -805,9 +808,12 @@ namespace gui {
 		if (event == rust::classes::EventType::MouseDown)
 		{
 			poz = rust::classes::Rect(pos.x + tab_size.x + 2.0f, pos.y + current_pos.y, 150, 20);
-			if (poz.Contains(mouse))
+			if (poz.Contains(mouse)) {
 				list_clicked = !list_clicked;
-			if (list_clicked)
+				if (list_open != selected)
+					list_open = selected;
+			}
+			if (list_clicked && list_open == selected)
 			{
 				for (size_t i = 1; i < sz; i++)
 				{
@@ -820,7 +826,7 @@ namespace gui {
 			}
 		}
 
-		if (list_clicked) {
+		if (list_clicked && list_open == selected) {
 			for (size_t i = 1; i < sz; i++)
 			{
 				if (str_list[i][0] == '\x00') continue;
@@ -847,7 +853,7 @@ namespace gui {
 
 		pos.x += 5;
 		const float button_size = 20;
-		if (event == rust::classes::EventType::MouseDown && !combo_clicked) {
+		if (event == rust::classes::EventType::MouseDown && !combo_clicked && !list_clicked) {
 			if (rust::classes::Rect(pos.x + tab_size.x + 3 + 2.0f, pos.y + current_pos.y - 4 + 3 + 2.0f, 100, button_size + 3).Contains(mouse)) {
 				*checked_ref = !*checked_ref;
 			}
@@ -857,7 +863,7 @@ namespace gui {
 		{
 			rust::classes::Rect poz = rust::classes::Rect(pos.x + tab_size.x + 100 + 2.0f, pos.y + current_pos.y, 31, 15);
 			fill_box(poz, rgba(14.f, 18.f, 24.f, 255.f));
-			if (event == rust::classes::EventType::MouseDown && !combo_clicked) {
+			if (event == rust::classes::EventType::MouseDown && !combo_clicked && !list_clicked) {
 				if (poz.Contains(mouse)) {
 					getting_keybind = !getting_keybind;
 					if (getting_keybind)
@@ -1142,17 +1148,20 @@ namespace gui {
 									Progbar({ 900, (650 + (bars++ * 10)) }, { 120, 4 }, settings::time_since_last_shot, (r - 0.2f));
 							}
 						}
-						if (settings::visuals::snaplines)
+						if (esp::best_target.player
+							&& settings::visuals::snapline > 1)
 						{
-							if (esp::best_target.player)
-							{
-								Vector3 o = WorldToScreen(esp::best_target.pos);
-								if (esp::best_target.visible)
-									gui::line(Vector2(ScreenWidth / 2, 1080), Vector2(o.x, o.y), gui::Color(0, 0.9, 0.2, 1));
-								else
-									gui::line(Vector2(ScreenWidth / 2, 1080), Vector2(o.x, o.y), gui::Color(0.9, 0, 0.2, 1));
-							}
+							Vector2 start = settings::visuals::snapline == 2 ? Vector2(ScreenWidth / 2, 0) :
+								settings::visuals::snapline == 3 ? Vector2(ScreenWidth / 2, 540) :
+								settings::visuals::snapline == 4 ? Vector2(ScreenWidth / 2, 1080) :
+								Vector2(ScreenWidth / 2, 1080);
+							Vector3 o = WorldToScreen(esp::best_target.pos);
+							if (esp::best_target.visible)
+								gui::line(start, Vector2(o.x, o.y), gui::Color(0, 0.9, 0.2, 1));
+							else
+								gui::line(start, Vector2(o.x, o.y), gui::Color(0.9, 0, 0.2, 1));
 						}
+						
 						if (settings::visuals::draw_fov) {
 							esp::draw_target_fov(col(settings::visuals::VisRcolor, settings::visuals::VisGcolor, settings::visuals::VisBcolor, 1), Vector2(ScreenWidth / 2, ScreenHeight / 2), settings::weapon::aimbotfov);
 						}
@@ -1183,11 +1192,8 @@ namespace gui {
 									settings::vert_flyhack,
 									6.5f);
 							}
-
-
 						}
 					}
-
 
 					esp::start();
 				}
@@ -1231,11 +1237,6 @@ namespace gui {
 					menu_size.x -= 90;
 					menu_size.y -= 15;
 
-					if (settings::misc::code_lock_code < 1000)
-						settings::misc::code_lock_code = 1000;
-					else if (settings::misc::code_lock_code > 9999)
-						settings::misc::code_lock_code = 9999;
-
 					std::array<wchar_t*, 13> list1_names = {
 							_(L"none"),
 							_(L"none"),
@@ -1250,7 +1251,53 @@ namespace gui {
 							_(L"wave"),
 							_(L"cabbagepatch"),
 							_(L"twist")
+					}; 
+					std::array<wchar_t*, 13> list2_names = {
+							_(L"none"),
+							_(L"none"),
+							_(L"top"),
+							_(L"center"),
+							_(L"bottom"),
+							_(L"\x00"),
+							_(L"\x00"),
+							_(L"\x00"),
+							_(L"\x00"),
+							_(L"\x00"),
+							_(L"\x00"),
+							_(L"\x00"),
+							_(L"\x00")
 					};
+					std::array<wchar_t*, 13> list3_names = {
+							_(L"none"),
+							_(L"none"),
+							_(L"normal"),
+							_(L"seethrough"),
+							_(L"wireframe"),
+							_(L"lit"),
+							_(L"\x00"),
+							_(L"\x00"),
+							_(L"\x00"),
+							_(L"\x00"),
+							_(L"\x00"),
+							_(L"\x00"),
+							_(L"\x00")
+					};
+					std::array<wchar_t*, 13> list4_names = {
+							_(L"none"),
+							_(L"none"),
+							_(L"seethrough"),
+							_(L"chams (rgb)"),
+							_(L"\x00"),
+							_(L"\x00"),
+							_(L"\x00"),
+							_(L"\x00"),
+							_(L"\x00"),
+							_(L"\x00"),
+							_(L"\x00"),
+							_(L"\x00"),
+							_(L"\x00")
+					};
+
 					std::array<wchar_t*, 8> combo1_names = {
 							_(L"Null"),
 							_(L"Head"),
@@ -1330,18 +1377,24 @@ namespace gui {
 
 						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Bottom healthbar"), &settings::visuals::bottomhealth, visual_tab);
 						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Side healthbar"), &settings::visuals::sidehealth, visual_tab);
-						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Chams"), &settings::visuals::chams, visual_tab);
+						pos.y += 25;
 						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Rainbow chams"), &settings::visuals::rainbow_chams, visual_tab);
-						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Hand chams"), &settings::visuals::hand_chams, visual_tab);
 						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Sleeper"), &settings::visuals::sleeper_esp, visual_tab);
 						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"NPC"), &settings::visuals::npc_esp, visual_tab);
 						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Corpse"), &settings::visuals::corpses, visual_tab);
 						//checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Misc"), &settings::visuals::misc_esp, visual_tab);
 						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Held icons"), &settings::visuals::spriteitem, visual_tab);
+						pos.y += 25;
 						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Skeleton"), &settings::visuals::skeleton, visual_tab);
-						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Snaplines"), &settings::visuals::snaplines, visual_tab);
 						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Offscreen indicator"), &settings::visuals::offscreen_indicator, visual_tab);
 						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Show fov"), &settings::visuals::draw_fov, visual_tab);
+						listbox(event_type, menu_pos, pos, mouse_pos, _(L"Snapline"), list2_names, &settings::visuals::snapline);
+
+						pos.y -= 240;
+						listbox(event_type, menu_pos, pos, mouse_pos, _(L"Chams"), list3_names, &settings::visuals::shader);
+						pos.y += 95;
+						listbox(event_type, menu_pos, pos, mouse_pos, _(L"Hands"), list4_names, &settings::visuals::hand_chams);
+
 						break;
 					case 2:
 						//checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Materials"), &settings::visuals::materials, other_esp);
@@ -1364,7 +1417,7 @@ namespace gui {
 						menu_pos.x += 170;
 						pos.y = 0; //?
 
-						listbox(event_type, menu_pos, pos, mouse_pos, _(L"Gesture: "), list1_names, &settings::misc::gesture_spam);
+						listbox(event_type, menu_pos, pos, mouse_pos, _(L"Gesture"), list1_names, &settings::misc::gesture_spam);
 
 						break;
 					case 3:
@@ -1722,103 +1775,121 @@ namespace esp
 	static float r = 1.00f, g = 0.00f, b = 1.00f;
 	void do_chams(base_player* player)
 	{
-		if (settings::visuals::hand_chams) {
-			auto model = gui::methods::get_activemodel();
-			auto renderers = ((networkable*)model)->GetComponentsInChildren(unity::GetType(_("UnityEngine"), _("Renderer")));
-
-			auto sz = *reinterpret_cast<int*>(renderers + 0x18);	
-
-			for (int i = 0; i < sz; i++) {
-				//if (sz == 2) i == 1; //skips front of weapon
-				auto renderer = *reinterpret_cast<uintptr_t*>(renderers + 0x20 + i * 0x8);
-
-				if (!renderer) continue;
-				auto material = get_material(renderer);
-				if (!material) continue;
-				auto s = FindShader(rust::classes::string(_(L"Standard")));
-				unity::set_shader(material, s);
-				SetColor(material, _(L"_Color"), col(r, g, b, 0.5));
-			}
-		}
-
-		if (settings::visuals::chams) {
-			if (unity::bundle)
+		if (unity::bundle)
+		{
+			uintptr_t shader = unity::chams_shader_normal;
+			switch (settings::visuals::shader)
 			{
-				//unity::chams_shader = unity::LoadAsset(unity::bundle, _(L"Chams"), unity::GetType(_(L"UnityEngine.Shader, UnityEngine.CoreModule")));
-				uintptr_t shader = unity::chams_shader_normal;
-
-				if (settings::visuals::shaders::seethrough) {
-					shader = unity::chams_shader_seethru;
-				}
-				else if (settings::visuals::shaders::wireframe) {
-					shader = unity::chams_shader_wireframe;
-				}
-				else if (settings::visuals::shaders::lit) {
-					shader = unity::chams_shader_lit;
-				}
+			case 0:
+				break;
+			case 1:
+				break;
+			case 2:
+				shader = unity::LoadAsset(unity::bundle, _(L"Chams"), unity::GetType(_("UnityEngine"), _("Shader")));
+				break;
+			case 3:
+				shader = unity::LoadAsset(unity::bundle, _(L"SeethroughShader"), unity::GetType(_("UnityEngine"), _("Shader")));
+				break;
+			case 4:
+				shader = unity::LoadAsset(unity::bundle, _(L"WireframeTransparent"), unity::GetType(_("UnityEngine"), _("Shader")));
+				break;
+			case 5:
+				shader = unity::LoadAsset(unity::bundle, _(L"chamslit"), unity::GetType(_("UnityEngine"), _("Shader")));
+				break;
 			}
+			if (!shader && settings::visuals::hand_chams < 2) return;
 
-			static int cases = 0;
-			switch (cases) {
-			case 0: { r -= 0.004f; if (r <= 0) cases += 1; break; }
-			case 1: { g += 0.004f; b -= 0.004f; if (g >= 1) cases += 1; break; }
-			case 2: { r += 0.004f; if (r >= 1) cases += 1; break; }
-			case 3: { b += 0.004f; g -= 0.004f; if (b >= 1) cases = 0; break; }
-			default: { r = 1.00f; g = 0.00f; b = 1.00f; break; }
-			}
-			auto _multiMesh = mem::read<uintptr_t>(player->get_player_model() + 0x2D0); //SkinnedMultiMesh _multiMesh;
-			if (_multiMesh) {
-				auto render = get_Renderers(_multiMesh);
+			if (settings::visuals::hand_chams > 1) {
+				auto model = gui::methods::get_activemodel();
+				auto renderers = ((networkable*)model)->GetComponentsInChildren(unity::GetType(_("UnityEngine"), _("Renderer")));
+				if (renderers)
+				{
+					auto sz = *reinterpret_cast<int*>(renderers + 0x18);
 
-				for (int i = 0; i < render->get_size(); i++) {
-					auto renderer = render->get_value(i);
+					for (int i = 0; i < sz; i++) {
+						//if (sz == 2) i == 1; //skips front of weapon
+						auto renderer = *reinterpret_cast<uintptr_t*>(renderers + 0x20 + i * 0x8);
 
-					//////// CHAMMINGS ///////
-					if (renderer) {
+						if (!renderer) continue;
 						auto material = get_material(renderer);
-						if (material) {
-							//if (shader)
-							//{
-								if (shader != unity::get_shader(material)) {
-									unity::set_shader(material, shader);
-								}
-								else {
-									SetInt(material, _(L"_ZTest"), 8); // through walls
-									//SetInt(material, _(L"_ZCull"), 8); // through walls
+						if (!material) continue;
+						switch (settings::visuals::hand_chams)
+						{
+						case 2:
+						{
+							uintptr_t s = unity::LoadAsset(unity::bundle, _(L"SeethroughShader"), unity::GetType(_("UnityEngine"), _("Shader")));
+							if (s)
+								unity::set_shader(material, s);
+							break;
+						}
+						case 3:
+						{
+							auto s = FindShader(rust::classes::string(_(L"Standard")));
+							unity::set_shader(material, s);
+							SetColor(material, _(L"_Color"), col(r, g, b, 0.5));
+							break;
+						}
 
-									if (settings::visuals::rainbow_chams) {
-										SetColor(material, _(L"_Color"), col(r, g, b, 1));
-									}
-									else if (get_IsNpc(player->get_player_model()) && unity::is_visible(local_player->get_bone_transform((int)rust::classes::Bone_List::head)->get_bone_position(), player->get_bone_transform((int)rust::classes::Bone_List::head)->get_bone_position(), (uintptr_t)esp::local_player)) {
-										SetColor(material, _(L"_Color"), col(0, 0.5, 1, 0.5));
-									}
-									else if (get_IsNpc(player->get_player_model())) {
-										SetColor(material, _(L"_Color"), col(0, 0, 0.6, 0.5));
-									}
-									else if (get_IsNpc(player->get_player_model())) {
-										SetColor(material, _(L"_Color"), col(0, 0, 0.6, 0.5));
-									}
-									else if (player->is_teammate(local_player)) {
-										SetColor(material, _(L"_Color"), col(0, 1, 1, 1));
-									}
-									else if (unity::is_visible(local_player->get_bone_transform((int)rust::classes::Bone_List::head)->get_bone_position(), player->get_bone_transform((int)rust::classes::Bone_List::head)->get_bone_position(), (uintptr_t)esp::local_player)) {
-										if (settings::visuals::shaders::wireframe) {
-											SetColor(material, _(L"_WireColor"), col(settings::visuals::VisRcolor, settings::visuals::VisGcolor, settings::visuals::VisBcolor, 1));
-										}
-										SetColor(material, _(L"_Color"), col(settings::visuals::VisRcolor, settings::visuals::VisGcolor, settings::visuals::VisBcolor, 1));
-									}
-									else {
-										if (settings::visuals::shaders::wireframe) {
-											SetColor(material, _(L"_WireColor"), col(settings::visuals::InvRcolor, settings::visuals::InvGcolor, settings::visuals::InvBcolor, 1));
-										}
-										SetColor(material, _(L"_Color"), col(settings::visuals::InvRcolor, settings::visuals::InvGcolor, settings::visuals::InvBcolor, 1));
-									}
-								}
-							//}
+						//GALAXY CHAAAAAAAAAAAAAAAAAAAMS??????????????????????
 						}
 					}
 				}
 			}
+
+			if (settings::visuals::shader > 1 && shader) {
+				uintptr_t chams_shader = 0;
+
+				static int cases = 0;
+				switch (cases) {
+				case 0: { r -= 0.004f; if (r <= 0) cases += 1; break; }
+				case 1: { g += 0.004f; b -= 0.004f; if (g >= 1) cases += 1; break; }
+				case 2: { r += 0.004f; if (r >= 1) cases += 1; break; }
+				case 3: { b += 0.004f; g -= 0.004f; if (b >= 1) cases = 0; break; }
+				default: { r = 1.00f; g = 0.00f; b = 1.00f; break; }
+				}
+				//unity::chams_shader = unity::LoadAsset(unity::bundle, _(L"Chams"), unity::GetType(_("UnityEngine"), _("Shader")));
+
+				auto _multiMesh = mem::read<uintptr_t>(player->get_player_model() + 0x2D0); //SkinnedMultiMesh _multiMesh;
+				if (!_multiMesh) return;
+				auto render = get_Renderers(_multiMesh);
+				if (!render) return;
+
+				for (int i = 0; i < render->get_size(); i++) {
+					auto renderer = render->get_value(i);
+					if (!renderer) continue;
+					auto material = get_material(renderer);
+					if (!material) continue;
+					if (shader)
+					{
+						if (shader != unity::get_shader(material)) {
+							unity::set_shader(material, shader);
+						}
+						else
+						{
+							auto viscolor = col(settings::visuals::VisRcolor, settings::visuals::VisGcolor, settings::visuals::VisBcolor, 1);
+							auto inviscolor = col(settings::visuals::InvRcolor, settings::visuals::InvGcolor, settings::visuals::InvBcolor, 1);
+
+							if (settings::visuals::rainbow_chams)
+							{
+								viscolor = col(r, g, b, 1);
+								inviscolor = col(r, g, b, 1);
+							}
+
+							switch (settings::visuals::shader)
+							{
+							case 2:
+								SetColor(material, _(L"_ColorVisible"), viscolor);
+								SetColor(material, _(L"_ColorBehind"), inviscolor);
+								break;
+							case 4:
+								SetColor(material, _(L"_WireColor"), viscolor);
+								break;
+							}
+						}
+					}
+				}
+			}
+			return;
 		}
 	}
 

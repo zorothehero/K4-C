@@ -1330,9 +1330,7 @@ public:
 	void SpiderMan() {
 		*reinterpret_cast<float*>(this + 0xb0) = 0.f;
 	}
-
-
-
+	
 	float get_jump_height() {
 		return GetJumpHeight(this);
 	}
