@@ -1872,7 +1872,7 @@ namespace esp
 							if (settings::visuals::rainbow_chams)
 							{
 								viscolor = col(r, g, b, 1);
-								inviscolor = col(-r, -g, -b, 1);
+								inviscolor = col(1.f - r, 1.f - g, 1.f - b, 1);
 							}
 
 							switch (settings::visuals::shader)
