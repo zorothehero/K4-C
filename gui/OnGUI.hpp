@@ -1867,12 +1867,12 @@ namespace esp
 						else
 						{
 							auto viscolor = col(settings::visuals::VisRcolor, settings::visuals::VisGcolor, settings::visuals::VisBcolor, 1);
-							auto inviscolor = col(-settings::visuals::InvRcolor, -settings::visuals::InvGcolor, -settings::visuals::InvBcolor, 1);
+							auto inviscolor = col(settings::visuals::InvRcolor, settings::visuals::InvGcolor, settings::visuals::InvBcolor, 1);
 
 							if (settings::visuals::rainbow_chams)
 							{
 								viscolor = col(r, g, b, 1);
-								inviscolor = col(r, g, b, 1);
+								inviscolor = col(-r, -g, -b, 1);
 							}
 
 							switch (settings::visuals::shader)
