@@ -1884,6 +1884,10 @@ namespace esp
 							case 4:
 								SetColor(material, _(L"_WireColor"), viscolor);
 								break;
+							case 5:
+								SetColor(material, _(L"_ColorVisible"), viscolor);
+								SetColor(material, _(L"_ColorBehind"), inviscolor);
+								break;
 							}
 						}
 					}
