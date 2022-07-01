@@ -378,10 +378,16 @@ namespace esp {
 						if (flag != 2048)
 							continue;
 					}
-
+					//auto s = il2cpp::methods::new_string(string::format(_("[%dm]"), (int)local_player->get_player_eyes()->get_position().distance(world_position)));
 					Vector2 w2s_position = {};
 					if (out_w2s(world_position, w2s_position))
+					{
 						esp::draw_item(w2s_position, esp_name, esp_color);
+
+						//if (settings::visuals::distance
+						//	&& local_player)
+						//	esp::draw_item(Vector2(w2s_position.x, w2s_position.y += 10), s, esp_color);
+					}
 
 					continue;
 				}
@@ -435,7 +441,10 @@ namespace esp {
 			}
 
 			if (player->is_local_player())
+			{
 				local_player = reinterpret_cast<base_player*>(ent);
+				do_chams(local_player);
+			}
 			else {
 				if (esp::local_player) {
 					auto target = aim_target();

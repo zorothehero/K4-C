@@ -3,6 +3,7 @@
 #include "unity.hpp"
 #include "../utils/xor_float.hpp"
 #include <vector>
+#include "../utils/string_format.h"
 
 uintptr_t planner_rotationoffset = il2cpp::value(_("Planner"), _("rotationOffset"));
 uintptr_t planner_currentconstruction = il2cpp::value(_("Planner"), _("currentConstruction"));
@@ -223,6 +224,8 @@ static auto get_Renderers = reinterpret_cast<rust::list<uintptr_t>*(*)(uintptr_t
 
 static auto get_material = reinterpret_cast<uintptr_t(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Renderer"), _("get_material"), 0, _(""), _("UnityEngine"))));
 
+static auto set_material = reinterpret_cast<uintptr_t(*)(uintptr_t, uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Renderer"), _("set_material"), 0, _(""), _("UnityEngine"))));
+
 static auto get_maxspeed = reinterpret_cast<float(*)(base_player*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("GetMaxSpeed"), 0, _(""), _(""))));
 
 static auto SendSignal = reinterpret_cast<void(*)(uintptr_t, rust::classes::Signal, rust::classes::string)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseEntity"), _("SendSignalBroadcast"), 2, _(""), _(""))));
@@ -259,10 +262,15 @@ static auto upgradetograde = reinterpret_cast<void(*)(uintptr_t, rust::classes::
 
 static auto set_jumped = reinterpret_cast<void(*)(uintptr_t, bool)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("ModelState"), _("set_jumped"), 0, _(""), _(""))));
 
+static auto do_jump = reinterpret_cast<void(*)(uintptr_t, uintptr_t, bool)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("PlayerWalkMovement"), _("Jump"), 0, _(""), _(""))));
+
 static auto set_rigidbody_velocity = reinterpret_cast<void(*)(uintptr_t, Vector3)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Rigidbody"), _("set_velocity"), 0, _(""), _("UnityEngine"))));
 
 static auto get_rigidbody_velocity = reinterpret_cast<Vector3(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Rigidbody"), _("get_velocity"), 0, _(""), _("UnityEngine"))));
 
+static auto console_msg = reinterpret_cast<void(*)(uintptr_t, rust::classes::string)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("ConsoleMessage"), 0, _(""), _(""))));
+
+static auto teleportto = reinterpret_cast<void(*)(uintptr_t, Vector3, uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseMovement"), _("TeleportTo"), 0, _(""), _(""))));
 
 
 //static auto name = reinterpret_cast<void*(*)(void* args_here)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("class"), _("function name"), 0, _(""), _(""))));
@@ -361,6 +369,14 @@ void init_bp() {
 	set_rigidbody_velocity = reinterpret_cast<void(*)(uintptr_t, Vector3)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Rigidbody"), _("set_velocity"), 0, _(""), _("UnityEngine"))));
 
 	get_rigidbody_velocity = reinterpret_cast<Vector3(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Rigidbody"), _("get_velocity"), 0, _(""), _("UnityEngine"))));
+
+	console_msg = reinterpret_cast<void(*)(uintptr_t, rust::classes::string)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("ConsoleMessage"), 0, _(""), _(""))));
+
+	teleportto = reinterpret_cast<void(*)(uintptr_t, Vector3, uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseMovement"), _("TeleportTo"), 0, _(""), _(""))));
+
+	set_material = reinterpret_cast<uintptr_t(*)(uintptr_t, uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Renderer"), _("set_material"), 0, _(""), _("UnityEngine"))));
+
+	do_jump = reinterpret_cast<void(*)(uintptr_t, uintptr_t, bool)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("PlayerWalkMovement"), _("Jump"), 0, _(""), _(""))));
 #pragma region il2
 
 	containerWear = il2cpp::value(_("PlayerInventory"), _("containerWear"));
@@ -1130,6 +1146,11 @@ public:
 		return *reinterpret_cast<bool*>((uintptr_t)this + 0x142); //private bool sliding
 	}
 
+	void force_jump(modelstate* state, bool indirection = false) {
+		if (!this) return;
+		return do_jump((uintptr_t)this, (uintptr_t)state, indirection);
+	}
+
 	void set_flying(bool fly) {
 		*reinterpret_cast<bool*>((uintptr_t)this + flying) = fly;
 	}
@@ -1164,6 +1185,10 @@ public:
 
 	bool set_sliding(bool g) {
 		return *reinterpret_cast<bool*>((uintptr_t)this + 0x142) = g; //private bool sliding
+	}
+
+	void teleport_to(Vector3 p, base_player* ply) {
+		return teleportto((uintptr_t)this, p, (uintptr_t)ply);
 	}
 };
 
@@ -1615,7 +1640,7 @@ public:
 		}
 	}
 
-	bool is_visible(Vector3 source, Vector3 destination, float p1 = 0.2f) {
+	bool is_visible(Vector3 source, Vector3 destination, float p1 = 0.18f) {
 		return unity::is_visible(source, destination, (uintptr_t)this, p1);
 	}
 
@@ -1966,6 +1991,12 @@ public:
 			}
 		}
 		return *reinterpret_cast<transform**>(closest);
+	}
+
+	void console_echo(const wchar_t* str) {
+		//string::format(("%s %d"), _("B:"), (int)settings::visuals::VisBcolor))
+		//auto s = string::wformat(_(L"K4 [%d]: %s"), (int)get_fixedTime(), str);
+		console_msg((uintptr_t)this, str);
 	}
 };
 

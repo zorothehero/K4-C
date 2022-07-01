@@ -128,37 +128,35 @@ bool DllMain(HMODULE hmodule)
 			//LI_FIND(freopen_s)(reinterpret_cast<FILE**>(stdout), _("CONOUT$"), _("w"), stdout);
 			//ShowWindow(GetCon, SW_HIDE);
 
-            /*
-            auto typeinfo = *reinterpret_cast<uintptr_t*>((uintptr_t)mem::game_assembly_base + offsets::consolesystem_typeinfo);
-            auto unknown = *reinterpret_cast<uintptr_t*>((uintptr_t)typeinfo + 0xb8);
-            rust::classes::list* command_list = *reinterpret_cast<rust::classes::list**>((uintptr_t)unknown + 0x10);
+            
+            typedef rust::list<uintptr_t>* (*AAA)();//real rust 0x22714A0 "Name": "ConsoleSystem.Index$$get_All",
+            rust::list<uintptr_t>* command_list = ((AAA)(mem::game_assembly_base + 0x22714A0))();
 
-            auto size = command_list->get_size();
-            auto buffer = command_list->get_buffer<uintptr_t>();
-
-            for (size_t i = 0; i < size; i++)
-            {
-                uintptr_t command = *reinterpret_cast<uintptr_t*>((uintptr_t)buffer + 0x20 + (i * 0x8));
-                auto name = (char*)*reinterpret_cast<uintptr_t*>((uintptr_t)command + 0x10);
-                if (!LI_FIND(strcmp)(name, _("noclip")) ||
-                    !LI_FIND(strcmp)(name, _("debugcamera")) ||
-                    !LI_FIND(strcmp)(name, _("debug.debugcamera")) ||
-                    !LI_FIND(strcmp)(name, _("camspeed")) ||
-                    !LI_FIND(strcmp)(name, _("camlerp"))
-                    )
-                {
-                    bool r = false;
-                    mem::write<bool>((uintptr_t)command + 0x58, r);
+            if (command_list) {
+                auto sz = *reinterpret_cast<int*>(command_list + 0x18);
+                for (size_t i = 0; i < sz; i++)
+                { 
+                    auto cmd = *reinterpret_cast<uintptr_t*>(command_list + 0x20 + i * 0x8);
+                    if (!cmd) continue;
+                    auto name = (rust::classes::string*)*reinterpret_cast<uintptr_t*>((uintptr_t)cmd + 0x10);
+                    if (!LI_FIND(wcscmp)(name->str, _(L"noclip")) ||
+                        !LI_FIND(wcscmp)(name->str, _(L"debugcamera")) ||
+                        !LI_FIND(wcscmp)(name->str, _(L"debug.debugcamera")) ||
+                        !LI_FIND(wcscmp)(name->str, _(L"camspeed")) ||
+                        !LI_FIND(wcscmp)(name->str, _(L"camlerp")))
+                    {
+                        bool r = false;
+                        mem::write<bool>((uintptr_t)cmd + 0x58, r);
+                    }
                 }
             }
-            */
 
 			has_initialized = true;
 		}
 	}
-    //il2cpp::hook(&hooks::hk_performance_update, _("Update"), _("PerformanceUI"), _("Facepunch"), 0);
-    //il2cpp::hook(&gui::OnGUI, _("OnGUI"), _("DevControls"), _(""), 0);
-	il2cpp::hook(&gui::OnGUI, _("OnGUI"), _("DDraw"), _("UnityEngine"), 0);
+    il2cpp::hook(&hooks::hk_performance_update, _("Update"), _("PerformanceUI"), _("Facepunch"), 0);
+    il2cpp::hook(&gui::OnGUI, _("OnGUI"), _("DevControls"), _(""), 0);
+	//il2cpp::hook(&gui::OnGUI, _("OnGUI"), _("DDraw"), _("UnityEngine"), 0);
 	//il2cpp::hook(&hooks::DoFatBullet, _("Update"), _("Projectile"), _(""), 0);
 	//il2cpp::hook(&hooks::AimConeDir_hk, _("GetModifiedAimConeDirection"), _("AimConeUtil"));
 	mem::hook_virtual_function(_("BasePlayer"), _("ClientInput"), &hooks::hk_baseplayer_ClientInput);

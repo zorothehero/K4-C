@@ -116,11 +116,11 @@ namespace gui {
 
 		static auto Color = reinterpret_cast<void(*)(col)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GL"), _("Color"), 0, _(""), _("UnityEngine"))));
 		
-		//static auto dont_destroy_on_load = reinterpret_cast<void(*)(uintptr_t target)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Object"), _("DontDestroyOnLoad"), 0, _(""), _("UnityEngine"))));
-		//
-		//static auto create = reinterpret_cast<void(*)(uintptr_t self, rust::classes::string shader)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GameObject"), _("InternalCreateGameObject"), 0, _(""), _("UnityEngine"))));
-		//
-		//static auto add_component = reinterpret_cast<void(*)(uintptr_t self, uintptr_t componentType)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GameObject"), _("InternalAddComponentWithType"), 0, _(""), _("UnityEngine"))));
+		static auto dont_destroy_on_load = reinterpret_cast<void(*)(uintptr_t target)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Object"), _("DontDestroyOnLoad"), 0, _(""), _("UnityEngine"))));
+		
+		static auto create = reinterpret_cast<void(*)(uintptr_t self, rust::classes::string shader)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GameObject"), _("Internal_CreateGameObject"), 0, _(""), _("UnityEngine"))));
+		
+		static auto add_component = reinterpret_cast<void(*)(uintptr_t self, uintptr_t componentType)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GameObject"), _("Internal_AddComponentWithType"), 0, _(""), _("UnityEngine"))));
 
 		//static auto name = reinterpret_cast<void(*)( )>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_(""), _(""), 0, _(""), _(""))));
 	}
@@ -530,6 +530,16 @@ namespace gui {
 		}
 	}
 
+	void circle(Vector2 o, float r, col clr, bool filled = false) {
+		gui::methods::Begin(1.5);
+		gui::methods::Color(clr);
+		for (float num = 0.f; num < 6.2831855f; num += 0.05f)
+		{
+			gui::methods::Vertex(Vector3(cos(num) * r + o.x, sin(num) * r + o.y, 0));
+			gui::methods::Vertex(Vector3(cos(num + 0.05f) * r + o.x, sin(num + 0.05f) * r + o.y, 0));
+		}
+		gui::methods::End();
+	}
 
 	void vertical_line(Vector2 pos, float size, Color clr)
 	{
@@ -562,7 +572,6 @@ namespace gui {
 			//unity::chams_shader_wireframe = unity::LoadAsset(unity::bundle, _(L"WireframeTransparent"), unity::GetType(_(L"UnityEngine.Shader, UnityEngine.CoreModule")));
 			//unity::chams_shader_lit = unity::LoadAsset(unity::bundle, _(L"chamslit"), unity::GetType(_(L"UnityEngine.Shader, UnityEngine.CoreModule")));
 		}
-
 
 
 
@@ -1047,6 +1056,8 @@ namespace gui {
 
 	float out;
 
+	Vector2 window_position = { 650, 200 };
+	Vector2 lmp = { 650, 200 };
 	void OnGUI(uintptr_t rcx)
 	{
 		__try
@@ -1102,7 +1113,7 @@ namespace gui {
 			auto mouse = get_mousePosition();
 			auto height = unity::get_height();
 
-			Vector2 pos, menu_pos = { 650, 200 }, menu_size = { 500, 330 }, button_size = { 200, 0 }, mouse_pos = { mouse.x, height - mouse.y };
+			Vector2 pos, menu_pos = window_position, menu_size = { 500, 380 }, button_size = { 200, 0 }, mouse_pos = { mouse.x, height - mouse.y };
 
 			if (event_type == rust::classes::EventType::Repaint) {
 				{
@@ -1167,7 +1178,7 @@ namespace gui {
 						}
 
 						if (settings::misc::flyhack_indicator) {
-							if (settings::vert_flyhack >= 4.f) {
+							if (settings::vert_flyhack >= 3.f) {
 								Progbar({ screen_center.x - 300, screen_center.y - 500 },
 									{ 600, 5 },
 									settings::vert_flyhack,
@@ -1189,7 +1200,7 @@ namespace gui {
 							else {
 								Progbar({ screen_center.x - 300, screen_center.y - 470 },
 									{ 600, 5 },
-									settings::vert_flyhack,
+									settings::hor_flyhack,
 									6.5f);
 							}
 						}
@@ -1212,6 +1223,16 @@ namespace gui {
 					default: { r = 1.00f; g = 0.00f; b = 1.00f; break; }
 					}
 					unity::set_lockstate(rust::classes::CursorLockMode::None);
+
+					if (LI_FIND(GetAsyncKeyState)(VK_LBUTTON)) {
+						auto z = rust::classes::Rect{ window_position.x, window_position.y, menu_size.x, 30 };
+
+						if (z.Contains(mouse_pos))
+						{
+							window_position = mouse_pos - (mouse_pos - window_position);
+						}
+						lmp = mouse_pos;
+					}
 
 					outline_box({ menu_pos.x - 1, menu_pos.y - 1 }, { menu_size.x + 1, menu_size.y + 1 }, rgba(249.f, 130.f, 109.f, 255.f));
 					fill_box(rust::classes::Rect{ menu_pos.x, menu_pos.y + 30, menu_size.x, menu_size.y - 30 }, rgba(21.f, 27.f, 37.f, 255));
@@ -1325,7 +1346,7 @@ namespace gui {
 						Slider(event_type, menu_pos, mouse_pos, il2cpp::methods::new_string(_("Fov")), pos, settings::weapon::aimbotfov, 1100.f, weapon_tab);
 						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Silent melee"), &settings::weapon::silent_melee, weapon_tab, true, &settings::keybind::silentmelee);
 						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Thick bullet"), &settings::weapon::thick_bullet, weapon_tab);
-						Slider(event_type, menu_pos, mouse_pos, il2cpp::methods::new_string(_("Bullet size")), pos, settings::weapon::thickness, 2.2f, weapon_tab);
+						Slider(event_type, menu_pos, mouse_pos, il2cpp::methods::new_string(_("Bullet size")), pos, settings::weapon::thickness, 3.2f, weapon_tab);
 						//checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Removals"), &settings::weapon::weapon_removals, weapon_tab);
 
 						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Legit recoil"), &settings::weapon::legit_recoil, weapon_tab); //
@@ -1372,6 +1393,8 @@ namespace gui {
 						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Weapon Esp"), &settings::visuals::weaponesp, visual_tab);
 						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Hotbar Esp"), &settings::visuals::hotbar_esp, visual_tab);
 
+						listbox(event_type, menu_pos, pos, mouse_pos, _(L"Snapline"), list2_names, &settings::visuals::snapline);
+
 						menu_pos.x += 170;
 						pos.y = 0; //?
 
@@ -1388,9 +1411,8 @@ namespace gui {
 						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Skeleton"), &settings::visuals::skeleton, visual_tab);
 						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Offscreen indicator"), &settings::visuals::offscreen_indicator, visual_tab);
 						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Show fov"), &settings::visuals::draw_fov, visual_tab);
-						listbox(event_type, menu_pos, pos, mouse_pos, _(L"Snapline"), list2_names, &settings::visuals::snapline);
 
-						pos.y -= 240;
+						pos.y -= 210;
 						listbox(event_type, menu_pos, pos, mouse_pos, _(L"Chams"), list3_names, &settings::visuals::shader);
 						pos.y += 95;
 						listbox(event_type, menu_pos, pos, mouse_pos, _(L"Hands"), list4_names, &settings::visuals::hand_chams);
@@ -1430,6 +1452,7 @@ namespace gui {
 						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Spiderman"), &settings::misc::spiderman, misc_tab);
 						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Big jump"), &settings::misc::gravity, misc_tab);
 						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Shoot while mounted"), &settings::misc::attack_on_mountables, misc_tab);
+						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Auto farm"), &settings::misc::autofarm, misc_tab);
 						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Silent farm"), &settings::misc::silent_farm, misc_tab);
 						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Silent walk"), &settings::misc::silentwalk, misc_tab, true, &settings::keybind::silentwalk);
 						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Spinbot"), &settings::misc::spinbot, misc_tab);
@@ -1441,12 +1464,12 @@ namespace gui {
 
 						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Admin mode"), &settings::misc::admin_mode, misc_tab);
 						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Always day"), &settings::misc::always_day, misc_tab);
-						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Flyhack stop"), &settings::misc::flyhack_stop, misc_tab);
+						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Anti-flyhack"), &settings::misc::flyhack_stop, misc_tab);
+						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Fly up wall"), &settings::misc::flywall, misc_tab, true, &settings::keybind::flywall);
 						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"No collisions"), &settings::misc::no_playercollision, misc_tab);
 						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Interactive debug"), &settings::misc::interactive_debug, misc_tab);
 						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Instant med"), &settings::misc::instant_med, misc_tab);
 						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"No recycler"), &settings::misc::norecycler, misc_tab);
-						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Auto farm"), &settings::misc::autofarm, misc_tab);
 						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Suicide"), &settings::misc::TakeFallDamage, misc_tab, true, &settings::keybind::suicide);
 						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Longneck"), &settings::misc::eyeoffset, misc_tab, true, &settings::keybind::neck);
 						//checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Auto upgrade"), &settings::misc::auto_upgrade, misc_tab);
@@ -1728,14 +1751,7 @@ namespace esp
 	}
 
 	void draw_target_fov(col color, Vector2 o, float r) {
-		gui::methods::Begin(1.5);
-		gui::methods::Color(color);
-		for (float num = 0.f; num < 6.2831855f; num += 0.05f)
-		{
-			gui::methods::Vertex(Vector3(cos(num) * r + o.x, sin(num) * r + o.y, 0));
-			gui::methods::Vertex(Vector3(cos(num + 0.05f) * r + o.x, sin(num + 0.05f) * r + o.y, 0));
-		}
-		gui::methods::End();
+		gui::circle(o, r, color, true);
 	}
 
 	void offscreen_indicator(Vector3 position) {
@@ -1743,7 +1759,7 @@ namespace esp
 
 		float num = atan2(local.x - position.x, local.z - position.z) * 57.29578f - 180.f - EulerAngles(esp::local_player->get_player_eyes()->get_rotation()).y;
 
-		if (num < -450 || num > -270) return;
+		if (!(num < -420 || num > -300)) return;
 		Vector2 tp0 = CosTanSinLineH(num, 5.f,		 1920 / 2, 1080 / 2, 150.f);
 		Vector2 tp1 = CosTanSinLineH(num + 2.f, 5.f, 1920 / 2, 1080 / 2, 140.f);
 		Vector2 tp2 = CosTanSinLineH(num - 2.f, 5.f, 1920 / 2, 1080 / 2, 140.f);
@@ -1799,7 +1815,8 @@ namespace esp
 			}
 			if (!shader && settings::visuals::hand_chams < 2) return;
 
-			if (settings::visuals::hand_chams > 1) {
+			if (settings::visuals::hand_chams > 1
+				&& player->is_local_player()) {
 				auto model = gui::methods::get_activemodel();
 				auto renderers = ((networkable*)model)->GetComponentsInChildren(unity::GetType(_("UnityEngine"), _("Renderer")));
 				if (renderers)
@@ -1829,6 +1846,13 @@ namespace esp
 							SetColor(material, _(L"_Color"), col(r, g, b, 0.5));
 							break;
 						}
+						case 4:
+						{
+							if (unity::space_material)
+								//unity::set_shader(material, unity::space_material);
+								set_material(material, unity::space_material);
+							break;
+						}
 
 						//GALAXY CHAAAAAAAAAAAAAAAAAAAMS??????????????????????
 						}
@@ -1836,7 +1860,7 @@ namespace esp
 				}
 			}
 
-			if (settings::visuals::shader > 1 && shader) {
+			if (settings::visuals::shader > 1 && shader && player) {
 				uintptr_t chams_shader = 0;
 
 				static int cases = 0;

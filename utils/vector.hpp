@@ -15,6 +15,21 @@ public:
 		: x(x), y(y)
 	{}
 
+	Vector2 operator-() const
+	{
+		return Vector2(-x, -y);
+	}
+	
+	Vector2 operator-(const Vector2 &r) const
+	{
+		return Vector2(x - r.x, y - r.y);
+	}
+
+	Vector2 operator+(const Vector2& vector) const
+	{
+		return Vector2(x + vector.x, y + vector.y);
+	}
+
 	static Vector2 Lerp(Vector2 value1, Vector2 value2, float amount)
 	{
 		return Vector2(

@@ -7,6 +7,7 @@ namespace settings {
 
 	namespace keybind {
 		int psilent = 0;
+		int flywall = 0;
 		int silentmelee = 0;
 		int autoshoot = 0;
 		int manipulator = 0;
@@ -135,6 +136,7 @@ namespace settings {
 
 	namespace misc {
 		bool auto_upgrade = false;
+		bool flywall = false;
 		bool force_privlidge = false;
 		int upgrade_tier = 1;
 		bool flyhack_indicator = false;
@@ -168,7 +170,7 @@ namespace settings {
 		bool view_offset  = false;
 		bool norecycler = false;
 		bool instant_med  = true;
-		bool instant_revive = true;
+		bool instant_revive = false;
 		bool no_playercollision = true;
 		bool spiderman = true;
 		bool Crosshair = false;

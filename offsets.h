@@ -29,7 +29,9 @@ namespace offsets {
     constexpr auto Method$Facepunch_Pool_GetList_TraceInfo_MethodAddress = 19607488;// "Address":,"Method$BaseEntity.ServerRPC<uint>()"
     constexpr auto Method$BaseEntity_ServerRPC_uint = 24732352;// "Name": "BaseEntity$$ServerRPC<uint>"
     constexpr auto BaseEntity$$ServerRPC_uint_ = 24724336;// method address ?????????????????????????????
+    constexpr auto consolesystem_typeinfo = 52589680;//ConsoleSystem_Index___c_c*
     constexpr auto convar = 52531944; //"ConVar_Graphics_c*"
+    constexpr auto sky_typeinfo = 52540200; //"Name": "TOD_Sky_TypeInfo"
 }
 
 
