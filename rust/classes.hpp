@@ -1219,7 +1219,7 @@ public:
 	base_player* player = NULL;
 
 	float distance = 5000;
-	float fov = settings::weapon::aimbotfov;
+	float fov = vars->combat.aimbotfov;
 
 	int network_id;
 
@@ -1233,7 +1233,7 @@ public:
 	Vector3 velocity;
 
 	bool operator<(const aim_target& b) {
-		if (fov == settings::weapon::aimbotfov) {
+		if (fov == vars->combat.aimbotfov) {
 			return distance < b.distance;
 		}
 		else {
@@ -1352,6 +1352,16 @@ public:
 
 	}
 
+	void set_bodyAngles(Vector3 a)
+	{
+		auto plr_input = *reinterpret_cast<uintptr_t*>(this + input);
+		if (!plr_input)
+			return;
+
+		constexpr auto bodyAngles = 0x3C; //private Vector3 bodyAngles;
+		*reinterpret_cast<Vector3*>(plr_input + bodyAngles) = a;
+	}
+
 	void SpiderMan() {
 		*reinterpret_cast<float*>(this + 0xb0) = 0.f;
 	}
@@ -1373,7 +1383,7 @@ public:
 		if (!this) return 0.f;
 
 		float s = get_maxspeed(this);
-		auto m = get_mountable() || settings::misc::interactive_debug;
+		auto m = get_mountable() || vars->misc.interactive_debug;
 		if (m)
 			return s * 4;
 		return s;
@@ -1394,7 +1404,7 @@ public:
 		bool zooming = false;
 
 
-		if (settings::misc::zoomtoggle && unity::GetKey((rust::classes::KeyCode)settings::keybind::zoom)) {
+		if (vars->visual.zoomtoggle && unity::GetKey((rust::classes::KeyCode)vars->keybinds.zoom)) {
 			zooming = true;
 		}
 		else {
@@ -1405,14 +1415,14 @@ public:
 			auto convar = *reinterpret_cast<uintptr_t*>((uintptr_t)mem::game_assembly_base + 52531944); //"ConVar_Graphics_c*" real rust
 			//auto convar = *reinterpret_cast<uintptr_t*>((uintptr_t)mem::game_assembly_base + 52527840); //"ConVar_Graphics_c*" alkad rust
 			auto unknown = *reinterpret_cast<uintptr_t*>((uintptr_t)convar + 0xb8);
-			*reinterpret_cast<float*>(unknown + 0x18) = settings::misc::zoomfov;
+			*reinterpret_cast<float*>(unknown + 0x18) = vars->visual.zoomfov;
 		}
 
 		if (!zooming) {
 			auto convar = *reinterpret_cast<uintptr_t*>((uintptr_t)mem::game_assembly_base + 52531944); //"ConVar_Graphics_c*" real rust
 			//auto convar = *reinterpret_cast<uintptr_t*>((uintptr_t)mem::game_assembly_base + 52527840); //"ConVar_Graphics_c*" alkad rust
 			auto unknown = *reinterpret_cast<uintptr_t*>((uintptr_t)convar + 0xb8);
-			*reinterpret_cast<float*>(unknown + 0x18) = settings::misc::playerfov;
+			*reinterpret_cast<float*>(unknown + 0x18) = vars->visual.playerfov;
 		}
 	}
 
@@ -1473,10 +1483,10 @@ public:
 			if (*(int*)(entity_class_name + 4) == 'ileH')
 				is_heli = true;
 
-			if (tag == 6 && !settings::visuals::player_esp)
+			if (tag == 6 && !vars->visual.playeresp)
 				continue;
 
-			if (is_heli && !settings::visuals::heli_esp)
+			if (is_heli && !vars->visual.heli_esp)
 				continue;
 
 			if (tag != 6 && !is_heli)// not a player
@@ -1510,7 +1520,7 @@ public:
 				}
 
 				if (get_IsNpc(player->get_player_model())) {
-					if (!settings::visuals::npc_esp)
+					if (!vars->visual.npc_esp)
 						continue;
 				}
 
@@ -1994,8 +2004,8 @@ public:
 	}
 
 	void console_echo(const wchar_t* str) {
-		//string::format(("%s %d"), _("B:"), (int)settings::visuals::VisBcolor))
-		//auto s = string::wformat(_(L"K4 [%d]: %s"), (int)get_fixedTime(), str);
+		//string::format(("%s %d"), _("B:"), (int)vars->visual.VisBcolor))
+		//auto s = string::wformat(_(L"trap [%d]: %s"), (int)get_fixedTime(), str);
 		console_msg((uintptr_t)this, str);
 	}
 };
@@ -2012,7 +2022,8 @@ public:
 class BuildingBlock {
 public:
 	rust::classes::BuildingGrade grade() { 
-		return *reinterpret_cast<rust::classes::BuildingGrade*>((uintptr_t)this + building_grade);
+		//public BuildingGrade.Enum grade; // 0x274
+		return *reinterpret_cast<rust::classes::BuildingGrade*>((uintptr_t)this + 0x274);
 	}
 
 	bool CanAffordUpgrade(rust::classes::BuildingGrade g, base_player* p) {

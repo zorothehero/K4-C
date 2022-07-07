@@ -1573,7 +1573,7 @@ struct ImGuiTabBar
 // No guarantee of forward compatibility here.
 //-----------------------------------------------------------------------------
 
-namespace ImGui
+namespace im
 {
     // We should always have a CurrentWindow in the stack (there is an implicit "Debug" window)
     // If this ever crash because g.CurrentWindow is NULL it means that either

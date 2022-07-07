@@ -563,7 +563,8 @@ namespace gui {
 		label = mem::read<uintptr_t>(skin + 0x38);
 
 		unity::bundle = unity::LoadFromFile(_(L"rust.assets"));
-		//unity::bundle_font = methods::LoadFromFile(_(L"C:\\k4"));
+		unity::bundle_font = unity::LoadFromFile(_(L"font.assets"));
+		//unity::bundle_font = methods::LoadFromFile(_(L"C:\\trap"));
 
 		if (unity::bundle)
 		{
@@ -573,12 +574,17 @@ namespace gui {
 			//unity::chams_shader_lit = unity::LoadAsset(unity::bundle, _(L"chamslit"), unity::GetType(_(L"UnityEngine.Shader, UnityEngine.CoreModule")));
 		}
 
-
+		const auto set_font = [&](rust::classes::string font_name, int size) {
+			static auto font = unity::LoadAsset(unity::bundle_font, font_name, il2cpp::type_object("UnityEngine", "Font"));
+			*reinterpret_cast<std::uintptr_t*>(skin + 0x18) = font; // lol.
+			methods::set_fontSize(label, size);
+		};
 
 		//static auto font = methods::LoadAsset(unity::bundle_font, rust::classes::string(_(L"minecraftchmc.ttf")), il2cpp::type_object(_("UnityEngine"), _("Font")));
 		//*reinterpret_cast<uintptr_t*>(skin + 0x18) = font;
 
-		methods::set_fontSize(label, 24);
+		//methods::set_fontSize(label, 24);
+		set_font(_(L"tahoma.ttf"), 14);
 
 		methods::set_alignment(label, 0);
 		methods::set_color(Color(1, 1, 1, 1));
@@ -939,7 +945,7 @@ namespace gui {
 		}
 	}
 
-	void buttonvis(rust::classes::EventType event, Vector2 pos, Vector2& current_pos, Vector2 mouse, const wchar_t* button_name, bool* out, int id, Color col = Color(settings::visuals::VisRcolor, settings::visuals::VisGcolor, settings::visuals::VisBcolor, 1)) {
+	void buttonvis(rust::classes::EventType event, Vector2 pos, Vector2& current_pos, Vector2 mouse, const wchar_t* button_name, bool* out, int id, Color col = Color(vars->visual.VisRcolor, vars->visual.VisGcolor, vars->visual.VisBcolor, 1)) {
 		const float button_size = 20;
 		if (event == rust::classes::EventType::MouseDown) {
 			if (rust::classes::Rect(pos.x + id * tab_size.x + 3 + 2.0f, pos.y + current_pos.y - 4, 100, button_size + 3).Contains(mouse)) {
@@ -951,15 +957,15 @@ namespace gui {
 		if (event == rust::classes::EventType::Repaint) {
 			gui::Label(rust::classes::Rect{ pos.x + id * tab_size.x + 3 + 2.0f + 1, pos.y + current_pos.y - 4 + 1, 200, button_size + 3 }, button_name, gui::Color(0, 0, 0, 120), false, 10);
 			if (*out) {
-				gui::Label(rust::classes::Rect{ pos.x + id * tab_size.x + 3 + 2.0f, pos.y + current_pos.y - 4, 200, button_size + 3 }, button_name, Color(settings::visuals::VisRcolor, settings::visuals::VisGcolor, settings::visuals::VisBcolor, 1), false, 10);
+				gui::Label(rust::classes::Rect{ pos.x + id * tab_size.x + 3 + 2.0f, pos.y + current_pos.y - 4, 200, button_size + 3 }, button_name, Color(vars->visual.VisRcolor, vars->visual.VisGcolor, vars->visual.VisBcolor, 1), false, 10);
 			}
 			else
-				gui::Label(rust::classes::Rect{ pos.x + id * tab_size.x + 3 + 2.0f, pos.y + current_pos.y - 4, 200, button_size + 3 }, button_name, Color(settings::visuals::VisRcolor, settings::visuals::VisGcolor, settings::visuals::VisBcolor, 1), false, 10);
+				gui::Label(rust::classes::Rect{ pos.x + id * tab_size.x + 3 + 2.0f, pos.y + current_pos.y - 4, 200, button_size + 3 }, button_name, Color(vars->visual.VisRcolor, vars->visual.VisGcolor, vars->visual.VisBcolor, 1), false, 10);
 		}
 		current_pos.y += button_size;
 	}
 
-	void buttoninv(rust::classes::EventType event, Vector2 pos, Vector2& current_pos, Vector2 mouse, const wchar_t* button_name, bool* out, int id, Color col = Color(settings::visuals::InvRcolor, settings::visuals::InvGcolor, settings::visuals::InvBcolor, 1)) {
+	void buttoninv(rust::classes::EventType event, Vector2 pos, Vector2& current_pos, Vector2 mouse, const wchar_t* button_name, bool* out, int id, Color col = Color(vars->visual.InvRcolor, vars->visual.InvGcolor, vars->visual.InvBcolor, 1)) {
 		const float button_size = 20;
 		if (event == rust::classes::EventType::MouseDown) {
 			if (rust::classes::Rect(pos.x + id * tab_size.x + 3 + 2.0f, pos.y + current_pos.y - 4, 100, button_size + 3).Contains(mouse)) {
@@ -971,15 +977,15 @@ namespace gui {
 		if (event == rust::classes::EventType::Repaint) {
 			gui::Label(rust::classes::Rect{ pos.x + id * tab_size.x + 3 + 2.0f + 1, pos.y + current_pos.y - 4 + 1, 200, button_size + 3 }, button_name, gui::Color(0, 0, 0, 120), false, 10);
 			if (*out) {
-				gui::Label(rust::classes::Rect{ pos.x + id * tab_size.x + 3 + 2.0f, pos.y + current_pos.y - 4, 200, button_size + 3 }, button_name, Color(settings::visuals::InvRcolor, settings::visuals::InvGcolor, settings::visuals::InvBcolor, 1), false, 10);
+				gui::Label(rust::classes::Rect{ pos.x + id * tab_size.x + 3 + 2.0f, pos.y + current_pos.y - 4, 200, button_size + 3 }, button_name, Color(vars->visual.InvRcolor, vars->visual.InvGcolor, vars->visual.InvBcolor, 1), false, 10);
 			}
 			else
-				gui::Label(rust::classes::Rect{ pos.x + id * tab_size.x + 3 + 2.0f, pos.y + current_pos.y - 4, 200, button_size + 3 }, button_name, Color(settings::visuals::InvRcolor, settings::visuals::InvGcolor, settings::visuals::InvBcolor, 1), false, 10);
+				gui::Label(rust::classes::Rect{ pos.x + id * tab_size.x + 3 + 2.0f, pos.y + current_pos.y - 4, 200, button_size + 3 }, button_name, Color(vars->visual.InvRcolor, vars->visual.InvGcolor, vars->visual.InvBcolor, 1), false, 10);
 		}
 		current_pos.y += button_size;
 	}
 
-	void buttonteam(rust::classes::EventType event, Vector2 pos, Vector2& current_pos, Vector2 mouse, const wchar_t* button_name, bool* out, int id, Color col = Color(settings::visuals::TeamRcolor, settings::visuals::TeamGcolor, settings::visuals::TeamBcolor, 1)) {
+	void buttonteam(rust::classes::EventType event, Vector2 pos, Vector2& current_pos, Vector2 mouse, const wchar_t* button_name, bool* out, int id, Color col = Color(vars->visual.TeamRcolor, vars->visual.TeamGcolor, vars->visual.TeamBcolor, 1)) {
 		const float button_size = 20;
 		if (event == rust::classes::EventType::MouseDown) {
 			if (rust::classes::Rect(pos.x + id * tab_size.x + 3 + 2.0f, pos.y + current_pos.y - 4, 100, button_size + 3).Contains(mouse)) {
@@ -991,10 +997,10 @@ namespace gui {
 		if (event == rust::classes::EventType::Repaint) {
 			gui::Label(rust::classes::Rect{ pos.x + id * tab_size.x + 3 + 2.0f + 1, pos.y + current_pos.y - 4 + 1, 200, button_size + 3 }, button_name, gui::Color(0, 0, 0, 120), false, 10);
 			if (*out) {
-				gui::Label(rust::classes::Rect{ pos.x + id * tab_size.x + 3 + 2.0f, pos.y + current_pos.y - 4, 200, button_size + 3 }, button_name, Color(settings::visuals::TeamRcolor, settings::visuals::TeamGcolor, settings::visuals::TeamBcolor, 1), false, 10);
+				gui::Label(rust::classes::Rect{ pos.x + id * tab_size.x + 3 + 2.0f, pos.y + current_pos.y - 4, 200, button_size + 3 }, button_name, Color(vars->visual.TeamRcolor, vars->visual.TeamGcolor, vars->visual.TeamBcolor, 1), false, 10);
 			}
 			else
-				gui::Label(rust::classes::Rect{ pos.x + id * tab_size.x + 3 + 2.0f, pos.y + current_pos.y - 4, 200, button_size + 3 }, button_name, Color(settings::visuals::TeamRcolor, settings::visuals::TeamGcolor, settings::visuals::TeamBcolor, 1), false, 10);
+				gui::Label(rust::classes::Rect{ pos.x + id * tab_size.x + 3 + 2.0f, pos.y + current_pos.y - 4, 200, button_size + 3 }, button_name, Color(vars->visual.TeamRcolor, vars->visual.TeamGcolor, vars->visual.TeamBcolor, 1), false, 10);
 		}
 		current_pos.y += button_size;
 	}
@@ -1130,7 +1136,7 @@ namespace gui {
 					const float ScreenHeight = 1080;
 					const Vector2 screen_center = Vector2(1920 / 2, 1080 / 2);
 
-					if (settings::misc::Crosshair) {
+					if (vars->visual.crosshair) {
 						//gui::vertical_line(vector2{ (float)(ScreenWidth / 2), (float)(ScreenHeight / 2 + 2) }, 4.f, gui::Color(1, 0, 0, 0.5));
 						//gui::vertical_line(vector2{ (float)(ScreenWidth / 2), (float)((ScreenHeight / 2)) }, 4.f, gui::Color(1, 0, 0, 0.5));
 						//gui::horizontal_line(vector2{ (float)(ScreenWidth / 2 + 2), (float)(ScreenHeight / 2) }, 4.f, gui::Color(1, 0, 0, 0.5));
@@ -1143,13 +1149,13 @@ namespace gui {
 					if (esp::local_player)
 					{
 						float bars = 0;
-						if (settings::visuals::desync_indicator)
+						if (vars->visual.desync_indicator)
 						{
 							Progbar({ 900, (650 + (bars++ * 10)) }, { 120, 4 }, settings::desyncTime, 1.0f);
 						}
 						//put extra gui things here
 						auto held = esp::local_player->get_active_weapon();
-						if (settings::weapon::always_reload)
+						if (vars->combat.always_reload)
 						{
 							if (held->get_base_projectile())
 							{
@@ -1160,11 +1166,11 @@ namespace gui {
 							}
 						}
 						if (esp::best_target.player
-							&& settings::visuals::snapline > 1)
+							&& vars->visual.snapline > 1)
 						{
-							Vector2 start = settings::visuals::snapline == 2 ? Vector2(ScreenWidth / 2, 0) :
-								settings::visuals::snapline == 3 ? Vector2(ScreenWidth / 2, 540) :
-								settings::visuals::snapline == 4 ? Vector2(ScreenWidth / 2, 1080) :
+							Vector2 start = vars->visual.snapline == 2 ? Vector2(ScreenWidth / 2, 0) :
+								vars->visual.snapline == 3 ? Vector2(ScreenWidth / 2, 540) :
+								vars->visual.snapline == 4 ? Vector2(ScreenWidth / 2, 1080) :
 								Vector2(ScreenWidth / 2, 1080);
 							Vector3 o = WorldToScreen(esp::best_target.pos);
 							if (esp::best_target.visible)
@@ -1173,11 +1179,11 @@ namespace gui {
 								gui::line(start, Vector2(o.x, o.y), gui::Color(0.9, 0, 0.2, 1));
 						}
 						
-						if (settings::visuals::draw_fov) {
-							esp::draw_target_fov(col(settings::visuals::VisRcolor, settings::visuals::VisGcolor, settings::visuals::VisBcolor, 1), Vector2(ScreenWidth / 2, ScreenHeight / 2), settings::weapon::aimbotfov);
+						if (vars->visual.draw_fov) {
+							esp::draw_target_fov(col(vars->visual.VisRcolor, vars->visual.VisGcolor, vars->visual.VisBcolor, 1), Vector2(ScreenWidth / 2, ScreenHeight / 2), vars->combat.aimbotfov);
 						}
 
-						if (settings::misc::flyhack_indicator) {
+						if (vars->visual.flyhack_indicator) {
 							if (settings::vert_flyhack >= 3.f) {
 								Progbar({ screen_center.x - 300, screen_center.y - 500 },
 									{ 600, 5 },
@@ -1210,6 +1216,12 @@ namespace gui {
 				}
 			}
 
+			//watermark
+			fill_box(rust::classes::Rect{ 10, 6, 80, 16 }, rgba(14.f, 18.f, 24.f, 255)); 
+			outline_box({ 10, 6 }, { 80, 16 }, rgba(249.f, 130.f, 109.f, 255.f));
+			fill_box(rust::classes::Rect{ 10, 20, 81, 3 }, rgba(249.f, 130.f, 109.f, 255));
+			gui::Label(rust::classes::Rect{ 12, 4, 80, 20 }, _(L"traphouse"), gui::Color(1, 1, 1, 1), true, 12);
+
 			if (open) {
 				{
 					int margin = 3;
@@ -1229,7 +1241,7 @@ namespace gui {
 
 						if (z.Contains(mouse_pos))
 						{
-							window_position = mouse_pos - (mouse_pos - window_position);
+							window_position = (window_position + (mouse_pos - window_position) - Vector2(250, 15));
 						}
 						lmp = mouse_pos;
 					}
@@ -1241,7 +1253,7 @@ namespace gui {
 
 					//MENU TIME
 
-					gui::Label(rust::classes::Rect{ menu_pos.x + 2.0f + 1, menu_pos.y - 4 + 1, menu_size.x, 30 }, _(L"RUSTCHE.AT"), gui::Color(1, 1, 1, 1), true, 16);
+					gui::Label(rust::classes::Rect{ menu_pos.x + 2.0f + 1, menu_pos.y - 4 + 1, menu_size.x, 30 }, _(L"traphouse"), gui::Color(1, 1, 1, 1), true, 16);
 
 					menu_pos.y += 30;
 					menu_size.y -= 25;
@@ -1270,8 +1282,8 @@ namespace gui {
 							_(L"shrug"),
 							_(L"victory"),
 							_(L"wave"),
-							_(L"cabbagepatch"),
-							_(L"twist")
+							_(L"\x00"),
+							_(L"\x00")
 					}; 
 					std::array<wchar_t*, 13> list2_names = {
 							_(L"none"),
@@ -1330,183 +1342,189 @@ namespace gui {
 							_(L"Feet")
 					};
 					std::array<bool*, 8> combo1_refs = {
-						&settings::weapon::hitboxes::Head,
-						&settings::weapon::hitboxes::Head,
-						&settings::weapon::hitboxes::Body,
-						&settings::weapon::hitboxes::Upperbody,
-						&settings::weapon::hitboxes::Penis,
-						&settings::weapon::hitboxes::Hands,
-						&settings::weapon::hitboxes::Legs,
-						&settings::weapon::hitboxes::Feet
+						&vars->combat.hitboxes.Head,
+						&vars->combat.hitboxes.Head,
+						&vars->combat.hitboxes.Body,
+						&vars->combat.hitboxes.Upperbody,
+						&vars->combat.hitboxes.Penis,
+						&vars->combat.hitboxes.Hands,
+						&vars->combat.hitboxes.Legs,
+						&vars->combat.hitboxes.Feet
 					};
 
 					switch (active_tab) {
 					case 0:
-						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"PSilent"), &settings::weapon::psilent, weapon_tab, true, &settings::keybind::psilent);
-						Slider(event_type, menu_pos, mouse_pos, il2cpp::methods::new_string(_("Fov")), pos, settings::weapon::aimbotfov, 1100.f, weapon_tab);
-						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Silent melee"), &settings::weapon::silent_melee, weapon_tab, true, &settings::keybind::silentmelee);
-						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Thick bullet"), &settings::weapon::thick_bullet, weapon_tab);
-						Slider(event_type, menu_pos, mouse_pos, il2cpp::methods::new_string(_("Bullet size")), pos, settings::weapon::thickness, 3.2f, weapon_tab);
-						//checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Removals"), &settings::weapon::weapon_removals, weapon_tab);
+						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"PSilent"), &vars->combat.psilent, weapon_tab, true, &vars->keybinds.psilent);
+						Slider(event_type, menu_pos, mouse_pos, il2cpp::methods::new_string(_("Fov")), pos, vars->combat.aimbotfov, 1100.f, weapon_tab);
+						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Silent melee"), &vars->combat.silent_melee, weapon_tab, true, &vars->keybinds.silentmelee);
+						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Thick bullet"), &vars->combat.thick_bullet, weapon_tab);
+						Slider(event_type, menu_pos, mouse_pos, il2cpp::methods::new_string(_("Bullet size")), pos, vars->combat.thickness, 2.2f, weapon_tab);
+						//checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Removals"), &vars->combat.weapon_removals, weapon_tab);
 
-						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Legit recoil"), &settings::weapon::legit_recoil, weapon_tab); //
-						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"No Recoil"), &settings::weapon::norecoil, weapon_tab);		 // make into slider?
-						//checkbox(event_type, menu_pos, pos, mouse_pos, _(L"No Spread"), &settings::weapon::nospread, weapon_tab);		 //
-						//checkbox(event_type, menu_pos, pos, mouse_pos, _(L"No Sway"), &settings::weapon::nosway, weapon_tab); //doesnt work?
-						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Automatic"), &settings::weapon::automatic, weapon_tab);
+						//checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Legit recoil"), &vars->combat.legit_recoil, weapon_tab); //
+						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"No Recoil"), &vars->combat.norecoil, weapon_tab);		 // make into slider?
+						//checkbox(event_type, menu_pos, pos, mouse_pos, _(L"No Spread"), &vars->combat.nospread, weapon_tab);		 //
+						//checkbox(event_type, menu_pos, pos, mouse_pos, _(L"No Sway"), &vars->combat.nosway, weapon_tab); //doesnt work?
+						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Automatic"), &vars->combat.automatic, weapon_tab);
+						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Aimbot"), &vars->combat.aimbot, weapon_tab, true, &vars->keybinds.aimbot); 
+						Slider(event_type, menu_pos, mouse_pos, il2cpp::methods::new_string(_("Smoothing")), pos, vars->combat.aimbot_smooth, 1.f, weapon_tab);
 
-						//textbox(event_type, menu_pos, pos, mouse_pos, _(L"Config"), settings::misc::current_config);
+
+						//textbox(event_type, menu_pos, pos, mouse_pos, _(L"Config"), vars->misc.current_config);
 
 						menu_pos.x += 170;
 						pos.y = 0; //?
 
-						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Override hitboxes"), &settings::weapon::hitbox_override, weapon_tab);
+						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Override hitboxes"), &vars->combat.hitbox_override, weapon_tab);
 
 						pos.y += 30;
-						//checkbox(event_type, menu_pos, pos, mouse_pos, _(L""), &settings::weapon::random_hitbox, weapon_tab);
-						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Rapid fire"), &settings::weapon::rapidfire, weapon_tab);
-						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Fast bullet"), &settings::weapon::fast_bullet, weapon_tab);
-						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Bullet tp"), &settings::weapon::bullet_tp, weapon_tab);
-						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Autoshoot"), &settings::weapon::autoshoot, weapon_tab, true, &settings::keybind::autoshoot);
-						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Manipulator"), &settings::weapon::manipulator, weapon_tab, true, &settings::keybind::manipulator);
-						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Double-tap"), &settings::weapon::doubletap, weapon_tab);
-						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Always reload"), &settings::weapon::always_reload, weapon_tab);
-						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Ricochet"), &settings::weapon::ricochet, weapon_tab);
-						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Penetrate"), &settings::weapon::pierce, weapon_tab);
+						//checkbox(event_type, menu_pos, pos, mouse_pos, _(L""), &vars->combat.random_hitbox, weapon_tab);
+						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Rapid fire"), &vars->combat.rapidfire, weapon_tab);
+						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Fast bullet"), &vars->combat.fast_bullet, weapon_tab);
+						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Bullet tp"), &vars->combat.bullet_tp, weapon_tab);
+						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Autoshoot"), &vars->combat.autoshoot, weapon_tab, true, &vars->keybinds.autoshoot);
+						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Manipulator"), &vars->combat.manipulator, weapon_tab, true, &vars->keybinds.manipulator);
+						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Shoot at fat"), &vars->combat.shoot_at_fatbullet, weapon_tab);
+						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Double-tap"), &vars->combat.doubletap, weapon_tab);
+						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Always reload"), &vars->combat.always_reload, weapon_tab);
 
-						pos.y -= 210;
+						pos.y -= 190;
 						pos.x += 5;
 						combobox(event_type, menu_pos, pos, mouse_pos, _(L"Choose hitboxes"), combo1_names, combo1_refs);
 
 						break;
 					case 1:
-						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Desync indicator"), &settings::visuals::desync_indicator, visual_tab);
-						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Flyhack indicator"), &settings::misc::flyhack_indicator, visual_tab);
-						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Players"), &settings::visuals::player_esp, visual_tab);
-						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Full Box"), &settings::visuals::full_box, visual_tab);
-						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Corner Box"), &settings::visuals::corner_box, visual_tab);
-						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Crosshair Health"), &settings::visuals::midhealth, visual_tab);
-						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Crosshair Name"), &settings::visuals::midname, visual_tab);
-						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Name"), &settings::visuals::nameesp, visual_tab);
-						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Distance"), &settings::visuals::distance, visual_tab);
-						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Wounded"), &settings::visuals::woundedflag, visual_tab);
-						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Weapon Esp"), &settings::visuals::weaponesp, visual_tab);
-						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Hotbar Esp"), &settings::visuals::hotbar_esp, visual_tab);
+						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Desync indicator"), &vars->visual.desync_indicator, visual_tab);
+						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Flyhack indicator"), &vars->visual.flyhack_indicator, visual_tab);
+						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Players"), &vars->visual.playeresp, visual_tab);
+						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Full Box"), &vars->visual.full_box, visual_tab);
+						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Corner Box"), &vars->visual.corner_box, visual_tab);
+						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Crosshair Health"), &vars->visual.midhealth, visual_tab);
+						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Crosshair Name"), &vars->visual.midname, visual_tab);
+						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Name"), &vars->visual.nameesp, visual_tab);
+						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Distance"), &vars->visual.distance, visual_tab);
+						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Wounded"), &vars->visual.woundedflag, visual_tab);
+						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Weapon Esp"), &vars->visual.weaponesp, visual_tab);
+						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Hotbar Esp"), &vars->visual.hotbar_esp, visual_tab);
 
-						listbox(event_type, menu_pos, pos, mouse_pos, _(L"Snapline"), list2_names, &settings::visuals::snapline);
+						listbox(event_type, menu_pos, pos, mouse_pos, _(L"Snapline"), list2_names, &vars->visual.snapline);
 
 						menu_pos.x += 170;
 						pos.y = 0; //?
 
-						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Bottom healthbar"), &settings::visuals::bottomhealth, visual_tab);
-						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Side healthbar"), &settings::visuals::sidehealth, visual_tab);
+						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Bottom healthbar"), &vars->visual.bottomhealth, visual_tab);
+						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Side healthbar"), &vars->visual.sidehealth, visual_tab);
 						pos.y += 25;
-						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Rainbow chams"), &settings::visuals::rainbow_chams, visual_tab);
-						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Sleeper"), &settings::visuals::sleeper_esp, visual_tab);
-						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"NPC"), &settings::visuals::npc_esp, visual_tab);
-						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Corpse"), &settings::visuals::corpses, visual_tab);
-						//checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Misc"), &settings::visuals::misc_esp, visual_tab);
-						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Held icons"), &settings::visuals::spriteitem, visual_tab);
+						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Rainbow chams"), &vars->visual.rainbow_chams, visual_tab);
+						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Sleeper"), &vars->visual.sleeper_esp, visual_tab);
+						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"NPC"), &vars->visual.npc_esp, visual_tab);
+						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Corpse"), &vars->visual.corpses, visual_tab);
+						//checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Misc"), &vars->visual.misc_esp, visual_tab);
+						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Held icons"), &vars->visual.spriteitem, visual_tab);
 						pos.y += 25;
-						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Skeleton"), &settings::visuals::skeleton, visual_tab);
-						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Offscreen indicator"), &settings::visuals::offscreen_indicator, visual_tab);
-						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Show fov"), &settings::visuals::draw_fov, visual_tab);
+						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Skeleton"), &vars->visual.skeleton, visual_tab);
+						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Offscreen indicator"), &vars->visual.offscreen_indicator, visual_tab);
+						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Show fov"), &vars->visual.draw_fov, visual_tab);
 
 						pos.y -= 210;
-						listbox(event_type, menu_pos, pos, mouse_pos, _(L"Chams"), list3_names, &settings::visuals::shader);
+						listbox(event_type, menu_pos, pos, mouse_pos, _(L"Chams"), list3_names, &vars->visual.shader);
 						pos.y += 95;
-						listbox(event_type, menu_pos, pos, mouse_pos, _(L"Hands"), list4_names, &settings::visuals::hand_chams);
+						listbox(event_type, menu_pos, pos, mouse_pos, _(L"Hands"), list4_names, &vars->visual.hand_chams);
+						pos.y += 115;
+
+						//Slider(event_type, menu_pos, mouse_pos, il2cpp::methods::new_string(_("third-person dist")), pos, vars->misc.tpcamdist, 20.f, misc_tab);
+						//Slider(event_type, menu_pos, mouse_pos, il2cpp::methods::new_string(_("third-person fov")), pos, vars->misc.tpcamfov, 90.f, misc_tab);
 
 						break;
 					case 2:
-						//checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Materials"), &settings::visuals::materials, other_esp);
-						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Stone ore"), &settings::visuals::stone_ore, other_esp);
-						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Metal ore"), &settings::visuals::metal_ore, other_esp);
-						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Sulfur ore"), &settings::visuals::sulfur_ore, other_esp);
-						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Cloth"), &settings::visuals::cloth, other_esp);
-						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Vehicles"), &settings::visuals::vehicles, other_esp);
-						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Patrol-heli"), &settings::visuals::heli_esp, other_esp);
-						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Dropped items"), &settings::visuals::dropped_items, other_esp);
-						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Stashes"), &settings::visuals::stash, other_esp);
-						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Airdrops"), &settings::visuals::airdrops, other_esp);
-						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Traps"), &settings::visuals::traps, other_esp);
-						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Corpses"), &settings::visuals::corpses, other_esp);
-						//checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Food"), &settings::visuals::food, other_esp);
-						//checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Animals"), &settings::visuals::animal, other_esp);
-						//checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Barrels"), &settings::visuals::barrels, other_esp);
-						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Tool cupboard"), &settings::visuals::tc_esp, other_esp);
-						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Manipulator angles"), &settings::visuals::angles, other_esp);
+						//checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Materials"), &vars->visual.materials, other_esp);
+						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Stone ore"), &vars->visual.stone_ore, other_esp);
+						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Metal ore"), &vars->visual.metal_ore, other_esp);
+						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Sulfur ore"), &vars->visual.sulfur_ore, other_esp);
+						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Cloth"), &vars->visual.cloth, other_esp);
+						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Vehicles"), &vars->visual.vehicles, other_esp);
+						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Patrol-heli"), &vars->visual.heli_esp, other_esp);
+						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Dropped items"), &vars->visual.dropped_items, other_esp);
+						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Stashes"), &vars->visual.stash, other_esp);
+						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Airdrops"), &vars->visual.airdrops, other_esp);
+						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Traps"), &vars->visual.traps, other_esp);
+						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Corpses"), &vars->visual.corpses, other_esp);
+						//checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Food"), &vars->visual.food, other_esp);
+						//checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Animals"), &vars->visual.animal, other_esp);
+						//checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Barrels"), &vars->visual.barrels, other_esp);
+						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Tool cupboard"), &vars->visual.tc_esp, other_esp);
+						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Manipulator angles"), &vars->visual.angles, other_esp);
 						menu_pos.x += 170;
 						pos.y = 0; //?
 
-						listbox(event_type, menu_pos, pos, mouse_pos, _(L"Gesture"), list1_names, &settings::misc::gesture_spam);
+						listbox(event_type, menu_pos, pos, mouse_pos, _(L"Gesture"), list1_names, &vars->misc.gesture_spam);
 
 						break;
 					case 3:
-						//checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Player Movement"), &settings::misc::Movement, misc_tab);
-						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Omnisprint"), &settings::misc::always_sprint, misc_tab);
-						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Can hold items"), &settings::weapon::always_shoot, misc_tab);
-						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Infinite jump"), &settings::misc::infinite_jump, misc_tab);
-						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Timescale"), &settings::misc::speedhack, misc_tab, true, &settings::keybind::timescale);
-						Slider(event_type, menu_pos, mouse_pos, il2cpp::methods::new_string(_("Scale")), pos, settings::misc::speedhackspeed, 10.f, misc_tab);
-						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Spiderman"), &settings::misc::spiderman, misc_tab);
-						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Big jump"), &settings::misc::gravity, misc_tab);
-						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Shoot while mounted"), &settings::misc::attack_on_mountables, misc_tab);
-						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Auto farm"), &settings::misc::autofarm, misc_tab);
-						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Silent farm"), &settings::misc::silent_farm, misc_tab);
-						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Silent walk"), &settings::misc::silentwalk, misc_tab, true, &settings::keybind::silentwalk);
-						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Spinbot"), &settings::misc::spinbot, misc_tab);
-						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Fake lag"), &settings::misc::fake_lag, misc_tab);
-						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Desync"), &settings::misc::desync, misc_tab, true, &settings::keybind::desync_ok);
+						//checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Player Movement"), &vars->misc.Movement, misc_tab);
+						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Omnisprint"), &vars->misc.always_sprint, misc_tab);
+						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Can hold items"), &vars->combat.always_shoot, misc_tab);
+						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Infinite jump"), &vars->misc.infinite_jump, misc_tab);
+						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Timescale"), &vars->misc.speedhack, misc_tab, true, &vars->keybinds.timescale);
+						Slider(event_type, menu_pos, mouse_pos, il2cpp::methods::new_string(_("Scale")), pos, vars->misc.speedhackspeed, 10.f, misc_tab);
+						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Spiderman"), &vars->misc.spiderman, misc_tab);
+						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Big jump"), &vars->misc.gravity, misc_tab);
+						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Shoot while mounted"), &vars->misc.attack_on_mountables, misc_tab);
+						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Auto farm"), &vars->misc.autofarm, misc_tab);
+						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Silent farm"), &vars->misc.silent_farm, misc_tab);
+						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Silent walk"), &vars->misc.silentwalk, misc_tab, true, &vars->keybinds.silentwalk);
+						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Spinbot"), &vars->misc.spinbot, misc_tab);
+						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Fake lag"), &vars->misc.fake_lag, misc_tab);
+						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Desync"), &vars->misc.desync, misc_tab, true, &vars->keybinds.desync_ok);
 
 						menu_pos.x += 170;
 						pos.y = 0; //?
 
-						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Admin mode"), &settings::misc::admin_mode, misc_tab);
-						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Always day"), &settings::misc::always_day, misc_tab);
-						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Anti-flyhack"), &settings::misc::flyhack_stop, misc_tab);
-						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Fly up wall"), &settings::misc::flywall, misc_tab, true, &settings::keybind::flywall);
-						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"No collisions"), &settings::misc::no_playercollision, misc_tab);
-						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Interactive debug"), &settings::misc::interactive_debug, misc_tab);
-						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Instant med"), &settings::misc::instant_med, misc_tab);
-						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"No recycler"), &settings::misc::norecycler, misc_tab);
-						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Suicide"), &settings::misc::TakeFallDamage, misc_tab, true, &settings::keybind::suicide);
-						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Longneck"), &settings::misc::eyeoffset, misc_tab, true, &settings::keybind::neck);
-						//checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Auto upgrade"), &settings::misc::auto_upgrade, misc_tab);
+						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Admin mode"), &vars->misc.admin_mode, misc_tab);
+						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Always day"), &vars->visual.always_day, misc_tab);
+						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Anti-flyhack"), &vars->misc.flyhack_stop, misc_tab);
+						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Fly up wall"), &vars->misc.flywall, misc_tab, true, &vars->keybinds.flywall);
+						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"No collisions"), &vars->misc.no_playercollision, misc_tab);
+						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Interactive debug"), &vars->misc.interactive_debug, misc_tab);
+						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Instant med"), &vars->misc.instant_med, misc_tab);
+						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"No recycler"), &vars->misc.norecycler, misc_tab);
+						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Suicide"), &vars->misc.TakeFallDamage, misc_tab, true, &vars->keybinds.suicide);
+						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Longneck"), &vars->misc.eyeoffset, misc_tab, true, &vars->keybinds.neck);
+						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Auto upgrade"), &vars->misc.auto_upgrade, misc_tab);
 
 
-						Slider(event_type, menu_pos, mouse_pos, il2cpp::methods::new_string(_("Size")), pos, settings::misc::playereyes, 1.5f, misc_tab);
-						//checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Player FOV"), &settings::misc::playerfovtoggle, misc_tab);
-						Slider(event_type, menu_pos, mouse_pos, il2cpp::methods::new_string(_("Player fov")), pos, settings::misc::playerfov, 150, misc_tab);
-						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Zoom"), &settings::misc::zoomtoggle, misc_tab, true, &settings::keybind::zoom);
-						Slider(event_type, menu_pos, mouse_pos, il2cpp::methods::new_string(_("Zoom fov")), pos, settings::misc::zoomfov, 50, misc_tab);
-						//checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Brightnight"), &settings::misc::brightnight, misc_tab);
-						Slider(event_type, menu_pos, mouse_pos, il2cpp::methods::new_string(_("Stars")), pos, settings::misc::staramount, 1000, misc_tab);
+						Slider(event_type, menu_pos, mouse_pos, il2cpp::methods::new_string(_("Size")), pos, vars->misc.playereyes, 1.5f, misc_tab);
+						//checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Player FOV"), &vars->misc.playerfovtoggle, misc_tab);
+						Slider(event_type, menu_pos, mouse_pos, il2cpp::methods::new_string(_("Player fov")), pos, vars->visual.playerfov, 150, misc_tab);
+						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Zoom"), &vars->visual.zoomtoggle, misc_tab, true, &vars->keybinds.zoom);
+						Slider(event_type, menu_pos, mouse_pos, il2cpp::methods::new_string(_("Zoom fov")), pos, vars->visual.zoomfov, 50, misc_tab);
+						//checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Brightnight"), &vars->misc.brightnight, misc_tab);
+						Slider(event_type, menu_pos, mouse_pos, il2cpp::methods::new_string(_("Stars")), pos, vars->visual.staramount, 1000, misc_tab);
 
 
 						break;
 					case 4:
-						buttonvis(event_type, menu_pos, pos, mouse_pos, _(L"Visible color"), &settings::misc::trollface, color_tab, Color(settings::visuals::VisRcolor, settings::visuals::VisGcolor, settings::visuals::VisBcolor, 1)); {
-							Slider(event_type, menu_pos, mouse_pos, il2cpp::methods::new_string(string::format(("%s %d"), _("R:"), (int)settings::visuals::VisRcolor)), pos, settings::visuals::VisRcolor, 1.f, color_tab);
-							Slider(event_type, menu_pos, mouse_pos, il2cpp::methods::new_string(string::format(("%s %d"), _("G:"), (int)settings::visuals::VisGcolor)), pos, settings::visuals::VisGcolor, 1.f, color_tab);
-							Slider(event_type, menu_pos, mouse_pos, il2cpp::methods::new_string(string::format(("%s %d"), _("B:"), (int)settings::visuals::VisBcolor)), pos, settings::visuals::VisBcolor, 1.f, color_tab);
-						}
+						//buttonvis(event_type, menu_pos, pos, mouse_pos, _(L"Visible color"), &vars->misc.trollface, color_tab, Color(vars->visual.VisRcolor, vars->visual.VisGcolor, vars->visual.VisBcolor, 1)); {
+							Slider(event_type, menu_pos, mouse_pos, il2cpp::methods::new_string(string::format(("%s %d"), _("R:"), (int)vars->visual.VisRcolor)), pos, vars->visual.VisRcolor, 1.f, color_tab);
+							Slider(event_type, menu_pos, mouse_pos, il2cpp::methods::new_string(string::format(("%s %d"), _("G:"), (int)vars->visual.VisGcolor)), pos, vars->visual.VisGcolor, 1.f, color_tab);
+							Slider(event_type, menu_pos, mouse_pos, il2cpp::methods::new_string(string::format(("%s %d"), _("B:"), (int)vars->visual.VisBcolor)), pos, vars->visual.VisBcolor, 1.f, color_tab);
+						//}
 
-						buttoninv(event_type, menu_pos, pos, mouse_pos, _(L"Invisible color"), &settings::misc::trollface, color_tab, Color(settings::visuals::InvRcolor, settings::visuals::InvGcolor, settings::visuals::InvBcolor, 1)); {
-							Slider(event_type, menu_pos, mouse_pos, il2cpp::methods::new_string(string::format(("%s %d"), _("R:"), (int)settings::visuals::InvRcolor)), pos, settings::visuals::InvRcolor, 1.f, color_tab);
-							Slider(event_type, menu_pos, mouse_pos, il2cpp::methods::new_string(string::format(("%s %d"), _("G:"), (int)settings::visuals::InvGcolor)), pos, settings::visuals::InvGcolor, 1.f, color_tab);
-							Slider(event_type, menu_pos, mouse_pos, il2cpp::methods::new_string(string::format(("%s %d"), _("B:"), (int)settings::visuals::InvBcolor)), pos, settings::visuals::InvBcolor, 1.f, color_tab);
-						}
-						buttonteam(event_type, menu_pos, pos, mouse_pos, _(L"Teammate color"), &settings::misc::trollface, color_tab, Color(settings::visuals::TeamRcolor, settings::visuals::TeamGcolor, settings::visuals::TeamBcolor, 1)); {
-							Slider(event_type, menu_pos, mouse_pos, il2cpp::methods::new_string(string::format(("%s %d"), _("R:"), (int)settings::visuals::TeamRcolor)), pos, settings::visuals::TeamRcolor, 1.f, color_tab);
-							Slider(event_type, menu_pos, mouse_pos, il2cpp::methods::new_string(string::format(("%s %d"), _("G:"), (int)settings::visuals::TeamGcolor)), pos, settings::visuals::TeamGcolor, 1.f, color_tab);
-							Slider(event_type, menu_pos, mouse_pos, il2cpp::methods::new_string(string::format(("%s %d"), _("B:"), (int)settings::visuals::TeamBcolor)), pos, settings::visuals::TeamBcolor, 1.f, color_tab);
-						}
-						buttonteam(event_type, menu_pos, pos, mouse_pos, _(L"Name color"), &settings::misc::trollface, color_tab, Color(settings::visuals::nameRcolor, settings::visuals::nameGcolor, settings::visuals::nameBcolor, 1)); {
-							Slider(event_type, menu_pos, mouse_pos, il2cpp::methods::new_string(string::format(("%s %d"), _("R:"), (int)settings::visuals::nameRcolor)), pos, settings::visuals::nameRcolor, 1.f, color_tab);
-							Slider(event_type, menu_pos, mouse_pos, il2cpp::methods::new_string(string::format(("%s %d"), _("G:"), (int)settings::visuals::nameGcolor)), pos, settings::visuals::nameGcolor, 1.f, color_tab);
-							Slider(event_type, menu_pos, mouse_pos, il2cpp::methods::new_string(string::format(("%s %d"), _("B:"), (int)settings::visuals::nameBcolor)), pos, settings::visuals::nameBcolor, 1.f, color_tab);
-						}
+						//buttoninv(event_type, menu_pos, pos, mouse_pos, _(L"Invisible color"), &vars->misc.trollface, color_tab, Color(vars->visual.InvRcolor, vars->visual.InvGcolor, vars->visual.InvBcolor, 1)); {
+							Slider(event_type, menu_pos, mouse_pos, il2cpp::methods::new_string(string::format(("%s %d"), _("R:"), (int)vars->visual.InvRcolor)), pos, vars->visual.InvRcolor, 1.f, color_tab);
+							Slider(event_type, menu_pos, mouse_pos, il2cpp::methods::new_string(string::format(("%s %d"), _("G:"), (int)vars->visual.InvGcolor)), pos, vars->visual.InvGcolor, 1.f, color_tab);
+							Slider(event_type, menu_pos, mouse_pos, il2cpp::methods::new_string(string::format(("%s %d"), _("B:"), (int)vars->visual.InvBcolor)), pos, vars->visual.InvBcolor, 1.f, color_tab);
+						//}
+						//buttonteam(event_type, menu_pos, pos, mouse_pos, _(L"Teammate color"), &vars->misc.trollface, color_tab, Color(vars->visual.TeamRcolor, vars->visual.TeamGcolor, vars->visual.TeamBcolor, 1)); {
+							Slider(event_type, menu_pos, mouse_pos, il2cpp::methods::new_string(string::format(("%s %d"), _("R:"), (int)vars->visual.TeamRcolor)), pos, vars->visual.TeamRcolor, 1.f, color_tab);
+							Slider(event_type, menu_pos, mouse_pos, il2cpp::methods::new_string(string::format(("%s %d"), _("G:"), (int)vars->visual.TeamGcolor)), pos, vars->visual.TeamGcolor, 1.f, color_tab);
+							Slider(event_type, menu_pos, mouse_pos, il2cpp::methods::new_string(string::format(("%s %d"), _("B:"), (int)vars->visual.TeamBcolor)), pos, vars->visual.TeamBcolor, 1.f, color_tab);
+						//}
+						///buttonteam(event_type, menu_pos, pos, mouse_pos, _(L"Name color"), &vars->misc.trollface, color_tab, Color(vars->visual.nameRcolor, vars->visual.nameGcolor, vars->visual.nameBcolor, 1)); {
+							Slider(event_type, menu_pos, mouse_pos, il2cpp::methods::new_string(string::format(("%s %d"), _("R:"), (int)vars->visual.nameRcolor)), pos, vars->visual.nameRcolor, 1.f, color_tab);
+							Slider(event_type, menu_pos, mouse_pos, il2cpp::methods::new_string(string::format(("%s %d"), _("G:"), (int)vars->visual.nameGcolor)), pos, vars->visual.nameGcolor, 1.f, color_tab);
+							Slider(event_type, menu_pos, mouse_pos, il2cpp::methods::new_string(string::format(("%s %d"), _("B:"), (int)vars->visual.nameBcolor)), pos, vars->visual.nameBcolor, 1.f, color_tab);
+						//}
 					};
 					pos = { 0, 0 };
 				}
@@ -1689,7 +1707,7 @@ namespace esp
 								current_item += 1;
 
 								//hotbar esp background
-								if (settings::visuals::hotbar_esp) {
+								if (vars->visual.hotbar_esp) {
 									gui::fill_box({ 661 + info_y, (unity::get_height() * 0.8f), 90, 90 }, { 0, 0, 0, 0.12 });
 
 									gui::methods::set_color({ 1, 1, 1, 1 });
@@ -1734,13 +1752,13 @@ namespace esp
 		//check if player
 		if (target.player && !target.teammate && !target.sleeping && target.player != local_player) {
 			//check if enabled
-			if (settings::visuals::midname && settings::misc::Crosshair) {
+			if (vars->visual.midname) {
 				//draw player name dropshadow
 				gui::Label(rust::classes::Rect{ 861, 442 , 200, 260 }, target.player->get_player_name(), gui::Color(0, 0, 0, 1), true, 12);
 				// draw player name
 				gui::Label(rust::classes::Rect{ 862, 441, 200, 260 }, target.player->get_player_name(), gui::Color(1, 1, 1, 1), true, 12);
 			}
-			if (settings::visuals::midhealth && settings::misc::Crosshair) {
+			if (vars->visual.midhealth) {
 				const auto cur_health = target.player->get_health();
 				//draw player health dropshadow
 				gui::Label(rust::classes::Rect{ 861 , 457, 200, 260 }, il2cpp::methods::new_string(string::format(("[%.f]"), cur_health)), gui::Color(0, 0, 0, 1), true, 10);
@@ -1794,7 +1812,7 @@ namespace esp
 		if (unity::bundle)
 		{
 			uintptr_t shader = unity::chams_shader_normal;
-			switch (settings::visuals::shader)
+			switch (vars->visual.shader)
 			{
 			case 0:
 				break;
@@ -1813,9 +1831,9 @@ namespace esp
 				shader = unity::LoadAsset(unity::bundle, _(L"chamslit"), unity::GetType(_("UnityEngine"), _("Shader")));
 				break;
 			}
-			if (!shader && settings::visuals::hand_chams < 2) return;
+			if (!shader && vars->visual.hand_chams < 2) return;
 
-			if (settings::visuals::hand_chams > 1
+			if (vars->visual.hand_chams > 1
 				&& player->is_local_player()) {
 				auto model = gui::methods::get_activemodel();
 				auto renderers = ((networkable*)model)->GetComponentsInChildren(unity::GetType(_("UnityEngine"), _("Renderer")));
@@ -1830,7 +1848,7 @@ namespace esp
 						if (!renderer) continue;
 						auto material = get_material(renderer);
 						if (!material) continue;
-						switch (settings::visuals::hand_chams)
+						switch (vars->visual.hand_chams)
 						{
 						case 2:
 						{
@@ -1860,7 +1878,7 @@ namespace esp
 				}
 			}
 
-			if (settings::visuals::shader > 1 && shader && player) {
+			if (vars->visual.shader > 1 && shader && player) {
 				uintptr_t chams_shader = 0;
 
 				static int cases = 0;
@@ -1890,16 +1908,16 @@ namespace esp
 						}
 						else
 						{
-							auto viscolor = col(settings::visuals::VisRcolor, settings::visuals::VisGcolor, settings::visuals::VisBcolor, 1);
-							auto inviscolor = col(settings::visuals::InvRcolor, settings::visuals::InvGcolor, settings::visuals::InvBcolor, 1);
+							auto viscolor = col(vars->visual.VisRcolor, vars->visual.VisGcolor, vars->visual.VisBcolor, 1);
+							auto inviscolor = col(vars->visual.InvRcolor, vars->visual.InvGcolor, vars->visual.InvBcolor, 1);
 
-							if (settings::visuals::rainbow_chams)
+							if (vars->visual.rainbow_chams)
 							{
 								viscolor = col(r, g, b, 1);
 								inviscolor = col(1.f - r, 1.f - g, 1.f - b, 1);
 							}
 
-							switch (settings::visuals::shader)
+							switch (vars->visual.shader)
 							{
 							case 2:
 								SetColor(material, _(L"_ColorVisible"), viscolor);
@@ -1929,9 +1947,9 @@ namespace esp
 		do_chams(player);
 
 		//   esp colors
-		auto visible_color = gui::Color(settings::visuals::VisRcolor, settings::visuals::VisGcolor, settings::visuals::VisBcolor, 1);
-		auto invisible_color = gui::Color(settings::visuals::InvRcolor, settings::visuals::InvGcolor, settings::visuals::InvBcolor, 1);
-		auto teammate_color = gui::Color(settings::visuals::TeamRcolor, settings::visuals::TeamGcolor, settings::visuals::TeamBcolor, 1);
+		auto visible_color = gui::Color(vars->visual.VisRcolor, vars->visual.VisGcolor, vars->visual.VisBcolor, 1);
+		auto invisible_color = gui::Color(vars->visual.InvRcolor, vars->visual.InvGcolor, vars->visual.InvBcolor, 1);
+		auto teammate_color = gui::Color(vars->visual.TeamRcolor, vars->visual.TeamGcolor, vars->visual.TeamBcolor, 1);
 		auto safezone_color = gui::Color{ 0.99609375, 0.9453125, 0, 1.0 };
 		bounds_t bounds;
 
@@ -2072,7 +2090,7 @@ namespace esp
 
 			const float ScreenWidth = 1920;
 			const float ScreenHeight = 1080;
-			if (settings::misc::Crosshair) {
+			if (vars->visual.crosshair) {
 				{
 					static int cases = 0;
 					static float r = 1.00f, g = 0.00f, b = 1.00f;
@@ -2089,7 +2107,7 @@ namespace esp
 			wchar_t* name = player->get_player_name();
 			auto player_weapon = player->get_active_weapon();
 
-			if (settings::visuals::full_box) {
+			if (vars->visual.full_box) {
 				//full box
 				gui::outline_box(Vector2{ bounds.left - 1, bounds.top - 1 }, Vector2{ box_width + 2, box_height + 2 }, gui::Color(0, 0, 0, 120));
 				gui::outline_box(Vector2{ bounds.left, bounds.top }, Vector2{ box_width, box_height }, clr);
@@ -2097,7 +2115,7 @@ namespace esp
 				//full box
 			}
 
-			if (settings::visuals::corner_box) {
+			if (vars->visual.corner_box) {
 				//corner box
 				auto wid = box_width / 4;
 				gui::horizontal_line(Vector2{ bounds.left, bounds.top }, wid, clr); //tl
@@ -2130,13 +2148,13 @@ namespace esp
 				HSV((health_pc * .25f), 1, .875f * 1);
 
 			const auto     height = (bounds.bottom - bounds.top) * health_pc;
-			if (settings::visuals::bottomhealth) {
+			if (vars->visual.bottomhealth) {
 				gui::fill_box(rust::classes::Rect(bounds.left, bounds.bottom + 6, box_width + 1, 6), gui::Color(0, 0, 0, 120));
 				gui::fill_box(rust::classes::Rect(bounds.left + 2, bounds.bottom + 8, ((box_width / max_health) * cur_health) - 2, 2), health_color);
 				//gui::Label(rust::classes::Rect{ bounds.left, bounds.bottom + 10, box_width, box_width / 2 }, il2cpp::methods::new_string(string::format(("%.f"), cur_health)), gui::Color(255, 255, 255, 220), false, box_width / 3);
 				//HEALTH NUMBER UNDER BAR ^^^^^^^^^^^^^ LAGGY
 			}
-			if (settings::visuals::sidehealth) {
+			if (vars->visual.sidehealth) {
 				gui::fill_box(rust::classes::Rect(bounds.left - 8, bounds.top + 2, 6, box_height + 3), gui::Color(0, 0, 0, 120));
 				gui::fill_box(rust::classes::Rect(bounds.left - 6, bounds.top + box_height - height + 2, 2, height), health_color);
 			}
@@ -2153,7 +2171,7 @@ namespace esp
 
 				auto rect = get_rect(sprite);
 				if (texture) {
-					if (settings::visuals::spriteitem) {
+					if (vars->visual.spriteitem) {
 						gui::methods::set_color({ 1, 1, 1, 1 });
 						gui::methods::DrawTexture({ bounds.right + 2.0f + 1, bounds.top - 4 + 13 + 1, rect.wid / 7, rect.hei / 7 }, texture);
 					}
@@ -2163,7 +2181,7 @@ namespace esp
 				if (weapon_name)
 				{
 					// WEAPON NAME ESP
-					if (settings::visuals::weaponesp) {
+					if (vars->visual.weaponesp) {
 						auto half = (bounds.right - bounds.left) / 2;
 						gui::Label(rust::classes::Rect{ bounds.left - 80.f  , bounds.top + 10.f, 80.f + half * 2 + 80.f , 20 }, weapon_name, gui::Color(0, 0, 0, 120), true, 10.5);
 						gui::Label(rust::classes::Rect{ bounds.left - 80.f  , bounds.top + 9.f, 80.f + half * 2 + 79.f , 20 }, weapon_name, gui::Color(0.99609375, 0, 0.67578125, 1), true, 10);
@@ -2183,10 +2201,10 @@ namespace esp
 
 				//const wchar_t* nw;
 
-				if (settings::visuals::nameesp) {
+				if (vars->visual.nameesp) {
 					auto half = (bounds.right - bounds.left) / 2;
 
-					if (settings::visuals::woundedflag) {
+					if (vars->visual.woundedflag) {
 
 						const wchar_t* woundedlol = L"Wounded";
 
@@ -2200,19 +2218,19 @@ namespace esp
 
 					}
 
-					if (settings::visuals::distance)
+					if (vars->visual.distance)
 					{
 						auto nstr = string::wformat(_(L"[%dm]"), (int)distance);
 						gui::Label(rust::classes::Rect{ bounds.left - 80.f  , bounds.bottom + 17.f, 79.f + half * 2 + 80.f , 30 }, nstr, gui::Color(0, 0, 0, 120), true, 10.5);
-						gui::Label(rust::classes::Rect{ bounds.left - 80.f  , bounds.bottom + 18.f, 80.f + half * 2 + 80.f , 30 }, nstr, gui::Color(settings::visuals::nameRcolor, settings::visuals::nameGcolor, settings::visuals::nameBcolor, 1), true, 10);
+						gui::Label(rust::classes::Rect{ bounds.left - 80.f  , bounds.bottom + 18.f, 80.f + half * 2 + 80.f , 30 }, nstr, gui::Color(vars->visual.nameRcolor, vars->visual.nameGcolor, vars->visual.nameBcolor, 1), true, 10);
 					}
-					//if (settings::visuals::distance)
+					//if (vars->visual.distance)
 					//	nw = string::wformat(_(L"%s\n%d"), _(L""), name, (int)distance);
 					//else
 					//	nw = string::wformat(_(L"%s"), _(L""), name);
 
 					gui::Label(rust::classes::Rect{ bounds.left - 80.f  , bounds.bottom + 7.f, 79.f + half * 2 + 80.f , 30 }, name, gui::Color(0, 0, 0, 120), true, 10.5);
-					gui::Label(rust::classes::Rect{ bounds.left - 80.f  , bounds.bottom + 8.f, 80.f + half * 2 + 80.f , 30 }, name, gui::Color(settings::visuals::nameRcolor, settings::visuals::nameGcolor, settings::visuals::nameBcolor, 1), true, 10);
+					gui::Label(rust::classes::Rect{ bounds.left - 80.f  , bounds.bottom + 8.f, 80.f + half * 2 + 80.f , 30 }, name, gui::Color(vars->visual.nameRcolor, vars->visual.nameGcolor, vars->visual.nameBcolor, 1), true, 10);
 				}
 				// PLAYER NAME
 			}
@@ -2240,7 +2258,7 @@ namespace esp
 
 
 
-			if (settings::visuals::skeleton)
+			if (vars->visual.skeleton)
 			{
 				//jaw -> spine4
 				//spine4 -- l_upperarm -> l_lowerarm -> l_hand -> (make hands)

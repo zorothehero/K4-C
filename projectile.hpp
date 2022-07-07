@@ -309,7 +309,7 @@ public:
 
 			if (!target.is_heli) {
 				Transform = FindBone(target.player, _(L"spine4"));
-				if (settings::weapon::hitbox_override)
+				if (vars->combat.hitbox_override)
 					Transform = FindBone(target.player, _(L"head"));
 			}
 			if (!Transform)
@@ -530,9 +530,9 @@ void OnProjectileUpdate(Projectile* unk) {
 		if (!unk)
 			return;
 
-		if (settings::weapon::doubletap && settings::desyncTime > 0.f)
+		if (vars->combat.doubletap && settings::desyncTime > 0.f)
 			return Update(unk);
-		//if(!settings::weapon::magic_bullet)
+		//if(!vars->combat.magic_bullet)
 		//	return Update(unk);
 
 		base_player* owner = (base_player*)safe_read(unk + 0xD0, DWORD64);

@@ -233,13 +233,12 @@ namespace esp {
 					esp::draw_hackable_crate(w2s_position, ent, { 0.45, 0.72, 1, 0.8 });
 			}
 
-			if (settings::misc::auto_upgrade
-				|| settings::misc::force_privlidge)
+			if (vars->misc.auto_upgrade && local_player)
 			{
-				if (LI_FIND(strcmp)(entity_class_name, _("BuildingBlock")))
+				if (!LI_FIND(strcmp)(entity_class_name, _("BuildingBlock")))
 				{
-					auto lpos = local_player->get_player_eyes()->get_position();
-					float dist_to_new = lpos.distance(get_position((uintptr_t)get_transform((base_player*)ent)));
+					auto lpos = get_position((uintptr_t)get_transform(local_player));
+					float dist_to_new = lpos.distance(world_position);
 					if (!closest_building_block)
 						closest_building_block = ent;
 					else if (dist_to_new < lpos.distance(get_position((uintptr_t)get_transform((base_player*)closest_building_block))))
@@ -247,9 +246,9 @@ namespace esp {
 				}
 			}
 
-			if (settings::visuals::misc_esp) {
+			if (vars->visual.misc_esp) {
 				if (*(int*)(entity_class_name) == 'porD') {
-					if (!settings::visuals::dropped_items)
+					if (!vars->visual.dropped_items)
 						continue;
 
 					if (*(int*)(entity_class_name + 40) == 'kcab')
@@ -279,7 +278,7 @@ namespace esp {
 					continue;
 				}
 
-				if (settings::visuals::tc_esp && *(int*)(entity_class_name) == 'liuB' && *(int*)(entity_class_name + 8) == 'virP') {
+				if (vars->visual.tc_esp && *(int*)(entity_class_name) == 'liuB' && *(int*)(entity_class_name + 8) == 'virP') {
 
 					//rpc stuf
 
@@ -296,7 +295,7 @@ namespace esp {
 				}
 
 
-				if (*(int*)(entity_class_name + 4) == 'ileH' && settings::visuals::heli_esp) {
+				if (*(int*)(entity_class_name + 4) == 'ileH' && vars->visual.heli_esp) {
 					auto base_heli = reinterpret_cast<base_player*>(ent);
 
 					Vector2 rearrotor, beam, mainrotor;
@@ -322,28 +321,28 @@ namespace esp {
 					draw_heli(x, y, w, h);
 				}
 
-				if (settings::visuals::stash && *(int*)(object_name.zpad + 46) == '_hsa') {
+				if (vars->visual.stash && *(int*)(object_name.zpad + 46) == '_hsa') {
 					esp_name = il2cpp::methods::new_string(_("Stash"));
 				}
-				else if (settings::misc::norecycler && *(int*)(entity_class_name) == 'yceR') {
+				else if (vars->misc.norecycler && *(int*)(entity_class_name) == 'yceR') {
 					esp_name = il2cpp::methods::new_string(_("Recycler"));
 					esp_color = Vector4(232, 232, 232, 255);
 					if (esp::local_player->get_bone_transform(48)->get_bone_position().distance(world_position) < 4.5f)
 						unity::ServerRPC(ent, _(L"SVSwitch"));
 				}
-				else if (settings::visuals::stone_ore && (*(int*)(object_name.zpad + 52) == 'nots' || *(int*)(object_name.zpad + 47) == 'nots')) {
+				else if (vars->visual.stone_ore && (*(int*)(object_name.zpad + 52) == 'nots' || *(int*)(object_name.zpad + 47) == 'nots')) {
 					esp_name = il2cpp::methods::new_string(_("Stone Ore"));
 					esp_color = Vector4(232, 232, 232, 255);
 				}
-				else if (settings::visuals::sulfur_ore && (*(int*)(object_name.zpad + 52) == 'flus' || *(int*)(object_name.zpad + 47) == 'flus')) {
+				else if (vars->visual.sulfur_ore && (*(int*)(object_name.zpad + 52) == 'flus' || *(int*)(object_name.zpad + 47) == 'flus')) {
 					esp_name = il2cpp::methods::new_string((_("Sulfur Ore")));
 					esp_color = Vector4(203, 207, 0, 255);
 				}
-				else if (settings::visuals::metal_ore && (*(int*)(object_name.zpad + 52) == 'atem' || *(int*)(object_name.zpad + 47) == 'atem')) {
+				else if (vars->visual.metal_ore && (*(int*)(object_name.zpad + 52) == 'atem' || *(int*)(object_name.zpad + 47) == 'atem')) {
 					esp_name = il2cpp::methods::new_string(_("Metal Ore"));
 					esp_color = Vector4(145, 145, 145, 255);
 				}
-				else if (settings::visuals::traps && (*(int*)(object_name.zpad + 36) == 'terr' || *(int*)(object_name.zpad + 43) == 'tnug' || *(int*)(object_name.zpad + 38) == 'rtra')) {
+				else if (vars->visual.traps && (*(int*)(object_name.zpad + 36) == 'terr' || *(int*)(object_name.zpad + 43) == 'tnug' || *(int*)(object_name.zpad + 38) == 'rtra')) {
 					if (*(int*)(object_name.zpad + 36) == 'terr')
 						esp_name = il2cpp::methods::new_string(_("Auto Turret*"));
 					else if (*(int*)(object_name.zpad + 43) == 'tnug')
@@ -353,19 +352,19 @@ namespace esp {
 
 					esp_color = Vector4(255, 166, 0, 255);
 				}
-				else if (settings::visuals::vehicles && *(int*)(entity_class_name + 4) == 'iheV') {
+				else if (vars->visual.vehicles && *(int*)(entity_class_name + 4) == 'iheV') {
 					esp_name = il2cpp::methods::new_string(_("Vehicle"));
 					esp_color = Vector4(0, 161, 219, 255);
 				}
-				else if (settings::visuals::airdrops && *(int*)(object_name.zpad + 39) == 'pord') {
+				else if (vars->visual.airdrops && *(int*)(object_name.zpad + 39) == 'pord') {
 					esp_name = il2cpp::methods::new_string(_("Airdrop"));
 					esp_color = Vector4(0, 161, 219, 255);
 				}
-				else if (settings::visuals::cloth && *(int*)(object_name.zpad + 52) == 'c-pm') {
+				else if (vars->visual.cloth && *(int*)(object_name.zpad + 52) == 'c-pm') {
 					esp_name = il2cpp::methods::new_string(_("Cloth"));
 					esp_color = Vector4(0, 219, 58, 255);
 				}
-				else if (settings::visuals::corpses && *(int*)(object_name.zpad + 29) == 'proc') {
+				else if (vars->visual.corpses && *(int*)(object_name.zpad + 29) == 'proc') {
 					esp_name = il2cpp::methods::new_string(_("Player Corpse"));
 					esp_color = Vector4(230, 230, 230, 255);
 				}
@@ -384,7 +383,7 @@ namespace esp {
 					{
 						esp::draw_item(w2s_position, esp_name, esp_color);
 
-						//if (settings::visuals::distance
+						//if (vars->visual.distance
 						//	&& local_player)
 						//	esp::draw_item(Vector2(w2s_position.x, w2s_position.y += 10), s, esp_color);
 					}
@@ -397,7 +396,7 @@ namespace esp {
 
 			esp::matrix = unity::get_view_matrix();
 
-			if (tag == 6 && !settings::visuals::player_esp)
+			if (tag == 6 && !vars->visual.playeresp)
 				continue;
 
 
@@ -428,7 +427,7 @@ namespace esp {
 			if (!player->is_alive())
 				continue;
 
-			if (player->is_sleeping() && !settings::visuals::sleeper_esp)
+			if (player->is_sleeping() && !vars->visual.sleeper_esp)
 				continue;
 
 			bool is_npc = false;
@@ -436,7 +435,7 @@ namespace esp {
 			if (get_IsNpc(player->get_player_model())) {
 				is_npc = true;
 
-				if (!settings::visuals::npc_esp)
+				if (!vars->visual.npc_esp)
 					continue;
 			}
 
@@ -467,26 +466,22 @@ namespace esp {
 
 					draw_player(player, is_npc);
 
-					if (settings::visuals::offscreen_indicator
+					if (vars->visual.offscreen_indicator
 						&& !is_npc)
 					{
 						offscreen_indicator(player->get_player_eyes()->get_position());
 					}
 
-					if (settings::weapon::silent_melee || unity::GetKey(rust::classes::KeyCode(settings::keybind::silentmelee)))
+					if (vars->combat.silent_melee || unity::GetKey(rust::classes::KeyCode(vars->keybinds.silentmelee)))
 						hit_player();
 				}
 			}
 		}
 
 
-		if (settings::misc::auto_upgrade
+		if (vars->misc.auto_upgrade
 			&& closest_building_block)
 		{
-			//auto closest = baseplayer->find_closest(_("BuildingBlock"), (networkable*)baseplayer, 4.2f);
-			//auto block = closest->GetComponent<BuildingBlock>(unity::GetType(_(L"BuildingBlock, Assembly-CSharp")));
-			//auto block = closest->GetComponent<BuildingBlock>(unity::GetType(_("Assembly-CSharp"), _("BuildingBlock")));
-
 			auto block = (BuildingBlock*)closest_building_block;
 			auto tranny = get_transform((base_player*)block);
 			auto pos = get_position((uintptr_t)tranny);
@@ -558,7 +553,7 @@ namespace esp {
 
 			auto online = mem::read<bool>(player + 0x38);
 
-			if (!online && !settings::visuals::sleeper_esp)
+			if (!online && !vars->visual.sleeper_esp)
 				continue;
 
 			auto id = mem::read<unsigned long>(player + 0x20);

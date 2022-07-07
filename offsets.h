@@ -17,7 +17,6 @@ namespace offsets {
 */
 
 
-
 //REAL RUST
 namespace offsets {
     constexpr auto Method_BaseEntity_ServerRPC_string_bool_address = 52356144;// address "Name": "Method$BaseEntity.ServerRPC<string, bool>()",
@@ -31,9 +30,7 @@ namespace offsets {
     constexpr auto BaseEntity$$ServerRPC_uint_ = 24724336;// method address ?????????????????????????????
     constexpr auto consolesystem_typeinfo = 52589680;//ConsoleSystem_Index___c_c*
     constexpr auto convar = 52531944; //"ConVar_Graphics_c*"
-    constexpr auto sky_typeinfo = 52540200; //"Name": "TOD_Sky_TypeInfo"
 }
-
 
 /*
 //ALKAD

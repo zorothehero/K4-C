@@ -159,31 +159,36 @@ namespace misc
 			//if (!ply->is_visible(p - Vector3(0, 0.3, 0), re_p)) //double check not too low as likes to shoot from just under the ground
 			//	return false;
 
-			if(settings::visuals::angles)
-				Sphere(p, 0.05f, col(0.1, 0.3, 0.9, 0), 0.02f, 10);
+			if(vars->visual.angles)
+				Sphere(p, 0.05f, col(10, 30, 90, 1), 0.02f, 10);
 
 			if (!ply->is_visible(p, pos))
 			{
-				if(!settings::weapon::thick_bullet) return false;
+				if(!vars->combat.thick_bullet && !vars->combat.shoot_at_fatbullet) return false;
 				bool t = false;
-				
-				//std::array<Vector3, 1> positions = {
-				//	pos + Vector3(0, .5f, 0),
-				//	//pos + Vector3(0, -settings::weapon::thickness, 0),
-				//	//pos + Vector3(1.f, 0, 0),
-				//	//pos + Vector3(-settings::weapon::thickness, 0, 0),
-				//	//pos + Vector3(0, 0, 1.f),
-				//	//pos + Vector3(0, 0, -settings::weapon::thickness)
-				//};
+				Vector3 z = pos;
+				//pos.y -= -0.2f; //imagine aiming at chest?????????
+				std::array<Vector3, 5> positions = {
+					z + Vector3(0, .3f, 0),
+					z + Vector3(.9f, 0, 0),
+					z + Vector3(-.9f, 0, 0),
+					z + Vector3(0, 0, .9f),
+					z + Vector3(0, 0, -.9f)
+				};
 				////Line(p, pos + Vector3(0, 1, 0), col(1,1,1,1), 10.f, true, false);
-				//for (auto v : sphere1m) {
-				//	if (ply->is_visible(p, v)
-				//		&& ply->is_visible(pos, v)) {
-				//		t = true;
-				//		misc::best_target = v;
-				//		break;
-				//	}
-				//}
+				for (auto v : positions) {
+					if (vars->visual.angles)
+						Sphere(v, 0.05f, col(10, 30, 90, 1), 0.02f, 10);
+					if (ply->is_visible(p, v))
+					{
+						if (ply->is_visible(z, v))
+						{
+							t = true;
+							misc::best_target = v;
+							break;
+						}
+					}
+				}
 				
 				if (!t) return false;
 			}
@@ -195,8 +200,8 @@ namespace misc
 			return true;
 		};
 
-		for (float y = 1.5f; y > -1.5f; y -= settings::weapon::thick_bullet ? 0.2f : 0.1f) {
-			int points = settings::weapon::thick_bullet ? 11 : 20;
+		for (float y = 1.5f; y > -1.5f; y -= vars->combat.thick_bullet ? 0.3f : 0.1f) {
+			int points = vars->combat.thick_bullet ? 7 : 20;
 			float step = (M_PI_2) / points;
 			float x, z, current = 0;
 			for (size_t i = 0; i < points; i++)
@@ -320,7 +325,7 @@ namespace misc
 		bool flag = ticks.startPoint != ticks.endPoint;
 		if (flag) {
 			if (ValidateMove(tickDeltaTime)
-				&& (settings::misc::flyhack_indicator || settings::misc::flyhack_stop)) {
+				&& (vars->visual.flyhack_indicator || vars->misc.flyhack_stop)) {
 				//good
 			}
 			else {
@@ -496,13 +501,13 @@ namespace misc
 
 				if (esp::local_player->is_visible(point, new_point, 1.5f))
 				{
-					esp::local_player->console_echo(string::wformat(_(L"[K4]: CreatePath - visibility straight ahead (%d)"), path.size()));
+					esp::local_player->console_echo(string::wformat(_(L"[trap]: CreatePath - visibility straight ahead (%d)"), path.size()));
 					old_point = point;
 					point = lowest_pos(new_point);
 				}
 				else
 				{
-					esp::local_player->console_echo(string::wformat(_(L"[K4]: CreatePath - no visibility straight ahead, creating sphere (%d)"), path.size()));
+					esp::local_player->console_echo(string::wformat(_(L"[trap]: CreatePath - no visibility straight ahead, creating sphere (%d)"), path.size()));
 
 					std::vector<Vector3> ps = {};
 
@@ -516,17 +521,17 @@ namespace misc
 
 					Vector3 best = Vector3(0, 0, 0);
 					if (ps.size() == 0) {
-						esp::local_player->console_echo(string::wformat(_(L"[K4]: CreatePath could not create another node, path size: %i"), path.size()));
+						esp::local_player->console_echo(string::wformat(_(L"[trap]: CreatePath could not create another node, path size: %i"), path.size()));
 						break;
 					}
 
-					esp::local_player->console_echo(string::wformat(_(L"[K4]: CreatePath - potentials: %d"), ps.size()));
+					esp::local_player->console_echo(string::wformat(_(L"[trap]: CreatePath - potentials: %d"), ps.size()));
 
 					for (auto e : ps)
 						if (e.distance(node.pos) < best.distance(node.pos)
 							&& dist_from_ground(e) < 1.6f)
 							best = e;
-					esp::local_player->console_echo(string::wformat(_(L"[K4]: CreatePath - closest (best chosen) (%d, %d, %d) (%d)"), (int)best.x, (int)best.y, (int)best.z, path.size()));
+					esp::local_player->console_echo(string::wformat(_(L"[trap]: CreatePath - closest (best chosen) (%d, %d, %d) (%d)"), (int)best.x, (int)best.y, (int)best.z, path.size()));
 					old_point = point;
 					point = best;
 				}
@@ -593,9 +598,9 @@ namespace misc
 						for (size_t i = 1; i < node.path.size(); i++)
 						{
 							if (node.path[i] == current_step)
-								Line(node.path[i - 1], node.path[i], col(1, 0, 0, 50), 0.02f, false, true);
+								Line(node.path[i - 1], node.path[i], col(12, 150, 100, 50), 0.02f, false, true);
 							else
-								Line(node.path[i - 1], node.path[i], col(1, 1, 1, 50) , 0.02f, false, true);
+								Line(node.path[i - 1], node.path[i], col(12, 150, 100, 50), 0.02f, false, true);
 						}
 					}
 
@@ -644,6 +649,153 @@ namespace misc
 		}
 	}
 
+	void get_prediction(aim_target target,
+		Vector3 rpc_position,
+		Vector3 target_pos,
+		Vector3 original_vel,
+		Vector3 &aimbot_velocity,
+		Vector3 &_aimdir,
+		Projectile* p) {
+
+		float travel_t;
+		Vector3 player_velocity = Vector3(0, 0, 0);
+		std::vector<Vector3> path = {};
+		int simulations = 0;
+
+		if (target.player) {
+			auto travel = 0.f;
+			auto vel = (getmodifiedaimcone(0, rpc_position - target_pos, true)).Normalized() * original_vel.length();
+			auto drag = p->drag();
+			auto grav = p->gravityModifier();
+			auto gravity = get_gravity();
+			auto deltatime = get_deltaTime();
+			auto timescale = get_timeScale();
+			auto offset = 0.1f;
+			simulations = 0;
+			auto targetvel = target.player->get_new_velocity();
+
+			auto wv = GetWorldVelocity(target.player);
+			player_velocity = Vector3(wv.x, 0, wv.z);
+
+
+			while (simulations < 300) {
+				travel_t = 0.f;
+				auto pos = rpc_position;
+				auto origin = pos;
+				float num = deltatime * timescale;
+				float travelTime = 0.f;
+				int num3 = (int)(8.f / num);
+
+				Vector3 vt = target_pos + Vector3(0, offset, 0);
+				_aimdir = getmodifiedaimcone(0.f, vt - rpc_position, true);
+				auto velocity = _aimdir.Normalized() * original_vel.length();
+
+				//predict movement?
+
+				for (size_t i = 0; i < num3; i++)
+				{
+					origin = pos;
+					pos += velocity * num;
+					velocity += gravity * grav * num;
+					velocity -= velocity * drag * num;
+					travel_t += num;
+					if (misc::LineCircleIntersection(target_pos, 0.1f, origin, pos, offset))
+					{
+						//Line(origin, pos, col(0, 1, 0, 1), 10.f, false, true);
+						aimbot_velocity = (_aimdir).Normalized() * original_vel.length();
+						//emulate 1 tick has already passed
+						aimbot_velocity += gravity * grav * num;
+						aimbot_velocity -= aimbot_velocity * drag * num;
+						break;
+					}
+					else
+					{
+						//Line(origin, pos, col(1, 1, 1, 1), 10.f, false, true);
+					}
+				}
+				offset += 0.1f;
+				simulations++;
+				if (!aimbot_velocity.is_empty())
+					break;
+			}
+		}
+
+		if (travel_t > 0.f) {
+			//movement prediction
+			aimbot_velocity = Vector3(0, 0, 0);
+			if (target.player) {
+				auto wv = GetWorldVelocity(target.player);
+				player_velocity = Vector3(wv.x, 0, wv.z) * 0.75f;
+				Vector3 final_vel = player_velocity * travel_t;
+				Vector3 actual = target_pos += final_vel;
+
+				auto partialTime = p->partialTime();
+				auto travel = 0.f;
+				auto vel = (getmodifiedaimcone(0, rpc_position - actual, true)).Normalized() * original_vel.length();
+				auto drag = p->drag();
+				auto grav = p->gravityModifier();
+				auto gravity = get_gravity();
+				auto deltatime = get_deltaTime();
+				auto timescale = get_timeScale();
+				auto offset = 0.1f;
+				simulations = 0;
+				auto targetvel = target.player->get_new_velocity();
+
+
+				travel_t = 0.f;
+
+				while (simulations < 300) {
+					path.clear();
+					auto pos = rpc_position;
+					auto origin = pos;
+					float num = deltatime * timescale;
+					float travelTime = 0.f;
+					int num3 = (int)(8.f / num);
+
+					Vector3 vt = actual + Vector3(0, offset, 0);
+					_aimdir = getmodifiedaimcone(0.f, vt - rpc_position, true);
+					auto velocity = _aimdir.Normalized() * original_vel.length();
+
+					//predict movement?
+
+					for (size_t i = 0; i < num3; i++)
+					{
+						path.push_back(origin);
+						origin = pos;
+						pos += velocity * num;
+						velocity += gravity * grav * num;
+						velocity -= velocity * drag * num;
+						travel_t += num;
+
+						if (misc::LineCircleIntersection(actual, 0.1f, origin, pos, offset))
+						{
+							//Line(origin, pos, col(0, 1, 0, 1), 10.f, false, true);
+							aimbot_velocity = (_aimdir).Normalized() * original_vel.length();
+							//emulate 1 tick has already passed
+							aimbot_velocity += gravity * grav * num;
+							aimbot_velocity -= aimbot_velocity * drag * num;
+
+							path.push_back(target_pos);
+							Vector3 va = path[0];
+							for (auto v : path) {
+								Line(va, v, col(12, 150, 100, 50), 10.f, false, true);
+								va = v;
+							}
+							break;
+						}
+						else
+						{
+							//Line(origin, pos, col(1, 1, 1, 1), 10.f, false, true);
+						}
+					}
+					offset += 0.1f;
+					simulations++;
+					if (!aimbot_velocity.is_empty())
+						break;
+				}
+			}
+		}
+	}
 
 	bool just_shot = false;
 	bool did_reload = false;
@@ -661,7 +813,7 @@ namespace hooks {
 		static auto blocksprint = reinterpret_cast<void (*)(base_player*, float)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("BlockSprint"), 1, _(""), _(""))));
 		static auto OnNetworkMessage = reinterpret_cast<void (*)(uintptr_t, uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Client"), _("OnNetworkMessage"), 1, _(""), _(""))));
 		static auto IsConnected = reinterpret_cast<bool (*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Client"), _("IsConnected"), 0, _(""), _("Network"))));
-		static auto Run = reinterpret_cast<rust::classes::string(*)(uintptr_t, uintptr_t, rust::classes::string, uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("ConsoleSystem"), _("Run"), 3, _(""), _(""))));
+		static auto Run = reinterpret_cast<rust::classes::string(*)(uintptr_t, rust::classes::string, uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("ConsoleSystem"), _("Run"), 0, _(""), _(""))));
 
 
 		static auto get_bodyleanoffset = reinterpret_cast<Vector3(*)(playereyes*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("PlayerEyes"), _("get_BodyLeanOffset"), 0, _(""), _(""))));
@@ -721,6 +873,7 @@ namespace hooks {
 		orig::playerwalkmovement_client_input = reinterpret_cast<void (*)(playerwalkmovement*, uintptr_t, modelstate*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("PlayerWalkMovement"), _("ClientInput"), -1, _(""), _(""))));
 		orig::DoFixedUpdate = reinterpret_cast<void (*)(playerwalkmovement*, modelstate*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("PlayerWalkMovement"), _("DoFixedUpdate"), -1, _(""), _(""))));
 		orig::blocksprint = reinterpret_cast<void (*)(base_player*, float)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("BlockSprint"), 1, _(""), _(""))));
+		orig::Run = reinterpret_cast<rust::classes::string(*)(uintptr_t, rust::classes::string, uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("ConsoleSystem"), _("Run"), 0, _(""), _(""))));
 
 		orig::get_bodyleanoffset = reinterpret_cast<Vector3(*)(playereyes*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("PlayerEyes"), _("get_BodyLeanOffset"), 0, _(""), _(""))));
 
@@ -846,7 +999,6 @@ namespace hooks {
 			if (target.player)
 			{
 				target_pos = target.player->get_bone_transform(48)->get_bone_position();
-				target_pos.y += 0.1f;
 				target_velocity = target.player->get_new_velocity();
 			}
 
@@ -858,8 +1010,23 @@ namespace hooks {
 				original_vel = *reinterpret_cast<Vector3*>(projectileshoot + 0x24);
 				rpc_position = *reinterpret_cast<Vector3*>(projectileshoot + 0x18);
 
-				if (settings::weapon::manipulator
-					&& (unity::GetKey((rust::classes::KeyCode)settings::keybind::manipulator)
+				if (misc::best_target == Vector3(0, 0, 0)
+					&& vars->combat.thick_bullet
+					&& !target.visible)
+				{
+					for (auto v : sphere1m)
+					{
+						if (target.player)
+						{
+							if (target.player->is_visible(target_pos, target_pos + v)
+								&& target.player->is_visible(target_pos + v, rpc_position))
+								misc::best_target = target_pos + v;
+						}
+					}
+				}
+
+				if (vars->combat.manipulator
+					&& (unity::GetKey((rust::classes::KeyCode)vars->keybinds.manipulator)
 						|| misc::manipulate_vis))
 				{
 					auto b = rpc_position;
@@ -877,76 +1044,18 @@ namespace hooks {
 								target_pos = misc::best_target;
 								vis_fat = true;
 							}
-							//Sphere(rpc_position, 0.05f, col(0.9, 0.1, 0.1, 3), 5.f, 25.f);
 						}
 					}
 				}
 			}
-
+			target_pos.y += 0.2f;
 
 			for (int i = 0; i < projectile_list->get_size(); i++) 
 			{
 				auto projectile = *(base_projectile**)((uintptr_t)projectile_list + 0x20 + i * 0x8);
 				p = *(Projectile**)((uintptr_t)projectile_list + 0x20 + i * 0x8);
-
-				
-				//call get modified aimcone with target direction but 
-				//change Y on direction until point hits or intersects head?
-				if (target.player) {
-					auto partialTime = p->partialTime();
-					auto travel = 0.f;
-					auto vel = (getmodifiedaimcone(0, rpc_position - target_pos, true)).Normalized() * original_vel.length();
-					auto drag = p->drag();
-					auto grav = p->gravityModifier();
-					auto gravity = get_gravity();
-					auto deltatime = get_deltaTime();
-					auto timescale = get_timeScale();
-					auto offset = 0.1f;
-					simulations = 0;
-					auto targetvel = target.player->get_new_velocity();
-					travel_t = 0.f;
-
-					while (simulations < 3000) {
-						auto pos = rpc_position;
-						auto origin = pos;
-						float num = deltatime * timescale;
-						float travelTime = 0.f;
-						int num3 = (int)(8.f / num);
-
-						Vector3 vt = target_pos + Vector3(0, offset, 0);
-						auto _aimdir = getmodifiedaimcone(0.f, vt - rpc_position, true);
-						auto velocity = _aimdir.Normalized() * original_vel.length();
-						
-						//predict movement?
-
-						for (size_t i = 0; i < num3; i++)
-						{
-							origin = pos;
-							pos += velocity * num;
-							velocity += gravity * grav * num;
-							velocity -= velocity * drag * num;
-							travel_t += num;
-
-							if (misc::LineCircleIntersection(target_pos, 0.1f, origin, pos, offset))
-							{
-								//Line(origin, pos, col(0, 1, 0, 1), 10.f, false, true);
-								aimbot_velocity = (_aimdir).Normalized() * original_vel.length();
-								//emulate 1 tick has already passed
-								aimbot_velocity += gravity * grav * num;
-								aimbot_velocity -= aimbot_velocity * drag * num;
-								break;
-							}
-							else
-							{
-								//Line(origin, pos, col(1, 1, 1, 1), 10.f, false, true);
-							}
-						}
-						offset += 0.01f;
-						simulations++;
-						if (!aimbot_velocity.is_empty())
-							break;
-					}
-				}
+				Vector3 a;
+				misc::get_prediction(target, rpc_position, target_pos, original_vel, aimbot_velocity, a, p);
 
 				/*
 				Vector3 orig;
@@ -1010,16 +1119,6 @@ namespace hooks {
 			for (int i = 0; i < size; i++) {
 				auto projectile = *(uintptr_t*)(shoot_list + 0x20 + i * 0x8);
 				if (target.player && (target.visible || manipulated || misc::autoshot) && !target.teammate) {
-					//if (!settings::weapon::bullet_tp)
-					//	Prediction(rpc_position, target_pos, target.velocity, original_vel.Length(), stats.gravity_modifier);
-					//else if (settings::desyncTime < (target.distance / original_vel.Length()))
-					//	Prediction(rpc_position, target_pos, target.velocity, original_vel.Length(), stats.gravity_modifier);
-					
-					//aim_angle = aim_direction;//target_pos - rpc_position;
-					//
-					//aimbot_velocity = (aim_angle).Normalized() * original_vel.Length();
-
-
 					*reinterpret_cast<Vector3*>(projectile + 0x24) = aimbot_velocity; //startvel
 				}
 			}
@@ -1031,34 +1130,25 @@ namespace hooks {
 				if (!projectile)
 					continue;
 
-				if (settings::weapon::bullet_tp)
+				if (vars->combat.bullet_tp)
 				{
 					//check traveltime
 					if (settings::desyncTime > travel_t)
 						p->SetInitialDistance(target.distance);
 					else if (settings::desyncTime > 0.f)
-					{
+					{ 
 						Vector3 r = rpc_position;
 						Vector3 v = aimbot_velocity;
-						v = v * settings::desyncTime;
-						r = r.Normalized() * v.Length();
-						float d = target.distance - r.distance(rpc_position);
-						float a = 0.f;
-						while (d < 0)
-						{
-							a += 0.1f;
-							d += 0.1f;
-						}
-						d += a;
-						p->SetInitialDistance(d);
+						Vector3 n = rpc_position + (aimbot_velocity * settings::desyncTime);
+						p->SetInitialDistance(r.distance(n));
 					}
 					else p->SetInitialDistance(0);
 
-					esp::local_player->console_echo(string::wformat(_(L"[K4]: ProjectileShoot (bullet tp) spawned bullet at distance %d"), (int)p->initialDistance()));
+					esp::local_player->console_echo(string::wformat(_(L"[trap]: ProjectileShoot (bullet tp) spawned bullet at distance %d"), (int)p->initialDistance()));
 				}
 
 
-				if (settings::weapon::psilent || unity::GetKey(rust::classes::KeyCode(settings::keybind::psilent))) {
+				if (vars->combat.psilent || unity::GetKey(rust::classes::KeyCode(vars->keybinds.psilent))) {
 					if (target.player && !target.teammate) {
 						if (target.visible || vis_fat)
 						{
@@ -1073,8 +1163,8 @@ namespace hooks {
 					}
 				}
 
-				if (settings::weapon::thick_bullet)
-					projectile->set_projectile_thickness(settings::weapon::thickness > 1.f ? 1.f : settings::weapon::thickness);
+				if (vars->combat.thick_bullet)
+					projectile->set_projectile_thickness(vars->combat.thickness > 1.f ? 1.f : vars->combat.thickness);
 				else
 					projectile->set_projectile_thickness(projectile->thickness);
 				
@@ -1100,8 +1190,7 @@ namespace hooks {
 				misc::autoshot = false;
 		} while (0);
 
-		esp::local_player->console_echo(string::wformat(_(L"[K4]: ProjectileShoot (prediction) simulated %i times before hit!"), simulations));
-		misc::best_target = Vector3(0, 0, 0);
+		esp::local_player->console_echo(string::wformat(_(L"[trap]: ProjectileShoot (prediction) simulated %i times before hit!"), simulations));
 		reinterpret_cast<void (*)(int64_t, int64_t, int64_t, int64_t, int64_t)>(hooks::orig::serverrpc_projectileshoot)(rcx, rdx, r9, projectileShoot, arg5);
 		
 		//calls base.serverrpc<projectileshoot>("clproject", x) ^^
@@ -1140,27 +1229,27 @@ namespace hooks {
 			reinterpret_cast<void (*)(int64_t, int64_t, int64_t, int64_t, int64_t)>(
 				hooks::orig::playerprojectilericochet);
 
-		if (settings::weapon::ricochet
-			&& projectile->authoritative())
-		{
-			Vector3 hitpos = ppa->hitPosition;
-			Vector3 normal = ppa->hitNormal;
-			Vector3 invel = ppa->inVelocity;
-			Vector3 outvel = ppa->outVelocity;
-
-			Vector3 direction = outvel.Normalized();
-
-			Vector3 targetpos = esp::best_target.player->get_bone_transform(48)->get_bone_position();
-			Vector3 direction_to_target = targetpos - hitpos;
-
-			Vector3 newVelocity = direction_to_target.Normalized() * outvel.Length();
-
-			safe_write((uintptr_t)_ppa + 0x30, newVelocity, Vector3);
-			projectile->currentVelocity(newVelocity);
-			//safe_write((uintptr_t)ppa + 0x18, targetpos, Vector3);
-
-			Sphere(hitpos, 0.2f, col(1, 0.1, 0.2, 1), 10, 100);
-		}
+		//if (vars->combat.ricochet
+		//	&& projectile->authoritative())
+		//{
+		//	Vector3 hitpos = ppa->hitPosition;
+		//	Vector3 normal = ppa->hitNormal;
+		//	Vector3 invel = ppa->inVelocity;
+		//	Vector3 outvel = ppa->outVelocity;
+		//
+		//	Vector3 direction = outvel.Normalized();
+		//
+		//	Vector3 targetpos = esp::best_target.player->get_bone_transform(48)->get_bone_position();
+		//	Vector3 direction_to_target = targetpos - hitpos;
+		//
+		//	Vector3 newVelocity = direction_to_target.Normalized() * outvel.Length();
+		//
+		//	safe_write((uintptr_t)_ppa + 0x30, newVelocity, Vector3);
+		//	projectile->currentVelocity(newVelocity);
+		//	//safe_write((uintptr_t)ppa + 0x18, targetpos, Vector3);
+		//
+		//	Sphere(hitpos, 0.2f, col(1, 0.1, 0.2, 1), 10, 100);
+		//}
 		return orig_fn(rcx, rdx, r9, _ppa, arg5);
 	}
 
@@ -1180,6 +1269,8 @@ namespace hooks {
 		do {
 			if (!esp::local_player)
 				break;
+			
+			Update((Projectile*)projectile); //many invalids with fat bullet manipulator as projectile position isnt updated before the hit
 
 			auto hit_test = projectile->get_hit_test();
 			if (!hit_test)
@@ -1204,7 +1295,7 @@ namespace hooks {
 				}
 			}
 
-			if (!settings::weapon::hitbox_override && !settings::weapon::random_hitbox)
+			if (!vars->combat.hitbox_override)
 				break;
 
 			/*
@@ -1219,7 +1310,7 @@ StringPool::Get(xorstr_("l_knee")) = 3892428003
 StringPool::Get(xorstr_("spine4")) = 827230707
 */
 
-			if (!target.is_heli && settings::weapon::hitbox_override) {
+			if (!target.is_heli && vars->combat.hitbox_override) {
 
 				int hitbone = 698017942;
 				int hitpartid = 2173623152;
@@ -1240,31 +1331,31 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 					{ 0, 0 }, 
 				};
 				
-				if (settings::weapon::hitboxes::Head
+				if (vars->combat.hitboxes.Head
 					 && esp::local_player->is_visible(target.player->get_bone_transform(
 						 (int)rust::classes::Bone_List::head)->get_bone_position(), projectile->get_current_position()))
 					test[0] = { 698017942, 2173623152 };
-				if (settings::weapon::hitboxes::Body
+				if (vars->combat.hitboxes.Body
 					&& esp::local_player->is_visible(target.player->get_bone_transform(
 						(int)rust::classes::Bone_List::pelvis)->get_bone_position(), projectile->get_current_position()))
 					test[1] = { 1031402764, 1750816991 };
-				if (settings::weapon::hitboxes::Upperbody
+				if (vars->combat.hitboxes.Upperbody
 					&& esp::local_player->is_visible(target.player->get_bone_transform(
 						(int)rust::classes::Bone_List::spine4)->get_bone_position(), projectile->get_current_position()))
 					test[2] = { 3901657145, 1750816991 };
-				if (settings::weapon::hitboxes::Hands
+				if (vars->combat.hitboxes.Hands
 					&& esp::local_player->is_visible(target.player->get_bone_transform(
 						(int)rust::classes::Bone_List::r_hand)->get_bone_position(), projectile->get_current_position()))
 					test[3] = { 102231371, 1750816991 };
-				if (settings::weapon::hitboxes::Penis
+				if (vars->combat.hitboxes.Penis
 					&& esp::local_player->is_visible(target.player->get_bone_transform(
 						(int)rust::classes::Bone_List::penis)->get_bone_position(), projectile->get_current_position()))
 					test[4] = { 3771021956, 1750816991 };
-				if (settings::weapon::hitboxes::Legs
+				if (vars->combat.hitboxes.Legs
 					&& esp::local_player->is_visible(target.player->get_bone_transform(
 						(int)rust::classes::Bone_List::l_hip)->get_bone_position(), projectile->get_current_position()))
 					test[5] = { 3892428003, 1750816991 };
-				if (settings::weapon::hitboxes::Feet
+				if (vars->combat.hitboxes.Feet
 					&& esp::local_player->is_visible(target.player->get_bone_transform(
 						(int)rust::classes::Bone_List::r_foot)->get_bone_position(), projectile->get_current_position()))
 					test[6] = { 920055401, 1750816991 };
@@ -1286,7 +1377,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 				attack->hitPositionLocal = { -.1f, -.1f, 0 };
 				attack->hitNormalLocal = { 0, -1, 0 };
 			}
-			else if (!target.is_heli && settings::weapon::random_hitbox) {
+			else if (!target.is_heli) {
 				switch (my_rand() % 10) {
 				case 0: // Head
 					attack->hitBone   = 698017942;
@@ -1414,39 +1505,30 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 						uint64_t p2 = mem::read<uint64_t>(p1 + 0x28);
 
 
-						if (!unity::space_material)
-						{
-							/*
-							UINT64 klass = safe_read(mem::game_assembly_base + oTod_Sky, UINT64);// "Name": "TOD_Sky_TypeInfo",
-		UINT64 static_fields = safe_read(klass + 0xB8, UINT64);
-		UINT64 instances = safe_read(static_fields, UINT64);
-		UINT64 List = safe_read(instances + 0x10, UINT64);
-		UINT64 TOD_Sky = safe_read(List + 0x20, UINT64);
-		const auto TOD_CycleParameters = mem::read<uintptr_t>(TOD_Sky + 0x38);
-		UINT64 night = safe_read(TOD_Sky + 0x58, UINT64);
-		UINT64 ambient = safe_read(TOD_Sky + 0x90, UINT64);
-		*/
-							uintptr_t kl = *reinterpret_cast<uintptr_t*>(mem::game_assembly_base + offsets::sky_typeinfo);
-							uintptr_t fieldz = *reinterpret_cast<uintptr_t*>(kl + 0xB8);
-							uintptr_t instances = *reinterpret_cast<uintptr_t*>(fieldz);
-							uintptr_t list = *reinterpret_cast<uintptr_t*>(instances + 0x10);
-							uintptr_t tod_sky = *reinterpret_cast<uintptr_t*>(list + 0x20); // 'Dome'
-
-							auto components = *reinterpret_cast<uintptr_t*>(tod_sky + 0xA8);
-							if (components)
-							{
-								auto scattering = *reinterpret_cast<uintptr_t*>(components + 0x1A0);
-
-								if (scattering)
-								{
-									auto material = *reinterpret_cast<uintptr_t*>(scattering + 0x88); //private Material scatteringMaterial; // 0x78
-
-									if(material)
-										unity::space_material = material; //private Material skyMaskMaterial; // 0x88
+						//if (!unity::space_material)
+						//{
+						//	/
+						//	uintptr_t kl = *reinterpret_cast<uintptr_t*>(mem::game_assembly_base + offsets::sky_typeinfo);
+						//	uintptr_t fieldz = *reinterpret_cast<uintptr_t*>(kl + 0xB8);
+						//	uintptr_t instances = *reinterpret_cast<uintptr_t*>(fieldz);
+						//	uintptr_t list = *reinterpret_cast<uintptr_t*>(instances + 0x10);
+						//	uintptr_t tod_sky = *reinterpret_cast<uintptr_t*>(list + 0x20); // 'Dome'
+						//
+						//	auto components = *reinterpret_cast<uintptr_t*>(tod_sky + 0xA8);
+						//	if (components)
+						//	{
+						//		auto scattering = *reinterpret_cast<uintptr_t*>(components + 0x1A0);
+						//
+						//		if (scattering)
+						//		{
+						//			auto material = *reinterpret_cast<uintptr_t*>(scattering + 0x88); //private Material scatteringMaterial; // 0x78
+						//
+						//			if(material)
+						//				unity::space_material = material; //private Material skyMaskMaterial; // 0x88
 										//unity::space_material = *reinterpret_cast<uintptr_t*>(s + 0x78); //private Material skyMaskMaterial; // 0x88
-								}
-							}
-						}
+						//		}
+						//	}
+						//}
 						
 						//if (!unity::star_material)
 						//	unity::star_material = unity::get_StarMaterial(p2);
@@ -1464,12 +1546,12 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 						const auto TOD_Day = *reinterpret_cast<uintptr_t*>(p2 + 0x50);
 						const auto TOD_Night = *reinterpret_cast<uintptr_t*>(p2 + 0x58);
 						const auto TOD_Stars = *reinterpret_cast<uintptr_t*>(p2 + 0x70);
-						if (settings::misc::always_day) {
+						if (vars->visual.always_day) {
 							*(float*)(TOD_Night + 0x50) = 4.f;
 							*(float*)(TOD_Night + 0x54) = 1.f;
 							*(float*)(TOD_Day + 0x50) = 1.f;
 							*(float*)(TOD_Day + 0x54) = 1.f;
-							*(float*)(TOD_Stars + 0x14) = settings::misc::staramount;
+							*(float*)(TOD_Stars + 0x14) = vars->visual.staramount;
 						}
 
 
@@ -1493,7 +1575,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 			return;
 
 		if (loco && !loco->is_sleeping() && settings::desyncTime < 0.f) {
-			if (settings::misc::flyhack_stop) {
+			if (vars->misc.flyhack_stop) {
 				Vector3 curr = get_transform(esp::local_player)->get_bone_position();
 				Vector3 old = misc::cLastTickPos;
 				Vector3 v4 = (curr - misc::cLastTickPos);
@@ -1525,18 +1607,18 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 		set_sprinting(model_state, true);
 		flying = player_walk_movement->get_flying();
 
-		if (settings::misc::silentwalk && settings::keybind::silentwalk) {
+		if (vars->misc.silentwalk && vars->keybinds.silentwalk) {
 			set_onLadder(model_state, true);
 		}
 		else set_onLadder(model_state, false);
 
-		if (settings::misc::interactive_debug)
+		if (vars->misc.interactive_debug)
 			model_state->set_flag(rust::classes::ModelState_Flag::Mounted);
 
 		model_state->remove_flag(rust::classes::ModelState_Flag::Flying);
 
 		float max_speed = (player_walk_movement->get_swimming() || player_walk_movement->get_ducking() > 0.5) ? 1.7f : 5.5f;
-		if (settings::misc::always_sprint) {
+		if (vars->misc.always_sprint) {
 			if (vel.length() > 0.f) {
 				Vector3 target_vel = Vector3(vel.x / vel.length() * max_speed, vel.y, vel.z / vel.length() * max_speed);
 				player_walk_movement->set_TargetMovement(target_vel);
@@ -1544,14 +1626,14 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 		}
 
 		if (unity::GetKeyDown(rust::classes::KeyCode::Space)
-			&& settings::misc::infinite_jump)
+			&& vars->misc.infinite_jump)
 		{
 			misc::autobot::do_jump(player_walk_movement, model_state);
 		}
 		
 		auto wpn = esp::local_player->get_active_weapon();
 		auto held = wpn ? wpn->get_base_projectile() : nullptr;
-		if (settings::weapon::always_reload
+		if (vars->combat.always_reload
 			&& held)
 		{
 			misc::time_since_last_shot = (get_fixedTime() - misc::fixed_time_last_shot);
@@ -1559,7 +1641,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 			if (misc::just_shot && (misc::time_since_last_shot > 0.2f))
 			{
 				unity::ServerRPC((uintptr_t)held, rust::classes::string(_(L"StartReload")));
-				esp::local_player->console_echo(_(L"[K4]: ClientInput - starting reload"));
+				esp::local_player->console_echo(_(L"[trap]: ClientInput - starting reload"));
 				//esp::local_player->SendSignalBroadcast(rust::classes::Signal::Reload); //does this cause animation? YES
 				misc::just_shot = false;
 			}
@@ -1569,7 +1651,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 			if (misc::time_since_last_shot > reloadtime //-10% for faster reloads than normal >:)
 				&& !misc::did_reload)
 			{
-				esp::local_player->console_echo(_(L"[K4]: ClientInput - finishing reload"));
+				esp::local_player->console_echo(_(L"[trap]: ClientInput - finishing reload"));
 				unity::ServerRPC((uintptr_t)held, rust::classes::string(_(L"Reload")));
 				misc::did_reload = true;
 				misc::time_since_last_shot = 0;
@@ -1582,7 +1664,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 		if (loco)
 		{
 			if(!loco->is_sleeping()){
-				if (settings::misc::autofarm)
+				if (vars->misc.autofarm)
 				{
 					if(misc::node.ent == 0)
 						misc::node.ent = (uintptr_t)loco->find_closest(_("OreResourceEntity"), (networkable*)loco, 200.f);
@@ -1601,9 +1683,9 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 		if(dont_move)
 			player_walk_movement->set_TargetMovement(Vector3(0, 0, 0));
 
-		if (settings::misc::flywall)
+		if (vars->misc.flywall)
 		{
-			if (unity::GetKey((rust::classes::KeyCode)settings::keybind::flywall))
+			if (unity::GetKey((rust::classes::KeyCode)vars->keybinds.flywall))
 			{
 				set_onLadder(model_state, true);
 				if (settings::vert_flyhack > 1.5f
@@ -1637,15 +1719,15 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 		};
 
 
-		if (settings::weapon::doubletap)
+		if (vars->combat.doubletap)
 		{
 			auto held = esp::local_player->get_active_weapon();
 			auto m = held->get_base_projectile()->get_repeat_delay() * .75f; //we can shoot 25% faster??? more bullets?? :DDD
 
 			int r = settings::desyncTime / m;
-			esp::local_player->console_echo(string::wformat(_(L"[K4]: Launching %d projectiles!"), r));
 			if (r > 1)
 			{
+				esp::local_player->console_echo(string::wformat(_(L"[trap]: Launching %d projectiles!"), r));
 				for (size_t i = 0; i < r; i++)
 				{
 					orig::baseprojectile_launchprojectile((uintptr_t)p);
@@ -1681,7 +1763,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 	uintptr_t hk_GetBuildingPrivilege(uintptr_t base_entity) {
 		uintptr_t result = 0;
 
-		if (settings::misc::force_privlidge
+		if (vars->misc.force_privlidge
 			&& esp::closest_building_block) {
 
 			auto block = (BuildingBlock*)esp::closest_building_block;
@@ -1826,12 +1908,11 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 			auto tick_time = baseplayer->get_last_sent_tick_time();
 			settings::desyncTime = (unity::get_realtimesincestartup() - tick_time) - 0.03125 * 3;
 
-
 			auto wpn = baseplayer->get_active_weapon();
 
 			auto held = wpn ? wpn->get_base_projectile() : nullptr;
 
-			if (settings::misc::attack_on_mountables) {
+			if (vars->misc.attack_on_mountables) {
 				auto mountable = baseplayer->get_mountable();
 				if (mountable)
 					mountable->canwielditem() = true;
@@ -1839,7 +1920,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 
 			bool kyslol = false;
 
-			if (settings::misc::TakeFallDamage && unity::GetKey(rust::classes::KeyCode(settings::keybind::suicide))) {
+			if (vars->misc.TakeFallDamage && unity::GetKey(rust::classes::KeyCode(vars->keybinds.suicide))) {
 
 				OnLand(baseplayer, -8.0001f - 100);
 			}
@@ -1847,10 +1928,10 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 			bool t1 = orig::isdown(state, rust::classes::BUTTON::FIRE_PRIMARY);
 			auto t2 = orig::get_bodyleanoffset(baseplayer->get_player_eyes());
 
-			if (settings::misc::admin_mode)
+			if (vars->misc.admin_mode)
 				baseplayer->set_admin_flag(rust::classes::PlayerFlags::IsAdmin);
 
-			if (settings::misc::spiderman) {
+			if (vars->misc.spiderman) {
 				baseplayer->SpiderMan();
 			}
 
@@ -1863,13 +1944,13 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 					{
 						auto v = planner->rotationoffset();
 						planner->rotationoffset(Vector3(v.x, v.y += 10, v.z));
-						esp::local_player->console_echo(string::wformat(_(L"[K4]: ClientInput - rotate building right (%d, %d, %d)"), (int)v.x, (int)v.y, (int)v.z));
+						esp::local_player->console_echo(string::wformat(_(L"[trap]: ClientInput - rotate building right (%d, %d, %d)"), (int)v.x, (int)v.y, (int)v.z));
 					}
 					else if (unity::GetKeyDown(rust::classes::KeyCode::LeftArrow))
 					{
 						auto v = planner->rotationoffset();
 						planner->rotationoffset(Vector3(v.x, v.y -= 10, v.z));
-						esp::local_player->console_echo(string::wformat(_(L"[K4]: ClientInput - rotate building left (%d, %d, %d)"), (int)v.x, (int)v.y, (int)v.z));
+						esp::local_player->console_echo(string::wformat(_(L"[trap]: ClientInput - rotate building left (%d, %d, %d)"), (int)v.x, (int)v.y, (int)v.z));
 					}
 				}
 			}
@@ -1898,7 +1979,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 
 				auto mag_ammo = getammo(held);
 
-				if (settings::weapon::manipulator && ((unity::GetKey(rust::classes::KeyCode(settings::keybind::manipulator)))
+				if (vars->combat.manipulator && ((unity::GetKey(rust::classes::KeyCode(vars->keybinds.manipulator)))
 						|| misc::manipulate_vis))
 				{
 					float nextshot = misc::fixed_time_last_shot + held->get_repeat_delay();
@@ -1911,15 +1992,16 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 							&& mag_ammo > 0)
 						{
 							auto v = esp::local_player->get_player_eyes()->get_position() + misc::best_lean;
-							esp::local_player->console_echo(string::wformat(_(L"[K4]: ClientInput - manipulator attempted shot from position (%d, %d, %d) with desync of %d"), (int)v.x, (int)v.y, (int)v.z, (int)(settings::desyncTime * 100.f)));
+							esp::local_player->console_echo(string::wformat(_(L"[trap]: ClientInput - manipulator attempted shot from position (%d, %d, %d) with desync of %d"), (int)v.x, (int)v.y, (int)v.z, (int)(settings::desyncTime * 100.f)));
 
 							misc::manual = true;
 							hk_LaunchProjectile(held);
+							misc::best_target = Vector3(0, 0, 0);
 							baseplayer->send_client_tick();
 						}
 				}
 
-				if ((settings::weapon::autoshoot || unity::GetKey(rust::classes::KeyCode(settings::keybind::autoshoot))))
+				if ((vars->combat.autoshoot || unity::GetKey(rust::classes::KeyCode(vars->keybinds.autoshoot))))
 				{
 					float nextshot = misc::fixed_time_last_shot + held->get_repeat_delay();
 					//Sphere(target, 0.05f, col(0.6, 0.6, 0.6, 1), 0.02f, 100.f);
@@ -1939,7 +2021,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 					}
 					else if (!baseplayer->is_visible(baseplayer->get_bone_transform(48)->get_bone_position(), target)
 						//&& get_fixedTime() > nextshot
-						&& settings::weapon::manipulator
+						&& vars->combat.manipulator
 						&& mag_ammo > 0)
 					{
 						if (misc::can_manipulate(baseplayer, target, 5.f))
@@ -1953,9 +2035,9 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 			}
 			else misc::manipulate_vis = false;
 			//desync on key
-			if (unity::GetKey(rust::classes::KeyCode(settings::keybind::desync_ok))
-				|| (settings::weapon::manipulator
-					&& (unity::GetKey(rust::classes::KeyCode(settings::keybind::manipulator))
+			if (unity::GetKey(rust::classes::KeyCode(vars->keybinds.desync_ok))
+				|| (vars->combat.manipulator
+					&& (unity::GetKey(rust::classes::KeyCode(vars->keybinds.manipulator))
 						|| misc::manipulate_vis)))
 				baseplayer->set_client_tick_interval(0.99f);
 			else if (!is_lagging && !is_speeding)
@@ -1963,7 +2045,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 
 
 			if (!keybinds::fakelagb || unity::GetKey(keybinds::fakelagk)) {
-				if (!is_lagging && !flying && settings::misc::fake_lag && !is_speeding) {
+				if (!is_lagging && !flying && vars->misc.fake_lag && !is_speeding) {
 					baseplayer->set_client_tick_interval(0.4f);
 					is_lagging = true;
 				}
@@ -1972,32 +2054,32 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 				esp::local_player->set_client_tick_interval(0.03f);
 				is_lagging = false;
 			}
-			else if (is_lagging && !settings::misc::fake_lag) {
+			else if (is_lagging && !vars->misc.fake_lag) {
 				esp::local_player->set_client_tick_interval(0.05f);
 				is_lagging = false;
 			}
 
-			if (settings::misc::eyeoffset || unity::GetKey((rust::classes::KeyCode)settings::keybind::neck))
+			if (vars->misc.eyeoffset || unity::GetKey((rust::classes::KeyCode)vars->keybinds.neck))
 			{
-				baseplayer->get_player_eyes()->set_view_offset(Vector3(0, settings::misc::playereyes, 0));
+				baseplayer->get_player_eyes()->set_view_offset(Vector3(0, vars->misc.playereyes, 0));
 			}
 
 			if (auto movement = baseplayer->get_movement()) {
-				if (settings::misc::spiderman) {
+				if (vars->misc.spiderman) {
 					movement->set_ground_angles_new(-1);
 				}
-				if (settings::misc::infinite_jump) {
+				if (vars->misc.infinite_jump) {
 					movement->set_land_time(0);
 					movement->set_jump_time(0);
 					movement->set_ground_time(100000);
 				}
 
-				if (settings::misc::gravity)
+				if (vars->misc.gravity)
 					movement->set_gravity_multiplier(1.75f);
 				else
 					movement->set_gravity_multiplier(2.35f);
 
-				if (settings::weapon::always_shoot) {
+				if (vars->combat.always_shoot) {
 					if (auto modelstate = baseplayer->get_model_state()) {
 						modelstate->set_flag(rust::classes::ModelState_Flag::OnGround);
 						mem::write<float>((uint64_t)movement + 0x4C, 1); //private float <Grounded>k__BackingField; // 0x4C
@@ -2008,8 +2090,8 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 			auto item = baseplayer->get_active_weapon();
 
 
-			if (settings::misc::speedhack || unity::GetKey(rust::classes::KeyCode(settings::keybind::timescale))) {
-				set_timeScale(settings::misc::speedhackspeed);
+			if (vars->misc.speedhack || unity::GetKey(rust::classes::KeyCode(vars->keybinds.timescale))) {
+				set_timeScale(vars->misc.speedhackspeed);
 				is_speeding = true;
 			}
 			else {
@@ -2017,6 +2099,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 				is_speeding = false;	
 			}
 
+			auto target = baseplayer->get_aimbot_target(unity::get_camera_pos());
 			if (item) {
 				auto baseprojectile = item->get_base_projectile();
 				if (baseprojectile) {
@@ -2045,34 +2128,33 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 						float offset = 0.f;
 						auto target = current.player;
 						__try {
-							if (settings::weapon::thick_bullet
+							if (vars->combat.thick_bullet
 								&& projectile->authoritative()
-								&& projectile->IsAlive()
-								)//&& settings::weapon::thickness > 1.1f)
+								&& projectile->IsAlive() //causes invalids right now
+								)//&& vars->combat.thickness > 1.1f)
 							{
 								if (target.player) {
 									auto current_position = get_position((uintptr_t)get_transform((base_player*)projectile));
 									
-									
 									//transform* bonetrans = target.player->find_closest_bone(current_position, true);
-									transform* bonetrans = target.player->get_bone_transform(47);
+									transform* bonetrans = target.player->get_bone_transform(48);
 
-									Vector3 target_bone = get_position((uintptr_t)bonetrans);
-									//Sphere(target_bone, 0.1f, col(12, 150, 100, 50), 10.f, 100.f);
+									Vector3 target_bone = get_position((uintptr_t)bonetrans); target_bone.y -= 1.1f;
+									Sphere(target_bone, 2.2f, col(12, 150, 100, 50), 10.f, 100.f);
 
-									if (misc::LineCircleIntersection(target_bone, settings::weapon::thickness, current_position, projectile->previousPosition(), offset))
+									if (misc::LineCircleIntersection(target_bone, vars->combat.thickness, current_position, projectile->previousPosition(), offset))
 									{
-										current_position = Vector3::move_towards(target_bone, current_position, settings::weapon::thickness);
+										current_position = Vector3::move_towards(target_bone, current_position, vars->combat.thickness);
 									}
 
-									if (target_bone.distance(current_position) <= settings::weapon::thickness
+									if (target_bone.distance(current_position) <= vars->combat.thickness
 										&& target.player->is_visible(target_bone, current_position))
 									{
 										//current_position = Vector3::move_towards(current_position, target_bone, 1.0f);
-										current_position = Vector3::move_towards(target_bone, current_position, 1.2f);
+										current_position = Vector3::move_towards(current_position, target_bone, 1.0f);
 										set_position(get_transform((base_player*)projectile), current_position);
-
-										if (current_position.distance(target_bone) <= 1.2f)
+										Update(projectile);
+										if (current_position.distance(target_bone) <= 1.0f)
 										{
 											current_position = Vector3::move_towards(current_position, target_bone, 0.2f);
 											HitTest* ht = (HitTest*)projectile->hitTest();
@@ -2155,7 +2237,89 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 						attack_melee(target, baseprojectile);
 					};
 
-					if (settings::misc::silent_farm) {
+					if (target.player
+						&& vars->combat.aimbot
+						&& vars->keybinds.aimbot)
+					{
+						//predict aiming direction
+						//
+						// normalize angles
+						// smooth angles
+						// set bodyangles to result
+						//
+						Vector3 eyes = esp::local_player->get_player_eyes()->get_position();
+						Vector3 aim_dir;
+						Vector3 aim_vel;
+
+						auto v = baseprojectile->get_item_mod_projectile()->get_projectile_velocity();
+						auto v1 = baseprojectile->projectileVelocityScale();
+						if (vars->combat.fast_bullet)
+							v1 *= 1.49f;
+						v *= v1;
+
+						auto vel = (getmodifiedaimcone(0, eyes - target.pos, true)).Normalized() * v;
+
+						misc::get_prediction(target, eyes, target.pos, vel, aim_vel, aim_dir, (Projectile*)baseprojectile);
+
+						Vector3 va = baseplayer->bodyAngles();
+						Vector2 vb = { va.x, va.y };
+						auto calc = [&](const Vector3& src, const Vector3& dst) {
+							Vector3 d = src - dst;
+							return Vector2(RAD2DEG(Vector3::my_asin(d.y / d.length())), RAD2DEG(-Vector3::my_atan2(d.x, -d.z)));
+						};
+						auto normalize = [&](float& yaw, float& pitch) {
+							if (pitch < -89) pitch = -89;
+							else if (pitch > 89) pitch = 89;
+							if (yaw < -999) yaw = -999;
+							else if (yaw > 999) yaw = 999;
+						};
+						auto step = [&](Vector2& angles) {
+							bool smooth = true;
+							Vector3 v = va;
+							Vector2 va = { v.x, v.y };
+							Vector2 angles_step = angles - va;
+							normalize(angles_step.x, angles_step.y);
+
+							if (smooth) {
+								float factor_pitch = vars->combat.aimbot_smooth;
+								if (angles_step.x < 0.f) {
+									if (factor_pitch > std::fabs(angles_step.x)) {
+										factor_pitch = std::fabs(angles_step.x);
+									}
+									angles.x = va.x - factor_pitch;
+								}
+								else {
+									if (factor_pitch > angles_step.x) {
+										factor_pitch = angles_step.x;
+									}
+									angles.x = va.x + factor_pitch;
+								}
+							}
+							if (smooth) {
+								float factor_yaw = vars->combat.aimbot_smooth;
+								if (angles_step.y < 0.f) {
+									if (factor_yaw > std::fabs(angles_step.y)) {
+										factor_yaw = std::fabs(angles_step.y);
+									}
+									angles.y = va.y - factor_yaw;
+								}
+								else {
+									if (factor_yaw > angles_step.y) {
+										factor_yaw = angles_step.y;
+									}
+									angles.y = va.y + factor_yaw;
+								}
+							}
+						};
+						//smooth the shit
+						Vector2 ai = { aim_dir.x, aim_dir.y };
+						step(ai);
+						normalize(ai.x, ai.y);
+						Vector3 i = { ai.x, ai.y, 0.0f };
+						baseplayer->set_bodyAngles(i);
+					}
+
+					if (vars->misc.silent_farm) {
 						auto entity = baseplayer->resolve_closest_entity(3, false);
 						if (entity.first.found && entity.first.player) {
 							if (*(int*)(wep_class_name + 4) == 'eleM' || *(int*)(wep_class_name + 4) == 'mmah') {
@@ -2165,7 +2329,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 					}
 
 					if (!(*(int*)(wep_class_name + 4) == 'eleM' && *(int*)(wep_class_name) == 'esaB')) {
-						if (unity::GetKey(rust::classes::KeyCode::Mouse0) && settings::misc::instant_med) {
+						if (unity::GetKey(rust::classes::KeyCode::Mouse0) && vars->misc.instant_med) {
 							const auto item_id = item->get_item_definition_id();
 
 							if (item_id == 1079279582 || item_id == -2072273936) {
@@ -2178,7 +2342,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 								}
 							}
 						}
-						else if (unity::GetKey(rust::classes::KeyCode::Mouse1) && settings::misc::instant_med) {
+						else if (unity::GetKey(rust::classes::KeyCode::Mouse1) && vars->misc.instant_med) {
 							const auto item_id = item->get_item_definition_id();
 
 							if (item_id == 1079279582 || item_id == -2072273936) {
@@ -2220,21 +2384,17 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 									mem::write<bool>((uint64_t)baseprojectile + 0x388, true); //eoka _didSparkThisFrame
 									break;
 								default:
-									if (settings::weapon::fast_bullet)
+									if (vars->combat.fast_bullet)
 										if (item_id != 1318558775)
 											baseprojectile->SetProjectileVelocityScale(1.49f);
-									if (settings::weapon::rapidfire)
+									if (vars->combat.rapidfire)
 										baseprojectile->set_repeat_delay(0.02f);
-									if (settings::weapon::automatic)
+									if (vars->combat.automatic)
 										baseprojectile->is_automatic() = true;
-									if (settings::weapon::nospread)
+									if (vars->combat.nospread)
 										baseprojectile->set_no_spread();
-									if (settings::weapon::norecoil)
+									if (vars->combat.norecoil)
 										baseprojectile->set_recoil(0, 0, 0, 0);
-									if (settings::weapon::legit_recoil)
-										baseprojectile->set_recoil(1, 1, -1, 0);
-									if (settings::weapon::nosway)
-										baseprojectile->set_no_sway();
 									break;
 
 								}
@@ -2244,19 +2404,18 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 				}
 			}
 
-			if (settings::misc::instant_revive) {
-				auto target = baseplayer->get_aimbot_target(unity::get_camera_pos());
+			if (vars->misc.instant_revive) {
 
 				if (target.player)
 				{
-					esp::local_player->console_echo(string::wformat(_(L"[K4]: ClientInput - sending RPC_Assist to player %s"), target.player->get_player_name()));
+					esp::local_player->console_echo(string::wformat(_(L"[trap]: ClientInput - sending RPC_Assist to player %s"), target.player->get_player_name()));
 
 					if (!target.is_heli && target.player && target.distance <= 5 && target.player->get_health() <= 4 && target.visible)
 						unity::ServerRPC((uintptr_t)target.player, rust::classes::string(_(L"RPC_Assist")));
 				}
 			}
 
-			switch (settings::misc::gesture_spam) {
+			switch (vars->misc.gesture_spam) {
 			case 0:
 				break;
 			case 1:
@@ -2296,9 +2455,9 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 				break;
 			}
 
-			unity::IgnoreLayerCollision(rust::classes::layer::PlayerMovement, rust::classes::layer::Water, !settings::misc::no_playercollision);
-			unity::IgnoreLayerCollision(rust::classes::layer::PlayerMovement, rust::classes::layer::Tree, settings::misc::no_playercollision);
-			unity::IgnoreLayerCollision(rust::classes::layer::PlayerMovement, rust::classes::layer::AI, settings::misc::no_playercollision);
+			unity::IgnoreLayerCollision(rust::classes::layer::PlayerMovement, rust::classes::layer::Water, !vars->misc.no_playercollision);
+			unity::IgnoreLayerCollision(rust::classes::layer::PlayerMovement, rust::classes::layer::Tree, vars->misc.no_playercollision);
+			unity::IgnoreLayerCollision(rust::classes::layer::PlayerMovement, rust::classes::layer::AI, vars->misc.no_playercollision);
 
 			draw_get();
 			if (tick_time > gui::tick_time_when_called + 10) {
@@ -2314,12 +2473,12 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 		//model_state->set_water_level(99999);
 
 
-		if (settings::misc::spinbot) {
+		if (vars->misc.spinbot) {
 			state->set_aim_angles(Vector3(100, my_rand() % 999 + -999, 100));
 		}
 
 
-		if (settings::misc::autofarm) {
+		if (vars->misc.autofarm) {
 			if (misc::node.pos != Vector3(0, 0, 0))
 			{
 				auto dir = (misc::node.pos - baseplayer->get_player_eyes()->get_position()).Normalized();

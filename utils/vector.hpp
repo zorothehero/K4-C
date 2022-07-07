@@ -30,6 +30,16 @@ public:
 		return Vector2(x + vector.x, y + vector.y);
 	}
 
+	Vector2 operator/(const Vector2& vector) const
+	{
+		return Vector2(x / vector.x, y / vector.y);
+	}
+
+	Vector2 operator/(const float& f) const
+	{
+		return Vector2(x / f, y / f);
+	}
+
 	static Vector2 Lerp(Vector2 value1, Vector2 value2, float amount)
 	{
 		return Vector2(
@@ -75,6 +85,7 @@ enum weapon_types : int32_t {
 	spear_stone = 1602646136,
 	spear_wooden = 1540934679
 };
+
 
 float my_pow(float base, float exp)
 {
