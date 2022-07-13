@@ -751,17 +751,26 @@ namespace gui {
 		{
 			if (poz.Contains(mouse))
 				combo_clicked = !combo_clicked;
-			if (combo_clicked)
+			else
 			{
-				for (size_t i = 1; i < 8; i++)
+				bool clicked_inside = false;
+				if (combo_clicked)
 				{
-					poz = rust::classes::Rect(pos.x + tab_size.x + 2.0f, pos.y + current_pos.y + (i * 20), 150, 15);
-					if (poz.Contains(mouse))
+					for (size_t i = 1; i < 8; i++)
 					{
-						if (&combo[i])
-							*combo[i] = !*combo[i];
+						poz = rust::classes::Rect(pos.x + tab_size.x + 2.0f, pos.y + current_pos.y + (i * 20), 150, 15);
+						if (poz.Contains(mouse))
+						{
+							if (&combo[i])
+							{
+								*combo[i] = !*combo[i];
+								clicked_inside = true;
+							}
+						}
 					}
 				}
+				if(clicked_inside == false)
+					combo_clicked = false;
 			}
 		}
 		if (combo_clicked)
@@ -1165,7 +1174,7 @@ namespace gui {
 									Progbar({ 900, (650 + (bars++ * 10)) }, { 120, 4 }, settings::time_since_last_shot, (r - 0.2f));
 							}
 						}
-						if (esp::best_target.player
+						if ((esp::best_target.player && esp::best_target.player->is_alive())
 							&& vars->visual.snapline > 1)
 						{
 							Vector2 start = vars->visual.snapline == 2 ? Vector2(ScreenWidth / 2, 0) :
@@ -1173,10 +1182,13 @@ namespace gui {
 								vars->visual.snapline == 4 ? Vector2(ScreenWidth / 2, 1080) :
 								Vector2(ScreenWidth / 2, 1080);
 							Vector3 o = WorldToScreen(esp::best_target.pos);
-							if (esp::best_target.visible)
-								gui::line(start, Vector2(o.x, o.y), gui::Color(0, 0.9, 0.2, 1));
-							else
-								gui::line(start, Vector2(o.x, o.y), gui::Color(0.9, 0, 0.2, 1));
+							if (o.x != 0 && o.y != 0)
+							{
+								if (esp::best_target.visible)
+									gui::line(start, Vector2(o.x, o.y), gui::Color(0, 0.9, 0.2, 1));
+								else
+									gui::line(start, Vector2(o.x, o.y), gui::Color(0.9, 0, 0.2, 1));
+							}
 						}
 						
 						if (vars->visual.draw_fov) {
@@ -1388,7 +1400,7 @@ namespace gui {
 						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Double-tap"), &vars->combat.doubletap, weapon_tab);
 						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Always reload"), &vars->combat.always_reload, weapon_tab);
 
-						pos.y -= 190;
+						pos.y -= 180;
 						pos.x += 5;
 						combobox(event_type, menu_pos, pos, mouse_pos, _(L"Choose hitboxes"), combo1_names, combo1_refs);
 
@@ -1475,6 +1487,7 @@ namespace gui {
 						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Silent walk"), &vars->misc.silentwalk, misc_tab, true, &vars->keybinds.silentwalk);
 						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Spinbot"), &vars->misc.spinbot, misc_tab);
 						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Fake lag"), &vars->misc.fake_lag, misc_tab);
+						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Emulate projectile"), &vars->misc.emulate_p, misc_tab);
 						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Desync"), &vars->misc.desync, misc_tab, true, &vars->keybinds.desync_ok);
 
 						menu_pos.x += 170;

@@ -272,8 +272,11 @@ static auto console_msg = reinterpret_cast<void(*)(uintptr_t, rust::classes::str
 
 static auto teleportto = reinterpret_cast<void(*)(uintptr_t, Vector3, uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseMovement"), _("TeleportTo"), 0, _(""), _(""))));
 
+static auto GetAimCone = reinterpret_cast<float(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseProjectile"), _("GetAimCone"), 0, _(""), _(""))));
 
-//static auto name = reinterpret_cast<void*(*)(void* args_here)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("class"), _("function name"), 0, _(""), _(""))));
+static auto animcurve_evaluate = reinterpret_cast<float(*)(uintptr_t, float)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("AnimationCurve"), _("Evaluate"), 0, _(""), _("UnityEngine"))));
+
+static auto guidtopath = reinterpret_cast<rust::classes::string(*)(rust::classes::string)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GameManifest"), _("GUIDToPath"), 0, _(""), _(""))));
 
 
 class col {
@@ -377,6 +380,12 @@ void init_bp() {
 	set_material = reinterpret_cast<uintptr_t(*)(uintptr_t, uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Renderer"), _("set_material"), 0, _(""), _("UnityEngine"))));
 
 	do_jump = reinterpret_cast<void(*)(uintptr_t, uintptr_t, bool)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("PlayerWalkMovement"), _("Jump"), 0, _(""), _(""))));
+
+	GetAimCone = reinterpret_cast<float(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseProjectile"), _("GetAimCone"), 0, _(""), _(""))));
+
+	animcurve_evaluate = reinterpret_cast<float(*)(uintptr_t, float)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("AnimationCurve"), _("Evaluate"), 0, _(""), _("UnityEngine"))));
+
+	guidtopath = reinterpret_cast<rust::classes::string(*)(rust::classes::string)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GameManifest"), _("GUIDToPath"), 0, _(""), _(""))));
 #pragma region il2
 
 	containerWear = il2cpp::value(_("PlayerInventory"), _("containerWear"));
@@ -1230,7 +1239,9 @@ public:
 	bool found = false;
 
 	/*Velocity related shit*/
-	Vector3 velocity;
+	Vector3 avg_vel = Vector3(0, 0, 0);
+	std::vector<Vector3> velocity_list = {};
+	float last_frame = 0.f; // overwrite every fixedtime + deltatime
 
 	bool operator<(const aim_target& b) {
 		if (fov == vars->combat.aimbotfov) {
@@ -1361,6 +1372,26 @@ public:
 		constexpr auto bodyAngles = 0x3C; //private Vector3 bodyAngles;
 		*reinterpret_cast<Vector3*>(plr_input + bodyAngles) = a;
 	}
+	Vector3 recoilAngles()
+	{
+		auto plr_input = *reinterpret_cast<uintptr_t*>(this + input);
+		if (!plr_input)
+			return {};
+
+		constexpr auto bodyAngles = 0x64; //private Vector3 bodyAngles; 
+		return *reinterpret_cast<Vector3*>(plr_input + bodyAngles);
+
+	}
+
+	void recoilAngles(Vector3 a)
+	{
+		auto plr_input = *reinterpret_cast<uintptr_t*>(this + input);
+		if (!plr_input)
+			return;
+
+		constexpr auto bodyAngles = 0x64; //private Vector3 bodyAngles;
+		*reinterpret_cast<Vector3*>(plr_input + bodyAngles) = a;
+	}
 
 	void SpiderMan() {
 		*reinterpret_cast<float*>(this + 0xb0) = 0.f;
@@ -1412,14 +1443,14 @@ public:
 		}
 
 		if (zooming) {//0x32182E0
-			auto convar = *reinterpret_cast<uintptr_t*>((uintptr_t)mem::game_assembly_base + 52531944); //"ConVar_Graphics_c*" real rust
+			auto convar = *reinterpret_cast<uintptr_t*>((uintptr_t)mem::game_assembly_base + 52647456); //"ConVar_Graphics_c*" real rust
 			//auto convar = *reinterpret_cast<uintptr_t*>((uintptr_t)mem::game_assembly_base + 52527840); //"ConVar_Graphics_c*" alkad rust
 			auto unknown = *reinterpret_cast<uintptr_t*>((uintptr_t)convar + 0xb8);
 			*reinterpret_cast<float*>(unknown + 0x18) = vars->visual.zoomfov;
 		}
 
 		if (!zooming) {
-			auto convar = *reinterpret_cast<uintptr_t*>((uintptr_t)mem::game_assembly_base + 52531944); //"ConVar_Graphics_c*" real rust
+			auto convar = *reinterpret_cast<uintptr_t*>((uintptr_t)mem::game_assembly_base + 52647456); //"ConVar_Graphics_c*" real rust
 			//auto convar = *reinterpret_cast<uintptr_t*>((uintptr_t)mem::game_assembly_base + 52527840); //"ConVar_Graphics_c*" alkad rust
 			auto unknown = *reinterpret_cast<uintptr_t*>((uintptr_t)convar + 0xb8);
 			*reinterpret_cast<float*>(unknown + 0x18) = vars->visual.playerfov;
@@ -1523,13 +1554,6 @@ public:
 					if (!vars->visual.npc_esp)
 						continue;
 				}
-
-				auto velocity = player->get_new_velocity();
-				target.velocity = velocity;
-			}
-			else {
-				auto velocity = GetWorldVelocity(player);
-				target.velocity = velocity;
 			}
 
 			auto pos = is_heli ? player->get_bone_transform(19)->get_bone_position() : player->get_bone_transform((int)rust::classes::Bone_List::head)->get_bone_position();
@@ -2029,16 +2053,16 @@ public:
 	bool CanAffordUpgrade(rust::classes::BuildingGrade g, base_player* p) {
 		if (!this) return false;
 
-		typedef bool (*AAA)(uintptr_t, int, base_player*);//real rust 0x6BB6A0
-		return ((AAA)(mem::game_assembly_base + 0x6BB6A0))((uintptr_t)this, (int)g, p);
+		typedef bool (*AAA)(uintptr_t, int, base_player*);//real rust 7202688
+		return ((AAA)(mem::game_assembly_base + 7202688))((uintptr_t)this, (int)g, p);
 		//return canaffordupgrade((uintptr_t)this, g, p);
 	}
 
 	bool CanChangeToGrade(rust::classes::BuildingGrade g, base_player* p) {
 		if (!this) return false;
 
-		typedef bool (*AAA)(uintptr_t, int, base_player*);//real rust 0x6BB870
-		return ((AAA)(mem::game_assembly_base + 0x6BB870))((uintptr_t)this, (int)g, p);
+		typedef bool (*AAA)(uintptr_t, int, base_player*);//real rust 7203152
+		return ((AAA)(mem::game_assembly_base + 7203152))((uintptr_t)this, (int)g, p);
 		//return canchangetograde((uintptr_t)this, g, p);
 	}
 

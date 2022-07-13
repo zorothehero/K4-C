@@ -131,6 +131,8 @@ public:
 #define D3DXToRadian(degree) ((degree) * (M_PI / 180.0f))
 #define RAD_TO_DEG 180 / 3.141592654f
 
+	bool is_nan() { return isnan(x) || isnan(x) || isnan(x); }
+
 	bool is_empty() { return x == 0 && y == 0 && z == 0; }
 
 	static float my_sqrt(float number)
@@ -1022,6 +1024,7 @@ public:
 	}
 
 
+
 	inline float dot(const Vector4& vector)
 	{
 		return x * vector.x + y * vector.y + z * vector.z + w * vector.w;
@@ -1044,6 +1047,88 @@ public:
 	bool operator!=(const Vector4& vector) const
 	{
 		return x != vector.x || y != vector.y || z != vector.z || w != vector.w;
+	}
+
+	Vector3 vm(const Vector3& point)
+	{
+		float x =  x * 2.f;
+		float y =  y * 2.f;
+		float z =  z * 2.f;
+		float xx = x * x;
+		float yy = y * y;
+		float zz = z * z;
+		float xy = x * y;
+		float xz = x * z;
+		float yz = y * z;
+		float wx = w * x;
+		float wy = w * y;
+		float wz = w * z;
+
+		Vector3 res;
+		res.x = (1.f - (yy + zz)) * point.x + (xy - wz) * point.y + (xz + wy) * point.z;
+		res.y = (xy + wz) * point.x + (1.f - (xx + zz)) * point.y + (yz - wx) * point.z;
+		res.z = (xz - wy) * point.x + (yz + wx) * point.y + (1.f - (xx + yy)) * point.z;
+		return res;
+	}
+
+	Vector4 LookRotation(Vector3& forward, Vector3& up)
+	{
+		/*
+		forward = forward.normalize();
+		
+		Vector3 right = Vector3.Normalize(Vector3.Cross(up, forward));
+		up = Vector3.Cross(forward, right);
+		var m00 = right.x;
+		var m01 = right.y;
+		var m02 = right.z;
+		var m10 = up.x;
+		var m11 = up.y;
+		var m12 = up.z;
+		var m20 = forward.x;
+		var m21 = forward.y;
+		var m22 = forward.z;
+
+
+		float num8 = (m00 + m11) + m22;
+		var quaternion = new MyQuaternion();
+		if (num8 > 0f)
+		{
+			var num = (float)System.Math.Sqrt(num8 + 1f);
+			quaternion.w = num * 0.5f;
+			num = 0.5f / num;
+			quaternion.x = (m12 - m21) * num;
+			quaternion.y = (m20 - m02) * num;
+			quaternion.z = (m01 - m10) * num;
+			return quaternion;
+		}
+		if ((m00 >= m11) && (m00 >= m22))
+		{
+			var num7 = (float)System.Math.Sqrt(((1f + m00) - m11) - m22);
+			var num4 = 0.5f / num7;
+			quaternion.x = 0.5f * num7;
+			quaternion.y = (m01 + m10) * num4;
+			quaternion.z = (m02 + m20) * num4;
+			quaternion.w = (m12 - m21) * num4;
+			return quaternion;
+		}
+		if (m11 > m22)
+		{
+			var num6 = (float)System.Math.Sqrt(((1f + m11) - m00) - m22);
+			var num3 = 0.5f / num6;
+			quaternion.x = (m10 + m01) * num3;
+			quaternion.y = 0.5f * num6;
+			quaternion.z = (m21 + m12) * num3;
+			quaternion.w = (m20 - m02) * num3;
+			return quaternion;
+		}
+		var num5 = (float)System.Math.Sqrt(((1f + m22) - m00) - m11);
+		var num2 = 0.5f / num5;
+		quaternion.x = (m20 + m02) * num2;
+		quaternion.y = (m21 + m12) * num2;
+		quaternion.z = 0.5f * num5;
+		quaternion.w = (m01 - m10) * num2;
+		return quaternion;
+		*/
 	}
 
 	Vector4 operator+(const Vector4& vector) const

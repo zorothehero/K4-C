@@ -60,8 +60,8 @@ bool DllMain(HMODULE hmodule)
 
 			init_projectile();
             
-            typedef rust::list<uintptr_t>* (*AAA)();//real rust 0x22714A0 ALKAD 36111200 "Name": "ConsoleSystem.Index$$get_All",
-            rust::list<uintptr_t>* command_list = ((AAA)(mem::game_assembly_base + 0x22714A0))();
+            typedef rust::list<uintptr_t>* (*AAA)();//real rust 36204160 ALKAD 36111200 "Name": "ConsoleSystem.Index$$get_All",
+            rust::list<uintptr_t>* command_list = ((AAA)(mem::game_assembly_base + 36204160))();
 
             if (command_list) {
                 auto sz = *reinterpret_cast<int*>(command_list + 0x18);
@@ -87,14 +87,8 @@ bool DllMain(HMODULE hmodule)
 	}
     il2cpp::hook(&hooks::hk_performance_update, _("Update"), _("PerformanceUI"), _("Facepunch"), 0);
     il2cpp::hook(&gui::OnGUI, _("OnGUI"), _("DevControls"), _(""), 0);
-	//il2cpp::hook(&gui::OnGUI, _("OnGUI"), _("DDraw"), _("UnityEngine"), 0);
-	//il2cpp::hook(&hooks::DoFatBullet, _("Update"), _("Projectile"), _(""), 0);
-	//il2cpp::hook(&hooks::AimConeDir_hk, _("GetModifiedAimConeDirection"), _("AimConeUtil"));
-	mem::hook_virtual_function(_("BasePlayer"), _("ClientInput"), &hooks::hk_baseplayer_ClientInput);
-
-	mem::hook_virtual_function(_("BaseProjectile"), _("LaunchProjectile"), &hooks::hk_LaunchProjectile);
-	
-    //mem::hook_virtual_function(_("BaseEntity"), _("GetBuildingPrivilege"), &hooks::hk_GetBuildingPrivilege);
+    mem::hook_virtual_function(_("BasePlayer"), _("ClientInput"), &hooks::hk_baseplayer_ClientInput);
+    mem::hook_virtual_function(_("BaseProjectile"), _("LaunchProjectile"), &hooks::hk_LaunchProjectile);
     
 
 	//il2cpp::hook(&hooks::hk_DoHit, _("DoHit"), _("Projectile"), _(""), 3);

@@ -23,6 +23,5 @@ namespace mem {
 		*reinterpret_cast<t*>(addr) = buffer;
 		return true;
 	}
-	
 	uintptr_t hook_virtual_function(const char* classname, const char* function_to_hook, void* target, const char* name_space);
 }

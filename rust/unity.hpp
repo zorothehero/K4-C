@@ -160,11 +160,11 @@ namespace unity {
 			auto layer = (int)rust::classes::Layers::ProjectileLineOfSightCheck | (int)rust::classes::Layers::Terrain | (int)rust::classes::Layers::z;
 			typedef bool (*AAA)(Vector3, Vector3, rust::classes::Layers, float, uintptr_t);//real rust 0x50F790         //cracked 0x50ED80
 
-			//real rust 0x529DD0
+			//real rust 0x52C580
 			//alkad rust 0x50E9A0
 
-			return ((AAA)(mem::game_assembly_base + 0x529DD0))(source, destination, rust::classes::Layers(layer), p1, player)
-				&& ((AAA)(mem::game_assembly_base + 0x529DD0))(destination, source, rust::classes::Layers(layer), p1, player);
+			return ((AAA)(mem::game_assembly_base + 0x52C580))(source, destination, rust::classes::Layers(layer), p1, player)
+				&& ((AAA)(mem::game_assembly_base + 0x52C580))(destination, source, rust::classes::Layers(layer), p1, player);
 		}
 		__except (true) { return false; }
 	}

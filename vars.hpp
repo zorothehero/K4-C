@@ -114,6 +114,7 @@ struct Vars
 
 	struct misc {
 		bool auto_upgrade = false;
+		bool emulate_p = false;
 		bool flywall = false;
 		bool force_privlidge = false;
 		int upgrade_tier = 1;

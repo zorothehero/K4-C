@@ -15,7 +15,7 @@ namespace esp {
 	uintptr_t client_entities;
 	base_player* local_player;
 	VMatrix matrix;
-	aim_target best_target;
+	aim_target best_target = aim_target();
 	uintptr_t closest_building_block = 0;
 
 	struct bounds_t {
@@ -88,7 +88,7 @@ namespace esp {
 	uintptr_t shader;
 
 	void iterate_players(bool draw = true) {
-		best_target = aim_target();
+		//best_target = ;
 		auto get_client_entities = [&]() {
 			client_entities = il2cpp::value(_("BaseNetworkable"), _("clientEntities"), false);
 		};
@@ -447,7 +447,7 @@ namespace esp {
 			else {
 				if (esp::local_player) {
 					auto target = aim_target();
-					target.pos = player->get_bone_transform(19)->get_bone_position();
+					target.pos = player->get_bone_transform(48)->get_bone_position();
 
 					auto distance = esp::local_player->get_bone_transform(48)->get_bone_position().get_3d_dist(target.pos);
 					target.distance = distance;
@@ -457,8 +457,48 @@ namespace esp {
 
 					target.player = player;
 
-					if (target < best_target)
-						best_target = target;
+					auto visible = player->is_visible(esp::local_player->get_bone_transform(48)->get_bone_position(), target.pos);
+					target.visible = visible;
+
+					if (target < best_target
+						|| (target.player && target.player->get_steam_id() == best_target.player->get_steam_id()))
+					{
+						best_target.pos = target.pos;
+						best_target.distance= target.distance;
+						best_target.fov = target.fov;
+						best_target.player = target.player;
+						best_target.visible = visible;
+
+						auto vel = GetWorldVelocity(target.player);
+
+						float next_frame = best_target.last_frame + get_deltaTime();
+						if (get_fixedTime() > next_frame)
+						{
+							//new frame, record velocity, record frame
+							best_target.last_frame = get_fixedTime();
+							if (best_target.velocity_list.size() < 30) //0.03125 * 30 = 0.9 seconds
+								best_target.velocity_list.push_back(vel);
+							else
+							{
+								best_target.velocity_list.pop_back();
+								best_target.velocity_list.insert(best_target.velocity_list.begin(), 1, vel);
+							}
+							float avgx = 0.f;
+							float avgy = 0.f;
+							float avgz = 0.f;
+							int count = 0;
+							for (auto v : best_target.velocity_list)
+							{
+								if (v.is_empty()) break;
+								avgx += v.x;
+								avgy += v.y;
+								avgz += v.z;
+								count += 1;
+							}
+							avgx /= count; avgy /= count; avgz /= count;
+							best_target.avg_vel = Vector3(avgx, avgy, avgz);
+						}
+					}
 				}
 
 
