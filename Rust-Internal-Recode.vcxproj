@@ -199,11 +199,11 @@
     <ClCompile Include="imgui\imgui_impl_win32.cpp" />
     <ClCompile Include="imgui\imgui_widgets.cpp" />
     <ClCompile Include="kiero\kiero.cpp" />
-    <ClCompile Include="kiero\minhook\src\buffer.c" />
+    <ClCompile Include="kiero\minhook\src\buffer.cpp" />
     <ClCompile Include="kiero\minhook\src\hde\hde32.c" />
     <ClCompile Include="kiero\minhook\src\hde\hde64.c" />
-    <ClCompile Include="kiero\minhook\src\hook.c" />
-    <ClCompile Include="kiero\minhook\src\trampoline.c" />
+    <ClCompile Include="kiero\minhook\src\hook.cpp" />
+    <ClCompile Include="kiero\minhook\src\trampoline.cpp" />
     <ClCompile Include="utils\pattern\pattern.cpp" />
   </ItemGroup>
   <ItemGroup>

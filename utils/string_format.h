@@ -13,6 +13,31 @@ namespace string
 {
 	inline char buffer[512];
 
+	char* myPrintf(float fVal)
+	{
+		char result[100];
+		int dVal, dec, i;
+
+		fVal += 0.005;   // added after a comment from Matt McNabb, see below.
+
+		dVal = fVal;
+		dec = (int)(fVal * 100) % 100;
+
+		memset(result, 0, 100);
+		result[0] = (dec % 10) + '0';
+		result[1] = (dec / 10) + '0';
+		result[2] = '.';
+
+		i = 3;
+		while (dVal > 0)
+		{
+			result[i] = (dVal % 10) + '0';
+			dVal /= 10;
+			i++;
+		}
+		return result;
+	}
+
 	inline const char* format(const char* fmt, ...) {
 		va_list args;
 		va_start(args, fmt);

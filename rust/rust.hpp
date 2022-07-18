@@ -48,6 +48,11 @@ namespace rust {
 				callback(object, i);
 			}
 		}
+
+		void add(int idx, T value) {
+			if (!this) return;
+			*reinterpret_cast<T*>(this + (0x20 + (idx * 0x8))) = value;
+		}
 	};
 
 	namespace classes {
@@ -188,6 +193,19 @@ namespace rust {
 			union {
 				DEFINE_MEMBER_N(Attack*, attack, 0x18);
 			};
+		};
+
+		class CreateBuilding {
+			bool ShouldPool; // 0x10
+			bool _disposed; // 0x11
+			unsigned int entity; // 0x14
+			unsigned int socket; // 0x18
+			bool onterrain; // 0x1C
+			Vector3 position; // 0x20
+			Vector3 normal; // 0x2C
+			Ray ray; // 0x38
+			unsigned int blockID; // 0x50
+			Vector3 rotation; // 0x54
 		};
 
 		class PlayerProjectileAttack {

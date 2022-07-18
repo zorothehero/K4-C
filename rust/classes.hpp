@@ -30,6 +30,8 @@ uintptr_t mounted = il2cpp::value(_("BasePlayer"), _("mounted"));
 
 uintptr_t building_grade = il2cpp::value(_("BuildingBlock"), _("grade"));
 
+uintptr_t numprojectiles = il2cpp::value(_("ItemModProjectile"), _("numProjectiles"));
+
 
 uintptr_t newVelocity = il2cpp::value(_("PlayerModel"), _("newVelocity"));
 uintptr_t isLocalPlayer = il2cpp::value(_("PlayerModel"), _("isLocalPlayer"));
@@ -926,29 +928,37 @@ public:
 
 	uint32_t get_size() { return *reinterpret_cast<uint32_t*>((uintptr_t)this + 0x18); }
 
-	void set_recoil(float yaw_min, float yaw_max, float pitch_min, float pitch_max) {
+	float oyx = 0.f;
+	float oyy = 0.f;
+	float opx = 0.f;
+	float opy = 0.f;
+
+	void set_recoil() {
 		auto recoil_properties = *reinterpret_cast<uintptr_t*>((uintptr_t)this + recoil);
 		
+		float recoilx = vars->combat.recoilx;
+		float recoily = vars->combat.recoily;
+
 		//after update June 5th 2022
 		auto new_recoil_properties = *reinterpret_cast<uintptr_t*>((uintptr_t)recoil_properties + 0x78);
 
 		if (new_recoil_properties)
 		{
-			*reinterpret_cast<float*>(new_recoil_properties + 0x18) = yaw_min;
-			*reinterpret_cast<float*>(new_recoil_properties + 0x1C) = yaw_max;
-			*reinterpret_cast<float*>(new_recoil_properties + 0x20) = pitch_min;
-			*reinterpret_cast<float*>(new_recoil_properties + 0x24) = pitch_max;
-			*reinterpret_cast<float*>(new_recoil_properties + 0x2C) = 9999.f; //timeToTakeMax
-			*reinterpret_cast<float*>(new_recoil_properties + 0x30) = 0.f; //ADSScale
+			*reinterpret_cast<float*>(new_recoil_properties + 0x18) = recoily; //yaw min
+			*reinterpret_cast<float*>(new_recoil_properties + 0x1C) = recoily; //yaw max
+			*reinterpret_cast<float*>(new_recoil_properties + 0x20) = -recoilx; //pitch min
+			*reinterpret_cast<float*>(new_recoil_properties + 0x24) = -recoilx; //pitch max
+			//*reinterpret_cast<float*>(new_recoil_properties + 0x2C) = lastrecoil * recoil; //timeToTakeMax
+			//*reinterpret_cast<float*>(new_recoil_properties + 0x30) = recoil; //ADSScale
 		}
 		else
 		{
-			*reinterpret_cast<float*>(recoil_properties + 0x18) = yaw_min;
-			*reinterpret_cast<float*>(recoil_properties + 0x1C) = yaw_max;
-			*reinterpret_cast<float*>(recoil_properties + 0x20) = pitch_min;
-			*reinterpret_cast<float*>(recoil_properties + 0x24) = pitch_max;
-			*reinterpret_cast<float*>(recoil_properties + 0x2C) = 9999.f; //timeToTakeMax
-			*reinterpret_cast<float*>(recoil_properties + 0x30) = 0.f; //ADSScale
+			*reinterpret_cast<float*>(recoil_properties + 0x18) = recoily; //yaw min
+			*reinterpret_cast<float*>(recoil_properties + 0x1C) = recoily; //yaw max
+			*reinterpret_cast<float*>(recoil_properties + 0x20) = -recoilx; //pitch min
+			*reinterpret_cast<float*>(recoil_properties + 0x24) = -recoilx; //pitch max
+			//*reinterpret_cast<float*>(recoil_properties + 0x2C) = lastrecoil * recoil; //timeToTakeMax
+			//*reinterpret_cast<float*>(recoil_properties + 0x30) = recoil; //ADSScale
 		}
 	}
 
@@ -1467,6 +1477,9 @@ public:
 	}
 
 	aim_target get_aimbot_target(Vector3 source, float max_distance = 500) {
+		//if (esp::best_target.player
+		//	&& !esp::best_target.player->is_teammate(esp::local_player))
+		//	return esp::best_target;
 		aim_target best_target = aim_target();
 
 		if (!cliententities) {
@@ -2031,6 +2044,11 @@ public:
 		//string::format(("%s %d"), _("B:"), (int)vars->visual.VisBcolor))
 		//auto s = string::wformat(_(L"trap [%d]: %s"), (int)get_fixedTime(), str);
 		console_msg((uintptr_t)this, str);
+	}
+
+	uintptr_t get_lookingat_entity() {
+		if (!this) return 0;
+		return *reinterpret_cast<uintptr_t*>(this + 0x508);
 	}
 };
 

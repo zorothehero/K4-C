@@ -9,7 +9,7 @@
 #include "../rust.hpp"
 
 namespace esp {
-
+	unsigned int selected_entity_id;
 	float time_last_upgrade = 0.f;
 	float rl_time = 0.f;
 	uintptr_t client_entities;
@@ -87,6 +87,8 @@ namespace esp {
 
 	uintptr_t shader;
 
+	float last_recycler = 0.f;
+
 	void iterate_players(bool draw = true) {
 		//best_target = ;
 		auto get_client_entities = [&]() {
@@ -129,6 +131,8 @@ namespace esp {
 				continue;
 
 			WORD tag = *reinterpret_cast<WORD*>(object + 0x54);
+
+			bool is_looking_at_entity = false;
 
 			auto do_melee_attack = [&](base_projectile* baseprojectile)
 			{
@@ -222,6 +226,24 @@ namespace esp {
 			if (!object_name.zpad)
 				continue;
 
+			auto ent_net = *reinterpret_cast<networkable**>(ent + 0x58);
+			auto ent_id = ent_net->get_id();
+
+			if (local_player && GetAsyncKeyState(0x37))
+			{
+				auto look = local_player->get_lookingat_entity();
+				if (look)
+				{
+					auto net2 = *reinterpret_cast<networkable**>(look + 0x58);
+					auto look_id = net2->get_id();
+					if (look_id == ent_id)
+					{
+						//is_looking_at_entity = true;
+						selected_entity_id = ent_id;
+					}
+				}
+			}
+
 
 			if (*(int*)(entity_class_name) == 'kcaH' && *(int*)(entity_class_name + 14) == 'tarC') {
 				auto flag = *reinterpret_cast<int*>(ent + 0x128);
@@ -245,6 +267,7 @@ namespace esp {
 						closest_building_block = ent;
 				}
 			}
+
 
 			if (vars->visual.misc_esp) {
 				if (*(int*)(entity_class_name) == 'porD') {
@@ -278,6 +301,20 @@ namespace esp {
 					continue;
 				}
 
+				//if (*(int*)(entity_class_name) == 'ddaL') {
+				if (vars->visual.ladder && !strcmp(entity_class_name, _("BaseLadder"))) {
+					esp_name = il2cpp::methods::new_string(_("Ladder"));
+					esp_color = Vector4(0, 219, 58, 255);
+
+					Vector2 w2s_position = {};
+					if (out_w2s(world_position, w2s_position))
+						esp::draw_item(w2s_position, esp_name, esp_color);
+
+					w2s_position.y += 10;
+					if (selected_entity_id == ent_id)
+						esp::draw_item(w2s_position, il2cpp::methods::new_string(("[selected]")), esp_color);
+				}
+
 				if (vars->visual.tc_esp && *(int*)(entity_class_name) == 'liuB' && *(int*)(entity_class_name + 8) == 'virP') {
 
 					//rpc stuf
@@ -292,6 +329,10 @@ namespace esp {
 					Vector2 w2s_position = {};
 					if (out_w2s(world_position, w2s_position))
 						esp::draw_tool_cupboard(w2s_position, il2cpp::methods::new_string(_("Tool Cupboard")), Vector4(255, 0, 0, 255), authorizedPlayers_list);
+
+					w2s_position.y -= 10;
+					if (selected_entity_id == ent_id)
+						esp::draw_item(w2s_position, il2cpp::methods::new_string(("[selected]")), esp_color);
 				}
 
 
@@ -324,11 +365,14 @@ namespace esp {
 				if (vars->visual.stash && *(int*)(object_name.zpad + 46) == '_hsa') {
 					esp_name = il2cpp::methods::new_string(_("Stash"));
 				}
-				else if (vars->misc.norecycler && *(int*)(entity_class_name) == 'yceR') {
+				else if (vars->misc.norecycler && *(int*)(entity_class_name) == 'yceR' && get_fixedTime() > last_recycler + 0.35f) {
 					esp_name = il2cpp::methods::new_string(_("Recycler"));
 					esp_color = Vector4(232, 232, 232, 255);
 					if (esp::local_player->get_bone_transform(48)->get_bone_position().distance(world_position) < 4.5f)
+					{
 						unity::ServerRPC(ent, _(L"SVSwitch"));
+						last_recycler = get_fixedTime();
+					}
 				}
 				else if (vars->visual.stone_ore && (*(int*)(object_name.zpad + 52) == 'nots' || *(int*)(object_name.zpad + 47) == 'nots')) {
 					esp_name = il2cpp::methods::new_string(_("Stone Ore"));
@@ -371,6 +415,7 @@ namespace esp {
 				else if (tag != 6)
 					continue;
 
+
 				if (tag != 6) {
 					if (*(int*)(entity_class_name) == 'satS') {
 						auto flag = *reinterpret_cast<int*>(ent + 0x128);
@@ -383,6 +428,9 @@ namespace esp {
 					{
 						esp::draw_item(w2s_position, esp_name, esp_color);
 
+						w2s_position.y += 10;
+						if (selected_entity_id == ent_id)
+							esp::draw_item(w2s_position, il2cpp::methods::new_string(("[selected]")), esp_color);
 						//if (vars->visual.distance
 						//	&& local_player)
 						//	esp::draw_item(Vector2(w2s_position.x, w2s_position.y += 10), s, esp_color);
@@ -394,8 +442,10 @@ namespace esp {
 			else if (tag != 6)
 				continue;
 
+
 			esp::matrix = unity::get_view_matrix();
 
+			//players
 			if (tag == 6 && !vars->visual.playeresp)
 				continue;
 
@@ -461,6 +511,7 @@ namespace esp {
 					target.visible = visible;
 
 					if (target < best_target
+						|| !best_target.player->is_alive()
 						|| (target.player && target.player->get_steam_id() == best_target.player->get_steam_id()))
 					{
 						best_target.pos = target.pos;
@@ -499,6 +550,8 @@ namespace esp {
 							best_target.avg_vel = Vector3(avgx, avgy, avgz);
 						}
 					}
+					if (best_target.fov > vars->combat.aimbotfov)
+						best_target = aim_target();
 				}
 
 
@@ -614,7 +667,38 @@ namespace esp {
 		}
 	}
 
+	uintptr_t find_networkable_by_id(unsigned int id_to_check) {
+		auto list = (rust::classes::list*)(cliententities);
+		auto value = list->get_value<uintptr_t>();
+		if (!value) return uintptr_t(0);
+		auto sz = list->get_size();
+		if (!sz) return uintptr_t(0);
+		auto buffer = list->get_buffer<uintptr_t>();
 
+		for (size_t i = 0; i < sz; i++)
+		{
+			auto current = *reinterpret_cast<uintptr_t*>(buffer + 0x20 + (i * 0x8));
+			if (!current)
+				continue;
+			auto base_object = *reinterpret_cast<uintptr_t*>(current + 0x10);
+			if (!base_object)
+				continue;
+			auto object = *reinterpret_cast<uintptr_t*>(base_object + 0x30);
+			if (!object)
+				continue;
+
+			WORD tag = *reinterpret_cast<WORD*>(object + 0x54);
+
+			auto ent = *reinterpret_cast<uintptr_t*>(base_object + 0x28);
+
+			auto net = *reinterpret_cast<networkable**>(ent + 0x58);
+
+			unsigned int id = net->get_id();
+
+			if (id == id_to_check)
+				return ent;
+		}
+	}
 
 	void start() {
 		//esp::draw_target_snap_line();

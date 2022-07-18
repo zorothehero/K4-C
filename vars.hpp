@@ -29,6 +29,8 @@ struct Vars
 		bool norecoil = false;
 		bool nospread = false;
 		bool fast_bullet = false;
+		float recoilx = 1.f;
+		float recoily = 1.f;
 
 		bool shoot_at_fatbullet = false;
 		
@@ -82,6 +84,7 @@ struct Vars
 		float nameGcolor = 130.f / 255.f;
 		float nameBcolor = 109.f / 255.f;
 		bool stash = false;
+		bool ladder = false;
 		bool sulfur_ore = false;
 		bool stone_ore = false;
 		bool metal_ore = false;
@@ -108,6 +111,7 @@ struct Vars
 		bool weaponesp = false;
 		bool desync_indicator = false;
 		bool flyhack_indicator = false;
+		bool tracers = false;
 
 		int shader = 0;
 	}; visual visual;

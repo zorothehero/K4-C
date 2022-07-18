@@ -69,13 +69,13 @@
     <ClCompile Include="imgui\imgui_widgets.cpp">
       <Filter>imgui</Filter>
     </ClCompile>
-    <ClCompile Include="kiero\minhook\src\buffer.c">
+    <ClCompile Include="kiero\minhook\src\buffer.cpp">
       <Filter>kiero\minhook\src</Filter>
     </ClCompile>
-    <ClCompile Include="kiero\minhook\src\hook.c">
+    <ClCompile Include="kiero\minhook\src\hook.cpp">
       <Filter>kiero\minhook\src</Filter>
     </ClCompile>
-    <ClCompile Include="kiero\minhook\src\trampoline.c">
+    <ClCompile Include="kiero\minhook\src\trampoline.cpp">
       <Filter>kiero\minhook\src</Filter>
     </ClCompile>
     <ClCompile Include="kiero\minhook\src\hde\hde32.c">

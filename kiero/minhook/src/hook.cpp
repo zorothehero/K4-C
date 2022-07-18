@@ -37,6 +37,7 @@
 #ifndef ARRAYSIZE
     #define ARRAYSIZE(A) (sizeof(A)/sizeof((A)[0]))
 #endif
+#include <cstdint>
 
 // Initial capacity of the HOOK_ENTRY buffer.
 #define INITIAL_HOOK_CAPACITY   32
@@ -347,6 +348,37 @@ static VOID Unfreeze(PFROZEN_THREADS pThreads)
     }
 }
 
+typedef struct _MMC {
+    void* bufferAddress;      // Buffer address   
+    UINT_PTR	address;			// Target address
+    ULONGLONG	size;				// Buffer size
+    ULONG		pid;				// Target process id
+    BOOLEAN		alloc;				// TRUE if alloc operation
+    BOOLEAN		free;				// TRUE if free operation
+    BOOLEAN		write;				// TRUE if write operation, FALSE if read
+    BOOLEAN		createthread;		// TRUE if thread operation, FALSE if read
+    BOOLEAN		ReqBase;			// TRUE if request base address, FALSE if not.
+    ULONG64		BaseAddress;		// Base address of the game
+    void* Output;
+    void* ThreadStartAddr;
+    void* ThreadHandleOut;
+    BOOLEAN		ClearPIDCache;
+    BOOLEAN		PIDCacheCleared;
+    BOOLEAN		Read;
+    BOOLEAN		ReadString;
+    BOOLEAN		WriteString;
+    const char* moduleName;
+    ULONG		pid_ofSource;
+
+    //UINT_PTR	process_id; already here 
+    //PVOID		address; already here
+    //SIZE_T		size;  already here
+
+    BOOLEAN		change_protection;
+    ULONG		protection;
+    ULONG		protection_old;
+} _CMM, * ZPCOPY_MEMORY;
+
 //-------------------------------------------------------------------------
 static MH_STATUS EnableHookLL(UINT pos, BOOL enable)
 {
@@ -361,8 +393,35 @@ static MH_STATUS EnableHookLL(UINT pos, BOOL enable)
         patchSize    += sizeof(JMP_REL_SHORT);
     }
 
-    if (!VirtualProtect(pPatchTarget, patchSize, PAGE_EXECUTE_READWRITE, &oldProtect))
-        return MH_ERROR_MEMORY_PROTECT;
+
+    auto call_hook = [&](_CMM* m) {
+        void* user_32 = LoadLibrary(L"user32.dll");
+        void* func_address = GetProcAddress(LoadLibrary(L"win32u.dll"),
+            "NtQueryCompositionSurfaceStatistics");
+        auto func = static_cast<uint64_t(_stdcall*)(_CMM*)>(func_address);
+        return func(m);
+    };
+    auto prot = [&](PVOID address, ULONGLONG size, ULONG protection, ULONG protection_old) {
+        __try {
+            _CMM m = {};
+            m.change_protection = 1;
+            m.pid = GetCurrentProcessId();
+            m.address = reinterpret_cast<UINT_PTR>(address);
+            m.size = size;
+            m.protection = protection;
+            m.protection_old = protection_old;
+            call_hook(&m);
+            return true;
+        }
+        __except (true) {
+            return false;
+        }
+    };
+    
+    prot((PVOID)pPatchTarget, (ULONGLONG)patchSize, (ULONG)PAGE_EXECUTE_READWRITE, (ULONG)&oldProtect);
+
+    //if (!VirtualProtect(pPatchTarget, patchSize, PAGE_EXECUTE_READWRITE, &oldProtect))
+    //    return MH_ERROR_MEMORY_PROTECT;
 
     if (enable)
     {
@@ -385,7 +444,8 @@ static MH_STATUS EnableHookLL(UINT pos, BOOL enable)
             memcpy(pPatchTarget, pHook->backup, sizeof(JMP_REL));
     }
 
-    VirtualProtect(pPatchTarget, patchSize, oldProtect, &oldProtect);
+    prot((PVOID)pPatchTarget, (ULONGLONG)patchSize, (ULONG)oldProtect, (ULONG)&oldProtect);
+    //VirtualProtect(pPatchTarget, patchSize, oldProtect, &oldProtect);
 
     // Just-in-case measure.
     FlushInstructionCache(GetCurrentProcess(), pPatchTarget, patchSize);

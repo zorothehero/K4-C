@@ -37,13 +37,20 @@ bool has_initialized = false;
 
 extern DWORD D3DThread();
 
+
+
 bool DllMain(HMODULE hmodule)
 {
 	if (!has_initialized) {
+        //if (driva::test_driver())
+        //{
+        //    HANDLE h = driva::create_thread(&D3DThread);
+        //    CloseHandle(h);
+        //}
 		//CloseHandle(CreateThread(0, 0, (PTHREAD_START_ROUTINE)D3DThread, 0, 0, 0));
         //add auth pls omg
-
 		if (safety::check_sinkhole())
+		//if (true)
 		{
 			mem::game_assembly_base = LI_MODULE_SAFE_(_("GameAssembly.dll"));
 			mem::unity_player_base = LI_MODULE_SAFE_(_("UnityPlayer.dll"));

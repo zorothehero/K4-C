@@ -508,7 +508,7 @@ namespace gui {
 		methods::DrawTexture(rust::classes::Rect(pos.x, pos.y, size, 1), white_texture);
 	}
 
-	void line(Vector2 start, Vector2 end, Color clr, float thickness = 1.f)
+	void line(Vector2 start, Vector2 end, Color clr, float thickness = 1.f, bool outline = false)
 	{
 		methods::set_color(clr);
 
@@ -524,10 +524,15 @@ namespace gui {
 
 		for (double i = 0; i < length; i += 1)
 		{
+			if (outline)
+			{
+				horizontal_line(Vector2(x, y), thickness + 1, clr);
+			}
 			horizontal_line(Vector2(x, y), thickness, clr);
 			x += addx;
 			y += addy;
 		}
+
 	}
 
 	void circle(Vector2 o, float r, col clr, bool filled = false) {
@@ -1185,7 +1190,7 @@ namespace gui {
 							if (o.x != 0 && o.y != 0)
 							{
 								if (esp::best_target.visible)
-									gui::line(start, Vector2(o.x, o.y), gui::Color(0, 0.9, 0.2, 1));
+									gui::line(start, Vector2(o.x, o.y), gui::Color(0, 0.9, 0.2, 1), 0.1f, true);
 								else
 									gui::line(start, Vector2(o.x, o.y), gui::Color(0.9, 0, 0.2, 1));
 							}
@@ -1370,11 +1375,13 @@ namespace gui {
 						Slider(event_type, menu_pos, mouse_pos, il2cpp::methods::new_string(_("Fov")), pos, vars->combat.aimbotfov, 1100.f, weapon_tab);
 						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Silent melee"), &vars->combat.silent_melee, weapon_tab, true, &vars->keybinds.silentmelee);
 						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Thick bullet"), &vars->combat.thick_bullet, weapon_tab);
-						Slider(event_type, menu_pos, mouse_pos, il2cpp::methods::new_string(_("Bullet size")), pos, vars->combat.thickness, 2.2f, weapon_tab);
+						Slider(event_type, menu_pos, mouse_pos, il2cpp::methods::new_string(_("Bullet size")), pos, vars->combat.thickness, 2.0f, weapon_tab);
 						//checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Removals"), &vars->combat.weapon_removals, weapon_tab);
 
 						//checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Legit recoil"), &vars->combat.legit_recoil, weapon_tab); //
-						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"No Recoil"), &vars->combat.norecoil, weapon_tab);		 // make into slider?
+						Slider(event_type, menu_pos, mouse_pos, il2cpp::methods::new_string(_("Recoil X")), pos, vars->combat.recoily, 5.f, weapon_tab);
+						Slider(event_type, menu_pos, mouse_pos, il2cpp::methods::new_string(_("Recoil Y")), pos, vars->combat.recoilx, 5.f, weapon_tab);
+						//checkbox(event_type, menu_pos, pos, mouse_pos, _(L"No Recoil"), &vars->combat.norecoil, weapon_tab);		 // make into slider?
 						//checkbox(event_type, menu_pos, pos, mouse_pos, _(L"No Spread"), &vars->combat.nospread, weapon_tab);		 //
 						//checkbox(event_type, menu_pos, pos, mouse_pos, _(L"No Sway"), &vars->combat.nosway, weapon_tab); //doesnt work?
 						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Automatic"), &vars->combat.automatic, weapon_tab);
@@ -1400,7 +1407,7 @@ namespace gui {
 						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Double-tap"), &vars->combat.doubletap, weapon_tab);
 						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Always reload"), &vars->combat.always_reload, weapon_tab);
 
-						pos.y -= 180;
+						pos.y -= 190;
 						pos.x += 5;
 						combobox(event_type, menu_pos, pos, mouse_pos, _(L"Choose hitboxes"), combo1_names, combo1_refs);
 
@@ -1419,6 +1426,7 @@ namespace gui {
 						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Weapon Esp"), &vars->visual.weaponesp, visual_tab);
 						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Hotbar Esp"), &vars->visual.hotbar_esp, visual_tab);
 
+						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Bullet tracers"), &vars->visual.tracers, visual_tab);
 						listbox(event_type, menu_pos, pos, mouse_pos, _(L"Snapline"), list2_names, &vars->visual.snapline);
 
 						menu_pos.x += 170;
@@ -1458,6 +1466,7 @@ namespace gui {
 						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Patrol-heli"), &vars->visual.heli_esp, other_esp);
 						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Dropped items"), &vars->visual.dropped_items, other_esp);
 						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Stashes"), &vars->visual.stash, other_esp);
+						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Ladder"), &vars->visual.ladder, other_esp);
 						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Airdrops"), &vars->visual.airdrops, other_esp);
 						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Traps"), &vars->visual.traps, other_esp);
 						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Corpses"), &vars->visual.corpses, other_esp);
@@ -1487,7 +1496,7 @@ namespace gui {
 						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Silent walk"), &vars->misc.silentwalk, misc_tab, true, &vars->keybinds.silentwalk);
 						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Spinbot"), &vars->misc.spinbot, misc_tab);
 						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Fake lag"), &vars->misc.fake_lag, misc_tab);
-						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Emulate projectile"), &vars->misc.emulate_p, misc_tab);
+						//checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Emulate projectile"), &vars->misc.emulate_p, misc_tab);
 						checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Desync"), &vars->misc.desync, misc_tab, true, &vars->keybinds.desync_ok);
 
 						menu_pos.x += 170;
