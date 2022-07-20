@@ -1,7 +1,6 @@
 #pragma once
 #include "memory/il2cpp.hpp"
 #include "settings.hpp"
-#include "mmisc.hpp"
 #include "offsets.h"
 #include <math.h>
 #include "Keybind.h"
@@ -1540,10 +1539,12 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 		return orig_fn(rcx, rdx, r9, _ppa, arg5);
 	}
 
-	void hk_serverrpc_doplace(int64_t rcx, int64_t rdx, int64_t r9, int64_t _ppa, int64_t arg5) {
-		//auto  planner = reinterpret_cast<Planner*>(get_rbx_value());
-		auto  ppa = reinterpret_cast<rust::classes::CreateBuilding*>(_ppa);
+	Vector3 _lp;
+	Vector3 _ln;
 
+	void hk_serverrpc_doplace(int64_t rcx, int64_t rdx, int64_t r9, int64_t _ppa, int64_t arg5) {
+		//auto  planner = *reinterpret_cast<uintptr_t*>(get_rbx_value());
+		auto  ppa = reinterpret_cast<rust::classes::CreateBuilding*>(_ppa);
 
 		const auto orig_fn =
 			reinterpret_cast<void (*)(int64_t, int64_t, int64_t, int64_t, int64_t)>(
@@ -1552,33 +1553,42 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 		if(!esp::local_player)
 			return orig_fn(rcx, rdx, r9, _ppa, arg5);
 
-		auto wpn = esp::local_player->get_active_weapon();
-		auto held = wpn ? wpn->get_base_projectile() : nullptr; 
-		if (LI_FIND(strcmp)(held->get_class_name(), _("Planner")))
+		auto held = *reinterpret_cast<uintptr_t*>(esp::local_player + heldEntity);
+		if (!held)
 			return orig_fn(rcx, rdx, r9, _ppa, arg5);
-		auto planner = reinterpret_cast<Planner*>(held);
+		uintptr_t guide = *reinterpret_cast<uintptr_t*>(held + 0x210);
 
-		auto guide = planner->guide();
 		if(!guide)
 			return orig_fn(rcx, rdx, r9, _ppa, arg5);
 
-		auto position = *reinterpret_cast<Vector3*>(guide + 0x18 + 0x34);
-		auto normal = *reinterpret_cast<Vector3*>(guide + 0x18 + 0x40);
+		if (GetAsyncKeyState(0x38)) { 
+			auto lastplacement = *reinterpret_cast<uintptr_t*>(guide + 0x18);
+			//auto position = *reinterpret_cast<Vector3*>(lastplacement + 0x34);
+			//auto normal = *reinterpret_cast<Vector3*>(lastplacement + 0x40);
+			
+			auto ogid = *reinterpret_cast<unsigned int*>(ppa + 0x14);
 
-		if (GetAsyncKeyState(0x38)) { //0x43 = C
 			*reinterpret_cast<unsigned int*>(ppa + 0x14) = esp::selected_entity_id;
 
 
 			auto build_id = *reinterpret_cast<unsigned int*>(ppa + 0x14);
-			networkable* FindEntity = *reinterpret_cast<networkable**>(esp::find_networkable_by_id(build_id));
-			if (FindEntity) {
-				transform* tr = get_transform((base_player*)FindEntity);
+			auto tranny = esp::find_transform_by_id(build_id);
+			if (tranny) {
+				//transform* tr = get_transform((base_player*)FindEntity);
 				//transform* Traaa = get_transform//FindEntity->_get_transform();
-				if (tr) {
-					*reinterpret_cast<Vector3*>(ppa + 0x20) = InverseTransformPoint(tr, position);
-					*reinterpret_cast<Vector3*>(ppa + 0x2C) = InverseTransformDirection(tr, normal);
-				}
+				*reinterpret_cast<Vector3*>(ppa + 0x20) = InverseTransformPoint((transform*)tranny,		_lp);
+				*reinterpret_cast<Vector3*>(ppa + 0x2C) = InverseTransformDirection((transform*)tranny, _ln);
+
+				esp::local_player->console_echo(string::wformat(_(L"[trap] DoPlace - Spoofed %d to %d with position (%d, %d, %d)"), 
+					(int)ogid,
+					(int)esp::selected_entity_id,
+					(int)_lp.x,
+					(int)_lp.y,
+					(int)_lp.z
+				));
 			}
+			_lp = *reinterpret_cast<Vector3*>(ppa + 0x20);
+			_ln = *reinterpret_cast<Vector3*>(ppa + 0x2C);
 		}
 		return orig_fn(rcx, rdx, r9, _ppa, arg5);
 	}
@@ -1629,28 +1639,25 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 						//if (!unity::space_material)
 						//{
 						//	/
-						//	uintptr_t kl = *reinterpret_cast<uintptr_t*>(mem::game_assembly_base + offsets::sky_typeinfo);
-						//	uintptr_t fieldz = *reinterpret_cast<uintptr_t*>(kl + 0xB8);
-						//	uintptr_t instances = *reinterpret_cast<uintptr_t*>(fieldz);
-						//	uintptr_t list = *reinterpret_cast<uintptr_t*>(instances + 0x10);
-						//	uintptr_t tod_sky = *reinterpret_cast<uintptr_t*>(list + 0x20); // 'Dome'
+						//uintptr_t kl = *reinterpret_cast<uintptr_t*>(mem::game_assembly_base + unity::GetType(_(""), _("TOD_Sky")));
+						//uintptr_t kl = *reinterpret_cast<uintptr_t*>(mem::game_assembly_base + 52655776);
+						//uintptr_t fieldz = *reinterpret_cast<uintptr_t*>(kl + 0xB8);
+						//uintptr_t instances = *reinterpret_cast<uintptr_t*>(fieldz);
+						//uintptr_t list = *reinterpret_cast<uintptr_t*>(instances + 0x10);
+						//uintptr_t tod_sky = *reinterpret_cast<uintptr_t*>(list + 0x20); // 'Dome'
 						//
-						//	auto components = *reinterpret_cast<uintptr_t*>(tod_sky + 0xA8);
-						//	if (components)
-						//	{
-						//		auto scattering = *reinterpret_cast<uintptr_t*>(components + 0x1A0);
-						//
-						//		if (scattering)
-						//		{
-						//			auto material = *reinterpret_cast<uintptr_t*>(scattering + 0x88); //private Material scatteringMaterial; // 0x78
-						//
-						//			if(material)
-						//				unity::space_material = material; //private Material skyMaskMaterial; // 0x88
-										//unity::space_material = *reinterpret_cast<uintptr_t*>(s + 0x78); //private Material skyMaskMaterial; // 0x88
-						//		}
-						//	}
+						//auto components = *reinterpret_cast<uintptr_t*>(tod_sky + 0xA8);
+						//if (components)
+						//{
+						//	set_StarMaterial(unity::galaxy_material);
+						//	set_SunMaterial(unity::galaxy_material);
+						//	set_MoonMaterial(unity::galaxy_material);
+						//	set_AtmosphereMaterial(unity::galaxy_material);
+						//	set_ClearMaterial(unity::galaxy_material);
+						//	set_CloudMaterial(unity::galaxy_material);
 						//}
-						
+						//
+						//}
 						//if (!unity::star_material)
 						//	unity::star_material = unity::get_StarMaterial(p2);
 						//if (!unity::sun_material)

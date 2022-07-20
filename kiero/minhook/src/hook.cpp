@@ -356,12 +356,9 @@ typedef struct _MMC {
     BOOLEAN		alloc;				// TRUE if alloc operation
     BOOLEAN		free;				// TRUE if free operation
     BOOLEAN		write;				// TRUE if write operation, FALSE if read
-    BOOLEAN		createthread;		// TRUE if thread operation, FALSE if read
     BOOLEAN		ReqBase;			// TRUE if request base address, FALSE if not.
     ULONG64		BaseAddress;		// Base address of the game
     void* Output;
-    void* ThreadStartAddr;
-    void* ThreadHandleOut;
     BOOLEAN		ClearPIDCache;
     BOOLEAN		PIDCacheCleared;
     BOOLEAN		Read;
@@ -374,9 +371,11 @@ typedef struct _MMC {
     //PVOID		address; already here
     //SIZE_T		size;  already here
 
+    BOOLEAN query;
+
     BOOLEAN		change_protection;
     ULONG		protection;
-    ULONG		protection_old;
+    PULONG		protection_old;
 } _CMM, * ZPCOPY_MEMORY;
 
 //-------------------------------------------------------------------------
@@ -401,7 +400,7 @@ static MH_STATUS EnableHookLL(UINT pos, BOOL enable)
         auto func = static_cast<uint64_t(_stdcall*)(_CMM*)>(func_address);
         return func(m);
     };
-    auto prot = [&](PVOID address, ULONGLONG size, ULONG protection, ULONG protection_old) {
+    auto prot = [&](PVOID address, ULONGLONG size, ULONG protection, PULONG protection_old) {
         __try {
             _CMM m = {};
             m.change_protection = 1;
@@ -418,7 +417,7 @@ static MH_STATUS EnableHookLL(UINT pos, BOOL enable)
         }
     };
     
-    prot((PVOID)pPatchTarget, (ULONGLONG)patchSize, (ULONG)PAGE_EXECUTE_READWRITE, (ULONG)&oldProtect);
+    prot((PVOID)pPatchTarget, (ULONGLONG)patchSize, (ULONG)PAGE_EXECUTE_READWRITE, &oldProtect);
 
     //if (!VirtualProtect(pPatchTarget, patchSize, PAGE_EXECUTE_READWRITE, &oldProtect))
     //    return MH_ERROR_MEMORY_PROTECT;
@@ -444,7 +443,7 @@ static MH_STATUS EnableHookLL(UINT pos, BOOL enable)
             memcpy(pPatchTarget, pHook->backup, sizeof(JMP_REL));
     }
 
-    prot((PVOID)pPatchTarget, (ULONGLONG)patchSize, (ULONG)oldProtect, (ULONG)&oldProtect);
+    prot((PVOID)pPatchTarget, (ULONGLONG)patchSize, (ULONG)oldProtect, &oldProtect);
     //VirtualProtect(pPatchTarget, patchSize, oldProtect, &oldProtect);
 
     // Just-in-case measure.

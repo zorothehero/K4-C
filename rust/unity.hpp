@@ -130,6 +130,7 @@ namespace unity {
 	}
 
 	uintptr_t bundle;
+	uintptr_t galaxy_bundle;
 	uintptr_t bundle_font;
 	uintptr_t chams_shader_normal;
 	uintptr_t chams_shader_seethru;
@@ -137,13 +138,7 @@ namespace unity {
 	uintptr_t chams_shader_lit;
 	uintptr_t font_ptr;
 
-	uintptr_t space_material;
-	uintptr_t star_material;
-	uintptr_t sun_material;
-	uintptr_t moon_material;
-	uintptr_t atmo_material;
-	uintptr_t clear_material;
-	uintptr_t cloud_material;
+	uintptr_t galaxy_material;
 	/*
 	bool is_visible(Vector3 source, Vector3 destination, base_player* entity, float radius = .5f) {
 		//auto layer = (int)rust::classes::Layers::ProjectileLineOfSightCheck | (int)rust::classes::Layers::Terrain;

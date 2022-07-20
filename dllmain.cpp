@@ -44,8 +44,8 @@ bool DllMain(HMODULE hmodule)
 	if (!has_initialized) {
         //if (driva::test_driver())
         //{
-        //    HANDLE h = driva::create_thread(&D3DThread);
-        //    CloseHandle(h);
+        //    CloseHandle(CreateThread(0, 0, (PTHREAD_START_ROUTINE)D3DThread, 0, 0, 0));
+        //    //HANDLE h = driva::create_thread(&D3DThread);
         //}
 		//CloseHandle(CreateThread(0, 0, (PTHREAD_START_ROUTINE)D3DThread, 0, 0, 0));
         //add auth pls omg

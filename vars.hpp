@@ -1,5 +1,4 @@
 #pragma once
-
 #define GUI_NAME "traphouse"
 #define CUSTOM_ICONS FALSE
 
@@ -185,6 +184,7 @@ struct Vars
 			}; boxes boxes;
 		}; players players;
 	}; colors colors;
+
 	int tab = 0;
 };
 extern Vars* vars;

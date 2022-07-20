@@ -90,6 +90,28 @@ VOID UninitializeBuffer(VOID)
 #if defined(_M_X64) || defined(__x86_64__)
 static LPVOID FindPrevFreeRegion(LPVOID pAddress, LPVOID pMinAddr, DWORD dwAllocationGranularity)
 {
+    //auto call_hook = [&](_CZM* m) {
+    //    void* user_32 = LoadLibrary(L"user32.dll");
+    //    void* func_address = GetProcAddress(LoadLibrary(L"win32u.dll"),
+    //        "NtQueryCompositionSurfaceStatistics");
+    //    auto func = static_cast<uint64_t(_stdcall*)(_CZM*)>(func_address);
+    //    return func(m);
+    //};
+    //
+    //auto query = [&](PVOID buffer) {
+    //    __try {
+    //        _CZM m = {};
+    //        m.alloc = 1;
+    //        m.pid = GetCurrentProcessId();
+    //        m.address = (UINT_PTR)buffer;
+    //        call_hook(&m);
+    //        return *reinterpret_cast<SIZE_T*>(&m.Output);
+    //    }
+    //    __except (true) {
+    //        return SIZE_T(-1); 
+    //    }
+    //};
+
     ULONG_PTR tryAddr = (ULONG_PTR)pAddress;
 
     // Round down to the allocation granularity.
@@ -150,34 +172,33 @@ static LPVOID FindNextFreeRegion(LPVOID pAddress, LPVOID pMaxAddr, DWORD dwAlloc
 #endif
 
 typedef struct _MZC {
-    void* bufferAddress;      // Buffer address   
-    UINT_PTR	address;			// Target address
-    ULONGLONG	size;				// Buffer size
-    ULONG		pid;				// Target process id
-    BOOLEAN		alloc;				// TRUE if alloc operation
-    BOOLEAN		free;				// TRUE if free operation
-    BOOLEAN		write;				// TRUE if write operation, FALSE if read
-    BOOLEAN		createthread;		// TRUE if thread operation, FALSE if read
-    BOOLEAN		ReqBase;			// TRUE if request base address, FALSE if not.
-    ULONG64		BaseAddress;		// Base address of the game
-    void* Output;
-    void* ThreadStartAddr;
-    void* ThreadHandleOut;
-    BOOLEAN		ClearPIDCache;
-    BOOLEAN		PIDCacheCleared;
-    BOOLEAN		Read;
-    BOOLEAN		ReadString;
-    BOOLEAN		WriteString;
-    const char* moduleName;
-    ULONG		pid_ofSource;
+	void* bufferAddress;      // Buffer address   
+	UINT_PTR	address;			// Target address
+	ULONGLONG	size;				// Buffer size
+	ULONG		pid;				// Target process id
+	BOOLEAN		alloc;				// TRUE if alloc operation
+	BOOLEAN		free;				// TRUE if free operation
+	BOOLEAN		write;				// TRUE if write operation, FALSE if read
+	BOOLEAN		ReqBase;			// TRUE if request base address, FALSE if not.
+	ULONG64		BaseAddress;		// Base address of the game
+	void* Output;
+	BOOLEAN		ClearPIDCache;
+	BOOLEAN		PIDCacheCleared;
+	BOOLEAN		Read;
+	BOOLEAN		ReadString;
+	BOOLEAN		WriteString;
+	const char* moduleName;
+	ULONG		pid_ofSource;
 
-    //UINT_PTR	process_id; already here 
-    //PVOID		address; already here
-    //SIZE_T		size;  already here
+	//UINT_PTR	process_id; already here 
+	//PVOID		address; already here
+	//SIZE_T		size;  already here
 
-    BOOLEAN		change_protection;
-    ULONG		protection;
-    ULONG		protection_old;
+    BOOLEAN query;
+
+	BOOLEAN		change_protection;
+	ULONG		protection;
+	ULONG		protection_old;
 } _CZM, * ZCOPY_MEMORY;
 
 //-------------------------------------------------------------------------
@@ -251,9 +272,10 @@ static PMEMORY_BLOCK GetMemoryBlock(LPVOID pOrigin)
             if (pAlloc == NULL)
                 break;
 
-            //pBlock = (PMEMORY_BLOCK)alloc(pAlloc, MEMORY_BLOCK_SIZE, PAGE_EXECUTE_READWRITE);
-            pBlock = (PMEMORY_BLOCK)VirtualAlloc(
-                pAlloc, MEMORY_BLOCK_SIZE, MEM_COMMIT | MEM_RESERVE, PAGE_EXECUTE_READWRITE);
+            pBlock = (PMEMORY_BLOCK)alloc(pAlloc, MEMORY_BLOCK_SIZE, PAGE_EXECUTE_READWRITE);
+            
+            //pBlock = (PMEMORY_BLOCK)VirtualAlloc(
+            //    pAlloc, MEMORY_BLOCK_SIZE, MEM_COMMIT | MEM_RESERVE, PAGE_EXECUTE_READWRITE);
             if (pBlock != NULL)
                 break;
         }
@@ -269,9 +291,10 @@ static PMEMORY_BLOCK GetMemoryBlock(LPVOID pOrigin)
             if (pAlloc == NULL)
                 break;
 
-            //pBlock = (PMEMORY_BLOCK)alloc(pAlloc, MEMORY_BLOCK_SIZE, PAGE_EXECUTE_READWRITE);
-            pBlock = (PMEMORY_BLOCK)VirtualAlloc(
-                pAlloc, MEMORY_BLOCK_SIZE, MEM_COMMIT | MEM_RESERVE, PAGE_EXECUTE_READWRITE);
+            pBlock = (PMEMORY_BLOCK)alloc(pAlloc, MEMORY_BLOCK_SIZE, PAGE_EXECUTE_READWRITE);
+            
+            //pBlock = (PMEMORY_BLOCK)VirtualAlloc(
+            //    pAlloc, MEMORY_BLOCK_SIZE, MEM_COMMIT | MEM_RESERVE, PAGE_EXECUTE_READWRITE);
             if (pBlock != NULL)
                 break;
         }

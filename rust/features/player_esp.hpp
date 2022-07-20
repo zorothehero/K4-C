@@ -1,4 +1,5 @@
 #pragma once
+#include "../../mmisc.hpp"
 #include <array>
 #include <cstdint>
 
@@ -7,8 +8,10 @@
 
 #include "../classes.hpp"
 #include "../rust.hpp"
+#include <map>
 
 namespace esp {
+	std::map<unsigned int, unsigned int> selected_entity_parent_mapping = {};
 	unsigned int selected_entity_id;
 	float time_last_upgrade = 0.f;
 	float rl_time = 0.f;
@@ -239,11 +242,32 @@ namespace esp {
 					if (look_id == ent_id)
 					{
 						//is_looking_at_entity = true;
+
+						//if (!map_contains_key(selected_entity_parent_mapping, selected_entity_id))
+						//	selected_entity_parent_mapping.insert(std::make_pair(selected_entity_id, 0));
+						//else //does contain the key
+						//	if (selected_entity_parent_mapping[selected_entity_id] == 0)
+						//		selected_entity_parent_mapping[selected_entity_id] = ent_id;
+
 						selected_entity_id = ent_id;
 					}
 				}
 			}
 
+			if (selected_entity_id == ent_id) {
+
+				Vector2 w2s_position = {};
+				if (out_w2s(world_position, w2s_position))
+				{
+					esp_color = Vector4(54, 116, 186, 255);
+					w2s_position.y += 10;
+					if (selected_entity_id == ent_id) {
+						esp::draw_item(w2s_position, il2cpp::methods::new_string(("[selected]")), esp_color);
+						w2s_position.y += 10;
+						esp::draw_item(w2s_position, il2cpp::methods::new_string(string::format(_("[%d]"), (int)ent_id)), esp_color);
+					}
+				}
+			}
 
 			if (*(int*)(entity_class_name) == 'kcaH' && *(int*)(entity_class_name + 14) == 'tarC') {
 				auto flag = *reinterpret_cast<int*>(ent + 0x128);
@@ -310,9 +334,13 @@ namespace esp {
 					if (out_w2s(world_position, w2s_position))
 						esp::draw_item(w2s_position, esp_name, esp_color);
 
-					w2s_position.y += 10;
-					if (selected_entity_id == ent_id)
-						esp::draw_item(w2s_position, il2cpp::methods::new_string(("[selected]")), esp_color);
+					//map of vector3,id
+					//display id
+					//if (map_contains_key(selected_entity_parent_mapping, ent_id))
+					//{
+					//	w2s_position.y += 10;
+					//	if (selected_entity_id == ent_id)
+					//		esp::draw_item(w2s_position, il2cpp::methods::new_string(string::format(_("[parent: %d]"), selected_entity_parent_mapping[ent_id])), esp_color);
 				}
 
 				if (vars->visual.tc_esp && *(int*)(entity_class_name) == 'liuB' && *(int*)(entity_class_name + 8) == 'virP') {
@@ -329,10 +357,6 @@ namespace esp {
 					Vector2 w2s_position = {};
 					if (out_w2s(world_position, w2s_position))
 						esp::draw_tool_cupboard(w2s_position, il2cpp::methods::new_string(_("Tool Cupboard")), Vector4(255, 0, 0, 255), authorizedPlayers_list);
-
-					w2s_position.y -= 10;
-					if (selected_entity_id == ent_id)
-						esp::draw_item(w2s_position, il2cpp::methods::new_string(("[selected]")), esp_color);
 				}
 
 
@@ -667,12 +691,12 @@ namespace esp {
 		}
 	}
 
-	uintptr_t find_networkable_by_id(unsigned int id_to_check) {
+	transform* find_transform_by_id(unsigned int id_to_check) {
 		auto list = (rust::classes::list*)(cliententities);
 		auto value = list->get_value<uintptr_t>();
-		if (!value) return uintptr_t(0);
+		if (!value) return nullptr;
 		auto sz = list->get_size();
-		if (!sz) return uintptr_t(0);
+		if (!sz) return nullptr;
 		auto buffer = list->get_buffer<uintptr_t>();
 
 		for (size_t i = 0; i < sz; i++)
@@ -693,10 +717,18 @@ namespace esp {
 
 			auto net = *reinterpret_cast<networkable**>(ent + 0x58);
 
+			auto game_object = *reinterpret_cast<uintptr_t*>(object + 0x30);
+			if (!game_object)
+				continue;
+
+			auto transform = *reinterpret_cast<uintptr_t*>(game_object + 0x8);
+			if (!transform)
+				continue;
+
 			unsigned int id = net->get_id();
 
 			if (id == id_to_check)
-				return ent;
+				return get_transform((base_player*)ent);
 		}
 	}
 
