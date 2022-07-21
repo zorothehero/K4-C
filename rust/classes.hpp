@@ -5,6 +5,14 @@
 #include <vector>
 #include "../utils/string_format.h"
 
+template<typename T>
+void pop_front(std::vector<T>& vec)
+{
+	if (vec.empty()) return;
+	vec.front() = std::move(vec.back());
+	vec.pop_back();
+}
+
 uintptr_t planner_rotationoffset = il2cpp::value(_("Planner"), _("rotationOffset"));
 uintptr_t planner_currentconstruction = il2cpp::value(_("Planner"), _("currentConstruction"));
 uintptr_t planner_guide = il2cpp::value(_("Planner"), _("guide"));
@@ -134,6 +142,12 @@ typedef struct Str
 
 class weapon;
 
+static auto GetNormal = reinterpret_cast<Vector3 (*)(uintptr_t, Vector3)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("TerrainHeightMap"), _("GetNormal"), 1, _(""), _(""))));
+
+static auto GetSpeed = reinterpret_cast<float (*)(base_player * baseplayer, float running, float ducking, float crawling)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("GetSpeed"), 3, _(""), _(""))));
+
+static auto IsSwimming = reinterpret_cast<bool (*)(base_player*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("IsSwimming"), 0, _(""), _(""))));
+
 static auto Line = reinterpret_cast<void (*)(Vector3, Vector3, col, float, bool, bool)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("DDraw"), _("Line"), 6, _(""), _("UnityEngine"))));
 
 static auto GetIndex = reinterpret_cast<int(*)(uintptr_t SkinSetCollection, float)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("SkinSetCollection"), _("GetIndex"), 1, _(""), _(""))));
@@ -158,6 +172,8 @@ static auto StringPool_Get = reinterpret_cast<unsigned int(*)(rust::classes::str
 
 static auto set_timeScale = reinterpret_cast<void(*)(float)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Time"), _("set_timeScale"), 1, _(""), _("UnityEngine"))));
 
+static auto get_frameCount = reinterpret_cast<int(*)()>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Time"), _("get_frameCount"), 0, _(""), _("UnityEngine"))));
+
 static auto get_timeScale = reinterpret_cast<float(*)()>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Time"), _("get_timeScale"), 0, _(""), _("UnityEngine"))));
 
 static auto FindBone = reinterpret_cast<transform * (*)(base_player*, rust::classes::string)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseEntity"), _("FindBone"), 1, _(""), _(""))));
@@ -171,6 +187,8 @@ static auto get_gravity = reinterpret_cast<Vector3(*)()>(*reinterpret_cast<uintp
 static auto get_isAlive = reinterpret_cast<bool (*)(base_projectile*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Projectile"), _("get_isAlive"), 0, _(""), _(""))));
 
 static auto get_position = reinterpret_cast<Vector3(*)(uintptr_t transform)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Transform"), _("get_position"), 0, _(""), _("UnityEngine"))));
+
+static auto get_rotation = reinterpret_cast<Vector4(*)(uintptr_t transform)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Transform"), _("get_rotation"), 0, _(""), _("UnityEngine"))));
 
 static auto FindShader = reinterpret_cast<uintptr_t(*)(rust::classes::string)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Shader"), _("Find"), 1, _(""), _("UnityEngine"))));
 
@@ -280,6 +298,8 @@ static auto animcurve_evaluate = reinterpret_cast<float(*)(uintptr_t, float)>(*r
 
 static auto guidtopath = reinterpret_cast<rust::classes::string(*)(rust::classes::string)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GameManifest"), _("GUIDToPath"), 0, _(""), _(""))));
 
+static auto GetBounds = reinterpret_cast<uintptr_t(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("GetBounds"), 0, _(""), _(""))));
+
 
 static auto set_SpaceMaterial = reinterpret_cast<uintptr_t(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("TOD_Components"), _("set_SpaceMaterial"), 0, _(""), _(""))));
 static auto set_StarMaterial = reinterpret_cast<uintptr_t(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("TOD_Components"), _("set_StarMaterial"), 0, _(""), _(""))));
@@ -309,6 +329,7 @@ static auto SetColor = reinterpret_cast<void(*)(uintptr_t material, rust::classe
 float current_time;
 
 void init_bp() {
+	GetNormal = reinterpret_cast<Vector3(*)(uintptr_t, Vector3)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("TerrainHeightMap"), _("GetNormal"), 1, _(""), _(""))));
 	Line = reinterpret_cast<void (*)(Vector3, Vector3, col, float, bool, bool)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("DDraw"), _("Line"), 6, _(""), _("UnityEngine"))));
 	set_onLadder = reinterpret_cast<void(*)(modelstate*, bool)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("ModelState"), _("set_onLadder"), 1, _(""), _(""))));
 	GetWorldVelocity = reinterpret_cast<Vector3(*)(base_player * base_entity)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseEntity"), _("GetWorldVelocity"), 0, _(""), _(""))));
@@ -340,6 +361,10 @@ void init_bp() {
 	FindBone = reinterpret_cast<transform * (*)(base_player*, rust::classes::string)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseEntity"), _("FindBone"), 1, _(""), _(""))));
 	get_isAlive = reinterpret_cast<bool (*)(base_projectile*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Projectile"), _("get_isAlive"), 0, _(""), _(""))));
 	get_mousePosition = reinterpret_cast<Vector3(*)()>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Input"), _("get_mousePosition"), 0, _(""), _("UnityEngine"))));
+	GetSpeed = reinterpret_cast<float (*)(base_player * baseplayer, float running, float ducking, float crawling)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("GetSpeed"), 3, _(""), _(""))));
+	get_frameCount = reinterpret_cast<int(*)()>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Time"), _("get_frameCount"), 0, _(""), _("UnityEngine"))));
+	get_rotation = reinterpret_cast<Vector4(*)(uintptr_t transform)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Transform"), _("get_rotation"), 0, _(""), _("UnityEngine"))));
+	GetBounds = reinterpret_cast<uintptr_t(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("GetBounds"), 0, _(""), _(""))));
 
 	get_components_in_children = reinterpret_cast<uintptr_t(*)(uintptr_t, uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Component"), _("GetComponentsInChildren"), 0, _(""), _("UnityEngine"))));
 	get_component = reinterpret_cast<uintptr_t(*)(uintptr_t, uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Component"), _("GetComponent"), 0, _(""), _("UnityEngine"))));
@@ -397,6 +422,8 @@ void init_bp() {
 	animcurve_evaluate = reinterpret_cast<float(*)(uintptr_t, float)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("AnimationCurve"), _("Evaluate"), 0, _(""), _("UnityEngine"))));
 
 	guidtopath = reinterpret_cast<rust::classes::string(*)(rust::classes::string)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GameManifest"), _("GUIDToPath"), 0, _(""), _(""))));
+
+	IsSwimming = reinterpret_cast<bool (*)(base_player*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("IsSwimming"), 0, _(""), _(""))));
 #pragma region il2
 
 	containerWear = il2cpp::value(_("PlayerInventory"), _("containerWear"));
@@ -1318,6 +1345,129 @@ public:
 	}
 };
 
+class Bounds {
+public:
+	Vector3 m_center;
+	Vector3 m_extents;
+	Vector3 center;
+	Vector3 extents;
+	Vector3 max;
+	Vector3 min;
+	Vector3 size;
+};
+
+struct OBB {
+public:
+	Vector4 rotation;
+	Vector3 position;
+	Vector3 extents;
+	Vector3 forward;
+	Vector3 right;
+	Vector3 up;
+	float reject;
+	OBB(Vector3 position, Vector4 rotation, Bounds bounds) {
+		this->rotation = rotation;
+		auto r = Vector3(rotation.x, rotation.y, rotation.z);
+		this->position = (position + r).multiply(bounds.center);
+		this->extents = bounds.extents;
+		auto temp = rotation * Vector4(0, 0, 1, 0);
+		this->forward = Vector3(temp.x, temp.y, temp.z);
+		temp = rotation * Vector4(1, 0, 0, 0);
+		this->right = Vector3(temp.x, temp.y, temp.z);
+		temp = rotation * Vector4(0, 1, 0, 0);
+		this->up = Vector3(temp.x, temp.y, temp.z);
+		this->reject = this->extents.Length();
+	}
+
+	Vector3 ClosestPoint(Vector3 target)
+	{
+		bool flag = false;
+		bool flag2 = false;
+		bool flag3 = false;
+		Vector3 vector = this->position;
+		Vector3 lhs = target - this->position;
+		float num = lhs.dot(this->right);
+		if (num > this->extents.x)
+		{
+			vector += this->right * this->extents.x;
+		}
+		else if (num < -this->extents.x)
+		{
+			vector -= this->right * this->extents.x;
+		}
+		else
+		{
+			flag = true;
+			vector += this->right * num;
+		}
+		float num2 = lhs.dot(this->up);
+		if (num2 > this->extents.y)
+		{
+			vector += this->up * this->extents.y;
+		}
+		else if (num2 < -this->extents.y)
+		{
+			vector -= this->up * this->extents.y;
+		}
+		else
+		{
+			flag2 = true;
+			vector += this->up * num2;
+		}
+		float num3 = lhs.dot(this->forward);
+		if (num3 > this->extents.z)
+		{
+			vector += this->forward * this->extents.z;
+		}
+		else if (num3 < -this->extents.z)
+		{
+			vector -= this->forward * this->extents.z;
+		}
+		else
+		{
+			flag3 = true;
+			vector += this->forward * num3;
+		}
+		if (flag && flag2 && flag3)
+		{
+			return target;
+		}
+		return vector;
+	}
+
+	float Distance(OBB other) {
+		OBB obb = *this;
+		OBB obb2 = other;
+		Vector3 vector = obb.position;
+		Vector3 vector2 = obb2.position;
+		vector = obb.ClosestPoint(vector2);
+		vector2 = obb2.ClosestPoint(vector);
+		vector = obb.ClosestPoint(vector2);
+		vector2 = obb2.ClosestPoint(vector);
+		return vector.distance(vector2);
+	}
+	float Distance(Vector3 position) { return position.distance(this->ClosestPoint(position)); }
+};
+
+class _Line {
+public:
+	Vector3 start;
+	Vector3 end;
+	_Line(Vector3 s, Vector3 e) {
+		start = s; end = e;
+	}
+	_Line() { }
+	Vector3 ClosestPoint(Vector3 pos)
+	{
+		Vector3 a = end - start;
+		float magnitude = a.Length();
+		if (magnitude == 0.f) return start;
+		Vector3 vector = a / magnitude;
+		Vector3 lhs = pos - start;
+		return start + vector * std::clamp(lhs.dot(vector), 0.f, magnitude);
+	}
+};
+
 class TickInterpolator {
 private:
 	struct Segment {
@@ -1366,6 +1516,66 @@ public:
 	}
 	bool HasNext() {
 		return this->index < this->points.size();
+	}
+};
+
+class TickHistory
+{
+public:
+	std::vector<Vector3> points = {};
+	int Count()
+	{
+		return points.size();
+	}
+
+	float Distance(base_player* player, Vector3 point)
+	{
+		Vector3 position = get_position((uintptr_t)get_transform(player));
+		if (Count() == 0)
+		{
+			return position.distance(point);
+		}
+		Vector4 rotation = get_rotation((uintptr_t)get_transform(player));
+		Bounds bounds = *reinterpret_cast<Bounds*>(GetBounds((uintptr_t)player));
+
+		auto trans = get_transform(player);
+		bool flag = trans ? !(!trans) : false;
+		VMatrix _mv; _mv.matrix_identity();
+		VMatrix matrix4x = flag ? _mv : get_localToWorldMatrix(trans);
+
+		VMatrix tickHistoryMatrix = matrix4x;
+		float num = FLT_MAX;
+		for (int i = 0; i < Count(); i++)
+		{
+			Vector3 point2 = tickHistoryMatrix.MultiplyPoint3x4(points[i]);
+			Vector3 point3 = (i == Count() - 1) ? position : tickHistoryMatrix.MultiplyPoint3x4(points[i + 1]);
+			_Line line(point2, point3);
+			Vector3 position2 = line.ClosestPoint(point);
+			OBB obb(position2, rotation, bounds);
+			num = min(num, obb.Distance(point));
+		}
+		return num;
+	}
+
+	void AddPoint(Vector3 point, int limit = -1)
+	{
+		while (limit > 0 && Count() >= limit)
+		{
+			pop_front(this->points);
+			//this->points.pop_back();
+			//this->points.insert(this->points.begin(), 1, point);
+		}
+		this->points.push_back(point);
+	}
+
+	void TransformEntries(VMatrix matrix)
+	{
+		for (int i = 0; i < Count(); i++)
+		{
+			Vector3 vector = this->points[i];
+			vector = matrix.MultiplyPoint3x4(vector);
+			this->points[i] = vector;
+		}
 	}
 };
 
@@ -1462,14 +1672,14 @@ public:
 		}
 
 		if (zooming) {//0x32182E0
-			auto convar = *reinterpret_cast<uintptr_t*>((uintptr_t)mem::game_assembly_base + 52647456); //"ConVar_Graphics_c*" real rust
+			auto convar = *reinterpret_cast<uintptr_t*>((uintptr_t)mem::game_assembly_base + 52698272); //"ConVar_Graphics_c*" real rust
 			//auto convar = *reinterpret_cast<uintptr_t*>((uintptr_t)mem::game_assembly_base + 52527840); //"ConVar_Graphics_c*" alkad rust
 			auto unknown = *reinterpret_cast<uintptr_t*>((uintptr_t)convar + 0xb8);
 			*reinterpret_cast<float*>(unknown + 0x18) = vars->visual.zoomfov;
 		}
 
 		if (!zooming) {
-			auto convar = *reinterpret_cast<uintptr_t*>((uintptr_t)mem::game_assembly_base + 52647456); //"ConVar_Graphics_c*" real rust
+			auto convar = *reinterpret_cast<uintptr_t*>((uintptr_t)mem::game_assembly_base + 52698272); //"ConVar_Graphics_c*" real rust
 			//auto convar = *reinterpret_cast<uintptr_t*>((uintptr_t)mem::game_assembly_base + 52527840); //"ConVar_Graphics_c*" alkad rust
 			auto unknown = *reinterpret_cast<uintptr_t*>((uintptr_t)convar + 0xb8);
 			*reinterpret_cast<float*>(unknown + 0x18) = vars->visual.playerfov;

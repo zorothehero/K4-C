@@ -1044,6 +1044,14 @@ public:
 		return x == vector.x && y == vector.y && z == vector.z && w == vector.w;
 	}
 
+	Vector4 operator*(const Vector4& v) const
+	{
+		return Vector4(this->x * v.x,
+			this->y * v.y,
+			this->z * v.z,
+			this->w * v.w);
+	}
+
 	bool operator!=(const Vector4& vector) const
 	{
 		return x != vector.x || y != vector.y || z != vector.z || w != vector.w;

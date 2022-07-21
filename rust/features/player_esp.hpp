@@ -232,6 +232,140 @@ namespace esp {
 			auto ent_net = *reinterpret_cast<networkable**>(ent + 0x58);
 			auto ent_id = ent_net->get_id();
 
+
+
+			esp::matrix = unity::get_view_matrix();
+
+			//players
+			if (tag == 6 && vars->visual.playeresp)
+			{
+
+				auto player = reinterpret_cast<base_player*>(ent);
+
+				auto hit_player = [&]() {
+					auto weapon = esp::local_player->get_active_weapon();
+					if (weapon) {
+						auto baseprojectile = weapon->get_base_projectile();
+						if (baseprojectile) {
+							auto class_name = baseprojectile->get_class_name();
+							if (*(int*)(class_name + 4) == 'eleM' || *(int*)(class_name + 4) == 'mmah') {
+								auto world_position = player->get_bone_transform(48)->get_bone_position();
+								auto local = ClosestPoint(esp::local_player, world_position);
+								auto camera = esp::local_player->get_bone_transform(48)->get_bone_position();
+
+								if (camera.get_3d_dist(world_position) >= 4.2f)
+									return;
+
+								aim_target target = esp::local_player->get_aimbot_target(camera);
+
+								attack_melee(target, baseprojectile, true);
+							}
+						}
+					}
+				};
+
+				if (!player->is_alive())
+					continue;
+
+				if (player->is_sleeping() && !vars->visual.sleeper_esp)
+					continue;
+
+				bool is_npc = false;
+
+				if (get_IsNpc(player->get_player_model())) {
+					is_npc = true;
+
+					if (!vars->visual.npc_esp)
+						continue;
+				}
+
+				if (player->is_local_player())
+				{
+					local_player = reinterpret_cast<base_player*>(ent);
+					do_chams(local_player);
+				}
+				else {
+					if (esp::local_player) {
+						auto target = aim_target();
+						if(vars->combat.bodyaim)
+							target.pos = player->get_bone_transform((int)rust::classes::Bone_List::pelvis)->get_bone_position();
+						else
+							target.pos = player->get_bone_transform(48)->get_bone_position();
+
+						auto distance = esp::local_player->get_bone_transform(48)->get_bone_position().get_3d_dist(target.pos);
+						target.distance = distance;
+
+						auto fov = unity::get_fov(target.pos);
+						target.fov = fov;
+
+						target.player = player;
+
+						target.network_id = ent_id;
+
+						auto visible = player->is_visible(esp::local_player->get_bone_transform(48)->get_bone_position(), target.pos);
+						target.visible = visible;
+
+						if (target < best_target
+							|| !best_target.player->is_alive()
+							|| (target.player && target.player->get_steam_id() == best_target.player->get_steam_id()))
+						{
+							best_target.pos = target.pos;
+							best_target.distance = target.distance;
+							best_target.fov = target.fov;
+							best_target.player = target.player;
+							best_target.visible = visible;
+
+							auto vel = GetWorldVelocity(target.player);
+
+							float next_frame = best_target.last_frame + get_deltaTime();
+							if (get_fixedTime() > next_frame)
+							{
+								//new frame, record velocity, record frame
+								best_target.last_frame = get_fixedTime();
+								if (best_target.velocity_list.size() < 30) //0.03125 * 30 = 0.9 seconds
+									best_target.velocity_list.push_back(vel);
+								else
+								{
+									best_target.velocity_list.pop_back();
+									best_target.velocity_list.insert(best_target.velocity_list.begin(), 1, vel);
+								}
+								float avgx = 0.f;
+								float avgy = 0.f;
+								float avgz = 0.f;
+								int count = 0;
+								for (auto v : best_target.velocity_list)
+								{
+									if (v.is_empty()) break;
+									avgx += v.x;
+									avgy += v.y;
+									avgz += v.z;
+									count += 1;
+								}
+								avgx /= count; avgy /= count; avgz /= count;
+								best_target.avg_vel = Vector3(avgx, avgy, avgz);
+							}
+						}
+						if (best_target.fov > vars->combat.aimbotfov)
+							best_target = aim_target();
+					}
+
+
+					if (draw) {
+
+						draw_player(player, is_npc);
+
+						if (vars->visual.offscreen_indicator
+							&& !is_npc)
+						{
+							offscreen_indicator(player->get_player_eyes()->get_position());
+						}
+
+						if (vars->combat.silent_melee || unity::GetKey(rust::classes::KeyCode(vars->keybinds.silentmelee)))
+							hit_player();
+					}
+				}
+			}
+
 			if (local_player && GetAsyncKeyState(0x37))
 			{
 				auto look = local_player->get_lookingat_entity();
@@ -367,7 +501,7 @@ namespace esp {
 					out_w2s(base_heli->get_bone_transform(22)->get_bone_position(), rearrotor);
 					out_w2s(base_heli->get_bone_transform(19)->get_bone_position(), mainrotor);
 					out_w2s(base_heli->get_bone_transform(56)->get_bone_position(), beam);
-					esp_name = il2cpp::methods::new_string(("Heli"));
+					esp_name = il2cpp::methods::new_string(("Patrol-heli"));
 					esp_color = Vector4(232, 232, 232, 255);
 
 					uintptr_t transform = mem::read<uintptr_t>(base_heli->get_model() + 0x48); //boneTransforms; // 0x48
@@ -382,6 +516,38 @@ namespace esp {
 					Vector2 w2s_position = {};
 					if (out_w2s(world_position, w2s_position))
 						esp::draw_item(w2s_position, esp_name, esp_color);
+
+					if (base_heli->is_alive())
+					{
+						auto target = aim_target();
+						target.pos = base_heli->get_bone_transform(19)->get_bone_position();
+
+						auto distance = esp::local_player->get_bone_transform(48)->get_bone_position().get_3d_dist(target.pos);
+						target.distance = distance;
+
+						auto fov = unity::get_fov(target.pos);
+						target.fov = fov;
+
+						target.network_id = ent_id;
+
+						if (fov < vars->combat.aimbotfov)
+						{
+							target.player = base_heli;
+
+							auto visible = local_player->is_visible(esp::local_player->get_bone_transform(48)->get_bone_position(), target.pos);
+							target.visible = visible;
+
+							if (target < best_target)
+							{
+								best_target = target;
+								best_target.is_heli = true;
+							}
+							else if (best_target.is_heli)
+								best_target.pos = target.pos;
+							else best_target.is_heli = false;
+						}
+					}
+					else best_target.is_heli = false;
 
 					draw_heli(x, y, w, h);
 				}
@@ -465,134 +631,6 @@ namespace esp {
 			}
 			else if (tag != 6)
 				continue;
-
-
-			esp::matrix = unity::get_view_matrix();
-
-			//players
-			if (tag == 6 && !vars->visual.playeresp)
-				continue;
-
-
-			auto player = reinterpret_cast<base_player*>(ent);
-
-			auto hit_player = [&]() {
-				auto weapon = esp::local_player->get_active_weapon();
-				if (weapon) {
-					auto baseprojectile = weapon->get_base_projectile();
-					if (baseprojectile) {
-						auto class_name = baseprojectile->get_class_name();
-						if (*(int*)(class_name + 4) == 'eleM' || *(int*)(class_name + 4) == 'mmah') {
-							auto world_position = player->get_bone_transform(48)->get_bone_position();
-							auto local = ClosestPoint(esp::local_player, world_position);
-							auto camera = esp::local_player->get_bone_transform(48)->get_bone_position();
-
-							if (camera.get_3d_dist(world_position) >= 4.2f)
-								return;
-
-							aim_target target = esp::local_player->get_aimbot_target(camera);
-
-							attack_melee(target, baseprojectile, true);
-						}
-					}
-				}
-			};
-
-			if (!player->is_alive())
-				continue;
-
-			if (player->is_sleeping() && !vars->visual.sleeper_esp)
-				continue;
-
-			bool is_npc = false;
-
-			if (get_IsNpc(player->get_player_model())) {
-				is_npc = true;
-
-				if (!vars->visual.npc_esp)
-					continue;
-			}
-
-			if (player->is_local_player())
-			{
-				local_player = reinterpret_cast<base_player*>(ent);
-				do_chams(local_player);
-			}
-			else {
-				if (esp::local_player) {
-					auto target = aim_target();
-					target.pos = player->get_bone_transform(48)->get_bone_position();
-
-					auto distance = esp::local_player->get_bone_transform(48)->get_bone_position().get_3d_dist(target.pos);
-					target.distance = distance;
-
-					auto fov = unity::get_fov(target.pos);
-					target.fov = fov;
-
-					target.player = player;
-
-					auto visible = player->is_visible(esp::local_player->get_bone_transform(48)->get_bone_position(), target.pos);
-					target.visible = visible;
-
-					if (target < best_target
-						|| !best_target.player->is_alive()
-						|| (target.player && target.player->get_steam_id() == best_target.player->get_steam_id()))
-					{
-						best_target.pos = target.pos;
-						best_target.distance= target.distance;
-						best_target.fov = target.fov;
-						best_target.player = target.player;
-						best_target.visible = visible;
-
-						auto vel = GetWorldVelocity(target.player);
-
-						float next_frame = best_target.last_frame + get_deltaTime();
-						if (get_fixedTime() > next_frame)
-						{
-							//new frame, record velocity, record frame
-							best_target.last_frame = get_fixedTime();
-							if (best_target.velocity_list.size() < 30) //0.03125 * 30 = 0.9 seconds
-								best_target.velocity_list.push_back(vel);
-							else
-							{
-								best_target.velocity_list.pop_back();
-								best_target.velocity_list.insert(best_target.velocity_list.begin(), 1, vel);
-							}
-							float avgx = 0.f;
-							float avgy = 0.f;
-							float avgz = 0.f;
-							int count = 0;
-							for (auto v : best_target.velocity_list)
-							{
-								if (v.is_empty()) break;
-								avgx += v.x;
-								avgy += v.y;
-								avgz += v.z;
-								count += 1;
-							}
-							avgx /= count; avgy /= count; avgz /= count;
-							best_target.avg_vel = Vector3(avgx, avgy, avgz);
-						}
-					}
-					if (best_target.fov > vars->combat.aimbotfov)
-						best_target = aim_target();
-				}
-
-
-				if (draw) {
-
-					draw_player(player, is_npc);
-
-					if (vars->visual.offscreen_indicator
-						&& !is_npc)
-					{
-						offscreen_indicator(player->get_player_eyes()->get_position());
-					}
-
-					if (vars->combat.silent_melee || unity::GetKey(rust::classes::KeyCode(vars->keybinds.silentmelee)))
-						hit_player();
-				}
-			}
 		}
 
 

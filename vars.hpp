@@ -1,4 +1,6 @@
 #pragma once
+#include "utils/xorstr.hpp"
+#include <string>
 #define GUI_NAME "traphouse"
 #define CUSTOM_ICONS FALSE
 
@@ -9,6 +11,7 @@ struct Vars
 	struct combat {
 		bool aimbot = false;
 		bool psilent = false;
+		bool bodyaim = false;
 		float aimbotfov = 500.f;
 		float aimbot_smooth = 0.5f;
 		bool hitbox_override = false;
@@ -109,6 +112,7 @@ struct Vars
 		bool distance = false;
 		bool weaponesp = false;
 		bool desync_indicator = false;
+		bool speedhack_indicator = false;
 		bool flyhack_indicator = false;
 		bool tracers = false;
 
@@ -186,5 +190,7 @@ struct Vars
 	}; colors colors;
 
 	int tab = 0;
+
+	std::wstring config_name = L"default";
 };
 extern Vars* vars;

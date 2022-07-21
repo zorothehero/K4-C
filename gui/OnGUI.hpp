@@ -116,6 +116,10 @@ namespace gui {
 
 		static auto Color = reinterpret_cast<void(*)(col)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GL"), _("Color"), 0, _(""), _("UnityEngine"))));
 		
+		static auto PushMatrix = reinterpret_cast<void(*)()>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GL"), _("PushMatrix"), 0, _(""), _("UnityEngine"))));
+
+		static auto PopMatrix = reinterpret_cast<void(*)()>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GL"), _("PopMatrix"), 0, _(""), _("UnityEngine"))));
+		
 		static auto dont_destroy_on_load = reinterpret_cast<void(*)(uintptr_t target)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Object"), _("DontDestroyOnLoad"), 0, _(""), _("UnityEngine"))));
 		
 		static auto create = reinterpret_cast<void(*)(uintptr_t self, rust::classes::string shader)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GameObject"), _("Internal_CreateGameObject"), 0, _(""), _("UnityEngine"))));
@@ -508,10 +512,24 @@ namespace gui {
 		methods::DrawTexture(rust::classes::Rect(pos.x, pos.y, size, 1), white_texture);
 	}
 
+
 	void line(Vector2 start, Vector2 end, Color clr, float thickness = 1.f, bool outline = false)
 	{
-		methods::set_color(clr);
+		col c = col(clr.r, clr.g, clr.b, clr.a);
+		gui::methods::PushMatrix();
+		gui::methods::Begin(1);
+		gui::methods::Color(c);
 
+		gui::methods::Color({ 0,0,0,255 });
+		gui::methods::Vertex(Vector3(start.x - thickness, start.y, 0));
+		gui::methods::Vertex(Vector3(end.x + thickness, end.y, 0));
+		gui::methods::Color(c);
+		gui::methods::Vertex(Vector3(start.x, start.y, 0));
+		gui::methods::Vertex(Vector3(end.x, end.y, 0));
+
+		gui::methods::End();
+		gui::methods::PopMatrix();
+		return;
 		double x = end.x - start.x;
 		double y = end.y - start.y;
 		double length = Vector3::my_sqrt(x * x + y * y);
@@ -526,8 +544,10 @@ namespace gui {
 		{
 			if (outline)
 			{
+				methods::set_color({ 0,0,0,255 });
 				horizontal_line(Vector2(x, y), thickness + 2, clr);
 			}
+			methods::set_color(clr);
 			horizontal_line(Vector2(x, y), thickness, clr);
 			x += addx;
 			y += addy;
@@ -568,7 +588,7 @@ namespace gui {
 		label = mem::read<uintptr_t>(skin + 0x38);
 
 		unity::bundle = unity::LoadFromFile(_(L"rust.assets"));
-		unity::galaxy_bundle = unity::LoadFromFile(_(L"galaxy.chams"));
+		//unity::galaxy_bundle = unity::LoadFromFile(_(L"galaxy.chams"));
 		unity::bundle_font = unity::LoadFromFile(_(L"font.assets"));
 
 		const auto set_font = [&](rust::classes::string font_name, int size) {
@@ -681,10 +701,34 @@ namespace gui {
 	bool combo_clicked = false;
 	bool true_placehold = true;
 	bool false_placehold = false;
-	wchar_t* current_text;
+	std::wstring* pinputtext;
+	bool _ti = false;
 	bool inputting_text = false;
 
-	void textbox(rust::classes::EventType event, Vector2 pos, Vector2& current_pos, Vector2 mouse, wchar_t* name, const wchar_t* str) {
+	bool button(rust::classes::EventType event, Vector2 pos, Vector2& current_pos, Vector2 mouse, wchar_t* name) {
+		pos.x += 5;
+		current_pos.y += 5;
+		rust::classes::Rect poz = rust::classes::Rect(pos.x + tab_size.x + 2.0f, pos.y + current_pos.y, 40, 14);
+		fill_box(poz, rgba(14.f, 18.f, 24.f, 255.f));
+		if (poz.Contains(mouse))
+		{
+			rust::classes::Rect poz = rust::classes::Rect(pos.x + tab_size.x + 2.0f, pos.y + current_pos.y, 40, 14);
+			fill_box(poz, rgba(39, 47, 59, 255.f));
+		}
+		if (event == rust::classes::EventType::MouseDown) {
+			if (poz.Contains(mouse)) {
+				rust::classes::Rect poz = rust::classes::Rect(pos.x + tab_size.x + 2.0f, pos.y + current_pos.y, 40, 14);
+				fill_box(poz, rgba(249.f, 130.f, 109.f, 255.f));
+				return true;
+			}
+		}
+
+		gui::Label({ poz.x , poz.y, poz.wid, poz.hei }, rust::classes::string(name), rgba(159.f, 163.f, 169.f, (opacity / 255.f)), true, 10);
+		current_pos.y += 15;
+		return false;
+	}
+
+	void textbox(rust::classes::EventType event, Vector2 pos, Vector2& current_pos, Vector2 mouse, wchar_t* name, std::wstring* str) {
 
 		pos.x += 5;
 
@@ -692,29 +736,28 @@ namespace gui {
 		fill_box(poz, rgba(14.f, 18.f, 24.f, 255.f));
 		if (poz.Contains(mouse))
 		{
-			rust::classes::Rect t = rust::classes::Rect(pos.x + tab_size.x + 2.0f, pos.y + current_pos.y + 18, 200, 2);
-			fill_box(poz, rgba(159.f, 163.f, 169.f, 255.f));
+			rust::classes::Rect t = rust::classes::Rect(pos.x + tab_size.x + 2.0f, pos.y + current_pos.y + 18, 150, 2);
+			fill_box(t, rgba(159.f, 163.f, 169.f, 255.f));
 		}
-		if (event == rust::classes::EventType::MouseDown)
+		if (event == rust::classes::EventType::MouseDown) {
+			if (poz.Contains(mouse))
+				inputting_text = !inputting_text;
+			else inputting_text = false;
+		}
+
+		
+		gui::Label({ poz.x + 4, poz.y, poz.wid, poz.hei }, rust::classes::string(name), rgba(159.f, 163.f, 169.f, (opacity / 255.f)), false, 10);
+
+		if(inputting_text)
 		{
-
-
-			if (poz.Contains(mouse)
-				&& LI_FIND(wcscmp)(current_text, str)) //if clicked and current_text is not desired
-				LI_FIND(wcscpy)(current_text, str); //set current text to desired
-			else if (poz.Contains(mouse) && !LI_FIND(wcscmp)(current_text, str)) //user has clicked the control again
-				LI_FIND(wcscpy)(current_text, _(L"")); //set current text empty
+			rust::classes::Rect t = rust::classes::Rect(pos.x + tab_size.x + 2.0f, pos.y + current_pos.y + 18, 150, 2);
+			fill_box(t, rgba(249.f, 130.f, 109.f, 255.f));
+			pinputtext = str;
+			gui::Label({ poz.x + 44, poz.y, poz.wid, poz.hei }, rust::classes::string(str->c_str()), rgba(249.f, 130.f, 109.f, (opacity / 255.f)), false, 10);
 		}
-
-		if (!LI_FIND(wcscmp)(current_text, str)) //
-		{
-			//current text has been clicked
-			poz = rust::classes::Rect(pos.x + tab_size.x + 2.0f, pos.y + current_pos.y + 18, 200, 2);
-			fill_box(poz, rgba(249.f, 130.f, 109.f, 255.f));
-		}
-
+		else
+			gui::Label({ poz.x + 44, poz.y, poz.wid, poz.hei }, rust::classes::string(str->c_str()), rgba(159.f, 163.f, 169.f, (opacity / 255.f)), false, 10);
 		//draw label of current_text
-		gui::Label({ poz.x + 2, poz.y, poz.wid, poz.hei }, rust::classes::string(str), rgba(249.f, 130.f, 109.f, (opacity / 255.f)), true, 10);
 		current_pos.y += 20;
 	}
 
@@ -854,18 +897,26 @@ namespace gui {
 			{
 				if (str_list[i][0] == '\x00') continue;
 				poz = rust::classes::Rect(pos.x + tab_size.x + 2.0f, pos.y + current_pos.y + (i * 20), 150, 20);
+
 				fill_box(poz, rgba(14.f, 18.f, 24.f, 255.f));
 
 				auto name = str_list[i];
 
 				gui::Label({ poz.x + 1, poz.y, poz.wid, poz.hei }, rust::classes::string(name), rgba(159.f, 163.f, 169.f, (opacity / 255.f)), true, 10);
 
+				if (*selected > 8)
+					*selected = 0;
 				bool s = LI_FIND(wcscmp)(str_list[*selected], str_list[i]) == 0;
 				if (s)
 					gui::Label({ poz.x + 1, poz.y, poz.wid, poz.hei }, rust::classes::string(name), rgba(249.f, 130.f, 109.f, (opacity / 255.f)), true, 10);
 
 				if (poz.Contains(mouse))
+				{
+					poz = rust::classes::Rect(pos.x + tab_size.x + 2.0f + 2, pos.y + current_pos.y + (i * 20) + 2, 146, 16);
+					fill_box(poz, rgba(22, 27, 36, 255.f));
+					poz = rust::classes::Rect(pos.x + tab_size.x + 2.0f, pos.y + current_pos.y + (i * 20), 150, 20);
 					gui::Label({ poz.x + 1, poz.y, poz.wid, poz.hei }, rust::classes::string(name), rgba(181, 140, 132, (opacity / 255.f)), true, 10);
+				}
 			}
 		}
 
@@ -946,10 +997,27 @@ namespace gui {
 			getting_keybind = false;
 			//keybind_map[keybind_str] = key;
 		}
+		if (inputting_text)
+		{
+			auto og = *pinputtext;
 
-		if (current_text) {
-			auto c = get_keystr((int)(key));
-			LI_FIND(wcscat)(current_text, c);
+			auto keystr = get_keystr((int)key);
+			if (((int)key >= 97 && (int)key <= 122) || (int)key == 8)
+			{
+				std::wstring new_text = og;
+
+				if (!wcscmp(keystr, _(L"backspace"))
+					|| (int)key == 8) //backspace
+					new_text = new_text.substr(0, new_text.size() - 1);
+				else if (pinputtext->size() < 16)
+				{
+					if (!wcscmp(keystr, _(L"space"))) //spacebar
+						new_text.append(_(L" "));
+					else if (wcscmp(keystr, _(L"none"))) //none
+						new_text.append(keystr);
+				}
+				*pinputtext = new_text;
+			}
 		}
 	}
 
@@ -1159,6 +1227,10 @@ namespace gui {
 					{
 						Progbar({ 900, (650 + (bars++ * 10)) }, { 120, 4 }, settings::desyncTime, 1.0f);
 					}
+					if (vars->visual.speedhack_indicator)
+					{
+						Progbar({ 900, (650 + (bars++ * 10)) }, { 120, 4 }, settings::speedhack, 10.0f);
+					}
 					//put extra gui things here
 					auto held = esp::local_player->get_active_weapon();
 					if (vars->combat.always_reload)
@@ -1316,7 +1388,7 @@ namespace gui {
 						_(L"seethrough"),
 						_(L"wireframe"),
 						_(L"lit"),
-						_(L"galaxy"),
+						_(L"\x00"),
 						_(L"\x00"),
 						_(L"\x00"),
 						_(L"\x00"),
@@ -1329,7 +1401,7 @@ namespace gui {
 						_(L"none"),
 						_(L"seethrough"),
 						_(L"chams (rgb)"),
-						_(L"galaxy"),
+						_(L"\x00"),
 						_(L"\x00"),
 						_(L"\x00"),
 						_(L"\x00"),
@@ -1380,6 +1452,8 @@ namespace gui {
 					checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Aimbot"), &vars->combat.aimbot, weapon_tab, true, &vars->keybinds.aimbot);
 					Slider(event_type, menu_pos, mouse_pos, il2cpp::methods::new_string(_("Smoothing")), pos, vars->combat.aimbot_smooth, 1.f, weapon_tab);
 
+					checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Body-aim"), &vars->combat.bodyaim, weapon_tab);
+
 
 					//textbox(event_type, menu_pos, pos, mouse_pos, _(L"Config"), vars->misc.current_config);
 
@@ -1407,6 +1481,7 @@ namespace gui {
 				case 1:
 					checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Desync indicator"), &vars->visual.desync_indicator, visual_tab);
 					checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Flyhack indicator"), &vars->visual.flyhack_indicator, visual_tab);
+					checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Speedhack indicator"), &vars->visual.speedhack_indicator, visual_tab);
 					checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Players"), &vars->visual.playeresp, visual_tab);
 					checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Full Box"), &vars->visual.full_box, visual_tab);
 					checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Corner Box"), &vars->visual.corner_box, visual_tab);
@@ -1490,6 +1565,8 @@ namespace gui {
 					checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Fake lag"), &vars->misc.fake_lag, misc_tab);
 					//checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Emulate projectile"), &vars->misc.emulate_p, misc_tab);
 					checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Desync"), &vars->misc.desync, misc_tab, true, &vars->keybinds.desync_ok);
+					checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Instant med"), &vars->misc.instant_med, misc_tab);
+					checkbox(event_type, menu_pos, pos, mouse_pos, _(L"No recycler"), &vars->misc.norecycler, misc_tab);
 
 					menu_pos.x += 170;
 					pos.y = 0; //?
@@ -1500,13 +1577,9 @@ namespace gui {
 					checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Fly up wall"), &vars->misc.flywall, misc_tab, true, &vars->keybinds.flywall);
 					checkbox(event_type, menu_pos, pos, mouse_pos, _(L"No collisions"), &vars->misc.no_playercollision, misc_tab);
 					checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Interactive debug"), &vars->misc.interactive_debug, misc_tab);
-					checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Instant med"), &vars->misc.instant_med, misc_tab);
-					checkbox(event_type, menu_pos, pos, mouse_pos, _(L"No recycler"), &vars->misc.norecycler, misc_tab);
 					checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Suicide"), &vars->misc.TakeFallDamage, misc_tab, true, &vars->keybinds.suicide);
 					checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Longneck"), &vars->misc.eyeoffset, misc_tab, true, &vars->keybinds.neck);
 					checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Auto upgrade"), &vars->misc.auto_upgrade, misc_tab);
-
-
 					Slider(event_type, menu_pos, mouse_pos, il2cpp::methods::new_string(_("Size")), pos, vars->misc.playereyes, 1.5f, misc_tab);
 					//checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Player FOV"), &vars->misc.playerfovtoggle, misc_tab);
 					Slider(event_type, menu_pos, mouse_pos, il2cpp::methods::new_string(_("Player fov")), pos, vars->visual.playerfov, 150, misc_tab);
@@ -1515,26 +1588,39 @@ namespace gui {
 					//checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Brightnight"), &vars->misc.brightnight, misc_tab);
 					Slider(event_type, menu_pos, mouse_pos, il2cpp::methods::new_string(_("Stars")), pos, vars->visual.staramount, 1000, misc_tab);
 
-
+					menu_pos.y += 5;
+					textbox(event_type, menu_pos, pos, mouse_pos, _(L"config:"), &vars->config_name);
+					menu_pos.x += 20;
+					if (button(event_type, menu_pos, pos, mouse_pos, _(L"load"))) {
+						load_config();
+					}
+					pos.y -= 20;
+					menu_pos.x += 70;
+					if (button(event_type, menu_pos, pos, mouse_pos, _(L"save"))) {
+						save_config();
+					}
+					menu_pos.x -= 90;
+					pos.y += 10;
 					break;
 				case 4:
-					//buttonvis(event_type, menu_pos, pos, mouse_pos, _(L"Visible color"), &vars->misc.trollface, color_tab, Color(vars->visual.VisRcolor, vars->visual.VisGcolor, vars->visual.VisBcolor, 1)); {
+					bool f = 0;
+					buttonvis(event_type, menu_pos, pos, mouse_pos, _(L"Visible color"), &f, color_tab, Color(vars->visual.VisRcolor, vars->visual.VisGcolor, vars->visual.VisBcolor, 1));
 					Slider(event_type, menu_pos, mouse_pos, il2cpp::methods::new_string(string::format(("%s %d"), _("R:"), (int)vars->visual.VisRcolor)), pos, vars->visual.VisRcolor, 1.f, color_tab);
 					Slider(event_type, menu_pos, mouse_pos, il2cpp::methods::new_string(string::format(("%s %d"), _("G:"), (int)vars->visual.VisGcolor)), pos, vars->visual.VisGcolor, 1.f, color_tab);
 					Slider(event_type, menu_pos, mouse_pos, il2cpp::methods::new_string(string::format(("%s %d"), _("B:"), (int)vars->visual.VisBcolor)), pos, vars->visual.VisBcolor, 1.f, color_tab);
 					//}
 
-					//buttoninv(event_type, menu_pos, pos, mouse_pos, _(L"Invisible color"), &vars->misc.trollface, color_tab, Color(vars->visual.InvRcolor, vars->visual.InvGcolor, vars->visual.InvBcolor, 1)); {
+					buttoninv(event_type, menu_pos, pos, mouse_pos, _(L"Invisible color"), &f, color_tab, Color(vars->visual.InvRcolor, vars->visual.InvGcolor, vars->visual.InvBcolor, 1));
 					Slider(event_type, menu_pos, mouse_pos, il2cpp::methods::new_string(string::format(("%s %d"), _("R:"), (int)vars->visual.InvRcolor)), pos, vars->visual.InvRcolor, 1.f, color_tab);
 					Slider(event_type, menu_pos, mouse_pos, il2cpp::methods::new_string(string::format(("%s %d"), _("G:"), (int)vars->visual.InvGcolor)), pos, vars->visual.InvGcolor, 1.f, color_tab);
 					Slider(event_type, menu_pos, mouse_pos, il2cpp::methods::new_string(string::format(("%s %d"), _("B:"), (int)vars->visual.InvBcolor)), pos, vars->visual.InvBcolor, 1.f, color_tab);
 					//}
-					//buttonteam(event_type, menu_pos, pos, mouse_pos, _(L"Teammate color"), &vars->misc.trollface, color_tab, Color(vars->visual.TeamRcolor, vars->visual.TeamGcolor, vars->visual.TeamBcolor, 1)); {
+					buttonteam(event_type, menu_pos, pos, mouse_pos, _(L"Teammate color"), &f, color_tab, Color(vars->visual.TeamRcolor, vars->visual.TeamGcolor, vars->visual.TeamBcolor, 1));
 					Slider(event_type, menu_pos, mouse_pos, il2cpp::methods::new_string(string::format(("%s %d"), _("R:"), (int)vars->visual.TeamRcolor)), pos, vars->visual.TeamRcolor, 1.f, color_tab);
 					Slider(event_type, menu_pos, mouse_pos, il2cpp::methods::new_string(string::format(("%s %d"), _("G:"), (int)vars->visual.TeamGcolor)), pos, vars->visual.TeamGcolor, 1.f, color_tab);
 					Slider(event_type, menu_pos, mouse_pos, il2cpp::methods::new_string(string::format(("%s %d"), _("B:"), (int)vars->visual.TeamBcolor)), pos, vars->visual.TeamBcolor, 1.f, color_tab);
 					//}
-					///buttonteam(event_type, menu_pos, pos, mouse_pos, _(L"Name color"), &vars->misc.trollface, color_tab, Color(vars->visual.nameRcolor, vars->visual.nameGcolor, vars->visual.nameBcolor, 1)); {
+					buttonteam(event_type, menu_pos, pos, mouse_pos, _(L"Name color"), &f, color_tab, Color(vars->visual.nameRcolor, vars->visual.nameGcolor, vars->visual.nameBcolor, 1));
 					Slider(event_type, menu_pos, mouse_pos, il2cpp::methods::new_string(string::format(("%s %d"), _("R:"), (int)vars->visual.nameRcolor)), pos, vars->visual.nameRcolor, 1.f, color_tab);
 					Slider(event_type, menu_pos, mouse_pos, il2cpp::methods::new_string(string::format(("%s %d"), _("G:"), (int)vars->visual.nameGcolor)), pos, vars->visual.nameGcolor, 1.f, color_tab);
 					Slider(event_type, menu_pos, mouse_pos, il2cpp::methods::new_string(string::format(("%s %d"), _("B:"), (int)vars->visual.nameBcolor)), pos, vars->visual.nameBcolor, 1.f, color_tab);
@@ -1844,14 +1930,14 @@ namespace esp
 				break;
 			}
 
-			if (vars->visual.shader == 6
-				|| vars->visual.hand_chams == 4)
-			{
-				if(!unity::galaxy_material)
-					unity::galaxy_material = unity::LoadAsset(unity::galaxy_bundle, _(L"GalaxyMaterial_05"), unity::GetType(_("UnityEngine"), _("Material")));
-			}
+			//if (vars->visual.shader == 6
+			//	|| vars->visual.hand_chams == 4)
+			//{
+			//	if(!unity::galaxy_material)
+			//		unity::galaxy_material = unity::LoadAsset(unity::galaxy_bundle, _(L"GalaxyMaterial_10"), unity::GetType(_("UnityEngine"), _("Material")));
+			//}
 
-			if ((!shader && !unity::galaxy_material) && vars->visual.hand_chams < 1) return;
+			if ((!shader /* && !unity::galaxy_material*/) && vars->visual.hand_chams < 1) return;
 
 			if (vars->visual.hand_chams > 1
 				&& player->is_local_player()) {
@@ -1885,24 +1971,24 @@ namespace esp
 							SetColor(material, _(L"_Color"), col(r, g, b, 0.5));
 							break;
 						}
-						case 4:
-						{
-							if (unity::galaxy_material && material != unity::galaxy_material)
-							{
-								//unity::set_shader(material, unity::space_material);
-								//auto s = FindShader(rust::classes::string(_(L"Standard")));
-								//unity::set_shader(unity::galaxy_material, s);
-								set_material(renderer, unity::galaxy_material);
-								SetInt(unity::galaxy_material, _(L"_ZTest"), 8);
-							}
-							break;
-						}
+						//case 4:
+						//{
+						//	if (unity::galaxy_material && material != unity::galaxy_material)
+						//	{
+						//		//unity::set_shader(material, unity::space_material);
+						//		//auto s = FindShader(rust::classes::string(_(L"Standard")));
+						//		//unity::set_shader(unity::galaxy_material, s);
+						//		set_material(renderer, unity::galaxy_material);
+						//		SetInt(unity::galaxy_material, _(L"_ZTest"), 8);
+						//	}
+						//	break;
+						//}
 						}
 					}
 				}
 			}
 
-			if (vars->visual.shader > 1 && (shader || unity::galaxy_material) && player) {
+			if (vars->visual.shader > 1 && (shader /*|| unity::galaxy_material*/) && player) {
 
 				static int cases = 0;
 				switch (cases) {
@@ -1924,15 +2010,15 @@ namespace esp
 					if (!renderer) continue;
 					auto material = get_material(renderer);
 					if (!material) continue;
-					if (vars->visual.shader == 6 && unity::galaxy_material)
-					{
-						if (material != unity::galaxy_material)
-						{
-							set_material(renderer, unity::galaxy_material);
-							SetInt(unity::galaxy_material, _(L"_ZTest"), 8);
-						}
-					}
-					else if (shader)
+					//if (vars->visual.shader == 6 && unity::galaxy_material)
+					//{
+					//	if (material != unity::galaxy_material)
+					//	{
+					//		set_material(renderer, unity::galaxy_material);
+					//		SetInt(unity::galaxy_material, _(L"_ZTest"), 8);
+					//	}
+					//} else 
+					if (shader)
 					{
 						if (shader != unity::get_shader(material)) {
 							unity::set_shader(renderer, shader);

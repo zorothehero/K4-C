@@ -8,6 +8,7 @@
 #include "spherearray.h"
 
 #include <Windows.h>
+#include "settings.hpp"
 //#include <vector>
 
 struct projectileshoot_projectile {
@@ -29,11 +30,83 @@ struct projectileshoot {
 	rust::list<projectileshoot_projectile*>* projectiles; //0x18
 };
 
+struct TimeAverageValueData
+{
+public:
+	int Calculate()
+	{
+		float realtimeSinceStartup = unity::get_realtimesincestartup();
+		float num = realtimeSinceStartup - refreshTime;
+		if (num >= 1.0)
+		{
+			counterPrev = (int)(counterNext / num + 0.5);
+			counterNext = 0;
+			refreshTime = realtimeSinceStartup;
+			num = 0;
+		}
+		return (int)(counterPrev * (1.0 - num)) + counterNext;
+	}
+
+	void Increment()
+	{
+		this->Calculate();
+		counterNext += 1;
+	}
+
+	void Reset()
+	{
+		counterPrev = 0;
+		counterNext = 0;
+	}
+
+	float refreshTime;
+
+	int counterPrev;
+
+	int counterNext;
+};
+
 namespace misc
 {
+	enum antihacktype {
+		None,
+		NoClip,
+		SpeedHack,
+		FlyHack,
+		ProjectileHack,
+		MeleeHack,
+		EyeHack,
+		AttackHack,
+		ReloadHack,
+		CooldownHack,
+		InsideTerrain
+	};
+
 	bool emulated = false;
 	projectileshoot emulated_shot;
 
+	namespace protections {
+		int flyhack_protection = 3;
+		int speedhack_protection = 2;
+		int eye_protection = 4;
+		int projectile_protection = 6;
+
+		float speedhack_slopespeed = 10.0f;
+		float speedhack_forgiveness_inertia = 10.0f;
+		float speedhack_forgiveness = 2.0f;
+		float speedhack_penalty = 0.0f;
+		bool speedhack_reject = true;
+
+		float flyhack_penalty = 100.0f;
+		bool flyhack_reject = true;
+
+		float eyehack_penalty = 100.0f;
+
+		int debuglevel = 4;
+	}
+
+	float speedhackDistance = 0.f;
+	float speedhackPauseTime = 0.f;
 	float flyhackDistanceVertical = 0.f;
 	float flyhackDistanceHorizontal = 0.f;
 	float flyhackPauseTime = 0.f;
@@ -50,6 +123,15 @@ namespace misc
 	Vector3 cLastTickEyePos{};
 	Vector3 best_lean{};
 	Vector3 best_target{};
+
+	antihacktype lastViolationType = antihacktype::None;
+	float lastViolationTime = 0.f;
+	float violationLevel = 0.f;
+
+	TimeAverageValueData ticksPerSecond = {};
+	TickHistory tickHistory;
+
+	std::vector<Vector3> eye_history = {};
 
 	struct fired_projectile {
 		Projectile* original;
@@ -80,6 +162,35 @@ namespace misc
 		return u.f;
 	}
 
+
+	void AddViolation(base_player* ply, antihacktype type, float amount) {
+		//if (Interface.CallHook("OnPlayerViolation", ply, type, amount) != null)
+		//
+		// this code would call the hooks from plugins etc
+
+		lastViolationType = type;
+		lastViolationTime = unity::get_realtimesincestartup();
+		violationLevel += amount;
+		if ((protections::debuglevel >= 2 && amount > 0.f) 
+			|| (protections::debuglevel >= 3 && type != antihacktype::NoClip) 
+			|| protections::debuglevel >= 4)
+		{
+ 			ply->console_echo(string::wformat(
+				_(L"[trap] Anti-AntiHack - Added violation of %d in frame %d (now has %d)"), 
+				(int)amount, 
+				(int)get_frameCount(), 
+				(int)violationLevel));
+			settings::speedhack = speedhackDistance;
+		}
+	}
+
+	void FadeViolations(base_player* ply, float deltaTime) {
+		if (unity::get_realtimesincestartup() - lastViolationTime > 10.0f)
+		{
+			violationLevel = max(0.0f, violationLevel - 0.1f * deltaTime);
+		}
+	}
+
 	bool TestNoClipping(base_player* ply = esp::local_player,
 		Vector3 oldPos = Vector3(0, 0, 0),
 		Vector3 newPos = Vector3(0, 0, 0),
@@ -95,9 +206,9 @@ namespace misc
 		if (!flag)
 		{
 			typedef bool (*AAA)(Ray, float, float, int);
-			//real rust 0x226ECA0
+			//real rust 0x2273840
 			//alkad rust 0x2258180
-			flag = ((AAA)(mem::game_assembly_base + 0x226ECA0))(z, radius, magnitude, 429990145);
+			flag = ((AAA)(mem::game_assembly_base + 0x2273840))(z, radius, magnitude, 429990145);
 		}
 		return flag;
 	}
@@ -145,8 +256,6 @@ namespace misc
 		return flag;
 	}
 
-
-	//OnProjectileAttack stuff
 	bool OnProjectileAttack(Projectile* p,
 		base_player* ply,
 		rust::classes::PlayerProjectileAttack* ppa) 
@@ -158,7 +267,6 @@ namespace misc
 
 		return true;
 	}
-
 
 	bool can_manipulate(base_player* ply, 
 		Vector3 pos, 
@@ -307,7 +415,87 @@ namespace misc
 		return false;
 	}
 
-	bool ValidateMove(float deltaTime) {
+	bool IsSpeeding(base_player* ply,
+		TickInterpolator ticks,
+		float deltaTime) {
+		bool result;
+		//using (TimeWarning.New("AntiHack.IsSpeeding", 0))
+		speedhackPauseTime = max(0.f, speedhackPauseTime - deltaTime);
+		if (protections::speedhack_protection <= 0)
+		{
+			return false;
+		}
+		else
+		{
+			auto trans = get_transform(esp::local_player);
+			bool flag = trans ? !(!trans) : false;
+			VMatrix _mv; _mv.matrix_identity();
+
+
+			VMatrix matrix4x = flag ? _mv : get_localToWorldMatrix(trans);
+
+			Vector3 vector = flag ? ticks.startPoint : 
+				matrix4x.MultiplyPoint3x4(ticks.startPoint);
+
+			Vector3 a = flag ? ticks.endPoint : 
+				matrix4x.MultiplyPoint3x4(ticks.endPoint);
+
+			float running = 1.0f;
+			float ducking = 0.f;
+			float crawling = 0.f;
+			if (protections::speedhack_protection >= 2)
+			{
+				bool flag2 = ply->get_model_state()->has_flag(rust::classes::ModelState_Flag::Sprinting);
+				bool flag3 = ply->get_model_state()->has_flag(rust::classes::ModelState_Flag::Ducked);
+				bool flag4 = IsSwimming(ply);
+				bool flag5 = ply->get_model_state()->has_flag(rust::classes::ModelState_Flag::Crawling);
+				running = (flag2 ? 1.0f : 0.f);
+				ducking = ((flag3 || flag4) ? 1.0f : 0.f);
+				crawling = (flag5 ? 1.0f : 0.f);
+			}
+			float speed = GetSpeed(ply, running, ducking, crawling);
+			Vector3 v = a - vector;
+			float num = v.length_2d();
+			float num2 = deltaTime * speed;
+			if (num > num2)
+			{
+				auto getheightmap = [&]() {
+					//real rust 52698608
+					uintptr_t kl = *reinterpret_cast<uintptr_t*>(mem::game_assembly_base + 52698608);
+					uintptr_t fieldz = *reinterpret_cast<uintptr_t*>(kl + 0xB8);
+					uintptr_t heightmap = *reinterpret_cast<uintptr_t*>(fieldz + 0xB0);
+					return heightmap;
+				};
+
+				uintptr_t heightmap = getheightmap();
+				Vector3 v2 = GetNormal(heightmap, vector);
+				Vector3 lhs = Vector3(v2.x, v2.y, v2.z);
+				float num3 = max(0.f, lhs.dot(lhs)) * protections::speedhack_slopespeed * deltaTime;
+				num = max(0.f, num - num3);
+			}
+			float num4 = max((speedhackPauseTime > 0.f) ? protections::speedhack_forgiveness_inertia : protections::speedhack_forgiveness, 0.1f);
+			float num5 = num4 + max(protections::speedhack_forgiveness, 0.1f);
+			speedhackDistance = std::clamp(speedhackDistance, -num5, num5);
+			speedhackDistance = std::clamp(speedhackDistance - num2, -num5, num5);
+			if (speedhackDistance > num4) {
+				result = true;
+			}
+			else
+			{
+				speedhackDistance = std::clamp(speedhackDistance + num, -num5, num5);
+				if (speedhackDistance > num4)
+				{
+					result = true;
+				}
+				else
+					result = false;
+			}
+		}
+		settings::speedhack = speedhackDistance;
+		return result;
+	}
+
+	bool IsFlying(float deltaTime) {
 		auto lp = esp::local_player;
 		bool result;
 		bool flag = deltaTime > 1.f;
@@ -333,30 +521,85 @@ namespace misc
 				vector = (flag ? ticks.currentPoint
 					: matrix4x.MultiplyPoint3x4(ticks.currentPoint));
 
-				TestFlying2(lp, oldPos, vector, true);
+				if (TestFlying2(lp, oldPos, vector, true))
+					return true;
 				oldPos = vector;
 			}
 		}
 		return true;
 	}
 
+	bool ValidateMove(base_player* ply, TickInterpolator ticks, float deltaTime)
+	{
+		bool flag = deltaTime > 1.0f;
+		//IsNoClipping
+		
+		if (IsFlying(deltaTime))
+		{
+			if (flag)
+				return false;
+			auto penalty = protections::flyhack_penalty * ticks.len;
+			if (penalty > 1)
+			{
+				AddViolation(ply, antihacktype::FlyHack, penalty);
+				if (protections::flyhack_reject)
+					return false;
+			}
+		}
+		if (IsSpeeding(ply, ticks, deltaTime))
+		{
+			if (flag)
+				return false;
+			auto penalty = protections::speedhack_penalty * ticks.len;
+			if (penalty > 10)
+			{
+				AddViolation(ply, antihacktype::SpeedHack, penalty);
+				if (protections::speedhack_reject)
+					return false;
+			}
+		}
+		return true;
+	}
+
+	void ValidateEyeHistory(base_player* ply) {
+		for (size_t i = 0; i < eye_history.size(); i++)
+		{
+			Vector3 point = eye_history[i];
+			if (tickHistory.Distance(ply, point) > 0.1f)
+			{
+				AddViolation(ply, antihacktype::EyeHack, protections::eyehack_penalty);
+			}
+		}
+		eye_history.clear();
+	}
+
 	void FinalizeTick(float deltatime) {
 		if (esp::local_player->is_sleeping())
 			return;
+		auto lp = esp::local_player;
 		tickDeltaTime += deltatime;
 		bool flag = ticks.startPoint != ticks.endPoint;
 		if (flag) {
-			if (ValidateMove(tickDeltaTime)
-				&& (vars->visual.flyhack_indicator || vars->misc.flyhack_stop)) {
-				//good
+			if (ValidateMove(lp, ticks, deltatime)) 
+			{
+				ticksPerSecond.Increment();
+				int tickHistoryCapacity = max(1, (int)(ticksPerSecond.Calculate() * 0.5f)); //tickhistorytime = 0.5f;
+				tickHistory.AddPoint(ticks.endPoint, tickHistoryCapacity);
+				FadeViolations(lp, tickDeltaTime);
 			}
 			else {
+				flag = false;
+				//if (ConVar.AntiHack.forceposition)
+				//{
+				//	base.ClientRPCPlayer<UnityEngine.Vector3, uint>(null, this, "ForcePositionToParentOffset", base.transform.localPosition, this.parentEntity.uid);
+				//}
 				//bad
 			}
 			settings::vert_flyhack = flyhackDistanceVertical;
 			settings::hor_flyhack = flyhackDistanceHorizontal;
 		}
 		ticks.Reset(get_transform(esp::local_player)->get_bone_position());
+		//ValidateEyeHistory(lp);
 		//ticks.Reset(esp::local_player->get_player_eyes()->get_position());
 	}
 
@@ -753,7 +996,11 @@ namespace misc
 				if(wv.is_empty() || wv.is_nan())
 					wv = GetWorldVelocity(target.player);
 
-				Vector3 player_velocity = Vector3(wv.x, 0, wv.z) * 0.9f;
+				if(target.is_heli)
+					wv = GetWorldVelocity(target.player);
+
+				Vector3 player_velocity = Vector3(wv.x, 0, wv.z) * (target.is_heli ? 0.75f : 0.9f);
+
 				Vector3 final_vel = player_velocity * travel_t;
 				Vector3 actual = target_pos += final_vel;
 
@@ -765,7 +1012,7 @@ namespace misc
 				auto gravity = get_gravity();
 				auto deltatime = get_deltaTime();
 				auto timescale = get_timeScale();
-				auto offset = 0.1f;
+				auto offset = -.5f;
 				simulations = 0;
 
 
@@ -881,11 +1128,7 @@ namespace hooks {
 
 	static auto set_flying = reinterpret_cast<void (*)(modelstate * model_state, bool value)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("ModelState"), _("set_flying"), 1, _(""), _(""))));
 
-	static auto GetSpeed = reinterpret_cast<float (*)(base_player * baseplayer, float running, float ducking)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("GetSpeed"), 2, _(""), _(""))));
-
 	static auto get_ducked = reinterpret_cast<bool (*)(modelstate*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("ModelState"), _("get_ducked"), 0, _(""), _(""))));
-
-	static auto IsSwimming = reinterpret_cast<bool (*)(base_player*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("IsSwimming"), 0, _(""), _(""))));
 
 	static auto OnLand = reinterpret_cast<void (*)(base_player*, float fVelocity)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("OnLand"), 1, _("fVelocity"), _(""), 1)));
 
@@ -945,11 +1188,7 @@ namespace hooks {
 
 		set_flying = reinterpret_cast<void (*)(modelstate * model_state, bool value)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("ModelState"), _("set_flying"), 1, _(""), _(""))));
 
-		GetSpeed = reinterpret_cast<float (*)(base_player * baseplayer, float running, float ducking)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("GetSpeed"), 2, _(""), _(""))));
-
 		get_ducked = reinterpret_cast<bool (*)(modelstate*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("ModelState"), _("get_ducked"), 0, _(""), _(""))));
-
-		IsSwimming = reinterpret_cast<bool (*)(base_player*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("IsSwimming"), 0, _(""), _(""))));
 
 		PerformanceUI_Update = reinterpret_cast<void (*)(void*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("PerformanceUI"), _("Update"), -1, _(""), _("Facepunch"))));
 
@@ -1057,7 +1296,7 @@ namespace hooks {
 			Vector3 target_velocity, target_pos;
 			if (target.player)
 			{
-				target_pos = target.player->get_bone_transform(48)->get_bone_position();
+				target_pos = target.pos;
 			}
 
 			//new_pos = new_pos.multiply(target_velocity);
@@ -1352,7 +1591,7 @@ namespace hooks {
 
 			aim_target target = esp::best_target;//esp::local_player->get_aimbot_target(camera_pos);
 
-			if (!target.player || !target.network_id)
+			if (!target.player)
 				break;
 
 			auto hit_entity = (base_player*)hit_test->get_hit_entity();
@@ -1361,10 +1600,6 @@ namespace hooks {
 					hit_test->set_ignore_entity(hit_entity);
 					return;
 				}
-			}
-			else {
-				hit_test->set_ignore_entity(hit_entity);
-				return;
 			}
 
 			if (!vars->combat.hitbox_override)
@@ -1422,7 +1657,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 				if (vars->combat.hitboxes.Penis
 					&& esp::local_player->is_visible(target.player->get_bone_transform(
 						(int)rust::classes::Bone_List::penis)->get_bone_position(), projectile->get_current_position()))
-					test[4] = { 3771021956, 1750816991 };
+					test[4] = { 612182976, 2173623152 };
 				if (vars->combat.hitboxes.Legs
 					&& esp::local_player->is_visible(target.player->get_bone_transform(
 						(int)rust::classes::Bone_List::l_hip)->get_bone_position(), projectile->get_current_position()))
@@ -1531,6 +1766,12 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 					attack->hitPositionLocal = { .9f, -.4f, .1f };
 					attack->hitNormalLocal = { .9f, -.4f, .1f };
 				}
+			}
+
+
+			if (layer != rust::classes::layer::Player_Server) {
+				hit_test->set_ignore_entity(hit_entity);
+				return;
 			}
 		} while (0);
 
@@ -1725,7 +1966,8 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 			misc::cLastTickEyePos = esp::local_player->get_player_eyes()->get_position();//get_transform(esp::local_player)->get_bone_position();//baseplayer->get_player_eyes()->get_position();
 			misc::cLastTickPos = get_transform(esp::local_player)->get_bone_position();//get_transform(esp::local_player)->get_bone_position();//baseplayer->get_player_eyes()->get_position();
 			misc::ticks.AddPoint(misc::cLastTickPos);
-			misc::ServerUpdate(misc::tickDeltaTime, esp::local_player);
+			//misc::ServerUpdate(misc::tickDeltaTime, esp::local_player);
+			misc::ServerUpdate(get_deltaTime(), esp::local_player);
 		}
 		else if (!loco || loco->is_sleeping())
 		{
@@ -2227,7 +2469,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 			float time = get_fixedTime();
 			if (esp::best_target.player && held && wpn)
 			{
-				Vector3 target = esp::best_target.player->get_bone_transform(48)->get_bone_position();
+				Vector3 target = esp::best_target.pos;//.player->get_bone_transform(48)->get_bone_position();
 				//Sphere(target, 0.05, col(0.8, 0.9, 0.3, 1), 0.05f, 10.f);
 
 				auto getammo = [&](base_projectile* held)
@@ -2406,6 +2648,8 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 
 								//transform* bonetrans = target.player->find_closest_bone(current_position, true
 								transform* bonetrans = target.player->get_bone_transform(48);
+								if(vars->combat.bodyaim)
+									bonetrans = target.player->get_bone_transform((int)rust::classes::Bone_List::pelvis);
 
 
 								Vector3 target_bone = get_position((uintptr_t)bonetrans); //target_bone.y -= 0.8f;
@@ -2573,10 +2817,10 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 							return Vector2(RAD2DEG(Vector3::my_asin(d.y / d.length())), RAD2DEG(-Vector3::my_atan2(d.x, -d.z)));
 						};
 						auto normalize = [&](float& yaw, float& pitch) {
-							if (pitch < -89) pitch = -89;
-							else if (pitch > 89) pitch = 89;
-							if (yaw < -999) yaw += 999;
-							else if (yaw > 999) yaw -= 999;
+							if (pitch < -270) pitch = -270;
+							else if (pitch > 180) pitch = 180;
+							if (yaw < -360) yaw = -360;
+							else if (yaw > 360) yaw = 360;
 							esp::local_player->console_echo(string::wformat(_(L"[trap]: ClientInput - yaw: %d, pitch: %d"), (int)yaw, (int)pitch));
 						};
 						auto step = [&](Vector2& angles) {
@@ -2619,10 +2863,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 						};
 
 						Vector2 offset = calc(eyes, target.pos) - vb;
-						//Vector2 offset = Vector2(aim_dir.x, aim_dir.y) - vb;
-						//smooth the shit
-						//normalize(offset.x, offset.y);
-						Vector2 ai = vb + offset;//;Vector2(aim_dir.x, aim_dir.y) + offset;
+						Vector2 ai = vb + offset;
 						step(ai);
 						step(ai);
 						normalize(ai.x, ai.y);
