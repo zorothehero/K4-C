@@ -530,29 +530,6 @@ namespace gui {
 		gui::methods::End();
 		gui::methods::PopMatrix();
 		return;
-		double x = end.x - start.x;
-		double y = end.y - start.y;
-		double length = Vector3::my_sqrt(x * x + y * y);
-
-		double addx = x / length;
-		double addy = y / length;
-
-		x = start.x;
-		y = start.y;
-
-		for (double i = 0; i < length; i += 1)
-		{
-			if (outline)
-			{
-				methods::set_color({ 0,0,0,255 });
-				horizontal_line(Vector2(x, y), thickness + 2, clr);
-			}
-			methods::set_color(clr);
-			horizontal_line(Vector2(x, y), thickness, clr);
-			x += addx;
-			y += addy;
-		}
-
 	}
 
 	void circle(Vector2 o, float r, col clr, bool filled = false) {

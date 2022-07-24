@@ -197,5 +197,6 @@
     <ClInclude Include="kiero\minhook\src\hde\table64.h">
       <Filter>kiero\minhook\src\hde</Filter>
     </ClInclude>
+    <ClInclude Include="misc.hpp" />
   </ItemGroup>
 </Project>

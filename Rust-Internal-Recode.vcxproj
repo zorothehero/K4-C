@@ -234,6 +234,7 @@
     <ClInclude Include="memory\il2cpp.hpp" />
     <ClInclude Include="memory\lazy_importer.hpp" />
     <ClInclude Include="memory\memory.hpp" />
+    <ClInclude Include="misc.hpp" />
     <ClInclude Include="offsets.h" />
     <ClInclude Include="projectile.hpp" />
     <ClInclude Include="rust\classes.hpp" />
