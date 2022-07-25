@@ -71,6 +71,21 @@ public:
 	int counterNext;
 };
 
+struct fired_projectile {
+	Projectile* original;
+	Projectile* fake;
+	float fired_at;
+	int updates;
+	aim_target player;
+};
+
+struct NodeTarget {
+	Vector3 pos;
+	int steps;
+	std::vector<Vector3> path;
+	uintptr_t ent;
+};
+
 namespace misc
 {
 	enum antihacktype {
@@ -86,9 +101,6 @@ namespace misc
 		CooldownHack,
 		InsideTerrain
 	};
-
-	bool emulated = false;
-	projectileshoot emulated_shot;
 
 	namespace protections {
 		int flyhack_protection = 3;
@@ -106,9 +118,18 @@ namespace misc
 		bool flyhack_reject = true;
 
 		float eyehack_penalty = 100.0f;
+		float eye_penalty = 0.0f;
 
 		int debuglevel = 4;
 	}
+
+	TickInterpolator ticks;
+	TimeAverageValueData ticksPerSecond = {};
+	TickHistory tickHistory;
+	antihacktype lastViolationType = antihacktype::None;
+	std::vector<Vector3> eye_history = {};
+	projectileshoot emulated_shot;
+	NodeTarget node;
 
 	float speedhackDistance = 0.f;
 	float speedhackPauseTime = 0.f;
@@ -118,41 +139,19 @@ namespace misc
 	float desyncTimeRaw = 0.f;
 	float desyncTimeClamped = 0.f;
 	float tickDeltaTime = 0.f;
-	TickInterpolator ticks;
-	bool isInAir = false;
+	float lastViolationTime = 0.f;
+	float violationLevel = 0.f;
 
+	bool isInAir = false;
 	bool manual = false;
 	bool autoshot = false;
 	bool manipulate_vis = false;
+	bool emulated = false;
+
 	Vector3 cLastTickPos{};
 	Vector3 cLastTickEyePos{};
 	Vector3 best_lean{};
 	Vector3 best_target{};
-
-	antihacktype lastViolationType = antihacktype::None;
-	float lastViolationTime = 0.f;
-	float violationLevel = 0.f;
-
-	TimeAverageValueData ticksPerSecond = {};
-	TickHistory tickHistory;
-
-	std::vector<Vector3> eye_history = {};
-
-	struct fired_projectile {
-		Projectile* original;
-		Projectile* fake;
-		float fired_at;
-		int updates;
-		aim_target player;
-	};
-
-	struct NodeTarget {
-		Vector3 pos;
-		int steps;
-		std::vector<Vector3> path;
-		uintptr_t ent;
-	};
-	NodeTarget node;
 
 	std::array<fired_projectile, 32> fired_projectiles;
 	// ADD PROJECTILES TO THIS LIST WHEN FIRED FROM RPC, MAYBE STRUCT THAT CONTAINS SHOOT TIME AND AMOUNT OF UPDATES ALREADY?
@@ -166,7 +165,6 @@ namespace misc
 		u.i &= -1ULL / 2;
 		return u.f;
 	}
-
 
 	void AddViolation(base_player* ply, antihacktype type, float amount) {
 		//if (Interface.CallHook("OnPlayerViolation", ply, type, amount) != null)
@@ -265,6 +263,17 @@ namespace misc
 		else if (position2.distance(loco->get_player_eyes()->get_position()) > 0.01f
 			&& TestNoClipping(loco, actual_eye_pos, eyepos)) {
 			flag = true;
+		}
+
+		if (flag)
+		{
+			AddViolation(loco, 
+				antihacktype::EyeHack, 
+				protections::eye_penalty);
+		}
+		else if(protections::eye_protection >= 5 && 
+			loco->get_model_state()->has_flag(rust::classes::ModelState_Flag::Mounted)) {
+			eye_history.push_back(pos);
 		}
 
 		return flag;
