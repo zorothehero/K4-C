@@ -934,12 +934,14 @@ namespace gui {
 		}
 
 		float o1 = (opacity / 255.f);
-		outline_box(Vector2(pos.x + tab_size.x + 3 + 2.0f, pos.y + 7 + current_pos.y - 4), Vector2(10, 10), rgba(14.f, 18.f, 24.f, o1));
+		//outline_box(Vector2(pos.x + tab_size.x + 3 + 2.0f, pos.y + 7 + current_pos.y - 4), Vector2(10, 10), rgba(14.f, 18.f, 24.f, o1));
+		//outline_box(Vector2(pos.x + 2 + tab_size.x + 3 + 2.0f, pos.y + 10 + current_pos.y - 5), Vector2(7, 7), rgba(249.f, 130.f, 109.f, o1));
+		fill_box(rust::classes::Rect{ pos.x + 3 + tab_size.x + 3 + 2.0f, pos.y + 10 + current_pos.y - 4, 5, 5 }, rgba(14.f, 18.f, 24.f, (opacity / 255.f)));
 
 		if (event == rust::classes::EventType::Repaint) {
 			gui::Label(rust::classes::Rect{ pos.x + 15 + tab_size.x + 3 + 2.0f + 1, pos.y + current_pos.y - 4 + 1, 200, button_size + 3 }, button_name, rgba(0, 0, 0, (opacity / 255.f)), false, 14);
 			if (*checked_ref) {
-				fill_box(rust::classes::Rect{ pos.x + tab_size.x + 3 + 2.0f, pos.y + 7 + current_pos.y - 4, 10, 10 }, rgba(14.f, 18.f, 24.f, (opacity / 255.f)));
+				//fill_box(rust::classes::Rect{ pos.x + tab_size.x + 3 + 2.0f, pos.y + 7 + current_pos.y - 4, 10, 10 }, rgba(14.f, 18.f, 24.f, (opacity / 255.f)));
 				fill_box(rust::classes::Rect{ pos.x + 3 + tab_size.x + 3 + 2.0f, pos.y + 10 + current_pos.y - 4, 5, 5 }, rgba(249.f, 130.f, 109.f, (opacity / 255.f)));
 				gui::Label(rust::classes::Rect{ pos.x + 15 + tab_size.x + 3 + 2.0f, pos.y + current_pos.y - 4, 200, button_size + 3 }, button_name, rgba(249.f, 130.f, 109.f, (opacity / 255.f)), false, 14);
 			}
@@ -1423,7 +1425,7 @@ namespace gui {
 					Slider(event_type, menu_pos, mouse_pos, il2cpp::methods::new_string(_("Recoil X")), pos, vars->combat.recoily, 5.f, weapon_tab);
 					Slider(event_type, menu_pos, mouse_pos, il2cpp::methods::new_string(_("Recoil Y")), pos, vars->combat.recoilx, 5.f, weapon_tab);
 					//checkbox(event_type, menu_pos, pos, mouse_pos, _(L"No Recoil"), &vars->combat.norecoil, weapon_tab);		 // make into slider?
-					//checkbox(event_type, menu_pos, pos, mouse_pos, _(L"No Spread"), &vars->combat.nospread, weapon_tab);		 //
+					checkbox(event_type, menu_pos, pos, mouse_pos, _(L"No Spread"), &vars->combat.nospread, weapon_tab);		 //
 					//checkbox(event_type, menu_pos, pos, mouse_pos, _(L"No Sway"), &vars->combat.nosway, weapon_tab); //doesnt work?
 					checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Automatic"), &vars->combat.automatic, weapon_tab);
 					checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Aimbot"), &vars->combat.aimbot, weapon_tab, true, &vars->keybinds.aimbot);
@@ -1523,6 +1525,7 @@ namespace gui {
 					pos.y = 0; //?
 
 					listbox(event_type, menu_pos, pos, mouse_pos, _(L"Gesture"), list1_names, &vars->misc.gesture_spam);
+					checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Skin changer"), &vars->misc.skinchanger, other_esp);
 
 					break;
 				case 3:

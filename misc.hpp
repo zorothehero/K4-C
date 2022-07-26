@@ -141,12 +141,16 @@ namespace misc
 	float tickDeltaTime = 0.f;
 	float lastViolationTime = 0.f;
 	float violationLevel = 0.f;
+	float time_since_last_shot = 0.0f;
+	float fixed_time_last_shot = 0.0f;
 
 	bool isInAir = false;
 	bool manual = false;
 	bool autoshot = false;
 	bool manipulate_vis = false;
 	bool emulated = false;
+	bool just_shot = false;
+	bool did_reload = false;
 
 	Vector3 cLastTickPos{};
 	Vector3 cLastTickEyePos{};
@@ -166,7 +170,9 @@ namespace misc
 		return u.f;
 	}
 
-	void AddViolation(base_player* ply, antihacktype type, float amount) {
+	void AddViolation(base_player* ply, 
+		antihacktype type, 
+		float amount) {
 		//if (Interface.CallHook("OnPlayerViolation", ply, type, amount) != null)
 		//
 		// this code would call the hooks from plugins etc
@@ -196,7 +202,8 @@ namespace misc
 		}
 	}
 
-	void FadeViolations(base_player* ply, float deltaTime) {
+	void FadeViolations(base_player* ply, 
+		float deltaTime) {
 		if (unity::get_realtimesincestartup() - lastViolationTime > 10.0f)
 		{
 			violationLevel = max(0.0f, violationLevel - 0.1f * deltaTime);
@@ -548,10 +555,12 @@ namespace misc
 				oldPos = vector;
 			}
 		}
-		return true;
+		return false;
 	}
 
-	bool ValidateMove(base_player* ply, TickInterpolator ticks, float deltaTime)
+	bool ValidateMove(base_player* ply, 
+		TickInterpolator ticks, 
+		float deltaTime)
 	{
 		bool flag = deltaTime > 1.0f;
 		//IsNoClipping
@@ -622,7 +631,7 @@ namespace misc
 			settings::speedhack = speedhackDistance;
 		}
 		ticks.Reset(get_transform(esp::local_player)->get_bone_position());
-		//ValidateEyeHistory(lp);
+		ValidateEyeHistory(lp);
 		//ticks.Reset(esp::local_player->get_player_eyes()->get_position());
 	}
 
@@ -1096,9 +1105,4 @@ namespace misc
 			}
 		}
 	}
-
-	bool just_shot = false;
-	bool did_reload = false;
-	float time_since_last_shot = 0.0f;
-	float fixed_time_last_shot = 0.0f;
 }

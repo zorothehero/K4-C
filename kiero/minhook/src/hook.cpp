@@ -417,10 +417,10 @@ static MH_STATUS EnableHookLL(UINT pos, BOOL enable)
         }
     };
     
-    prot((PVOID)pPatchTarget, (ULONGLONG)patchSize, (ULONG)PAGE_EXECUTE_READWRITE, &oldProtect);
+    //prot((PVOID)pPatchTarget, (ULONGLONG)patchSize, (ULONG)PAGE_EXECUTE_READWRITE, &oldProtect);
 
-    //if (!VirtualProtect(pPatchTarget, patchSize, PAGE_EXECUTE_READWRITE, &oldProtect))
-    //    return MH_ERROR_MEMORY_PROTECT;
+    if (!VirtualProtect(pPatchTarget, patchSize, PAGE_EXECUTE_READWRITE, &oldProtect))
+        return MH_ERROR_MEMORY_PROTECT;
 
     if (enable)
     {
@@ -443,8 +443,8 @@ static MH_STATUS EnableHookLL(UINT pos, BOOL enable)
             memcpy(pPatchTarget, pHook->backup, sizeof(JMP_REL));
     }
 
-    prot((PVOID)pPatchTarget, (ULONGLONG)patchSize, (ULONG)oldProtect, &oldProtect);
-    //VirtualProtect(pPatchTarget, patchSize, oldProtect, &oldProtect);
+    //prot((PVOID)pPatchTarget, (ULONGLONG)patchSize, (ULONG)oldProtect, &oldProtect);
+    VirtualProtect(pPatchTarget, patchSize, oldProtect, &oldProtect);
 
     // Just-in-case measure.
     FlushInstructionCache(GetCurrentProcess(), pPatchTarget, patchSize);

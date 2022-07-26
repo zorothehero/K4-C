@@ -272,10 +272,10 @@ static PMEMORY_BLOCK GetMemoryBlock(LPVOID pOrigin)
             if (pAlloc == NULL)
                 break;
 
-            pBlock = (PMEMORY_BLOCK)alloc(pAlloc, MEMORY_BLOCK_SIZE, PAGE_EXECUTE_READWRITE);
+           // pBlock = (PMEMORY_BLOCK)alloc(pAlloc, MEMORY_BLOCK_SIZE, PAGE_EXECUTE_READWRITE);
             
-            //pBlock = (PMEMORY_BLOCK)VirtualAlloc(
-            //    pAlloc, MEMORY_BLOCK_SIZE, MEM_COMMIT | MEM_RESERVE, PAGE_EXECUTE_READWRITE);
+            pBlock = (PMEMORY_BLOCK)VirtualAlloc(
+                pAlloc, MEMORY_BLOCK_SIZE, MEM_COMMIT | MEM_RESERVE, PAGE_EXECUTE_READWRITE);
             if (pBlock != NULL)
                 break;
         }
@@ -291,10 +291,10 @@ static PMEMORY_BLOCK GetMemoryBlock(LPVOID pOrigin)
             if (pAlloc == NULL)
                 break;
 
-            pBlock = (PMEMORY_BLOCK)alloc(pAlloc, MEMORY_BLOCK_SIZE, PAGE_EXECUTE_READWRITE);
+            //pBlock = (PMEMORY_BLOCK)alloc(pAlloc, MEMORY_BLOCK_SIZE, PAGE_EXECUTE_READWRITE);
             
-            //pBlock = (PMEMORY_BLOCK)VirtualAlloc(
-            //    pAlloc, MEMORY_BLOCK_SIZE, MEM_COMMIT | MEM_RESERVE, PAGE_EXECUTE_READWRITE);
+            pBlock = (PMEMORY_BLOCK)VirtualAlloc(
+                pAlloc, MEMORY_BLOCK_SIZE, MEM_COMMIT | MEM_RESERVE, PAGE_EXECUTE_READWRITE);
             if (pBlock != NULL)
                 break;
         }

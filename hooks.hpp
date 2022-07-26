@@ -284,62 +284,6 @@ namespace hooks {
 				p = *(Projectile**)((uintptr_t)projectile_list + 0x20 + i * 0x8);
 				Vector3 a;
 				misc::get_prediction(target, rpc_position, target_pos, original_vel, aimbot_velocity, a, p);
-
-				/*
-				Vector3 orig;
-				Vector3 velocity;
-
-				Vector3 new_position = rpc_position;
-				float	partialtime = p->partialTime();
-				float	traveltime = 0.f;
-				Vector3 grav = get_gravity();
-				float	drag = p->drag();
-				float timestep = 0.03125f;
-				float offset = 5.f;
-				if (!drag) break;
-
-				for (int iii = 0; iii < 10000; iii++)
-				{
-					orig = rpc_position;
-					//aim_direction = getmodifiedaimcone(0, (orig - target_pos) + Vector3(0, offset, 0), true);
-					velocity = -(Vector3(aim_direction.x, aim_direction.y, aim_direction.z).Normalized() * original_vel.length());
-					velocity.y += offset;
-					partialtime = p->partialTime();
-					traveltime = 0.f;
-					//velocity = target_direction.Normalized() * velocity.length();
-					//Vector3 original_velocity = velocity;
-
-					for (float f = 0.f; f < 8.f; f += timestep) {
-						Projectile::SimulateProjectile(new_position, velocity, partialtime, traveltime, grav, drag, timestep);
-
-						traveltime += timestep;
-
-						if (orig.distance(target_pos) > 400.f)
-							break;
-
-						if (misc::LineCircleIntersection(target_pos, 0.1f, orig, new_position, offset))
-						{
-							aimbot_velocity = -(Vector3(aim_direction.x, aim_direction.y, aim_direction.z).Normalized() * original_vel.length());
-
-							Line(orig, new_position, col(0.0, 1.0, 0.4, 1), 10.f, false, true);
-							Sphere(new_position, 0.1f, col(0.0, 1.0, 0.1, 1), 10.f, 400.f);
-							break;
-						}
-						else
-						{
-							Line(orig, new_position, col(0.2, 0.5, 0.9, 1), 10.f, false, true);
-						}
-
-						if (!aimbot_velocity.is_empty())
-							break;
-
-						orig = new_position;
-					}
-					if (!aimbot_velocity.is_empty())
-						break;
-					offset += 0.001f;
-				}
-				*/
 				break;
 			}
 
@@ -402,7 +346,7 @@ namespace hooks {
 				//create and SEND FAKE copy of projectile so game only updates original
 				//Projectile* fake = new Projectile(*p);
 				p->initialVelocity(aimbot_velocity);
-				misc::fired_projectile f = { p, nullptr, time, 1, target };
+				fired_projectile f = { p, nullptr, time, 1, target };
 				
 				//p = *(Projectile**)((uintptr_t)projectile_list + 0x20 + i * 0x8);
 				//*reinterpret_cast<uintptr_t*>((uintptr_t)projectile_list + 0x20 + i * 0x8) = (uintptr_t)fake;
@@ -795,47 +739,30 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 					if (tag == 20011) {
 						uint64_t p = mem::read<uint64_t>(current_tagged_obj + 0x30);
 						uint64_t p1 = mem::read<uint64_t>(p + 0x18);
-						uint64_t p2 = mem::read<uint64_t>(p1 + 0x28);
+						uint64_t tod_sky = mem::read<uint64_t>(p1 + 0x28);
 
+						//ambientcolor
+						*reinterpret_cast<Vector4*>(tod_sky + 0x1F4) = Vector4(249.f/255, 130.f / 255, 109.f / 255, 255.f);
+						//moon halo color
+						*reinterpret_cast<Vector4*>(tod_sky + 0x204) = Vector4(249.f / 255, 130.f / 255, 109.f / 255, 255.f);
+						//moon sky color
+						*reinterpret_cast<Vector4*>(tod_sky + 0x184) = Vector4(249.f / 255, 130.f / 255, 109.f / 255, 255.f);
+						//moon light color
+						*reinterpret_cast<Vector4*>(tod_sky + 0x144) = Vector4(249.f / 255, 130.f / 255, 109.f / 255, 255.f);
 
-						//if (!unity::space_material)
-						//{
-						//	/
-						//uintptr_t kl = *reinterpret_cast<uintptr_t*>(mem::game_assembly_base + unity::GetType(_(""), _("TOD_Sky")));
-						//uintptr_t kl = *reinterpret_cast<uintptr_t*>(mem::game_assembly_base + 52655776);
-						//uintptr_t fieldz = *reinterpret_cast<uintptr_t*>(kl + 0xB8);
-						//uintptr_t instances = *reinterpret_cast<uintptr_t*>(fieldz);
-						//uintptr_t list = *reinterpret_cast<uintptr_t*>(instances + 0x10);
-						//uintptr_t tod_sky = *reinterpret_cast<uintptr_t*>(list + 0x20); // 'Dome'
-						//
 						//auto components = *reinterpret_cast<uintptr_t*>(tod_sky + 0xA8);
-						//if (components)
-						//{
-						//	set_StarMaterial(unity::galaxy_material);
-						//	set_SunMaterial(unity::galaxy_material);
-						//	set_MoonMaterial(unity::galaxy_material);
-						//	set_AtmosphereMaterial(unity::galaxy_material);
-						//	set_ClearMaterial(unity::galaxy_material);
-						//	set_CloudMaterial(unity::galaxy_material);
-						//}
 						//
-						//}
-						//if (!unity::star_material)
-						//	unity::star_material = unity::get_StarMaterial(p2);
-						//if (!unity::sun_material)
-						//	unity::sun_material = unity::get_SunMaterial(p2);
-						//if (!unity::moon_material)
-						//	unity::moon_material = unity::get_MoonMaterial(p2);
-						//if (!unity::atmo_material)
-						//	unity::atmo_material = unity::get_AtmosphereMaterial(p2);
-						//if (!unity::clear_material)
-						//	unity::clear_material = unity::get_ClearMaterial(p2);
-						//if (!unity::cloud_material)
-						//	unity::cloud_material = unity::get_CloudMaterial(p2);
-
-						const auto TOD_Day = *reinterpret_cast<uintptr_t*>(p2 + 0x50);
-						const auto TOD_Night = *reinterpret_cast<uintptr_t*>(p2 + 0x58);
-						const auto TOD_Stars = *reinterpret_cast<uintptr_t*>(p2 + 0x70);
+						//typedef uintptr_t(*ind)(uintptr_t);
+						//auto star_renderer = ((ind)(mem::game_assembly_base + 0x9F4A40))(components);
+						//
+						//if (!unity::galaxy_material)
+						//	unity::galaxy_material = unity::LoadAsset(unity::galaxy_bundle, _(L"GalaxyMaterial_10"), unity::GetType(_("UnityEngine"), _("Material")));
+						// 
+						//set_material(star_renderer, unity::galaxy_material);
+						
+						const auto TOD_Day =   *reinterpret_cast<uintptr_t*>(tod_sky + 0x50);
+						const auto TOD_Night = *reinterpret_cast<uintptr_t*>(tod_sky + 0x58);
+						const auto TOD_Stars = *reinterpret_cast<uintptr_t*>(tod_sky + 0x70);
 						if (vars->visual.always_day) {
 							*(float*)(TOD_Night + 0x50) = 4.f;
 							*(float*)(TOD_Night + 0x54) = 1.f;
@@ -1273,7 +1200,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 
 			//HERE UNTIL THEY REMOVE IT AGAIN /S
 
-			misc::fired_projectile placeholder = { nullptr, 0, 1 };
+			fired_projectile placeholder = { nullptr, 0, 1 };
 			for (size_t i = 0; i < 32; i++)
 				misc::fired_projectiles[i] = placeholder;
 		}
@@ -1886,8 +1813,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 				}
 			}
 
-			if (vars->misc.gesture_spam != 0
-				&& vars->misc.gesture_spam != 1
+			if (vars->misc.gesture_spam > 1
 				&& get_fixedTime() > last_gesture_rpc + 0.35f)
 			{
 				switch (vars->misc.gesture_spam) {
@@ -1947,13 +1873,33 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 
 		auto model_state = baseplayer->get_model_state();
 
-		//model_state->set_water_level(99999);
+		//skin changer?
+		if (vars->misc.skinchanger) {
+			do {
+				auto weapon = baseplayer->get_active_weapon();
 
+				if (!weapon)
+					break;
+
+				//auto baseprojectile = esp::local_player->get_active_weapon()->get_base_projectile();
+				//if (!baseprojectile)
+				//	break;
+
+				//auto wep_class_name = *(const char**)(*(uintptr_t*)(uintptr_t)baseprojectile + 0x10);
+
+				*reinterpret_cast<ULONG*>(weapon + 0x140) = 1272989639ul;
+				break;
+			} while (1);
+			//if (!strcmp(wep_class_name, _("Assault Rifle")))
+			//{
+			//	
+			//}
+		}
+		//model_state->set_water_level(99999);
 
 		if (vars->misc.spinbot) {
 			state->set_aim_angles(Vector3(100, my_rand() % 999 + -999, 100));
 		}
-
 
 		if (vars->misc.autofarm) {
 			if (misc::node.pos != Vector3(0, 0, 0))

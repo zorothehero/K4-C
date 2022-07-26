@@ -427,7 +427,17 @@ namespace esp {
 			}
 
 
-			if (vars->visual.misc_esp) {
+			if (vars->visual.stash || 
+				vars->misc.norecycler ||
+				vars->visual.stone_ore ||
+				vars->visual.sulfur_ore ||
+				vars->visual.metal_ore ||
+				vars->visual.traps ||
+				vars->visual.vehicles ||
+				vars->visual.airdrops ||
+				vars->visual.cloth ||
+				vars->visual.corpses) 
+			{
 				if (*(int*)(entity_class_name) == 'porD') {
 					if (!vars->visual.dropped_items)
 						continue;
@@ -467,7 +477,7 @@ namespace esp {
 					Vector2 w2s_position = {};
 					if (out_w2s(world_position, w2s_position))
 						esp::draw_item(w2s_position, esp_name, esp_color);
-
+					continue;
 					//map of vector3,id
 					//display id
 					//if (map_contains_key(selected_entity_parent_mapping, ent_id))
@@ -550,6 +560,7 @@ namespace esp {
 					else best_target.is_heli = false;
 
 					draw_heli(x, y, w, h);
+					continue;
 				}
 
 				if (vars->visual.stash && *(int*)(object_name.zpad + 46) == '_hsa') {
