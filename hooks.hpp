@@ -742,13 +742,13 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 						uint64_t tod_sky = mem::read<uint64_t>(p1 + 0x28);
 
 						//ambientcolor
-						*reinterpret_cast<Vector4*>(tod_sky + 0x1F4) = Vector4(249.f/255, 130.f / 255, 109.f / 255, 255.f);
-						//moon halo color
-						*reinterpret_cast<Vector4*>(tod_sky + 0x204) = Vector4(249.f / 255, 130.f / 255, 109.f / 255, 255.f);
-						//moon sky color
-						*reinterpret_cast<Vector4*>(tod_sky + 0x184) = Vector4(249.f / 255, 130.f / 255, 109.f / 255, 255.f);
-						//moon light color
-						*reinterpret_cast<Vector4*>(tod_sky + 0x144) = Vector4(249.f / 255, 130.f / 255, 109.f / 255, 255.f);
+						//*reinterpret_cast<Vector4*>(tod_sky + 0x1F4) = Vector4(249.f/255, 130.f / 255, 109.f / 255, 255.f);
+						////moon halo color
+						//*reinterpret_cast<Vector4*>(tod_sky + 0x204) = Vector4(249.f / 255, 130.f / 255, 109.f / 255, 255.f);
+						////moon sky color
+						//*reinterpret_cast<Vector4*>(tod_sky + 0x184) = Vector4(249.f / 255, 130.f / 255, 109.f / 255, 255.f);
+						////moon light color
+						//*reinterpret_cast<Vector4*>(tod_sky + 0x144) = Vector4(249.f / 255, 130.f / 255, 109.f / 255, 255.f);
 
 						//auto components = *reinterpret_cast<uintptr_t*>(tod_sky + 0xA8);
 						//
@@ -1259,7 +1259,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 		//}
 #pragma endregion
 
-		if (baseplayer) {
+		if (baseplayer && !baseplayer->is_sleeping()) {
 			get_skydome();
 
 			auto fixed_time = get_fixedTime();
@@ -1873,28 +1873,6 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 
 		auto model_state = baseplayer->get_model_state();
 
-		//skin changer?
-		if (vars->misc.skinchanger) {
-			do {
-				auto weapon = baseplayer->get_active_weapon();
-
-				if (!weapon)
-					break;
-
-				//auto baseprojectile = esp::local_player->get_active_weapon()->get_base_projectile();
-				//if (!baseprojectile)
-				//	break;
-
-				//auto wep_class_name = *(const char**)(*(uintptr_t*)(uintptr_t)baseprojectile + 0x10);
-
-				*reinterpret_cast<ULONG*>(weapon + 0x140) = 1272989639ul;
-				break;
-			} while (1);
-			//if (!strcmp(wep_class_name, _("Assault Rifle")))
-			//{
-			//	
-			//}
-		}
 		//model_state->set_water_level(99999);
 
 		if (vars->misc.spinbot) {

@@ -628,15 +628,15 @@ namespace gui {
 		float red, green, blue;
 		if (Num < 0.5)
 		{
-			red = Num * 2.f * 255.f;
-			green = 255.f;
-			blue = 0.f;
+			red = 255.f;
+			green = 0.f;
+			blue = 255.f;
 		}
 		else
 		{
-			red = 255.f;
-			green = (2.f - 2.f * Num) * 255.f;
-			blue = 0.f;
+			red = Num * 2.f * 255.f;
+			green = 0.f;
+			blue = (2.f - 2.f * Num) * 255.f;
 		}
 
 		red -= 100;
@@ -644,7 +644,6 @@ namespace gui {
 		blue -= 100;
 		return Color(red / 255, green / 255, blue / 255, alpha);
 	}
-
 
 	int last_active_id = 0;
 
@@ -1816,6 +1815,14 @@ namespace esp
 		}
 	}
 
+	void draw_text(Vector2 worldpos, wchar_t* str, Vector4 col, bool outline) {
+		if (str) {
+			if(outline)
+				gui::Label(rust::classes::Rect{ worldpos.x, worldpos.y, 150, 20 }, str, gui::Color(0, 0, 0, 120), false, 10.5);
+			gui::Label(rust::classes::Rect{ worldpos.x, worldpos.y, 150, 20 }, str, gui::Color(col.x, col.y, col.z, col.w), false, 10);
+		}
+	}
+
 	void draw_name(Vector3 position, wchar_t* name)
 	{
 		if (name)
@@ -1919,6 +1926,15 @@ namespace esp
 
 			if ((!shader /* && !unity::galaxy_material*/) && vars->visual.hand_chams < 1) return;
 
+			static int cases = 0;
+			switch (cases) {
+			case 0: { r -= 0.004f; if (r <= 0) cases += 1; break; }
+			case 1: { g += 0.004f; b -= 0.004f; if (g >= 1) cases += 1; break; }
+			case 2: { r += 0.004f; if (r >= 1) cases += 1; break; }
+			case 3: { b += 0.004f; g -= 0.004f; if (b >= 1) cases = 0; break; }
+			default: { r = 1.00f; g = 0.00f; b = 1.00f; break; }
+			}
+
 			if (vars->visual.hand_chams > 1
 				&& player->is_local_player()) {
 				auto model = gui::methods::get_activemodel();
@@ -1968,7 +1984,8 @@ namespace esp
 				}
 			}
 
-			if (vars->visual.shader > 1 && (shader /*|| unity::galaxy_material*/) && player) {
+			if (vars->visual.shader > 1 && shader) {
+				uintptr_t chams_shader = 0;
 
 				static int cases = 0;
 				switch (cases) {
@@ -1990,18 +2007,10 @@ namespace esp
 					if (!renderer) continue;
 					auto material = get_material(renderer);
 					if (!material) continue;
-					//if (vars->visual.shader == 6 && unity::galaxy_material)
-					//{
-					//	if (material != unity::galaxy_material)
-					//	{
-					//		set_material(renderer, unity::galaxy_material);
-					//		SetInt(unity::galaxy_material, _(L"_ZTest"), 8);
-					//	}
-					//} else 
 					if (shader)
 					{
 						if (shader != unity::get_shader(material)) {
-							unity::set_shader(renderer, shader);
+							unity::set_shader(material, shader);
 						}
 						else
 						{

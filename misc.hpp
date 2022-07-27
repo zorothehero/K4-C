@@ -186,16 +186,16 @@ namespace misc
 		{
 			ply->console_echo(string::wformat(
 				_(L"[trap] Anti-AntiHack - Added violation [%s] of %d in frame %d (now has %d)"),
-				(type == antihacktype::AttackHack ? _("AttackHack") :
-					type == antihacktype::CooldownHack ? _("CooldownHack") :
-					type == antihacktype::EyeHack ? _("EyeHack") :
-					type == antihacktype::FlyHack ? _("FlyHack") :
-					type == antihacktype::InsideTerrain ? _("InsideTerrain") :
-					type == antihacktype::MeleeHack ? _("MeleeHack") :
-					type == antihacktype::NoClip ? _("NoClip") :
-					type == antihacktype::ProjectileHack ? _("ProjectileHack") :
-					type == antihacktype::ReloadHack ? _("ReloadHack") :
-					type == antihacktype::SpeedHack ? _("SpeedHack") : _("none")),
+				(type == antihacktype::AttackHack ? _(L"AttackHack") :
+					type == antihacktype::CooldownHack ? _(L"CooldownHack") :
+					type == antihacktype::EyeHack ? _(L"EyeHack") :
+					type == antihacktype::FlyHack ? _(L"FlyHack") :
+					type == antihacktype::InsideTerrain ? _(L"InsideTerrain") :
+					type == antihacktype::MeleeHack ? _(L"MeleeHack") :
+					type == antihacktype::NoClip ? _(L"NoClip") :
+					type == antihacktype::ProjectileHack ? _(L"ProjectileHack") :
+					type == antihacktype::ReloadHack ? _(L"ReloadHack") :
+					type == antihacktype::SpeedHack ? _(L"SpeedHack") : _(L"none")),
 				(int)amount,
 				(int)get_frameCount(),
 				(int)violationLevel));
@@ -628,7 +628,7 @@ namespace misc
 			}
 			settings::vert_flyhack = flyhackDistanceVertical;
 			settings::hor_flyhack = flyhackDistanceHorizontal;
-			settings::speedhack = speedhackDistance;
+			settings::speedhack = speedhackDistance + 4.0f;
 		}
 		ticks.Reset(get_transform(esp::local_player)->get_bone_position());
 		ValidateEyeHistory(lp);

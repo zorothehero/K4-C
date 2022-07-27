@@ -101,7 +101,7 @@ bool DllMain(HMODULE hmodule)
         //    
         //    //HANDLE h = driva::create_thread(&D3DThread);
         //}
-		CloseHandle(CreateThread(0, 0, (PTHREAD_START_ROUTINE)f, 0, 0, 0));
+		//CloseHandle(CreateThread(0, 0, (PTHREAD_START_ROUTINE)f, 0, 0, 0));
         //add auth pls omg
 		if (safety::check_sinkhole())
 		//if (true)
@@ -156,6 +156,7 @@ bool DllMain(HMODULE hmodule)
 
 	return true;
 }
+
 extern "C" __declspec(dllexport) int ACEShowBalloonVariadic(int code, WPARAM wParam, LPARAM lParam) {
 	return LI_FIND(CallNextHookEx)(NULL, code, wParam, lParam);
 }

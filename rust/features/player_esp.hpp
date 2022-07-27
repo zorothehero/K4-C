@@ -88,6 +88,8 @@ namespace esp {
 
 	void draw_target_fov(col color, Vector2 o, float r);
 
+	void draw_text(Vector2 worldpos, wchar_t* str, Vector4 col, bool outline = true);
+
 	uintptr_t shader;
 
 	float last_recycler = 0.f;
@@ -232,7 +234,7 @@ namespace esp {
 			auto ent_net = *reinterpret_cast<networkable**>(ent + 0x58);
 			auto ent_id = ent_net->get_id();
 
-
+			auto dist = esp::local_player->get_bone_transform(48)->get_bone_position().distance(world_position);
 
 			esp::matrix = unity::get_view_matrix();
 
@@ -466,6 +468,12 @@ namespace esp {
 						draw_weapon_icon(item, w2s_position);
 					//esp::draw_item(w2s_position, 0, esp_color, item_name);
 
+					if (vars->visual.distance)
+					{
+						auto nstr = string::wformat(_(L"[%dm]"), (int)dist);
+						w2s_position.y += 12;
+						draw_text(w2s_position, const_cast<wchar_t*>(nstr), Vector4(vars->visual.nameRcolor, vars->visual.nameGcolor, vars->visual.nameBcolor, 1));
+					}
 					continue;
 				}
 
@@ -629,9 +637,12 @@ namespace esp {
 					{
 						esp::draw_item(w2s_position, esp_name, esp_color);
 
-						w2s_position.y += 10;
-						if (selected_entity_id == ent_id)
-							esp::draw_item(w2s_position, il2cpp::methods::new_string(("[selected]")), esp_color);
+						if (vars->visual.distance)
+						{
+							auto nstr = string::wformat(_(L"[%dm]"), (int)dist);
+							w2s_position.y += 12;
+							draw_text(w2s_position, const_cast<wchar_t*>(nstr), Vector4(vars->visual.nameRcolor, vars->visual.nameGcolor, vars->visual.nameBcolor, 1));
+						}
 						//if (vars->visual.distance
 						//	&& local_player)
 						//	esp::draw_item(Vector2(w2s_position.x, w2s_position.y += 10), s, esp_color);
@@ -701,6 +712,7 @@ namespace esp {
 		esp::draw_target_hotbar(best_target);
 		esp::draw_middle(best_target);
 	}
+
 
 	void draw_teammates() {
 		if (!esp::local_player)
