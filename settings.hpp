@@ -525,6 +525,7 @@ void save_config() {
 #define RAD2DEG(x) ((float)(x) * (float)(180.f / M_PI_F))
 #define DEG2RAD(x) ((float)(x) * (float)(M_PI_F / 180.f))
 namespace settings {
+	bool targetbehindwall = false;
 	float desyncTime = 0.0f;
 	float speedhack = 0.0f;
 	float time_since_last_shot = 0.0f;

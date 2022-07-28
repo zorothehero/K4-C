@@ -13,7 +13,8 @@
 #include "rust/rust.hpp"
 #include "rust/unity.hpp"
 #include "rust/classes.hpp"
-#include "projectile.hpp"
+//#include "projectile.hpp"
+#include "projectile1.hpp"
 //#include <vector>
 
 struct projectileshoot_projectile {
@@ -507,6 +508,9 @@ namespace misc
 			float num5 = num4 + max(protections::speedhack_forgiveness, 0.1f);
 			speedhackDistance = std::clamp(speedhackDistance, -num5, num5);
 			speedhackDistance = std::clamp(speedhackDistance - num2, -num5, num5);
+
+			//esp::local_player->console_echo(string::wformat(_(L"[trap]: IsSpeeding - speedhackDistance: %d, num4: %d"),(int)(speedhackDistance * 100), (int)(num4 * 100)));
+
 			if (speedhackDistance > num4) {
 				result = true;
 			}
@@ -628,7 +632,8 @@ namespace misc
 			}
 			settings::vert_flyhack = flyhackDistanceVertical;
 			settings::hor_flyhack = flyhackDistanceHorizontal;
-			settings::speedhack = speedhackDistance + 4.0f;
+			//settings::speedhack = speedhackDistance + 4.0f;
+			settings::speedhack = speedhackDistance + 3.9f;
 		}
 		ticks.Reset(get_transform(esp::local_player)->get_bone_position());
 		ValidateEyeHistory(lp);
@@ -952,10 +957,9 @@ namespace misc
 		Vector3 original_vel,
 		Vector3& aimbot_velocity,
 		Vector3& _aimdir,
+		float& travel_t,
 		Projectile* p,
 		bool skip_draw = false) {
-
-		float travel_t;
 		Vector3 player_velocity = Vector3(0, 0, 0);
 		std::vector<Vector3> path = {};
 		int simulations = 0;
@@ -1000,7 +1004,6 @@ namespace misc
 					travel_t += num;
 					if (misc::LineCircleIntersection(target_pos, 0.1f, origin, pos, offset))
 					{
-						//Line(origin, pos, col(0, 1, 0, 1), 10.f, false, true);
 						aimbot_velocity = (_aimdir).Normalized() * original_vel.length();
 						//emulate 1 tick has already passed
 						aimbot_velocity += gravity * grav * num;
@@ -1021,6 +1024,11 @@ namespace misc
 
 		if (travel_t > 0.f) {
 			//movement prediction
+
+			if (settings::desyncTime > 0.f
+				&& vars->combat.bullet_tp)
+				travel_t -= settings::desyncTime;
+
 			aimbot_velocity = Vector3(0, 0, 0);
 			if (target.player) {
 				auto wv = target.avg_vel;

@@ -13,6 +13,17 @@ void pop_front(std::vector<T>& vec)
 	vec.pop_back();
 }
 
+class Bounds {
+public:
+	Vector3 m_center;
+	Vector3 m_extents;
+	Vector3 center;
+	Vector3 extents;
+	Vector3 max;
+	Vector3 min;
+	Vector3 size;
+};
+
 uintptr_t planner_rotationoffset = il2cpp::value(_("Planner"), _("rotationOffset"));
 uintptr_t planner_currentconstruction = il2cpp::value(_("Planner"), _("currentConstruction"));
 uintptr_t planner_guide = il2cpp::value(_("Planner"), _("guide"));
@@ -266,6 +277,8 @@ static auto GetRadius = reinterpret_cast<float(*)(base_player*)>(*reinterpret_ca
 
 static auto GetHeight = reinterpret_cast<float(*)(base_player*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("GetHeight"), 0, _(""), _(""))));
 
+static auto terrainheightmap_GetHeight = reinterpret_cast<int(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("TerrainHeightMap"), _("GetHeight"), 0, _(""), _(""))));
+
 static auto updateammodisplay = reinterpret_cast<void(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseProjectile"), _("UpdateAmmoDisplay"), 0, _(""), _(""))));
 
 static auto shot_fired = reinterpret_cast<void(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseProjectile"), _("ShotFired"), 0, _(""), _(""))));
@@ -298,8 +311,13 @@ static auto animcurve_evaluate = reinterpret_cast<float(*)(uintptr_t, float)>(*r
 
 static auto guidtopath = reinterpret_cast<rust::classes::string(*)(rust::classes::string)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GameManifest"), _("GUIDToPath"), 0, _(""), _(""))));
 
-static auto GetBounds = reinterpret_cast<uintptr_t(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("GetBounds"), 0, _(""), _(""))));
+static auto GetBounds = reinterpret_cast<Bounds(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("GetBounds"), 0, _(""), _(""))));
 
+static auto get_mounted = reinterpret_cast<uintptr_t(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("GetMounted"), 0, _(""), _(""))));
+
+static auto get_parent_entity = reinterpret_cast<uintptr_t(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseNetworkable"), _("GetParentEntity"), 0, _(""), _(""))));
+
+static auto get_short_prefab_name = reinterpret_cast<rust::classes::string(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseNetworkable"), _("get_ShortPrefabName"), 0, _(""), _(""))));
 
 static auto set_SpaceMaterial = reinterpret_cast<uintptr_t(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("TOD_Components"), _("set_SpaceMaterial"), 0, _(""), _(""))));
 static auto set_StarMaterial = reinterpret_cast<uintptr_t(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("TOD_Components"), _("set_StarMaterial"), 0, _(""), _(""))));
@@ -329,6 +347,10 @@ static auto SetColor = reinterpret_cast<void(*)(uintptr_t material, rust::classe
 float current_time;
 
 void init_bp() {
+	get_short_prefab_name = reinterpret_cast<rust::classes::string(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseNetworkable"), _("get_ShortPrefabName"), 0, _(""), _(""))));
+	get_parent_entity = reinterpret_cast<uintptr_t(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseNetworkable"), _("GetParentEntity"), 0, _(""), _(""))));
+	get_mounted = reinterpret_cast<uintptr_t(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("GetMounted"), 0, _(""), _(""))));
+	terrainheightmap_GetHeight = reinterpret_cast<int(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("TerrainHeightMap"), _("GetHeight"), 0, _(""), _(""))));
 	GetNormal = reinterpret_cast<Vector3(*)(uintptr_t, Vector3)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("TerrainHeightMap"), _("GetNormal"), 1, _(""), _(""))));
 	Line = reinterpret_cast<void (*)(Vector3, Vector3, col, float, bool, bool)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("DDraw"), _("Line"), 6, _(""), _("UnityEngine"))));
 	set_onLadder = reinterpret_cast<void(*)(modelstate*, bool)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("ModelState"), _("set_onLadder"), 1, _(""), _(""))));
@@ -364,7 +386,7 @@ void init_bp() {
 	GetSpeed = reinterpret_cast<float (*)(base_player * baseplayer, float running, float ducking, float crawling)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("GetSpeed"), 3, _(""), _(""))));
 	get_frameCount = reinterpret_cast<int(*)()>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Time"), _("get_frameCount"), 0, _(""), _("UnityEngine"))));
 	get_rotation = reinterpret_cast<Vector4(*)(uintptr_t transform)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Transform"), _("get_rotation"), 0, _(""), _("UnityEngine"))));
-	GetBounds = reinterpret_cast<uintptr_t(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("GetBounds"), 0, _(""), _(""))));
+	GetBounds = reinterpret_cast<Bounds(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("GetBounds"), 0, _(""), _(""))));
 
 	get_components_in_children = reinterpret_cast<uintptr_t(*)(uintptr_t, uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Component"), _("GetComponentsInChildren"), 0, _(""), _("UnityEngine"))));
 	get_component = reinterpret_cast<uintptr_t(*)(uintptr_t, uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Component"), _("GetComponent"), 0, _(""), _("UnityEngine"))));
@@ -660,6 +682,10 @@ public:
 		*reinterpret_cast<Vector3*>((uintptr_t)this + 0x90) = hit_point;
 	}
 
+	void set_hit_material(rust::classes::string str) {
+		*reinterpret_cast<rust::classes::string*>((uintptr_t)this + 0xC0) = str;
+	}
+
 	void set_hit_normal(Vector3 hit_nromal) {
 		*reinterpret_cast<Vector3*>((uintptr_t)this + 0x9C) = hit_nromal;
 	}
@@ -728,48 +754,20 @@ public:
 	}
 
 	float get_repeat_delay() {
-		__try
-		{
-			return *reinterpret_cast<float*>((uintptr_t)this + repeatDelay);
-		}
-		__except (true)
-		{
-			//printf(_("Exception occured in %s!\n"), __FUNCTION__);
-		}
+		return *reinterpret_cast<float*>((uintptr_t)this + repeatDelay);
 	}
 
 	void set_repeat_delay(float r) {
-		__try
-		{
-			*reinterpret_cast<float*>((uintptr_t)this + repeatDelay) = r;
-			return;
-		}
-		__except (true)
-		{
-			//printf(_("Exception occured in %s!\n"), __FUNCTION__);
-		}
+		*reinterpret_cast<float*>((uintptr_t)this + repeatDelay) = r;
+		return;
 	}
 
 	float get_reload_time() {
-		__try
-		{
-			return *reinterpret_cast<float*>((uintptr_t)this + reloadTime);
-		}
-		__except (true)
-		{
-			//printf(_("Exception occured in %s!\n"), __FUNCTION__);
-		}
+		return *reinterpret_cast<float*>((uintptr_t)this + reloadTime);
 	}
 
 	float get_next_reload_time() {
-		__try
-		{
-			return *reinterpret_cast<float*>((uintptr_t)this + nextreloadTime);
-		}
-		__except (true)
-		{
-			//printf(_("Exception occured in %s!\n"), __FUNCTION__);
-		}
+		return *reinterpret_cast<float*>((uintptr_t)this + nextreloadTime);
 	}
 
 	char* get_class_name() {
@@ -952,9 +950,7 @@ public:
 
 	void SetProjectileVelocityScale(float r)
 	{
-		__try {
-			*reinterpret_cast<float*>((uintptr_t)this + projectileVelocityScale_addr) = r;
-		} __except(true) {}
+		*reinterpret_cast<float*>((uintptr_t)this + projectileVelocityScale_addr) = r;
 	}
 
 	void set_current_velocity(Vector3 position)
@@ -1104,15 +1100,8 @@ public:
 	}
 
 	base_projectile* get_base_projectile() {
-		__try
-		{
-			if (!this) return nullptr;
-			return *reinterpret_cast<base_projectile**>((uintptr_t)this + heldEntity);
-		}
-		__except (true)
-		{
-			//printf(_("%s"), __FUNCTION__);
-		}
+		if (!this) return nullptr;
+		return *reinterpret_cast<base_projectile**>((uintptr_t)this + heldEntity);
 	}
 };
 
@@ -1345,16 +1334,7 @@ public:
 	}
 };
 
-class Bounds {
-public:
-	Vector3 m_center;
-	Vector3 m_extents;
-	Vector3 center;
-	Vector3 extents;
-	Vector3 max;
-	Vector3 min;
-	Vector3 size;
-};
+
 
 struct OBB {
 public:
@@ -1536,7 +1516,7 @@ public:
 			return position.distance(point);
 		}
 		Vector4 rotation = get_rotation((uintptr_t)get_transform(player));
-		Bounds bounds = *reinterpret_cast<Bounds*>(GetBounds((uintptr_t)player));
+		Bounds bounds = GetBounds((uintptr_t)player);
 
 		auto trans = get_transform(player);
 		bool flag = trans ? !(!trans) : false;
@@ -1892,18 +1872,13 @@ public:
 	}
 
 	transform* get_bone_transform(int bone_id) {
-		__try {
-			uintptr_t entity_model = *reinterpret_cast<uintptr_t*>((uintptr_t)this + 0x130); //public Model model; // 
-			//uintptr_t entity_model = *reinterpret_cast<uintptr_t*>((uintptr_t)this + 0x128); //public Model model; // 
-			if (!entity_model) return nullptr;
-			uintptr_t bone_dict = *reinterpret_cast<uintptr_t*>(entity_model + 0x48);
-			transform* BoneValue = *reinterpret_cast<transform**>(bone_dict + 0x20 + bone_id * 0x8);
+		uintptr_t entity_model = *reinterpret_cast<uintptr_t*>((uintptr_t)this + 0x130); //public Model model; // 
+		//uintptr_t entity_model = *reinterpret_cast<uintptr_t*>((uintptr_t)this + 0x128); //public Model model; // 
+		if (!entity_model) return nullptr;
+		uintptr_t bone_dict = *reinterpret_cast<uintptr_t*>(entity_model + 0x48);
+		transform* BoneValue = *reinterpret_cast<transform**>(bone_dict + 0x20 + bone_id * 0x8);
 
-			return BoneValue;
-		}
-		__except (true) {
-			return nullptr;
-		}
+		return BoneValue;
 	}
 
 	bool is_visible(Vector3 source, Vector3 destination, float p1 = 0.18f) {

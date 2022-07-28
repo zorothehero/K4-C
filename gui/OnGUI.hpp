@@ -1207,7 +1207,7 @@ namespace gui {
 					}
 					if (vars->visual.speedhack_indicator)
 					{
-						Progbar({ 900, (650 + (bars++ * 10)) }, { 120, 4 }, settings::speedhack, 10.0f);
+						Progbar({ 900, (650 + (bars++ * 10)) }, { 120, 4 }, settings::speedhack, 1.0f);
 					}
 					//put extra gui things here
 					auto held = esp::local_player->get_active_weapon();
@@ -2176,15 +2176,12 @@ namespace esp
 		if (get_bounds(bounds, 4)) {
 			//if (!is_visible)
 			//is_visible = unity::is_visible(camera_position, player->get_bone_transform(48)->get_bone_position(), (uintptr_t)esp::local_player);
-			
-			__try
-			{
-				for (auto& [bone_screen, bone_idx, on_screen, world_position, visible] : bones) {
-					if (is_visible) break;
-					is_visible = unity::is_visible(camera_position, world_position, (uintptr_t)esp::local_player);
-				}
+
+			is_visible = false;
+			for (auto& [bone_screen, bone_idx, on_screen, world_position, visible] : bones) {
+				if (is_visible) break;
+				is_visible = unity::is_visible(camera_position, world_position, (uintptr_t)esp::local_player);
 			}
-			__except (true) { is_visible = false; }
 			//is_visible = unity::is_visible(camera_position, bones[47].world_position, (uintptr_t)esp::local_player);
 
 			gui::Color clr = !is_teammate ? (is_visible ? visible_color : invisible_color) : teammate_color;

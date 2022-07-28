@@ -232,6 +232,7 @@ namespace rust {
 		class PlayerProjectileUpdate {
 		public:
 			union {
+				DEFINE_MEMBER_N(int, projectileID, 0x14);
 				DEFINE_MEMBER_N(Vector3, position, 0x18);
 				DEFINE_MEMBER_N(Vector3, velocity, 0x24);
 				DEFINE_MEMBER_N(float, traveltime, 0x30);

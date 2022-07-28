@@ -23,7 +23,8 @@ namespace hooks {
 		static auto baseprojectile_createprojectile = reinterpret_cast<uintptr_t(*)(base_projectile*, rust::classes::string, Vector3, Vector3, Vector3)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseProjectile"), _("CreateProjectile"), 0, _(""), _(""))));
 		static auto DoHit = reinterpret_cast<bool (*)(Projectile*, HitTest*, Vector3, Vector3)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Projectile"), _("DoHit"), -1, _(""), _(""))));
 
-		
+		static auto _update = reinterpret_cast<void (*)(Projectile*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Projectile"), _("Update"), 0, _(""), _(""))));
+
 		uintptr_t playerprojectileattack;
 		uintptr_t createbuilding;
 		uintptr_t playerprojectilericochet;
@@ -63,6 +64,7 @@ namespace hooks {
 
 	static auto PerformanceUI_Update = reinterpret_cast<void (*)(void*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("PerformanceUI"), _("Update"), -1, _(""), _("Facepunch"))));
 
+
 	void init_hooks() {
 		orig::IsConnected = reinterpret_cast<bool (*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Client"), _("IsConnected"), 0, _(""), _("Network"))));
 		orig::OnNetworkMessage = reinterpret_cast<void (*)(uintptr_t, uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Client"), _("OnNetworkMessage"), 1, _(""), _(""))));
@@ -90,6 +92,8 @@ namespace hooks {
 		orig::DoHit = reinterpret_cast<bool (*)(Projectile*, HitTest*, Vector3, Vector3)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Projectile"), _("DoHit"), -1, _(""), _(""))));
 
 		orig::attackent_addpunch = reinterpret_cast<void(*)(uintptr_t, Vector3, float)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("HeldEntity"), _("AddPunch"), 0, _(""), _(""))));
+
+		orig::_update = reinterpret_cast<void (*)(Projectile*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Projectile"), _("Update"), 0, _(""), _(""))));
 
 		serverrpc_projecileshoot = rb::pattern::find_rel(
 			_("GameAssembly.dll"), _("4C 8B 0D ? ? ? ? 48 8B 75 28"));
@@ -283,7 +287,7 @@ namespace hooks {
 				auto projectile = *(base_projectile**)((uintptr_t)projectile_list + 0x20 + i * 0x8);
 				p = *(Projectile**)((uintptr_t)projectile_list + 0x20 + i * 0x8);
 				Vector3 a;
-				misc::get_prediction(target, rpc_position, target_pos, original_vel, aimbot_velocity, a, p);
+				misc::get_prediction(target, rpc_position, target_pos, original_vel, aimbot_velocity, a, travel_t, p);
 				break;
 			}
 
@@ -1098,9 +1102,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 			misc::manual = false;
 		}
 
-		__try {
-			return orig::baseprojectile_launchprojectile((uintptr_t)p);
-		} __except(true) {}
+		return orig::baseprojectile_launchprojectile((uintptr_t)p);
 	}
 
 	uintptr_t hk_GetBuildingPrivilege(uintptr_t base_entity) {
@@ -1322,17 +1324,13 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 
 				auto getammo = [&](base_projectile* held)
 				{
-					__try {
-						if (held)
-						{
-							auto mag = *reinterpret_cast<uintptr_t*>((uintptr_t)held + primaryMagazine);
-							if (!mag) return 0;
-							return *reinterpret_cast<int*>((uintptr_t)mag + 0x1C); //0x1C = public int contents;
-						}
+					if (held)
+					{
+						auto mag = *reinterpret_cast<uintptr_t*>((uintptr_t)held + primaryMagazine);
+						if (!mag) return 0;
+						return *reinterpret_cast<int*>((uintptr_t)mag + 0x1C); //0x1C = public int contents;
 					}
-					__except (true) {
-						return 0;
-					}
+					return 0;
 				};
 
 				auto mag_ammo = getammo(held);

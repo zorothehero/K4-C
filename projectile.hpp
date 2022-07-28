@@ -72,7 +72,7 @@ namespace O::Projectile {
 
 class Projectile;
 
-static auto Retire = reinterpret_cast<void(*)(Projectile*)>(0);
+static auto _retire = reinterpret_cast<void(*)(Projectile*)>(0);
 static auto Update = reinterpret_cast<void(*)(Projectile*)>(0);
 static auto Do_Hit = reinterpret_cast<bool(*)(Projectile*, uintptr_t, Vector3, Vector3)>(0);
 
@@ -84,15 +84,18 @@ static auto HitNormalWorld = reinterpret_cast<Vector3(*)(uintptr_t)>(0);
 
 static auto Trace_All = reinterpret_cast<void(*)(uintptr_t, uintptr_t, int)>(0);
 static auto get_magnitude = reinterpret_cast<float(*)(uintptr_t)>(0);
+static auto seteffect = reinterpret_cast<void(*)(uintptr_t, float)>(0);
 
 static auto Sphere = reinterpret_cast<void (*)(Vector3 vPos, float fRadius, col color, float fDuration, bool distanceFade)>(0);
 static auto getrandomvel = reinterpret_cast<float(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("ItemModProjectile"), _("GetRandomVelocity"), 0, _(""), _(""))));
+
+static auto _launch = reinterpret_cast<void(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Projectile"), _("Launch"), 0, _(""), _(""))));
 
 
 void init_projectile() {
 	Update = reinterpret_cast<void(*)(Projectile*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Projectile"), _("Update"), 0, _(""), _(""))));
 	Sphere = reinterpret_cast<void (*)(Vector3 vPos, float fRadius, col color, float fDuration, bool distanceFade)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("DDraw"), _("Sphere"), 5, _(""), _("UnityEngine"))));
-	Retire = reinterpret_cast<void(*)(Projectile*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Projectile"), _("Retire"), 0, _(""), _(""))));
+	_retire = reinterpret_cast<void(*)(Projectile*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Projectile"), _("Retire"), 0, _(""), _(""))));
 	Trace_All = reinterpret_cast<void(*)(uintptr_t, uintptr_t, int)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GameTrace"), _("TraceAll"), 3, _(""), _(""))));
 
 	HitPointWorld = reinterpret_cast<Vector3(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("HitTest"), _("HitPointWorld"), 0, _(""), _(""))));
@@ -102,6 +105,8 @@ void init_projectile() {
 	Do_Hit = reinterpret_cast<bool(*)(Projectile*, uintptr_t, Vector3, Vector3)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Projectile"), _("DoHit"), 0, _(""), _(""))));
 	get_magnitude = reinterpret_cast<float(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Vector3"), _("get_magnitude"), 0, _(""), _("UnityEngine"))));
 	getrandomvel = reinterpret_cast<float(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("ItemModProjectile"), _("GetRandomVelocity"), 0, _(""), _(""))));
+	seteffect = reinterpret_cast<void(*)(uintptr_t, float)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Projectile"), _("SetEffectScale"), 1, _(""), _(""))));
+	_launch = reinterpret_cast<void(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Projectile"), _("Launch"), 0, _(""), _(""))));
 }
 
 class Projectile {
@@ -133,12 +138,14 @@ public:
 	void prevSentVelocity(Vector3 d) { safe_write(this + O::Projectile::tumbleAxis, d, Vector3); }
 	float sentTraveledTime() { return safe_read(this + O::Projectile::closeFlybyDistance, float); }
 	void sentTraveledTime(float d) { safe_write(this + O::Projectile::closeFlybyDistance, d, float); }
-	float lastUpdateTime() { return safe_read(this + O::Projectile::ricochetChance, float); }
-	void lastUpdateTime(float d) { safe_write(this + O::Projectile::ricochetChance, d, float); }
+	float ricochetChance() { return safe_read(this + O::Projectile::ricochetChance, float); }
+	void ricochetChance(float d) { safe_write(this + O::Projectile::ricochetChance, d, float); }
 	Vector3 prevSentPosition() { return safe_read(this + O::Projectile::sentPosition, Vector3); }
 	void prevSentPosition(Vector3 d) { safe_write(this + O::Projectile::sentPosition, d, Vector3); }
 	bool needsLOS() { return safe_read(this + O::Projectile::createDecals, bool); }
 	void needsLOS(bool d) { safe_write(this + O::Projectile::createDecals, d, bool); }
+
+	void SetEffectScale(float f) { return seteffect((uintptr_t)this, f); }
 
 	float traveledDistance() { return safe_read(this + O::Projectile::traveledDistance, float); }
 	void traveledDistance(float d) { safe_write(this + O::Projectile::traveledDistance, d, float); }
@@ -171,11 +178,12 @@ public:
 	float launchTime() { return safe_read(this + O::Projectile::launchTime, float); }
 	void launchTime(float d) { safe_write(this + O::Projectile::launchTime, d, float); }
 
+	void Launch() { return _launch((uintptr_t)this); }
+
+	void Retire() { return _retire(this); }
+
 	bool IsAlive() {
-		__try {
-			return (this->integrity() > 0.001f && this->traveledDistance() < this->maxDistance() && this->traveledTime() < 8);
-		}
-		__except (true) { return false; }
+		return (this->integrity() > 0.001f && this->traveledDistance() < this->maxDistance() && this->traveledTime() < 8);
 	}
 
 	struct TraceInfo {
@@ -336,11 +344,8 @@ public:
 		auto material = info.material != 0 ? GetName(info.material)->str : (_(L"generic"));
 
 		bool canIgnore = true;
-		__try
-		{
-			canIgnore = unity::is_visible(sentPosition(), currentPosition() + currentVelocity().Normalized() * 0.01f, 0);//(uintptr_t)esp::local_player);
-		}
-		__except(true) {  }
+		canIgnore = unity::is_visible(sentPosition(), currentPosition() + currentVelocity().Normalized() * 0.01f, 0);//(uintptr_t)esp::local_player);
+		
 		if (!canIgnore) {
 			integrity(0);
 			return true;

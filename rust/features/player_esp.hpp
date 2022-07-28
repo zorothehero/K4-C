@@ -234,7 +234,9 @@ namespace esp {
 			auto ent_net = *reinterpret_cast<networkable**>(ent + 0x58);
 			auto ent_id = ent_net->get_id();
 
-			auto dist = esp::local_player->get_bone_transform(48)->get_bone_position().distance(world_position);
+			float dist = 10.f;
+			if(esp::local_player)
+				dist = esp::local_player->get_bone_transform(48)->get_bone_position().distance(world_position);
 
 			esp::matrix = unity::get_view_matrix();
 
