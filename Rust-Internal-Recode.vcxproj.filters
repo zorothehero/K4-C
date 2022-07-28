@@ -199,5 +199,6 @@
     </ClInclude>
     <ClInclude Include="misc.hpp" />
     <ClInclude Include="projectile1.hpp" />
+    <ClInclude Include="nine_meter_poggers.hpp" />
   </ItemGroup>
 </Project>

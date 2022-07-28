@@ -235,6 +235,7 @@
     <ClInclude Include="memory\lazy_importer.hpp" />
     <ClInclude Include="memory\memory.hpp" />
     <ClInclude Include="misc.hpp" />
+    <ClInclude Include="nine_meter_poggers.hpp" />
     <ClInclude Include="offsets.h" />
     <ClInclude Include="projectile.hpp" />
     <ClInclude Include="projectile1.hpp" />

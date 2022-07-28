@@ -18,6 +18,7 @@ struct Vars
 		int hitbox = 0;
 		bool silent_melee = false;
 		bool manipulator = false;
+		bool manipulator2 = false;
 		bool doubletap = false;
 		bool always_reload = false;
 		bool autoshoot = false;
@@ -28,9 +29,11 @@ struct Vars
 		bool always_shoot = false;
 		float melee_range = 1.f;
 		float thickness = 1.f;
+		bool HitScan = false;
 		bool norecoil = false;
 		bool nospread = false;
 		bool fast_bullet = false;
+		bool targetbehindwall = false;
 		float recoilx = 1.f;
 		float recoily = 1.f;
 

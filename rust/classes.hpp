@@ -265,6 +265,8 @@ static auto BoundsPadding = reinterpret_cast<float(*)(base_player*)>(*reinterpre
 
 static auto PEyes_get_position = reinterpret_cast<Vector3(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("PlayerEyes"), _("get_position"), 0, _(""), _(""))));
 
+static auto get_center = reinterpret_cast<Vector3(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("PlayerEyes"), _("get_center"), 0, _(""), _(""))));
+
 static auto PEyes_get_rotation = reinterpret_cast<Vector4(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("PlayerEyes"), _("get_rotation"), 0, _(""), _(""))));
 
 static auto bodyforward = reinterpret_cast<Vector3(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("PlayerEyes"), _("BodyForward"), 0, _(""), _(""))));
@@ -319,6 +321,8 @@ static auto get_parent_entity = reinterpret_cast<uintptr_t(*)(uintptr_t)>(*reint
 
 static auto get_short_prefab_name = reinterpret_cast<rust::classes::string(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseNetworkable"), _("get_ShortPrefabName"), 0, _(""), _(""))));
 
+static auto get_max_fwd_speed = reinterpret_cast<float(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("ModularCar"), _("GetMaxForwardSpeed"), 0, _(""), _(""))));
+
 static auto set_SpaceMaterial = reinterpret_cast<uintptr_t(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("TOD_Components"), _("set_SpaceMaterial"), 0, _(""), _(""))));
 static auto set_StarMaterial = reinterpret_cast<uintptr_t(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("TOD_Components"), _("set_StarMaterial"), 0, _(""), _(""))));
 static auto set_SunMaterial = reinterpret_cast<uintptr_t(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("TOD_Components"), _("set_SunMaterial"), 0, _(""), _(""))));
@@ -347,6 +351,8 @@ static auto SetColor = reinterpret_cast<void(*)(uintptr_t material, rust::classe
 float current_time;
 
 void init_bp() {
+	get_center = reinterpret_cast<Vector3(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("PlayerEyes"), _("get_center"), 0, _(""), _(""))));
+	get_max_fwd_speed = reinterpret_cast<float(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("ModularCar"), _("GetMaxForwardSpeed"), 0, _(""), _(""))));
 	get_short_prefab_name = reinterpret_cast<rust::classes::string(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseNetworkable"), _("get_ShortPrefabName"), 0, _(""), _(""))));
 	get_parent_entity = reinterpret_cast<uintptr_t(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseNetworkable"), _("GetParentEntity"), 0, _(""), _(""))));
 	get_mounted = reinterpret_cast<uintptr_t(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("GetMounted"), 0, _(""), _(""))));
@@ -711,7 +717,9 @@ public:
 		return *reinterpret_cast<float*>((uintptr_t)this + 0x18);
 	}
 };
-
+class ItemDefinition {
+public:
+};
 class GatherProperties {
 public:
 	GatherPropertyEntry*& tree() {
@@ -1316,6 +1324,11 @@ public:
 		if (!this) return Vector3(0, 0, 0);
 		return bodyforward((uintptr_t)this);
 	}
+
+	Vector3 GetCenter() {
+		if (!this) return Vector3(0, 0, 0);
+		return get_center((uintptr_t)this);
+	}
 };
 
 class input_state {
@@ -1325,6 +1338,7 @@ public:
 
 		*reinterpret_cast<Vector3*>(current + 0x18) = aim_angle;
 	}
+
 };
 
 class basemountable {
@@ -1632,6 +1646,10 @@ public:
 	void send_client_tick() {
 		if (!this) return;
 		return SendClientTick(this);
+	}
+
+	rust::classes::PlayerTick* lastSentTick() {
+		return *reinterpret_cast<rust::classes::PlayerTick**>((uintptr_t)this + 0x660);
 	}
 
 	void SendSignalBroadcast(rust::classes::Signal signal, wchar_t* str = _(L""))

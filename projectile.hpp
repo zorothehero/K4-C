@@ -73,7 +73,7 @@ namespace O::Projectile {
 class Projectile;
 
 static auto _retire = reinterpret_cast<void(*)(Projectile*)>(0);
-static auto Update = reinterpret_cast<void(*)(Projectile*)>(0);
+static auto _update = reinterpret_cast<void(*)(Projectile*)>(0);
 static auto Do_Hit = reinterpret_cast<bool(*)(Projectile*, uintptr_t, Vector3, Vector3)>(0);
 
 
@@ -93,7 +93,7 @@ static auto _launch = reinterpret_cast<void(*)(uintptr_t)>(*reinterpret_cast<uin
 
 
 void init_projectile() {
-	Update = reinterpret_cast<void(*)(Projectile*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Projectile"), _("Update"), 0, _(""), _(""))));
+	_update = reinterpret_cast<void(*)(Projectile*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Projectile"), _("Update"), 0, _(""), _(""))));
 	Sphere = reinterpret_cast<void (*)(Vector3 vPos, float fRadius, col color, float fDuration, bool distanceFade)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("DDraw"), _("Sphere"), 5, _(""), _("UnityEngine"))));
 	_retire = reinterpret_cast<void(*)(Projectile*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Projectile"), _("Retire"), 0, _(""), _(""))));
 	Trace_All = reinterpret_cast<void(*)(uintptr_t, uintptr_t, int)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GameTrace"), _("TraceAll"), 3, _(""), _(""))));
@@ -536,7 +536,7 @@ void OnProjectileUpdate(Projectile* unk) {
 			return;
 
 		if (vars->combat.doubletap && settings::desyncTime > 0.f)
-			return Update(unk);
+			return _update(unk);
 		//if(!vars->combat.magic_bullet)
 		//	return Update(unk);
 
@@ -560,7 +560,7 @@ void OnProjectileUpdate(Projectile* unk) {
 				}
 			}
 			else {
-				Retire(unk);
+				_retire(unk);
 			}
 		}
 	}

@@ -1,4 +1,4 @@
-#include "projectile.hpp"
+#include "misc.hpp"
 
 uintptr_t GameAssemblyBase = mem::game_assembly_base;
 uintptr_t pools_offset = 0xAAE0A0;
@@ -33,130 +33,6 @@ uintptr_t pools_offset = 0xAAE0A0;
 uintptr_t Method$System_Collections_Generic_List_Projectile__Clear__ = 14664112; //Method$System.Collections.Generic.List<Projectile>.Clear() (METHOD ADDRESS)
 
 class Projectile1;
-float vprojectile_desync1 = 0.55f;
-
-int projectileProtection1 = 6;
-
-UINT64 g_UpdateReusable = NULL;
-
-struct TraceResult1 {
-public:
-	bool didHit;
-	bool silentCat;
-	base_player* hitEntity;
-	Vector3 hitPosition;
-	Vector3 outVelocity;
-	float hitTime;
-	float hitDist;
-	bool canHit;
-	bool HasLOS;
-};
-
-enum class MessageType : BYTE
-{
-	Welcome = 1,
-	Auth = 2,
-	Approved = 3,
-	Ready = 4,
-	Entities = 5,
-	EntityDestroy = 6,
-	GroupChange = 7,
-	GroupDestroy = 8,
-	RPCMessage = 9,
-	EntityPosition = 10,
-	ConsoleMessage = 11,
-	ConsoleCommand = 12,
-	Effect = 13,
-	DisconnectReason = 14,
-	Tick = 15,
-	Message = 16,
-	RequestUserInformation = 17,
-	GiveUserInformation = 18,
-	GroupEnter = 19,
-	GroupLeave = 20,
-	VoiceData = 21,
-	EAC = 22,
-	EntityFlags = 23,
-	World = 24,
-	ConsoleReplicatedVars = 25,
-};
-
-struct TimeAverageValueData
-{
-public:
-	int Calculate()
-	{
-		float realtimeSinceStartup = unity::get_realtimesincestartup();//UnityEngine::Time::get_realtimeSinceStartup();
-		float num = realtimeSinceStartup - refreshTime;
-		if (num >= 1.0)
-		{
-			counterPrev = (int)(counterNext / num + 0.5);
-			counterNext = 0;
-			refreshTime = realtimeSinceStartup;
-			num = 0;
-		}
-		return (int)(counterPrev * (1.0 - num)) + counterNext;
-	}
-
-	void Increment()
-	{
-		this->Calculate();
-		counterNext += 1;
-	}
-
-	void Reset()
-	{
-		counterPrev = 0;
-		counterNext = 0;
-	}
-
-	float refreshTime;
-
-	int counterPrev;
-
-	int counterNext;
-};
-
-TimeAverageValueData Total_Counter = { 0, 0, 0 };
-TimeAverageValueData RPC_Counter = { 0, 0, 0 };
-TimeAverageValueData Signal_Counter = { 0, 0, 0 };
-
-float Clamp(float value, float min, float max)
-{
-	if (value < min)
-	{
-		value = min;
-	}
-	else if (value > max)
-	{
-		value = max;
-	}
-	return value;
-}
-
-float Dot(const Vector3& Vec1, const Vector3& Vec2)
-{
-	return Vec1.x * Vec2.x + Vec1.y * Vec2.y + Vec1.z * Vec2.z;
-}
-
-class Line1111 {
-public:
-	Vector3 start;
-	Vector3 end;
-	Line1111(Vector3 s, Vector3 e) {
-		start = s; end = e;
-	}
-	Line1111() { }
-	Vector3 ClosestPoint(Vector3 pos)
-	{
-		Vector3 a = end - start;
-		float magnitude = a.Length();
-		if (magnitude == 0.f) return start;
-		Vector3 vector = a / magnitude;
-		return start + vector * Clamp(Dot(pos - start, vector), 0.f, magnitude);
-	}
-};
-
 class Projectile1
 {
 public:
@@ -203,11 +79,6 @@ public:
 			Render::GetInstance()->m_projectiles.push_back(proj);
 		}
 		*/
-	}
-
-	bool PLOS(Vector3 a, Vector3 b, int layerMask = 10551296) {
-		return unity::is_visible(a, b, (uintptr_t)esp::local_player);
-		//return GamePhysics::LineOfSight(a, b, layerMask, 0.f, 0.f, NULL);
 	}
 
 	bool IsAlive() {
@@ -580,8 +451,8 @@ public:
 		//if (write->Start()) {
 		if (((netwrite_start)(GameAssemblyBase + 0x21E7EF0))(write)) {
 
-			typedef void(*netwrite_packetid)(UINT);
-			((netwrite_packetid)(GameAssemblyBase + 0x21E7B20))((UINT)MessageType::RPCMessage);
+			typedef void(*netwrite_packetid)(uintptr_t, UINT);
+			((netwrite_packetid)(GameAssemblyBase + 0x21E7B20))(write, (UINT)MessageType::RPCMessage);
 			//write->PacketID((UINT)MessageType::RPCMessage);
 
 			auto net = *reinterpret_cast<uintptr_t*>((uintptr_t)esp::local_player + 0x58);
@@ -593,12 +464,12 @@ public:
 			UINT id = *reinterpret_cast<UINT*>(net + 0x10);
 			//UINT id = Network->ID();
 
-			typedef void(*netwrite_uint32)(UINT);
+			typedef void(*netwrite_uint32)(uintptr_t, UINT);
 
-			((netwrite_uint32)(GameAssemblyBase + 0x21E81F0))(id);
+			((netwrite_uint32)(GameAssemblyBase + 0x21E81F0))(write, id);
 			//write->UInt32(id);
 
-			((netwrite_uint32)(GameAssemblyBase + 0x21E81F0))(2324190493); //projectile update id 2324190493
+			((netwrite_uint32)(GameAssemblyBase + 0x21E81F0))(write, 2324190493); //projectile update id 2324190493
 			//write->UInt32(2324190493); //projectile update
 
 			typedef void(*serialize)(uintptr_t, uint64_t);
@@ -631,8 +502,8 @@ public:
 			//sendInfo->connection() = conn;
 			//sendInfo->connections() = 0;
 
-			typedef void(*netwrite_send)(uintptr_t);
-			((netwrite_send)(GameAssemblyBase + 0x21E7DD0))(si);
+			typedef void(*netwrite_send)(uintptr_t, uintptr_t);
+			((netwrite_send)(GameAssemblyBase + 0x21E7DD0))(write, si);
 			//write->Send(sendInfo);
 		}
 	}
@@ -667,7 +538,6 @@ public:
 			g_UpdateReusable = CreatePlayerProjectileUpdate();
 		}
 
-		//WHY DOES INTELLISENSE BREAK IN RETARDED PLACES????
 
 		((rust::classes::PlayerProjectileUpdate*)g_UpdateReusable)->projectileID = _this->projectileID();
 		//((ProtoBuf::PlayerProjectileUpdate*)g_UpdateReusable)->projectileID() = _this->projectileID();
@@ -886,6 +756,9 @@ public:
 				//if (misc::best_lean != Vector3(0, 0, 0))
 				//	pos = misc::best_lean;
 					//pos = CheatCore::m_cheat->RealGangstaShit;
+				//that was a lie this manipulator is different fuck me sideways
+				if (settings::RealGangstaShit != Vector3(0, 0, 0))
+					pos = settings::RealGangstaShit;
 
 				_this->currentPosition() = pos;
 
@@ -948,11 +821,11 @@ public:
 		//if (!memory::IsAddressValid(owner))
 			return;
 
-		if (owner == LocalPlayer && settings::targetbehindwall) {
+		if (owner == LocalPlayer && vars->combat.targetbehindwall) {
 			while (this->IsAlive() && _this->traveledTime() < 0.09f)
 				this->UpdateVelocity();
 		}
-		else if (owner == LocalPlayer && !settings::targetbehindwall) {
+		else if (owner == LocalPlayer && !vars->combat.targetbehindwall) {
 			_this->ricochetChance(0.f);
 			return _this->Launch();
 		}
@@ -979,7 +852,7 @@ public:
 			}
 
 			float bulletUpdateRate = 0.01f;
-			if (owner == LocalPlayer && settings::targetbehindwall) {
+			if (owner == LocalPlayer && vars->combat.targetbehindwall) {
 				while (this->IsAlive()) {
 					float time = unity::get_realtimesincestartup();//UnityEngine::Time::get_realtimeSinceStartup();
 					if (time - _this->launchTime() < _this->traveledTime() + bulletUpdateRate) {
@@ -989,66 +862,31 @@ public:
 				}
 			}
 			else
-				return hooks::orig::_update((Projectile*)this);
+				return _update((Projectile*)this);
 				//return Hooks::ProjectileUpdateHk.get_original<decltype(&Hooks::_Update)>()(this);
 
 		} while (0);
 
-		return hooks::orig::_update((Projectile*)this);//Hooks::ProjectileUpdateHk.get_original<decltype(&Hooks::_Update)>()(this);
+		return _update((Projectile*)this);//hooks::orig::_update((Projectile*)this);//Hooks::ProjectileUpdateHk.get_original<decltype(&Hooks::_Update)>()(this);
 
-	}
-
-	float GetMountedVelocity(base_player* target)
-	{
-		if (!target)
-			return 0.f;
-		
-		basemountable* mounted = (basemountable*)get_mounted((uintptr_t)target);
-
-		if (!mounted)
-			return 0.f;
-
-		
-		auto realM = get_parent_entity((uintptr_t)mounted);
-
-		if (!realM)
-			return 0.f;
-
-		//bool Ten = !strcmp(name, ("minicopter.entity")) || !strcmp(name, ("scraptransporthelicopter"));
-		//bool Six = std::string(name).find("car") != std::string::npos || !strcmp(name, ("testridablehorse")) || !strcmp(name, ("rowboat")) || !strcmp(name, ("rhib"));
-		const wchar_t* name = get_short_prefab_name(realM).str;
-
-		if (!wcscmp(name, L"minicopter.entity") || !wcscmp(name, L"scraptransporthelicopter"))  return 50.f;
-		else if (!wcscmp(name, L"rowboat") || !wcscmp(name, L"rhib")) return 25.f;
-		else if (std::wstring(name).find(L"car") != std::string::npos) {
-			static auto GetMaxForwardSpeed = *reinterpret_cast<float(**)(BaseEntity*)>(Il2CppWrapper::GetClassFromName(_(""), _("ModularCar"))->GetMethodFromName(_("GetMaxForwardSpeed")));
-			float speed = GetMaxForwardSpeed(realM) * 1.3f;
-			return max(speed, 30.f);
-		}
-		else if (name == "testridablehorse") {
-			static unsigned long long offset = Il2CppWrapper::GetClassFromName("", "BaseRidableAnimal")->GetFieldFromName("maxSpeed")->offset - 0;
-			return *reinterpret_cast<float*>(realM + offset) * 1.5f;
-		}
-
-		return 0.f;
 	}
 
 	float GetHitDist(float travel, base_player* target, bool player) {
-		if (!memory::IsAddressValid(target))
+		if (!target)
 			return 0.f;
 
-		auto LocalPlayerBase = CheatCore::m_cheat->LocalPlayer;
-		if (!memory::IsAddressValid(LocalPlayerBase))
+		auto LocalPlayerBase = esp::local_player;//CheatCore::m_cheat->LocalPlayer;
+		if (!LocalPlayerBase)
 			return 0.f;
 
-		float time = UnityEngine::Time::get_realtimeSinceStartup();
-		float timeSinceLastTick = time - LocalPlayerBase->lastSentTickTime();
+		float time = unity::get_realtimesincestartup();//UnityEngine::Time::get_realtimeSinceStartup();
+		float timeSinceLastTick = time - LocalPlayerBase->get_last_sent_tick_time();
 		float timeSinceLastTickClamped = max(0.f, min(timeSinceLastTick, 1.f));
 
-		bool mountedplayer = target->_get_isMounted();
+		bool mountedplayer = target->get_mountable() ? 1 : 0;
 
 		float Velocity = 0.f;
-		if (mountedplayer && memory::IsAddressValid(target) && !player)
+		if (mountedplayer && target && !player)
 			Velocity = GetMountedVelocity(target);
 
 		else if (!player && !mountedplayer)
@@ -1060,20 +898,20 @@ public:
 			if (player && !mountedplayer)
 				return min(1.4f, 1.4f);
 
-			else if (mountedplayer && memory::IsAddressValid(target)) {
+			else if (mountedplayer && target) {
 
-				BaseMountable* mounted = target->GetMounted();
-				if (memory::IsAddressValid(mounted)) {
+				basemountable* mounted = target->get_mountable();
+				if (mounted) {
 
-					auto* realM = mounted->GetParentEntity();
+					auto realM = get_parent_entity((uintptr_t)mounted);
 
-					if (!memory::IsAddressValid(realM))
+					if (!realM)
 						return 0.f;
 
-					const char* name = realM->_get_ShortPrefabName()->str();
+					auto name = get_short_prefab_name((uintptr_t)realM).str;//realM->_get_ShortPrefabName()->str();
 
-					bool Ten = !strcmp(name, ("minicopter.entity")) || !strcmp(name, ("scraptransporthelicopter"));
-					bool Six = std::string(name).find("car") != std::string::npos || !strcmp(name, ("testridablehorse")) || !strcmp(name, ("rowboat")) || !strcmp(name, ("rhib"));
+					bool Ten = !wcscmp(name, _(L"minicopter.entity")) || !wcscmp(name, _(L"scraptransporthelicopter"));
+					bool Six = std::wstring(name).find(L"car") != std::wstring::npos || !wcscmp(name, _(L"testridablehorse")) || !wcscmp(name, _(L"rowboat")) || !wcscmp(name, _(L"rhib"));
 
 					if (Ten)
 						if (maxDist > 10.f)

@@ -163,6 +163,29 @@ namespace rust {
 			};
 		};
 
+		class InputMessage {
+		public:
+			DEFINE_MEMBER_N(bool, ShouldPool, 0x10);
+			DEFINE_MEMBER_N(bool, _disposed, 0x11);
+			DEFINE_MEMBER_N(int, buttons, 0x14);
+			DEFINE_MEMBER_N(Vector3, aimAngles, 0x18);
+			DEFINE_MEMBER_N(Vector3, mouseDelta, 0x24);
+		};
+
+		class PlayerTick {
+		public:
+			DEFINE_MEMBER_N(bool, ShouldPool, 0x10);
+			DEFINE_MEMBER_N(bool, _disposed, 0x11);
+			DEFINE_MEMBER_N(InputMessage*, inputState, 0x18);
+			DEFINE_MEMBER_N(Vector3, position, 0x20);
+			//DEFINE_MEMBER_N(modelstate*, modelState, 0x30);
+			DEFINE_MEMBER_N(uintptr_t, modelState, 0x30);
+			DEFINE_MEMBER_N(UINT, activeItem, 0x38);
+			DEFINE_MEMBER_N(Vector3, eyePos, 0x3C);
+			DEFINE_MEMBER_N(UINT, parentID, 0x48);
+			DEFINE_MEMBER_N(UINT, deltaMs, 0x4C);
+		};
+
 		class game_object {
 		public:
 			template<typename T>

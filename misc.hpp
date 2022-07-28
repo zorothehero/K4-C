@@ -13,35 +13,100 @@
 #include "rust/rust.hpp"
 #include "rust/unity.hpp"
 #include "rust/classes.hpp"
+#include "projectile.hpp"
 //#include "projectile.hpp"
-#include "projectile1.hpp"
 //#include <vector>
 
-struct projectileshoot_projectile {
-	bool ShouldPool; // 0x10
-	bool _disposed; // 0x11
-	int projectileID; // 0x14
-	Vector3 startPos; // 0x18
-	Vector3 startVel; // 0x24
-	int seed; // 0x30
+float vprojectile_desync1 = 0.55f;
+
+int projectileProtection1 = 6;
+
+UINT64 g_UpdateReusable = NULL;
+
+struct TraceResult1 {
+public:
+	bool didHit;
+	bool silentCat;
+	base_player* hitEntity;
+	Vector3 hitPosition;
+	Vector3 outVelocity;
+	float hitTime;
+	float hitDist;
+	bool canHit;
+	bool HasLOS;
 };
 
-struct projectileshoot {
-	bool ShouldPool; // 0x10
-	bool _disposed; // 0x11
-	int ammoType; // 0x14
-	//std::array<projectileshoot_projectile, 8> projectiles; //0x18
-	//projectileshoot_projectile projectiles[];
-	//std::vector<projectileshoot_projectile> projectiles;
-	rust::list<projectileshoot_projectile*>* projectiles; //0x18
+enum class MessageType : BYTE
+{
+	Welcome = 1,
+	Auth = 2,
+	Approved = 3,
+	Ready = 4,
+	Entities = 5,
+	EntityDestroy = 6,
+	GroupChange = 7,
+	GroupDestroy = 8,
+	RPCMessage = 9,
+	EntityPosition = 10,
+	ConsoleMessage = 11,
+	ConsoleCommand = 12,
+	Effect = 13,
+	DisconnectReason = 14,
+	Tick = 15,
+	Message = 16,
+	RequestUserInformation = 17,
+	GiveUserInformation = 18,
+	GroupEnter = 19,
+	GroupLeave = 20,
+	VoiceData = 21,
+	EAC = 22,
+	EntityFlags = 23,
+	World = 24,
+	ConsoleReplicatedVars = 25,
 };
+
+float GetMountedVelocity(base_player* target)
+{
+	if (!target)
+		return 0.f;
+
+	basemountable* mounted = (basemountable*)get_mounted((uintptr_t)target);
+
+	if (!mounted)
+		return 0.f;
+
+
+	auto realM = get_parent_entity((uintptr_t)mounted);
+
+	if (!realM)
+		return 0.f;
+
+	//bool Ten = !strcmp(name, ("minicopter.entity")) || !strcmp(name, ("scraptransporthelicopter"));
+	//bool Six = std::string(name).find("car") != std::string::npos || !strcmp(name, ("testridablehorse")) || !strcmp(name, ("rowboat")) || !strcmp(name, ("rhib"));
+	const wchar_t* name = get_short_prefab_name(realM).str;
+
+	if (!wcscmp(name, L"minicopter.entity") || !wcscmp(name, L"scraptransporthelicopter"))  return 50.f;
+	else if (!wcscmp(name, L"rowboat") || !wcscmp(name, L"rhib")) return 25.f;
+	else if (std::wstring(name).find(L"car") != std::wstring::npos) {
+
+		//static auto GetMaxForwardSpeed = *reinterpret_cast<float(**)(BaseEntity*)>(Il2CppWrapper::GetClassFromName(_(""), _("ModularCar"))->GetMethodFromName(_("GetMaxForwardSpeed")));
+		float speed = get_max_fwd_speed(realM) * 1.3f;
+		return max(speed, 30.f);
+	}
+	else if (!wcscmp(name, L"testridablehorse")) {
+		//static unsigned long long offset = Il2CppWrapper::GetClassFromName("", "BaseRidableAnimal")->GetFieldFromName("maxSpeed")->offset - 0;
+		return *reinterpret_cast<float*>(realM + 0x684) * 1.5f; //public float maxSpeed; // 0x684
+	}
+
+	return 0.f;
+}
 
 struct TimeAverageValueData
 {
 public:
 	int Calculate()
 	{
-		float realtimeSinceStartup = unity::get_realtimesincestartup();
+		float realtimeSinceStartup = unity::get_realtimesincestartup();//UnityEngine::Time::get_realtimeSinceStartup();
 		float num = realtimeSinceStartup - refreshTime;
 		if (num >= 1.0)
 		{
@@ -70,6 +135,69 @@ public:
 	int counterPrev;
 
 	int counterNext;
+};
+
+TimeAverageValueData Total_Counter = { 0, 0, 0 };
+TimeAverageValueData RPC_Counter = { 0, 0, 0 };
+TimeAverageValueData Signal_Counter = { 0, 0, 0 };
+
+float Clamp(float value, float min, float max)
+{
+	if (value < min)
+	{
+		value = min;
+	}
+	else if (value > max)
+	{
+		value = max;
+	}
+	return value;
+}
+
+float Dot(const Vector3& Vec1, const Vector3& Vec2)
+{
+	return Vec1.x * Vec2.x + Vec1.y * Vec2.y + Vec1.z * Vec2.z;
+}
+
+class Line1111 {
+public:
+	Vector3 start;
+	Vector3 end;
+	Line1111(Vector3 s, Vector3 e) {
+		start = s; end = e;
+	}
+	Line1111() { }
+	Vector3 ClosestPoint(Vector3 pos)
+	{
+		Vector3 a = end - start;
+		float magnitude = a.Length();
+		if (magnitude == 0.f) return start;
+		Vector3 vector = a / magnitude;
+		return start + vector * Clamp(Dot(pos - start, vector), 0.f, magnitude);
+	}
+};
+
+bool PLOS(Vector3 a, Vector3 b, int layerMask = 10551296) {
+	return unity::is_visible(a, b, (uintptr_t)esp::local_player);
+}
+
+struct projectileshoot_projectile {
+	bool ShouldPool; // 0x10
+	bool _disposed; // 0x11
+	int projectileID; // 0x14
+	Vector3 startPos; // 0x18
+	Vector3 startVel; // 0x24
+	int seed; // 0x30
+};
+
+struct projectileshoot {
+	bool ShouldPool; // 0x10
+	bool _disposed; // 0x11
+	int ammoType; // 0x14
+	//std::array<projectileshoot_projectile, 8> projectiles; //0x18
+	//projectileshoot_projectile projectiles[];
+	//std::vector<projectileshoot_projectile> projectiles;
+	rust::list<projectileshoot_projectile*>* projectiles; //0x18
 };
 
 struct fired_projectile {
@@ -275,9 +403,9 @@ namespace misc
 
 		if (flag)
 		{
-			AddViolation(loco, 
-				antihacktype::EyeHack, 
-				protections::eye_penalty);
+			//AddViolation(loco, 
+			//	antihacktype::EyeHack, 
+			//	protections::eye_penalty);
 		}
 		else if(protections::eye_protection >= 5 && 
 			loco->get_model_state()->has_flag(rust::classes::ModelState_Flag::Mounted)) {

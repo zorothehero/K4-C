@@ -1,5 +1,5 @@
 #pragma once
-#include "misc.hpp"
+#include "nine_meter_poggers.hpp"
 
 namespace hooks {
 	namespace orig {
@@ -241,6 +241,7 @@ namespace hooks {
 				rpc_position = *reinterpret_cast<Vector3*>(projshoot + 0x18);
 
 				target.visible = target.player->is_visible(rpc_position, target.pos);
+
 				if (misc::best_target == Vector3(0, 0, 0)
 					&& vars->combat.thick_bullet
 					&& vars->combat.shoot_at_fatbullet
@@ -257,7 +258,24 @@ namespace hooks {
 					}
 				}
 
-				if (vars->combat.manipulator
+				//NEW POGCHAMP MANIPULATOR
+
+				if (vars->combat.manipulator2
+					&& (unity::GetKey((rust::classes::KeyCode)vars->keybinds.manipulator)
+						&& settings::RealGangstaShit != Vector3(0, 0, 0)))
+				{
+					if (settings::FatHitPosition != Vector3(0, 0, 0))
+					{
+						target_pos = settings::FatHitPosition;
+						vis_fat = true;
+					}
+					rpc_position = settings::RealGangstaShit;
+					*reinterpret_cast<Vector3*>(projshoot + 0x18) = rpc_position;
+					Sphere(target_pos, 0.1f, col(0, 190, 190, 255), 10.f, 0);
+					Sphere(rpc_position, 0.1f, col(190, 0, 190, 255), 10.f, 0);
+					manipulated = true;
+				}
+				else if (vars->combat.manipulator
 					&& (unity::GetKey((rust::classes::KeyCode)vars->keybinds.manipulator)
 						|| misc::manipulate_vis))
 				{
@@ -360,6 +378,31 @@ namespace hooks {
 						misc::fired_projectiles[i] = f;
 						break;
 					}
+
+				if (vars->combat.manipulator2
+					&& (unity::GetKey((rust::classes::KeyCode)vars->keybinds.manipulator)
+						&& settings::RealGangstaShit != Vector3(0, 0, 0)))
+				{
+					p->currentVelocity(aimbot_velocity);
+					p->initialVelocity(aimbot_velocity);
+					p->previousVelocity(aimbot_velocity);
+
+					p->currentPosition(rpc_position);
+					p->previousPosition(rpc_position);
+					p->sentPosition(rpc_position);
+					p->prevSentVelocity(rpc_position); //?
+				}
+
+				if (vars->combat.targetbehindwall)
+				{
+					auto p1 = *reinterpret_cast<Projectile1**>(p);
+					p1->Launch1();
+				}				
+			}
+			if (vars->combat.targetbehindwall)
+			{
+				typedef void(*cclear)(uintptr_t);
+				((cclear)(mem::game_assembly_base + 13108368))((uintptr_t)baseprojectile + 0x370); //"System.Collections.Generic.List<Projectile>$$Clear",
 			}
 
 			if (misc::autoshot)
@@ -707,6 +750,14 @@ StringPool::Get(xorstr_("spine4")) = 827230707
     if(val == 0)        \
     return
 	uintptr_t client_entities;
+
+	void hk_projectile_update(uintptr_t pr) {
+		if (vars->combat.targetbehindwall) {
+			((Projectile1*)pr)->Update();
+		}
+		else
+			return _update((Projectile*)pr);
+	}
 
 	bool __stdcall dohit_hk(Projectile* p, HitTest* h, Vector3 v1, Vector3 v2) {
 
@@ -1335,6 +1386,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 
 				auto mag_ammo = getammo(held);
 
+
 				if (vars->combat.manipulator && ((unity::GetKey(rust::classes::KeyCode(vars->keybinds.manipulator)))
 						|| misc::manipulate_vis))
 				{
@@ -1391,6 +1443,9 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 			}
 			else misc::manipulate_vis = false;
 			//desync on key
+
+
+
 			if (unity::GetKey(rust::classes::KeyCode(vars->keybinds.desync_ok))
 				|| (vars->combat.manipulator
 					&& (unity::GetKey(rust::classes::KeyCode(vars->keybinds.manipulator))
@@ -1864,6 +1919,26 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 			if (tick_time > gui::tick_time_when_called + 10) {
 				unity::camera = unity::get_main_camera();
 				gui::tick_time_when_called = tick_time;
+			}
+
+			if (vars->combat.manipulator2 && ((unity::GetKey(rust::classes::KeyCode(vars->keybinds.manipulator)))
+				|| misc::manipulate_vis))
+			{
+				float nextshot = misc::fixed_time_last_shot + held->get_repeat_delay();
+				if (CanManipulate(held, esp::best_target.player, state))
+					if (nextshot < time
+						&& (held->get_time_since_deploy() > held->get_deploy_delay() ||
+							!strcmp(held->get_class_name(), _("BowWeapon")) ||
+							!strcmp(held->get_class_name(), _("CompoundBowWeapon")) ||
+							!strcmp(held->get_class_name(), _("CrossbowWeapon"))))
+					{
+						auto v = settings::RealGangstaShit;//esp::local_player->get_player_eyes()->get_position() + misc::best_lean;
+						esp::local_player->console_echo(string::wformat(_(L"[trap]: ClientInput - manipulator2 attempted shot from position (%d, %d, %d) with desync of %d"), (int)v.x, (int)v.y, (int)v.z, (int)(settings::desyncTime * 100.f)));
+
+						misc::manual = true;
+						hk_LaunchProjectile(held);
+						baseplayer->send_client_tick();
+					}
 			}
 		}
 
