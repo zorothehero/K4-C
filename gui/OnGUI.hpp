@@ -1447,7 +1447,7 @@ namespace gui {
 					checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Bullet tp"), &vars->combat.bullet_tp, weapon_tab);
 					checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Autoshoot"), &vars->combat.autoshoot, weapon_tab, true, &vars->keybinds.autoshoot);
 					checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Manipulator"), &vars->combat.manipulator, weapon_tab, true, &vars->keybinds.manipulator);
-					checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Manipulator2"), &vars->combat.manipulator2, weapon_tab, true, &vars->keybinds.manipulator);
+					checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Manipulator 9m"), &vars->combat.manipulator2, weapon_tab, true, &vars->keybinds.manipulator);
 					checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Targetbehindwall"), &vars->combat.targetbehindwall, weapon_tab);
 					checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Shoot at fat"), &vars->combat.shoot_at_fatbullet, weapon_tab);
 					checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Double-tap"), &vars->combat.doubletap, weapon_tab);
