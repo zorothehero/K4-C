@@ -347,6 +347,10 @@ namespace esp {
 								best_target.avg_vel = Vector3(avgx, avgy, avgz);
 							}
 						}
+						
+						if (target.fov < vars->combat.aimbotfov
+							&& target.fov < best_target.fov)
+							best_target = target;
 						if (best_target.fov > vars->combat.aimbotfov)
 							best_target = aim_target();
 					}
