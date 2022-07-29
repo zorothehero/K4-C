@@ -833,56 +833,50 @@ public:
 	}
 
 	void Update() {
-		__try {
-			do
-			{
-				auto _this = (Projectile*)this;
-				if (!_this)
-					break;
+		do
+		{
+			auto _this = (Projectile*)this;
+			if (!_this)
+				break;
 
-				base_player* owner = _this->owner();
-				if (!owner)
-					break;
+			base_player* owner = _this->owner();
+			if (!owner)
+				break;
 
-				auto LocalPlayer = esp::local_player;
-				if (!LocalPlayer)
-					break;
+			auto LocalPlayer = esp::local_player;
+			if (!LocalPlayer)
+				break;
 
-				if (!this->IsAlive() || _this->projectileID() == 0 || !owner) {
-					_this->Retire();
-					break;
-				}
+			if (!this->IsAlive() || _this->projectileID() == 0 || !owner) {
+				_this->Retire();
+				break;
+			}
 
-				float bulletUpdateRate = 0.01f;
-				if (owner == LocalPlayer && vars->combat.targetbehindwall) {
-					while (this->IsAlive()) {
-						float time = unity::get_realtimesincestartup();//UnityEngine::Time::get_realtimeSinceStartup();
-						esp::local_player->console_echo(string::wformat(
-							_(L"[trap]: ProjectileUpdate - time: %d, launchtime: %d, traveledTime: 0.00%d, updateRate: 0.00%d, time - launchTime: 0.0%d, traveledTime + updateRate: %d / 100"),
-							(int)time,
-							(int)_this->launchTime(),
-							(int)_this->traveledTime() * 10000,
-							(int)bulletUpdateRate * 10000,
-							(int)(time - _this->launchTime()) * 100,
-							(int)_this->traveledTime() + bulletUpdateRate));
-						if (time - _this->launchTime() < _this->traveledTime() + bulletUpdateRate) {
-							break;
-						}
-						UpdateVelocity();
+			float bulletUpdateRate = 0.01f;
+			if (owner == LocalPlayer && vars->combat.targetbehindwall) {
+				while (this->IsAlive()) {
+					float time = unity::get_realtimesincestartup();//UnityEngine::Time::get_realtimeSinceStartup();
+					esp::local_player->console_echo(string::wformat(
+						_(L"[trap]: ProjectileUpdate - time: %d, launchtime: %d, traveledTime: 0.00%d, updateRate: 0.00%d, time - launchTime: 0.0%d, traveledTime + updateRate: %d / 100"),
+						(int)time,
+						(int)_this->launchTime(),
+						(int)_this->traveledTime() * 10000,
+						(int)bulletUpdateRate * 10000,
+						(int)(time - _this->launchTime()) * 100,
+						(int)_this->traveledTime() + bulletUpdateRate));
+					if (time - _this->launchTime() < _this->traveledTime() + bulletUpdateRate) {
+						break;
 					}
+					UpdateVelocity();
 				}
-				else
-					return _update((Projectile*)this);
-				//return Hooks::ProjectileUpdateHk.get_original<decltype(&Hooks::_Update)>()(this);
+			}
+			else
+				return _update((Projectile*)this);
+			//return Hooks::ProjectileUpdateHk.get_original<decltype(&Hooks::_Update)>()(this);
 
-			} while (0);
+		} while (0);
 
-			return _update((Projectile*)this);//hooks::orig::_update((Projectile*)this);//Hooks::ProjectileUpdateHk.get_original<decltype(&Hooks::_Update)>()(this);
-		}
-		__except (true) {
-
-		}
-
+		return _update((Projectile*)this);//hooks::orig::_update((Projectile*)this);//Hooks::ProjectileUpdateHk.get_original<decltype(&Hooks::_Update)>()(this);
 	}
 
 	float GetHitDist(float travel, base_player* target, bool player) {

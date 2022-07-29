@@ -118,7 +118,7 @@ bool DllMain(HMODULE hmodule)
 			hooks::init_hooks();
 
 			init_bp();
-
+			
 			init_projectile();
             
             typedef rust::list<uintptr_t>* (*AAA)();//real rust 36204160 ALKAD 36223520 "Name": "ConsoleSystem.Index$$get_All",

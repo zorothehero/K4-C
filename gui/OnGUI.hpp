@@ -50,6 +50,8 @@ inline Vector3 EulerAngles(Vector4 q1) {
 
 #define rgba(r,g,b,a) gui::Color(r / 255.f, g / 255.f, b / 255.f, a)
 
+static float r = 1.00f, g = 0.00f, b = 1.00f;
+
 namespace gui {
 	class Color {
 	public:
@@ -1176,7 +1178,6 @@ namespace gui {
 		if (event_type == rust::classes::EventType::Repaint) {
 			{
 				static int cases = 0;
-				static float r = 1.00f, g = 0.00f, b = 1.00f;
 				switch (cases) {
 				case 0: { r -= 0.0015f; if (r <= 0) cases += 1; break; }
 				case 1: { g += 0.0015f; b -= 0.0015f; if (g >= 1) cases += 1; break; }
@@ -1447,7 +1448,7 @@ namespace gui {
 					checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Bullet tp"), &vars->combat.bullet_tp, weapon_tab);
 					checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Autoshoot"), &vars->combat.autoshoot, weapon_tab, true, &vars->keybinds.autoshoot);
 					checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Manipulator"), &vars->combat.manipulator, weapon_tab, true, &vars->keybinds.manipulator);
-					checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Manipulator 9m"), &vars->combat.manipulator2, weapon_tab, true, &vars->keybinds.manipulator);
+					checkbox(event_type, menu_pos, pos, mouse_pos, _(L"9 meter"), &vars->combat.manipulator2, weapon_tab, true, &vars->keybinds.manipulator);
 					checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Targetbehindwall"), &vars->combat.targetbehindwall, weapon_tab);
 					checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Shoot at fat"), &vars->combat.shoot_at_fatbullet, weapon_tab);
 					checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Double-tap"), &vars->combat.doubletap, weapon_tab);
@@ -1614,6 +1615,7 @@ namespace gui {
 	}
 }
 
+
 float unity::get_fov(Vector3 Pos) {
 	esp::matrix = unity::get_view_matrix();
 
@@ -1758,7 +1760,7 @@ namespace esp
 					belt->for_each([&](weapon* item, int32_t idx) {
 						{
 							static int cases = 0;
-							static float r = 1.00f, g = 0.00f, b = 1.00f;
+							//static float r = 1.00f, g = 0.00f, b = 1.00f;
 							switch (cases) {
 							case 0: { r -= 0.0008f; if (r <= 0) cases += 1; break; }
 							case 1: { g += 0.0008f; b -= 0.0008f; if (g >= 1) cases += 1; break; }
@@ -1858,17 +1860,183 @@ namespace esp
 		gui::circle(o, r, color, true);
 	}
 
+	void lollll(Vector2 center) {
+		gui::Color col = gui::Color(r, g, b, 1);
+		auto pixelsize = 5; auto trianglecount = 5;
+		Vector2 triangleList[5][3] = {
+			{ Vector2{ 0, 0 }, Vector2{ 0, 0 }, Vector2{ 0, 0 } },
+			{ Vector2{ 0, 0 }, Vector2{ 0, 0 }, Vector2{ 0, 0 } },
+			{ Vector2{ 0, 0 }, Vector2{ 0, 0 }, Vector2{ 0, 0 } },
+			{ Vector2{ 0, 0 }, Vector2{ 0, 0 }, Vector2{ 0, 0 } },
+			{ Vector2{ 0, 0 }, Vector2{ 0, 0 }, Vector2{ 0, 0 } }
+		};
+		for (size_t n = 0; n < trianglecount; n++)
+		{
+			std::vector<Vector2> v = {};
+			for (size_t i = 0; i < 3; i++)
+			{
+				triangleList[n][i].x = rand() % (pixelsize/2) + 1;
+				triangleList[n][i].y = rand() % (pixelsize/2) + 1;
+
+				if (triangleList[n][i].x > triangleList[n][i].y)
+				{
+					float tmp = triangleList[n][i].x;
+					triangleList[n][i].x = triangleList[n][i].y;
+					triangleList[n][i].y = tmp;
+				}
+			}
+		}
+		
+		
+		auto morphTriangleIdx = new int[pixelsize];
+		auto morphVertexIdx =	new int[pixelsize];
+		auto morphDeltaX =		new int[pixelsize];
+		auto morphDeltaY =		new int[pixelsize];
+		auto setMorphParams = [&]() {
+			for (size_t i = 0; i < 3; i++)
+			{
+				morphTriangleIdx[i] = rand() % pixelsize + 0;
+				morphVertexIdx[i] = rand() % 3 + 0;
+				morphDeltaX[i] = 0;
+				morphDeltaY[i] = 0;
+				if ((rand() % 1 + 0) == 0)
+					morphDeltaX[i] = 1;
+				else
+					morphDeltaX[i] = -1;
+			}
+		};
+		
+		if((rand() % 10 + 1) == 1)
+			setMorphParams();
+
+		for (size_t i = 0; i < 5; i++)
+		{
+			float x = triangleList[morphTriangleIdx[i]][morphVertexIdx[i]].x = morphDeltaX[i];
+			float y = triangleList[morphTriangleIdx[i]][morphVertexIdx[i]].y = morphDeltaY[i];
+			
+			if (x > pixelsize / 2 - 1)
+			{
+				x = pixelsize / 2 - 1;
+				morphDeltaX[i] = -1;
+			}
+			else if (x < 0)
+			{
+				x = 0;
+				morphDeltaX[i] = 1;
+			}
+			
+			if(y > pixelsize / 2 - 1)
+			{
+				y = pixelsize / 2 - 1;
+				morphDeltaY[i] = -1;
+			}
+			else if (y < 0)
+			{
+				y = 0;
+				morphDeltaY[i] = 1;
+			}
+
+			if (x > y) {
+				float tmp = x;
+				x = y;
+				y = tmp;
+			}
+			
+			triangleList[morphTriangleIdx[i]][morphVertexIdx[i]].x = x;
+			triangleList[morphTriangleIdx[i]][morphVertexIdx[i]].y = y;
+		}
+		
+		std::vector<Vector2> v = { };
+		std::vector<Vector2> w = { };
+		
+		auto reflect = [&](std::vector<Vector2>& v, std::vector<Vector2>& w, int n, int offset) {
+			for (int i = 0; i < v.size(); i++)
+			{
+				if (n == 0)
+				{
+					w[i].x = v[i].x + offset;
+					w[i].y = v[i].y + offset;
+				}
+				else if (n == 1)
+				{
+					w[i].x = -v[i].x + offset;
+					w[i].y = v[i].y + offset;
+				}
+				else if (n == 2)
+				{
+					w[i].x = v[i].x + offset;
+					w[i].y = -v[i].y + offset;
+				}
+				else if (n == 3)
+				{
+					w[i].x = -v[i].x + offset;
+					w[i].y = -v[i].y + offset;
+				}
+				else if (n == 4)
+				{
+					w[i].x = v[i].y + offset;
+					w[i].y = v[i].x + offset;
+				}
+				else if (n == 5)
+				{
+					w[i].x = -v[i].y + offset;
+					w[i].y = v[i].x + offset;
+				}
+				else if (n == 6)
+				{
+					w[i].x = v[i].y + offset;
+					w[i].y = -v[i].x + offset;
+				}
+				else if (n == 7)
+				{
+					w[i].x = -v[i].y + offset;
+					w[i].y = -v[i].x + offset;
+				}
+			}
+		};
+
+		for (size_t n = 0; n < trianglecount; n++)
+		{
+			for (size_t k = 0; k < 3; k++)
+			{
+				v[k].x = triangleList[n][k].x;
+				v[k].y = triangleList[n][k].y;
+			}
+			
+			for (size_t k = 0; k < 3; k++)
+			{
+				reflect(v, w, k, pixelsize / 2);
+
+				for (size_t z = 0; z < trianglecount; z++)
+				{
+					for (size_t ii = 0; ii < 3; ii++)
+					{
+						w[ii].x += center.x;
+						w[ii].y += center.y;
+					}
+
+					gui::line(w[0], w[1], col);
+					gui::line(w[1], w[2], col);
+					gui::line(w[0], w[2], col);
+				}
+			}
+		}
+	}
+
 	void offscreen_indicator(Vector3 position) {
 		Vector3 local = esp::local_player->get_player_eyes()->get_position();
-
+		lollll(Vector2(1920 / 2, 1080 / 2));
 		float num = atan2(local.x - position.x, local.z - position.z) * 57.29578f - 180.f - EulerAngles(esp::local_player->get_player_eyes()->get_rotation()).y;
 
 		if (!(num < -420 || num > -300)) return;
+
 		Vector2 tp0 = CosTanSinLineH(num, 5.f,		 1920 / 2, 1080 / 2, 150.f);
 		Vector2 tp1 = CosTanSinLineH(num + 2.f, 5.f, 1920 / 2, 1080 / 2, 140.f);
 		Vector2 tp2 = CosTanSinLineH(num - 2.f, 5.f, 1920 / 2, 1080 / 2, 140.f);
 
 		Vector2 p = { tp0.x, tp0.y }, p1 = { tp1.x, tp1.y }, p2 = { tp2.x, tp2.y };
+		
+
 		gui::line(tp0, tp1, rgba(249.f, 130.f, 109.f, 255.f));
 		gui::line(tp0, tp2, rgba(249.f, 130.f, 109.f, 255.f));
 		gui::line(tp1, tp2, rgba(249.f, 130.f, 109.f, 255.f));
@@ -1892,7 +2060,6 @@ namespace esp
 		}
 	}
 
-	static float r = 1.00f, g = 0.00f, b = 1.00f;
 	void do_chams(base_player* player)
 	{
 		if (!player->is_alive() || player->is_sleeping()) return;
@@ -2198,7 +2365,7 @@ namespace esp
 			if (vars->visual.crosshair) {
 				{
 					static int cases = 0;
-					static float r = 1.00f, g = 0.00f, b = 1.00f;
+					//static float r = 1.00f, g = 0.00f, b = 1.00f;
 					switch (cases) {
 					case 0: { r -= 0.0008f; if (r <= 0) cases += 1; break; }
 					case 1: { g += 0.0008f; b -= 0.0008f; if (g >= 1) cases += 1; break; }

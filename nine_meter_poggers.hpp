@@ -3,7 +3,6 @@
 
 inline bool CanManipulate(base_projectile* baseProjectile, base_player* TargetPlayer, input_state* input)
 {
-
 	auto LocalPlayer = esp::local_player;//CheatCore::m_cheat->LocalPlayer;
 
 	if (!LocalPlayer)
@@ -91,11 +90,11 @@ inline bool CanManipulate(base_projectile* baseProjectile, base_player* TargetPl
 		//draw_line_(LastLocalEye, Up, ImColor(255, 0, 0, 255), 0.1f);
 		//draw_line_(LastLocalEye, Down, ImColor(255, 0, 0, 255), 0.1f);
 
-		Vector3 trg_pos = esp::best_target.player->get_bone_transform(48)->get_bone_position();
+		Vector3 trg_pos = esp::best_target.pos;//player->get_bone_transform(48)->get_bone_position();
 
 		auto HitScan = [&](Vector3 from, bool do_ = true, int val = 0) {
 
-			Vector3 head_pos_ = esp::best_target.player->get_bone_transform(48)->get_bone_position();
+			Vector3 head_pos_ = esp::best_target.pos;//player->get_bone_transform(48)->get_bone_position();
 
 			if (vars->combat.targetbehindwall && val) {
 				if ((val % 20) == 0) {
@@ -118,8 +117,8 @@ inline bool CanManipulate(base_projectile* baseProjectile, base_player* TargetPl
 				return std::make_pair(false, head_pos_);
 
 			if (vars->combat.HitScan) {
+				if (!esp::best_target.player) return std::make_pair(false, head_pos_);
 				for (auto bone : { 48, 3, 4, 15, 14, 26, 57 }) {
-
 					Vector3 TargetPosition;
 					if (bone == 48) TargetPosition = head_pos_;
 					else TargetPosition = esp::best_target.player->get_bone_transform(bone)->get_bone_position();
@@ -139,9 +138,9 @@ inline bool CanManipulate(base_projectile* baseProjectile, base_player* TargetPl
 
 		if (vars->visual.angles)
 		{
-			Sphere(HitResultUp.second, 0.1f, col(255, 255, 255, 255), 0.05f, false);
-			Sphere(HitResultDown.second, 0.1f, col(255, 255, 255, 255), 0.05f, false);
-			Sphere(HitResultForward.second, 0.1f, col(255, 255, 255, 255), 0.05f, false);
+			Sphere(HitResultUp.second, 0.1f, col(r * 100, g * 100, b * 100, 255), 0.05f, false);
+			Sphere(HitResultDown.second, 0.1f, col(r * 100, g * 100, b * 100, 255), 0.05f, false);
+			Sphere(HitResultForward.second, 0.1f, col(r * 100, g * 100, b * 100, 255), 0.05f, false);
 		}
 
 		if (HitResultForward.first)
@@ -178,9 +177,9 @@ inline bool CanManipulate(base_projectile* baseProjectile, base_player* TargetPl
 
 			if (vars->visual.angles)
 			{
-				Sphere(DiagonalUp, 0.1f, col(0, 0, 255, 255), 0.05f, 0);
-				Sphere(DiagonalDown, 0.1f, col(0, 0, 255, 255), 0.05f, 0);
-				Sphere(Horizontal, 0.1f, col(0, 0, 255, 255), 0.05f, 0);
+				Sphere(DiagonalUp, 0.1f, col(r * 100, g * 100, b * 100, 255), 0.05f, 0);
+				Sphere(DiagonalDown, 0.1f, col(r * 100, g * 100, b * 100, 255), 0.05f, 0);
+				Sphere(Horizontal, 0.1f, col(r * 100, g * 100, b * 100, 255), 0.05f, 0);
 			}
 
 			auto HitResultDiagonalUp = HitScan(DiagonalUp, true, val); //settings.ManipulationUp
@@ -325,13 +324,14 @@ inline bool CanManipulate(base_projectile* baseProjectile, base_player* TargetPl
 
 		if (LastLocalEye != ManipulationPosition)
 		{
-			esp::local_player->console_echo(string::wformat(_(L"[trap]: CanManipulate - RealGangstaShit: (%d, %d, %d), FatHitPosition: (%d, %d, %d)"),
+			esp::local_player->console_echo(string::wformat(_(L"[trap]: CanManipulate - RealGangstaShit: (%d, %d, %d), FatHitPosition: (%d, %d, %d), distance: %d"),
 				(int)ManipulationPosition.x,
 				(int)ManipulationPosition.y,
 				(int)ManipulationPosition.z,
 				(int)BehindWallPoistion.x,
 				(int)BehindWallPoistion.y,
-				(int)BehindWallPoistion.z));
+				(int)BehindWallPoistion.z,
+				(int)LastLocalEye.distance(ManipulationPosition)));
 		}
 	}
 

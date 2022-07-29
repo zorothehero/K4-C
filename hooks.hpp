@@ -267,13 +267,11 @@ namespace hooks {
 					if (settings::FatHitPosition != Vector3(0, 0, 0))
 					{
 						target_pos = settings::FatHitPosition;
-						vis_fat = true;
 					}
 					rpc_position = settings::RealGangstaShit;
 					*reinterpret_cast<Vector3*>(projshoot + 0x18) = rpc_position;
-					Sphere(target_pos, 0.1f, col(0, 190, 190, 255), 10.f, 0);
-					Sphere(rpc_position, 0.1f, col(190, 0, 190, 255), 10.f, 0);
 					manipulated = true;
+					target.visible = true;
 				}
 				else if (vars->combat.manipulator
 					&& (unity::GetKey((rust::classes::KeyCode)vars->keybinds.manipulator)
@@ -395,7 +393,7 @@ namespace hooks {
 
 				if (vars->combat.targetbehindwall)
 				{
-					((Projectile1*)p)->Launch1();
+					//((Projectile1*)p)->Launch1();
 				}				
 			}
 			if (vars->combat.targetbehindwall)
@@ -751,9 +749,16 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 	uintptr_t client_entities;
 
 	void hk_projectile_update(uintptr_t pr) {
-		esp::local_player->console_echo(_(L"[trap]: ProjectileUpdate - Called"));
+		//float offset = 0;
+		//if (misc::LineCircleIntersection(
+		//	esp::best_target.pos, 1.f, p->previousPosition(), p->currentPosition(), offset))
+		//{
+		//	
+		//}
+		
 		if (vars->combat.targetbehindwall) {
-			((Projectile1*)pr)->Update();
+			return _update((Projectile*)pr);
+			//((Projectile1*)pr)->Update();
 		}
 		else
 			return _update((Projectile*)pr);
@@ -1313,7 +1318,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 		//}
 #pragma endregion
 
-		if (baseplayer && !baseplayer->is_sleeping()) {
+		if (baseplayer) {
 			get_skydome();
 
 			auto fixed_time = get_fixedTime();
@@ -1389,7 +1394,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 
 
 				if (vars->combat.manipulator && ((unity::GetKey(rust::classes::KeyCode(vars->keybinds.manipulator)))
-						|| misc::manipulate_vis))
+					|| misc::manipulate_vis))
 				{
 					float nextshot = misc::fixed_time_last_shot + held->get_repeat_delay();
 					if (misc::can_manipulate(baseplayer, target, mm_eye))
@@ -1508,7 +1513,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 			}
 			else {
 				set_timeScale(1);
-				is_speeding = false;	
+				is_speeding = false;
 			}
 
 			auto target = esp::best_target; //baseplayer->get_aimbot_target(unity::get_camera_pos());
@@ -1541,8 +1546,8 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 						auto target = current.player;
 						if (vars->combat.thick_bullet
 							&& projectile->authoritative()
-							&& projectile->IsAlive()
-							&& vars->combat.thickness > 1.1f)//)
+							&& projectile->IsAlive())
+							//&& vars->combat.thickness > 1.1f)//)
 						{
 							if (target.player)
 							{
@@ -1550,17 +1555,17 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 
 								//transform* bonetrans = target.player->find_closest_bone(current_position, true
 								transform* bonetrans = target.player->get_bone_transform(48);
-								if(vars->combat.bodyaim)
+								if (vars->combat.bodyaim)
 									bonetrans = target.player->get_bone_transform((int)rust::classes::Bone_List::pelvis);
 
 
 								Vector3 target_bone = get_position((uintptr_t)bonetrans); //target_bone.y -= 0.8f;
 								//Sphere(target_bone, 2.2f, col(12, 150, 100, 50), 10.f, 100.f);
 
-								//if (misc::LineCircleIntersection(target_bone, vars->combat.thickness, current_position, projectile->previousPosition(), offset))
-								//{
-								//	current_position = Vector3::move_towards(target_bone, current_position, vars->combat.thickness);
-								//}
+								if (misc::LineCircleIntersection(target_bone, vars->combat.thickness, current_position, projectile->previousPosition(), offset))
+								{
+									current_position = Vector3::move_towards(target_bone, current_position, vars->combat.thickness);
+								}
 
 								auto dist = target_bone.distance(current_position);
 
@@ -1570,15 +1575,12 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 								float num8 = 2.0f / 60.0f;
 								float num9 = 2.0f * max(max(get_deltaTime(), get_smoothdeltaTime()), get_fixeddeltaTime());
 								float num11 = (settings::desyncTime + num8 + num9) * num2;
-
 								//typedef Vector3(*gpv)(uintptr_t);
 								//auto pv = ((gpv)(mem::game_assembly_base + 8331264))((uintptr_t)target.player);
 								auto pv = GetParentVelocity(target.player);
 								float mag = pv.length();
 								float num15 = 0.1f + num11 * mag + 0.1f;
-
-								esp::local_player->console_echo(string::wformat(_(L"[trap]: Fat bullet - calculated max: %d"), (int)num15));
-								dist -= num15;
+								//dist -= num15;
 
 								/*if (target.player->get_mountable())
 								{
@@ -1709,11 +1711,11 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 						//auto vel = (getmodifiedaimcone(0, eyes - target.pos, true)).Normalized() * v;
 
 						//misc::get_prediction(target, eyes, target.pos, vel, aim_vel, aim_dir, (Projectile*)projectile, true);
-						
+
 
 						Vector3 va = baseplayer->bodyAngles();
 						Vector2 vb = { va.x, va.y };
-						
+
 						auto calc = [&](const Vector3& src, const Vector3& dst) {
 							Vector3 d = src - dst;
 							return Vector2(RAD2DEG(Vector3::my_asin(d.y / d.length())), RAD2DEG(-Vector3::my_atan2(d.x, -d.z)));
@@ -1921,43 +1923,59 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 				unity::camera = unity::get_main_camera();
 				gui::tick_time_when_called = tick_time;
 			}
-
+			
 			if (vars->combat.manipulator2 && ((unity::GetKey(rust::classes::KeyCode(vars->keybinds.manipulator)))
 				|| misc::manipulate_vis))
 			{
-				float nextshot = misc::fixed_time_last_shot + held->get_repeat_delay();
-				if (CanManipulate(held, esp::best_target.player, state))
-					if (nextshot < time
-						&& (held->get_time_since_deploy() > held->get_deploy_delay() ||
-							!strcmp(held->get_class_name(), _("BowWeapon")) ||
-							!strcmp(held->get_class_name(), _("CompoundBowWeapon")) ||
-							!strcmp(held->get_class_name(), _("CrossbowWeapon"))))
+				if (wpn && held && esp::best_target.player) {
+					auto getammo = [&](base_projectile* held)
 					{
-						auto v = settings::RealGangstaShit;//esp::local_player->get_player_eyes()->get_position() + misc::best_lean;
-						esp::local_player->console_echo(string::wformat(_(L"[trap]: ClientInput - manipulator2 attempted shot from position (%d, %d, %d) with desync of %d"), (int)v.x, (int)v.y, (int)v.z, (int)(settings::desyncTime * 100.f)));
+						if (held)
+						{
+							auto mag = *reinterpret_cast<uintptr_t*>((uintptr_t)held + primaryMagazine);
+							if (!mag) return 0;
+							return *reinterpret_cast<int*>((uintptr_t)mag + 0x1C); //0x1C = public int contents;
+						}
+						return 0;
+					};
 
-						misc::manual = true;
-						hk_LaunchProjectile(held);
-						baseplayer->send_client_tick();
-					}
+					auto mag_ammo = getammo(held);
+
+					float nextshot = misc::fixed_time_last_shot + held->get_repeat_delay();
+					if (CanManipulate(held, esp::best_target.player, state))
+						if (nextshot < time
+							&& (held->get_time_since_deploy() > held->get_deploy_delay() ||
+								!strcmp(held->get_class_name(), _("BowWeapon")) ||
+								!strcmp(held->get_class_name(), _("CompoundBowWeapon")) ||
+								!strcmp(held->get_class_name(), _("CrossbowWeapon")))
+							&& mag_ammo > 0)
+						{
+							auto v = settings::RealGangstaShit;//esp::local_player->get_player_eyes()->get_position() + misc::best_lean;
+							esp::local_player->console_echo(string::wformat(_(L"[trap]: ClientInput - manipulator2 attempted shot from position (%d, %d, %d) with desync of %d"), (int)v.x, (int)v.y, (int)v.z, (int)(settings::desyncTime * 100.f)));
+
+							misc::manual = true;
+							hk_LaunchProjectile(held);
+							baseplayer->send_client_tick();
+						}
+				}
 			}
-		}
 
-		orig::baseplayer_client_input(baseplayer, state);
+			orig::baseplayer_client_input(baseplayer, state);
 
-		auto model_state = baseplayer->get_model_state();
+			auto model_state = baseplayer->get_model_state();
 
-		//model_state->set_water_level(99999);
+			//model_state->set_water_level(99999);
 
-		if (vars->misc.spinbot) {
-			state->set_aim_angles(Vector3(100, my_rand() % 999 + -999, 100));
-		}
+			if (vars->misc.spinbot) {
+				state->set_aim_angles(Vector3(100, my_rand() % 999 + -999, 100));
+			}
 
-		if (vars->misc.autofarm) {
-			if (misc::node.pos != Vector3(0, 0, 0))
-			{
-				auto dir = (misc::node.pos - baseplayer->get_player_eyes()->get_position()).Normalized();
-				state->set_aim_angles(dir);
+			if (vars->misc.autofarm) {
+				if (misc::node.pos != Vector3(0, 0, 0))
+				{
+					auto dir = (misc::node.pos - baseplayer->get_player_eyes()->get_position()).Normalized();
+					state->set_aim_angles(dir);
+				}
 			}
 		}
 	}
