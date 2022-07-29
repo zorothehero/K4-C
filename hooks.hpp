@@ -307,7 +307,6 @@ namespace hooks {
 				break;
 			}
 
-
 			for (int i = 0; i < size; i++) {
 				auto projectile = *(uintptr_t*)(shoot_list + 0x20 + i * 0x8);
 				if (target.ent && (target.visible || manipulated || misc::autoshot) && !target.teammate) {

@@ -717,7 +717,7 @@ public:
 
 	bool is_alive() {
 		if (!this) return false;
-		return this->lifestate() == BaseCombatEntity_LifeState::Dead;
+		return this->lifestate() == BaseCombatEntity_LifeState::Alive;
 	}
 };
 
@@ -1862,7 +1862,8 @@ public:
 
 	Item* get_active_weapon()
 	{
-		unsigned int ActUID = this->clActiveItem();//mem::read<unsigned int>((uintptr_t)this + clActiveItem);
+		//unsigned int ActUID = this->clActiveItem();
+		unsigned int ActUID = mem::read<unsigned int>((uintptr_t)this + 0x5D0); //private uint clActiveItem; //
 		if (!ActUID)
 			return 0;
 		Item* ActWeapon;
