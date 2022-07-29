@@ -5,6 +5,19 @@
 #include <vector>
 #include "../utils/string_format.h"
 
+class default_t
+{
+public:
+	template<typename T>
+	operator T() const { return T(); }
+};
+default_t const defaultt = default_t();
+#define NP(type) type nonptr = defaultt; if(!this) return nonptr;
+#define FIELD(klass,tr,name,type) type& name() { \
+	NP(type) \
+	static auto off = il2cpp::value(klass, tr); \
+	return *reinterpret_cast<type*>(this + off); }
+
 template<typename T>
 void pop_front(std::vector<T>& vec)
 {
@@ -24,6 +37,11 @@ public:
 	Vector3 size;
 };
 
+enum BaseCombatEntity_LifeState {
+	Alive = 0,
+	Dead = 1
+};
+
 uintptr_t planner_rotationoffset = il2cpp::value(_("Planner"), _("rotationOffset"));
 uintptr_t planner_currentconstruction = il2cpp::value(_("Planner"), _("currentConstruction"));
 uintptr_t planner_guide = il2cpp::value(_("Planner"), _("guide"));
@@ -38,7 +56,7 @@ uintptr_t clientTeam = il2cpp::value(_("BasePlayer"), _("clientTeam"));
 uintptr_t playerFlags = il2cpp::value(_("BasePlayer"), _("playerFlags"));
 uintptr_t clientTickInterval = il2cpp::value(_("BasePlayer"), _("clientTickInterval"));
 uintptr_t eyes = il2cpp::value(_("BasePlayer"), _("eyes"));
-uintptr_t lastSentTickTime = il2cpp::value(_("BasePlayer"), _("lastSentTickTime"));
+uintptr_t _lastSentTickTime = il2cpp::value(_("BasePlayer"), _("lastSentTickTime"));
 uintptr_t modelState = il2cpp::value(_("BasePlayer"), _("modelState"));
 uintptr_t input = il2cpp::value(_("BasePlayer"), _("input"));
 uintptr_t containerBelt = il2cpp::value(_("PlayerInventory"), _("containerBelt"));
@@ -151,7 +169,7 @@ typedef struct Str
 	wchar_t str[1];
 } *str;
 
-class weapon;
+class Item;
 
 static auto GetNormal = reinterpret_cast<Vector3 (*)(uintptr_t, Vector3)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("TerrainHeightMap"), _("GetNormal"), 1, _(""), _(""))));
 
@@ -165,15 +183,11 @@ static auto GetIndex = reinterpret_cast<int(*)(uintptr_t SkinSetCollection, floa
 
 static auto set_onLadder = reinterpret_cast<void(*)(ModelState*, bool)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("ModelState"), _("set_onLadder"), 1, _(""), _(""))));
 
-static auto GetWorldVelocity = reinterpret_cast<Vector3(*)(BasePlayer * base_entity)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseEntity"), _("GetWorldVelocity"), 0, _(""), _(""))));
-
-static auto GetParentVelocity = reinterpret_cast<Vector3(*)(BasePlayer * base_entity)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseEntity"), _("GetParentVelocity"), 0, _(""), _(""))));
-
 static auto HasPlayerFlag = reinterpret_cast<bool(*)(BasePlayer*, rust::classes::PlayerFlags)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("HasPlayerFlag"), 1, _(""), _(""))));
 
 static auto get_game_object_transform = reinterpret_cast<Transform * (*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GameObject"), _("get_transform"), 0, _(""), _("UnityEngine"))));
 
-static auto get_iconSprite = reinterpret_cast<uintptr_t(*)(weapon * Item)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Item"), _("get_iconSprite"), 0, _(""), _(""))));
+static auto get_iconSprite = reinterpret_cast<uintptr_t(*)(Item * Item)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Item"), _("get_iconSprite"), 0, _(""), _(""))));
 
 static auto get_texture = reinterpret_cast<uintptr_t(*)(uintptr_t sprite)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Sprite"), _("get_texture"), 0, _(""), _("UnityEngine"))));
 
@@ -187,8 +201,6 @@ static auto get_frameCount = reinterpret_cast<int(*)()>(*reinterpret_cast<uintpt
 
 static auto get_timeScale = reinterpret_cast<float(*)()>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Time"), _("get_timeScale"), 0, _(""), _("UnityEngine"))));
 
-static auto FindBone = reinterpret_cast<Transform * (*)(BasePlayer*, rust::classes::string)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseEntity"), _("FindBone"), 1, _(""), _(""))));
-
 static auto get_mousePosition = reinterpret_cast<Vector3(*)()>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Input"), _("get_mousePosition"), 0, _(""), _("UnityEngine"))));
 
 static auto FloorToInt = reinterpret_cast<int (*)(float)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Mathf"), _("FloorToInt"), 1, _(""), _("UnityEngine"))));
@@ -196,8 +208,6 @@ static auto FloorToInt = reinterpret_cast<int (*)(float)>(*reinterpret_cast<uint
 static auto get_gravity = reinterpret_cast<Vector3(*)()>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Physics"), _("get_gravity"), 1, _(""), _("UnityEngine"))));
 
 static auto get_isAlive = reinterpret_cast<bool (*)(BaseProjectile*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Projectile"), _("get_isAlive"), 0, _(""), _(""))));
-
-static auto get_position = reinterpret_cast<Vector3(*)(uintptr_t Transform)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Transform"), _("get_position"), 0, _(""), _("UnityEngine"))));
 
 static auto get_rotation = reinterpret_cast<Vector4(*)(uintptr_t Transform)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Transform"), _("get_rotation"), 0, _(""), _("UnityEngine"))));
 
@@ -229,8 +239,6 @@ static auto InverseTransformDirection = reinterpret_cast<Vector3(*)(Transform*, 
 
 static auto get_localToWorldMatrix = reinterpret_cast<VMatrix(*)(Transform*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Transform"), _("get_localToWorldMatrix"), 0, _(""), _("UnityEngine"))));
 
-static auto _get_transform = reinterpret_cast<Transform * (*)(BasePlayer*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Component"), _("get_transform"), 0, _(""), _("UnityEngine"))));
-
 static auto get_gameObject = reinterpret_cast<uintptr_t(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Component"), _("get_gameObject"), 0, _(""), _("UnityEngine"))));
 
 static auto get_component = reinterpret_cast<uintptr_t(*)(uintptr_t, uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Component"), _("GetComponent"), 0, _(""), _("UnityEngine"))));
@@ -251,7 +259,7 @@ static auto ProcessAttack = reinterpret_cast<void(*)(BaseProjectile*, HitTest*)>
 
 static auto GetProjectileVelocityScale = reinterpret_cast<float(*)(BaseProjectile*, bool max)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseProjectile"), _("GetProjectileVelocityScale"), 1, _("getMax"), _(""), 1)));
 
-static auto get_Renderers = reinterpret_cast<rust::list<uintptr_t>*(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("SkinnedMultiMesh"), _("get_Renderers"), 0, _(""), _(""))));
+//static auto get_Renderers = reinterpret_cast<rust::list<uintptr_t>*(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("SkinnedMultiMesh"), _("get_Renderers"), 0, _(""), _(""))));
 
 static auto get_material = reinterpret_cast<uintptr_t(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Renderer"), _("get_material"), 0, _(""), _("UnityEngine"))));
 
@@ -261,7 +269,7 @@ static auto get_maxspeed = reinterpret_cast<float(*)(BasePlayer*)>(*reinterpret_
 
 static auto SendSignal = reinterpret_cast<void(*)(uintptr_t, rust::classes::Signal, rust::classes::string)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseEntity"), _("SendSignalBroadcast"), 2, _(""), _(""))));
 
-static auto BoundsPadding = reinterpret_cast<float(*)(BasePlayer*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseEntity"), _("BoundsPadding"), 2, _(""), _(""))));
+static auto _BoundsPadding = reinterpret_cast<float(*)(BasePlayer*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseEntity"), _("BoundsPadding"), 2, _(""), _(""))));
 
 static auto PEyes_get_position = reinterpret_cast<Vector3(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("PlayerEyes"), _("get_position"), 0, _(""), _(""))));
 
@@ -271,11 +279,11 @@ static auto PEyes_get_rotation = reinterpret_cast<Vector4(*)(uintptr_t)>(*reinte
 
 static auto bodyforward = reinterpret_cast<Vector3(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("PlayerEyes"), _("BodyForward"), 0, _(""), _(""))));
 
-static auto SendClientTick = reinterpret_cast<void(*)(BasePlayer*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("SendClientTick"), 0, _(""), _(""))));
+static auto _SendClientTick = reinterpret_cast<void(*)(BasePlayer*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("SendClientTick"), 0, _(""), _(""))));
 
-static auto GetJumpHeight = reinterpret_cast<float(*)(BasePlayer*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("GetJumpHeight"), 0, _(""), _(""))));
+static auto _getjumpheight = reinterpret_cast<float(*)(BasePlayer*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("GetJumpHeight"), 0, _(""), _(""))));
 
-static auto GetRadius = reinterpret_cast<float(*)(BasePlayer*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("GetRadius"), 0, _(""), _(""))));
+static auto _GetRadius = reinterpret_cast<float(*)(BasePlayer*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("GetRadius"), 0, _(""), _(""))));
 
 static auto GetHeight = reinterpret_cast<float(*)(BasePlayer*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("GetHeight"), 0, _(""), _(""))));
 
@@ -346,8 +354,6 @@ public:
 	}
 };
 
-static auto SetColor = reinterpret_cast<void(*)(uintptr_t material, rust::classes::string name, col value)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Material"), _("SetColor"), 2, _("name"), _("UnityEngine"), 1)));
-
 float current_time;
 
 void init_bp() {
@@ -360,11 +366,10 @@ void init_bp() {
 	GetNormal = reinterpret_cast<Vector3(*)(uintptr_t, Vector3)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("TerrainHeightMap"), _("GetNormal"), 1, _(""), _(""))));
 	Line = reinterpret_cast<void (*)(Vector3, Vector3, col, float, bool, bool)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("DDraw"), _("Line"), 6, _(""), _("UnityEngine"))));
 	set_onLadder = reinterpret_cast<void(*)(ModelState*, bool)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("ModelState"), _("set_onLadder"), 1, _(""), _(""))));
-	GetWorldVelocity = reinterpret_cast<Vector3(*)(BasePlayer * base_entity)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseEntity"), _("GetWorldVelocity"), 0, _(""), _(""))));
 	HasPlayerFlag = reinterpret_cast<bool(*)(BasePlayer*, rust::classes::PlayerFlags)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("HasPlayerFlag"), 1, _(""), _(""))));
 	get_game_object_transform = reinterpret_cast<Transform * (*)(uintptr_t game_object)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GameObject"), _("get_transform"), 0, _(""), _("UnityEngine"))));
 	get_rect = reinterpret_cast<rust::classes::Rect(*)(uintptr_t sprite)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Sprite"), _("get_rect"), 0, _(""), _("UnityEngine"))));
-	get_iconSprite = reinterpret_cast<uintptr_t(*)(weapon * Item)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Item"), _("get_iconSprite"), 0, _(""), _(""))));
+	get_iconSprite = reinterpret_cast<uintptr_t(*)(Item * Item)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Item"), _("get_iconSprite"), 0, _(""), _(""))));
 	steamItem = il2cpp::value(_("ItemDefinition"), _("steamItem"));
 	iconSprite = il2cpp::value(_("ItemDefinition"), _("iconSprite"));
 	get_texture = reinterpret_cast<uintptr_t(*)(uintptr_t sprite)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Sprite"), _("get_texture"), 0, _(""), _("UnityEngine"))));
@@ -377,16 +382,14 @@ void init_bp() {
 	SetInt = reinterpret_cast<void(*)(uintptr_t material, rust::classes::string name, int value)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Material"), _("SetInt"), 1, _(""), _("UnityEngine"))));
 	set_hideFlags = reinterpret_cast<void(*)(uintptr_t material, int value)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Object"), _("set_hideFlags"), 1, _(""), _("UnityEngine"))));
 	FindShader = reinterpret_cast<uintptr_t(*)(rust::classes::string)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Shader"), _("Find"), 1, _(""), _("UnityEngine"))));
-	SetColor = reinterpret_cast<void(*)(uintptr_t, rust::classes::string name, col value)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Material"), _("SetColor"), 2, _("name"), _("UnityEngine"), 1)));
-	get_Renderers = reinterpret_cast<rust::list<uintptr_t> *(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("SkinnedMultiMesh"), _("get_Renderers"), 0, _(""), _(""))));
-	get_material = reinterpret_cast<uintptr_t(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Renderer"), _("get_material"), 0, _(""), _("UnityEngine"))));
+	//get_Renderers = reinterpret_cast<rust::list<uintptr_t> *(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("SkinnedMultiMesh"), _("get_Renderers"), 0, _(""), _(""))));
+	//get_material = reinterpret_cast<uintptr_t(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Renderer"), _("get_material"), 0, _(""), _("UnityEngine"))));
 	StringPool_Get = reinterpret_cast<unsigned int(*)(rust::classes::string)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("StringPool"), _("Get"), 1, _("str"), _(""))));
 	set_timeScale = reinterpret_cast<void(*)(float)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Time"), _("set_timeScale"), 1, _(""), _("UnityEngine"))));
 	get_timeScale = reinterpret_cast<float(*)()>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Time"), _("get_timeScale"), 0, _(""), _("UnityEngine"))));
 	GetIndex = reinterpret_cast<int(*)(uintptr_t SkinSetCollection, float)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("SkinSetCollection"), _("GetIndex"), 1, _(""), _(""))));
 	FloorToInt = reinterpret_cast<int (*)(float)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Mathf"), _("FloorToInt"), 1, _(""), _("UnityEngine"))));
 	get_gravity = reinterpret_cast<Vector3(*)()>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Physics"), _("get_gravity"), 1, _(""), _("UnityEngine"))));
-	FindBone = reinterpret_cast<Transform * (*)(BasePlayer*, rust::classes::string)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseEntity"), _("FindBone"), 1, _(""), _(""))));
 	get_isAlive = reinterpret_cast<bool (*)(BaseProjectile*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Projectile"), _("get_isAlive"), 0, _(""), _(""))));
 	get_mousePosition = reinterpret_cast<Vector3(*)()>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Input"), _("get_mousePosition"), 0, _(""), _("UnityEngine"))));
 	GetSpeed = reinterpret_cast<float (*)(BasePlayer * baseplayer, float running, float ducking, float crawling)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("GetSpeed"), 3, _(""), _(""))));
@@ -399,15 +402,13 @@ void init_bp() {
 
 	PEyes_get_position = reinterpret_cast<Vector3(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("PlayerEyes"), _("get_position"), 0, _(""), _(""))));
 
-	GetRadius = reinterpret_cast<float(*)(BasePlayer*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("GetRadius"), 0, _(""), _(""))));
+	_GetRadius = reinterpret_cast<float(*)(BasePlayer*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("GetRadius"), 0, _(""), _(""))));
 
-	GetJumpHeight = reinterpret_cast<float(*)(BasePlayer*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("GetJumpHeight"), 0, _(""), _(""))));
+	_getjumpheight = reinterpret_cast<float(*)(BasePlayer*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("GetJumpHeight"), 0, _(""), _(""))));
 
-	BoundsPadding = reinterpret_cast<float(*)(BasePlayer*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseEntity"), _("BoundsPadding"), 2, _(""), _(""))));
+	_BoundsPadding = reinterpret_cast<float(*)(BasePlayer*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseEntity"), _("BoundsPadding"), 2, _(""), _(""))));
 
-	GetParentVelocity = reinterpret_cast<Vector3(*)(BasePlayer * base_entity)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseEntity"), _("GetParentVelocity"), 0, _(""), _(""))));
-
-	SendClientTick = reinterpret_cast<void(*)(BasePlayer*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("SendClientTick"), 0, _(""), _(""))));
+	_SendClientTick = reinterpret_cast<void(*)(BasePlayer*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("SendClientTick"), 0, _(""), _(""))));
 
 	get_maxspeed = reinterpret_cast<float(*)(BasePlayer*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("GetMaxSpeed"), 0, _(""), _(""))));
 
@@ -482,7 +483,7 @@ void init_bp() {
 	playerFlags = il2cpp::value(_("BasePlayer"), _("playerFlags"));
 	clientTickInterval = il2cpp::value(_("BasePlayer"), _("clientTickInterval"));
 	eyes = il2cpp::value(_("BasePlayer"), _("eyes"));
-	lastSentTickTime = il2cpp::value(_("BasePlayer"), _("lastSentTickTime"));
+	_lastSentTickTime = il2cpp::value(_("BasePlayer"), _("lastSentTickTime"));
 	modelState = il2cpp::value(_("BasePlayer"), _("modelState"));
 	input = il2cpp::value(_("BasePlayer"), _("input"));
 	userID = il2cpp::value(_("BasePlayer"), _("userID"));
@@ -537,8 +538,6 @@ void init_bp() {
 	groundAngleNew = il2cpp::value(_("PlayerWalkMovement"), _("groundAngleNew"));
 	flying = il2cpp::value(_("PlayerWalkMovement"), _("flying"));
 
-	get_position = reinterpret_cast<Vector3(*)(uintptr_t Transform)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Transform"), _("get_position"), 0, _(""), _("UnityEngine"))));
-
 	get_deltaTime = reinterpret_cast<float(*)()>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Time"), _("get_deltaTime"), 0, _(""), _("UnityEngine"))));
 
 	get_IsNpc = reinterpret_cast<bool(*)(uintptr_t player_model)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("PlayerModel"), _("get_IsNpc"), -1, _(""), _(""))));
@@ -551,8 +550,6 @@ void init_bp() {
 
 	StartAttackCooldown = reinterpret_cast<void(*)(BaseProjectile*, float)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("AttackEntity"), _("StartAttackCooldown"), 1, _(""), _(""))));
 
-	_get_transform = reinterpret_cast<Transform * (*)(BasePlayer*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Component"), _("get_transform"), 0, _(""), _("UnityEngine"))));
-
 	InverseTransformPoint = reinterpret_cast<Vector3(*)(Transform*, Vector3)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Transform"), _("InverseTransformPoint"), 1, _(""), _("UnityEngine"))));
 
 	ProcessAttack = reinterpret_cast<void(*)(BaseProjectile*, HitTest*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseMelee"), _("ProcessAttack"), 1, _(""), _(""))));
@@ -561,11 +558,42 @@ void init_bp() {
 }
 
 class Object {
-public:
+
 };
 
+class Transform;
 class Component : public Object {
 public:
+	Transform* get_transform() {
+		if (!this) return nullptr;
+		auto off = reinterpret_cast<Transform* (*)(Component*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Component"), _("get_transform"), 0, _(""), _("UnityEngine"))));
+		return off(this);
+	}
+};
+
+class GameObject : public Object {
+public:
+	template<typename T>
+	T get_class()
+	{
+		return *reinterpret_cast<T*>((uintptr_t)this + 0x30);
+	}
+
+	template<typename T>
+	T get_class(uint32_t second_offset)
+	{
+		const auto object = *reinterpret_cast<uintptr_t*>((uintptr_t)this + 0x30);
+		if (!object)
+			return nullptr;
+
+		return *reinterpret_cast<T*>(object + second_offset);
+	}
+
+	char* get_prefab_name() { return *reinterpret_cast<char**>((uintptr_t)this + 0x60); }
+
+	uint32_t get_tag() { return *reinterpret_cast<uint16_t*>((uintptr_t)this + 0x54); }
+
+	rust::classes::layer get_layer() { return *reinterpret_cast<rust::classes::layer*>(this + 0x50); }
 };
 
 class Transform : public Component {
@@ -601,15 +629,34 @@ public:
 		return reinterpret_cast<Vector3*>(visual_state + 0x90);
 	}
 
-	Vector3 get_bone_position() {
+	Vector3 get_position() {
 		if (!(uintptr_t)this)
 			return {};
+		auto off = reinterpret_cast<Vector3(*)(Transform*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Transform"), _("get_position"), 0, _(""), _("UnityEngine"))));
+		return off(this);
+	}
 
-		return get_position((uintptr_t)this);
+	Vector4 get_rotation() {
+		if (!(uintptr_t)this)
+			return {};
+		auto off = reinterpret_cast<Vector4(*)(Transform*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Transform"), _("get_rotation"), 0, _(""), _("UnityEngine"))));
+		return off(this);
 	}
 };
 
-class MonoBehaviour {
+class Behaviour : public Component {
+
+};
+
+class FacepunchBehaviour : public Behaviour {
+
+};
+
+class BaseMonoBehaviour : public FacepunchBehaviour {
+
+};
+
+class MonoBehaviour : public Behaviour {
 public:
 	Transform* get_transform()
 	{
@@ -619,16 +666,72 @@ public:
 	}
 };
 
-class BaseEntity : public MonoBehaviour {
+class Model : public MonoBehaviour {
 public:
+	FIELD(_("Model"), _("boneTransforms"), boneTransforms, rust::list<Transform*>*);
+};
+
+class BaseNetworkable : public BaseMonoBehaviour {
+public:
+	//FIELD(_("BaseNetworkable"), _("net"), net, Networkable*);
+
+};
+
+class BaseEntity : public BaseNetworkable {
+public:
+	FIELD(_("BaseEntity"), _("model"), model, Model*);
+
+	Vector3 GetWorldVelocity() {
+		if (!this) return Vector3(0, 0, 0);
+		auto off = reinterpret_cast<Vector3(*)(BaseEntity*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseEntity"), _("GetWorldVelocity"), 0, _(""), _(""))));
+		return off(this);
+	}
+	Vector3 GetParentVelocity() {
+		if (!this) return Vector3(0, 0, 0);
+		auto off = reinterpret_cast<Vector3(*)(BaseEntity*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseEntity"), _("GetParentVelocity"), 0, _(""), _(""))));
+		return off(this);
+	}
+
+	void ServerRPC(wchar_t* func) {
+		if (!this) return;
+		auto off = reinterpret_cast<void (*)(BaseEntity*, rust::classes::string)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseEntity"), _("ServerRPC"), 1, _("funcName"), _(""), 1)));
+		return off(this, func);
+	}
+
+	Transform* FindBone(wchar_t* bone) {
+		if (!this) return nullptr;
+		auto off = reinterpret_cast<Transform * (*)(BaseEntity*, rust::classes::string)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseEntity"), _("FindBone"), 1, _(""), _(""))));
+		return off(this, bone);
+	}
+
+	bool is_visible(Vector3 source, Vector3 destination, float p1 = 0.18f) {
+		return unity::is_visible(source, destination, (uintptr_t)this, p1);
+	}
 };
 
 class BaseCombatEntity : public BaseEntity {
 public:
+	FIELD(_("BaseCombatEntity"), _("lifestate"), lifestate, BaseCombatEntity_LifeState);
+	FIELD(_("BaseCombatEntity"), _("_health"), health, float);
+	FIELD(_("BaseCombatEntity"), _("_maxHealth"), maxHealth, float);
+
+	bool is_alive() {
+		if (!this) return false;
+		return this->lifestate() == BaseCombatEntity_LifeState::Dead;
+	}
 };
 
 class HeldEntity : public BaseEntity {
+
+};
+
+class BaseHelicopter_Weakspot {
+
+};
+
+class BaseHelicopter : public BaseCombatEntity {
 public:
+	FIELD(_("BaseHelicopter"), _("weakspots"), weakspots, rust::list<BaseHelicopter_Weakspot*>*);
 };
 
 class ItemModProjectile : public MonoBehaviour {
@@ -648,78 +751,36 @@ public:
 
 class BasePlayer;
 
+class DamageProperties {
+
+};
+
 class HitTest {
 public:
-	uintptr_t game_object() {
-		return *reinterpret_cast<uintptr_t*>((uintptr_t)this + 0x70);
-	}
+	enum HitTest_Type {
+		Generic = 0,
+		ProjectileEffect = 1,
+		Projectile = 2,
+		MeleeAttack = 3,
+		Use = 4
+	};
 
-	rust::classes::game_object* get_gameobject()
-	{
-		auto gameObject = game_object();
-		if (!gameObject)
-			return nullptr;
-
-		return *reinterpret_cast<rust::classes::game_object**>(gameObject + 0x10);
-	}
-
-	void set_hit_transform(Transform* hit_transform) {
-		*reinterpret_cast<Transform**>((uintptr_t)this + 0xB0) = hit_transform;
-	}
-
-	void set_hit_type(rust::classes::HitTestType hit_type) {
-		*reinterpret_cast<int*>((uintptr_t)this + 0x10) = (int)hit_type;
-	}
-
-	void set_ignore_entity(BasePlayer* entity_to_ignore) {
-		*reinterpret_cast<BasePlayer**>((uintptr_t)this + 0x80) = entity_to_ignore;
-	}
-
-	void set_radius(float radius) {
-		*reinterpret_cast<float*>((uintptr_t)this + 0x2C) = radius;
-	}
-
-	void set_did_hit(bool did_hit) {
-		*reinterpret_cast<bool*>((uintptr_t)this + 0x66) = did_hit;
-	}
-
-	void set_attack_ray(Ray ray) {
-		*reinterpret_cast<Ray*>((uintptr_t)this + 0x14) = ray;
-	}
-
-	void set_best_hit(bool best_hit) {
-		*reinterpret_cast<bool*>((uintptr_t)this + 0x65) = best_hit;
-	}
-
-	void set_max_distance(float max_dist) {
-		*reinterpret_cast<float*>((uintptr_t)this + 0x34) = max_dist;
-	}
-
-	void set_hit_entity(BasePlayer* entity) {
-		*reinterpret_cast<BasePlayer**>((uintptr_t)this + 0x88) = entity;
-	}
-
-	uintptr_t& get_hit_entity() {
-		return *reinterpret_cast<uintptr_t*>((uintptr_t)this + 0x88);
-	}
-
-	void set_hit_point(Vector3 hit_point) {
-		*reinterpret_cast<Vector3*>((uintptr_t)this + 0x90) = hit_point;
-	}
-
-	void set_hit_material(rust::classes::string str) {
-		*reinterpret_cast<rust::classes::string*>((uintptr_t)this + 0xC0) = str;
-	}
-
-	void set_hit_normal(Vector3 hit_nromal) {
-		*reinterpret_cast<Vector3*>((uintptr_t)this + 0x9C) = hit_nromal;
-	}
-	void set_damage_properties(uintptr_t damage_properties) {
-		*reinterpret_cast<uintptr_t*>((uintptr_t)this + 0x68) = damage_properties;
-	}
-	Vector3 get_hit_normal_world() {
-
-	}
+	FIELD(_("HitTest"), _("type"), type, HitTest_Type);
+	FIELD(_("HitTest"), _("AttackRay"), AttackRay, Ray);
+	FIELD(_("HitTest"), _("Radius"), Radius, float);
+	FIELD(_("HitTest"), _("MaxDistance"), MaxDistance, float);
+	FIELD(_("HitTest"), _("BestHit"), BestHit, bool);
+	FIELD(_("HitTest"), _("DidHit"), DidHit, bool);
+	FIELD(_("HitTest"), _("damageProperties"), damageProperties, DamageProperties*);
+	FIELD(_("HitTest"), _("ignoreEntity"), ignoreEntity, BaseEntity*);
+	FIELD(_("HitTest"), _("HitEntity"), HitEntity, BaseEntity*);
+	FIELD(_("HitTest"), _("HitPoint"), HitPoint, Vector3);
+	FIELD(_("HitTest"), _("HitNormal"), HitNormal, Vector3);
+	FIELD(_("HitTest"), _("HitDistance"), HitDistance, float);
+	FIELD(_("HitTest"), _("HitTransform"), HitTransform, Transform*);
+	FIELD(_("HitTest"), _("HitPart"), HitPart, UINT);
+	FIELD(_("HitTest"), _("HitMaterial"), HitMaterial, rust::classes::string);
+	FIELD(_("HitTest"), _("gameObject"), gameObject, GameObject*);
 };
 
 class GatherPropertyEntry {
@@ -751,7 +812,6 @@ public:
 		return *reinterpret_cast<GatherPropertyEntry**>((uintptr_t)this + 0x18);
 	}
 };
-
 
 class AttackEntity : public HeldEntity {
 public:
@@ -809,8 +869,8 @@ public:
 		return (char*)*reinterpret_cast<uintptr_t*>(bp + 0x10);
 	}
 
-	uintptr_t get_damage_properties() {
-		return *reinterpret_cast<uintptr_t*>((uintptr_t)this + damageProperties);
+	DamageProperties* get_damage_properties() {
+		return *reinterpret_cast<DamageProperties**>((uintptr_t)this + damageProperties);
 	}
 
 	HitTest* get_hit_test() {
@@ -1075,7 +1135,7 @@ public:
 	}
 };
 
-class weapon {
+class Item {
 public:
 	uintptr_t get_icon_sprite() {
 		const auto     item_definition = mem::read<uintptr_t>((uintptr_t)this + info);
@@ -1298,7 +1358,7 @@ class aim_target {
 public:
 	Vector3 pos;
 
-	BasePlayer* player = NULL;
+	BaseCombatEntity* ent = NULL;
 
 	float distance = 5000;
 	float fov = vars->combat.aimbotfov;
@@ -1375,6 +1435,555 @@ class BaseMountable : public BaseCombatEntity {
 public:
 	bool& canwielditem() {
 		return *reinterpret_cast<bool*>((uintptr_t)this + canWieldItems);
+	}
+};
+
+class Shader : public Object {
+public:
+
+};
+
+class Material : public Object {
+public:
+	Shader* GetShader() {
+		if (!this) return nullptr;
+		auto off = reinterpret_cast<Shader*(*)(Material*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Material"), _("get_shader"), 0, _(""), _("UnityEngine"))));
+		return off(this);
+	}
+	void SetShader(Shader* s) {
+		if (!this) return;
+		auto off = reinterpret_cast<void(*)(Material*, Shader*)>(il2cpp::methods::resolve_icall(_("UnityEngine.Material::set_shader()")));
+		return off(this, s);
+	}
+	void SetColor(rust::classes::string s, col c) {
+		if (!this) return;
+		auto off = reinterpret_cast<void(*)(Material*, rust::classes::string, col)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Material"), _("SetColor"), 2, _("name"), _("UnityEngine"), 1)));
+		return off(this, s, c);
+	}
+};
+
+class Renderer : public Component {
+public:
+	Material* GetMaterial() {
+		if (!this) return nullptr;
+		auto off = reinterpret_cast<Material*(*)(Renderer*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Renderer"), _("get_material"), 0, _(""), _("UnityEngine"))));
+		return off(this);
+	}
+};
+
+class SkinnedMultiMesh : public MonoBehaviour {
+public:	
+
+	rust::list<Renderer*>* get_Renderers() {
+		if (!this) return nullptr;
+		auto off = reinterpret_cast<rust::list<Renderer*>*(*)(SkinnedMultiMesh*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("SkinnedMultiMesh"), _("get_Renderers"), 0, _(""), _(""))));
+		return off(this);
+	}
+};
+
+class PlayerInput : public Component {
+public:
+	FIELD(_("PlayerInput"), _("state"), state, InputState*);
+	FIELD(_("PlayerInput"), _("bodyAngles"), bodyAngles, Vector3);
+	FIELD(_("PlayerInput"), _("recoilAngles"), recoilAngles, Vector3);
+};
+
+class PlayerModel : public Component {
+public:
+	FIELD(_("PlayerModel"), _("newVelocity"), newVelocity, Vector3);
+	FIELD(_("PlayerModel"), _("isLocalPlayer"), isLocalPlayer, bool);
+	FIELD(_("PlayerModel"), _("_multiMesh"), _multiMesh, SkinnedMultiMesh*);
+
+	bool isnpc() {
+		if (!this) return false;
+		auto off = reinterpret_cast<bool(*)(PlayerModel*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("PlayerModel"), _("get_IsNpc"), -1, _(""), _(""))));
+		return off(this);
+	}
+};
+
+class BasePlayer : public BaseCombatEntity {
+public:
+	FIELD(_("BasePlayer"), _("playerModel"), playerModel, PlayerModel*);
+	FIELD(_("BasePlayer"), _("input"), input, PlayerInput*);
+	FIELD(_("BasePlayer"), _("movement"), movement, PlayerWalkMovement*);
+	FIELD(_("BasePlayer"), _("_lookingAtEntity"), _lookingAtEntity, BaseEntity*);
+	FIELD(_("BasePlayer"), _("clActiveItem"), clActiveItem, UINT);
+	FIELD(_("BasePlayer"), _("modelState"), modelState, ModelState*);
+	FIELD(_("BasePlayer"), _("eyes"), eyes, PlayerEyes*);
+	FIELD(_("BasePlayer"), _("lastSentTickTime"), lastSentTickTime, float);
+	FIELD(_("BasePlayer"), _("net"), net, Networkable*);
+	FIELD(_("BasePlayer"), _("_displayName"), _displayName, rust::classes::string);
+
+	void GroundAngleNew() {
+		*reinterpret_cast<float*>(this + 0xb0) = -1.0f;
+	}
+	
+	float GetJumpHeight() {
+		return _getjumpheight(this);
+	}
+
+	float GetRadius() {
+		return _GetRadius(this);
+	}
+
+	float BoundsPadding() {
+		if (!this) return 0;
+		return _BoundsPadding(this);
+	}
+
+	float max_velocity() {
+		if (!this) return 0.f;
+
+		float s = get_maxspeed(this);
+		auto m = GetMountable() || vars->misc.interactive_debug;
+		if (m)
+			return s * 4;
+		return s;
+	}
+
+	void SendClientTick() {
+		if (!this) return;
+		return _SendClientTick(this);
+	}
+
+	rust::classes::PlayerTick* lastSentTick() {
+		return *reinterpret_cast<rust::classes::PlayerTick**>((uintptr_t)this + 0x660);
+	}
+
+	void SendSignalBroadcast(rust::classes::Signal signal, wchar_t* str = _(L""))
+	{
+		if (!this) return;
+		return SendSignal((uintptr_t)this, signal, rust::classes::string(str));
+	}
+
+	void fov() {
+		bool zooming = false;
+
+
+		if (vars->visual.zoomtoggle && unity::GetKey((rust::classes::KeyCode)vars->keybinds.zoom)) {
+			zooming = true;
+		}
+		else {
+			zooming = false;
+		}
+
+		if (zooming) {//0x32182E0
+			auto convar = *reinterpret_cast<uintptr_t*>((uintptr_t)mem::game_assembly_base + 52698272); //"ConVar_Graphics_c*" real rust
+			//auto convar = *reinterpret_cast<uintptr_t*>((uintptr_t)mem::game_assembly_base + 52527840); //"ConVar_Graphics_c*" alkad rust
+			auto unknown = *reinterpret_cast<uintptr_t*>((uintptr_t)convar + 0xb8);
+			*reinterpret_cast<float*>(unknown + 0x18) = vars->visual.zoomfov;
+		}
+
+		if (!zooming) {
+			auto convar = *reinterpret_cast<uintptr_t*>((uintptr_t)mem::game_assembly_base + 52698272); //"ConVar_Graphics_c*" real rust
+			//auto convar = *reinterpret_cast<uintptr_t*>((uintptr_t)mem::game_assembly_base + 52527840); //"ConVar_Graphics_c*" alkad rust
+			auto unknown = *reinterpret_cast<uintptr_t*>((uintptr_t)convar + 0xb8);
+			*reinterpret_cast<float*>(unknown + 0x18) = vars->visual.playerfov;
+		}
+	}
+
+	BaseMountable* GetMountable() {
+		return mem::read<BaseMountable*>((uintptr_t)this + mounted);
+	}
+
+	void set_client_tick_interval(float tick) {
+		if (!this)
+			return;
+
+		*reinterpret_cast<float*>((uintptr_t)this + clientTickInterval) = tick;
+	}
+
+	void set_admin_flag(rust::classes::PlayerFlags flag) {
+		int PlayerFlag = *reinterpret_cast<int*>((uintptr_t)this + playerFlags);
+
+		*reinterpret_cast<int*>((uintptr_t)this + playerFlags) = PlayerFlag |= (int)flag;
+	}
+
+	unsigned long get_steam_id() {
+		if (!this)
+			return 0;
+
+		if (!playerModel())
+			return 0;
+
+		return *reinterpret_cast<unsigned long*>((uintptr_t)this + userID);
+	}
+
+	bool is_teammate(BasePlayer* local_player) {
+		auto team = mem::read<uintptr_t>((uintptr_t)local_player + clientTeam);
+
+		auto member = mem::read<uintptr_t>(team + 0x30);
+
+		auto size = mem::read<int>(member + 0x18);
+
+		auto list = mem::read<uintptr_t>(member + 0x10);
+
+		auto steam_id = get_steam_id();
+
+		for (int i = 0; i < size; i++) {
+			auto ent = mem::read<uintptr_t>(list + 0x20 + i * 0x8);
+
+			auto id = mem::read<unsigned long>(ent + 0x20);
+
+			if (id == steam_id)
+				return true;
+		}
+		return false;
+	}
+
+	//auto lastSentTickTime() {
+	//	return *reinterpret_cast<float*>((uintptr_t)this + _lastSentTickTime);
+	//}
+
+	rust::list<Item*>* get_belt_items()
+	{
+		const auto inventory = *reinterpret_cast<uintptr_t*>((uintptr_t)this + player_inventory);
+		if (!inventory)
+			return {};
+
+		const auto container_belt = *reinterpret_cast<uintptr_t*>(inventory + containerBelt);
+		if (!container_belt)
+			return {};
+
+		// get_once(uint32_t, itemList, 0, get_offset("ItemContainer", "itemList"));
+		const auto list_wrapper = *reinterpret_cast<uintptr_t*>(container_belt + itemList);
+		if (!list_wrapper)
+			return {};
+
+		const auto item_list =
+			*reinterpret_cast<rust::list<Item*>**>(list_wrapper + 0x10);
+		if (!item_list)
+			return {};
+
+		return item_list;
+	}
+
+	rust::list<Item*>* get_wearable_items()
+	{
+		const auto     inventory = *reinterpret_cast<uintptr_t*>((uintptr_t)this + player_inventory);
+		if (!inventory)
+			return {};
+
+		const auto container_belt = *reinterpret_cast<uintptr_t*>(inventory + containerWear);
+		if (!container_belt)
+			return {};
+
+		// get_once(uint32_t, itemList, 0, get_offset("ItemContainer", "itemList"));
+		const auto list_wrapper = *reinterpret_cast<uintptr_t*>(container_belt + itemList);
+		if (!list_wrapper)
+			return {};
+
+		const auto item_list =
+			*reinterpret_cast<rust::list<Item*>**>(list_wrapper + 0x10);
+		if (!item_list)
+			return {};
+
+		return item_list;
+	}
+
+	template<typename T = Networkable*>
+	T find_closest(char* class_name , Networkable* target_entity, float max_distance) {
+		auto client_entities = il2cpp::value(_("BaseNetworkable"), _("clientEntities"), false);
+		if (!client_entities)
+			return { nullptr };
+
+		rust::classes::list* entity_list = (rust::classes::list*)client_entities; 
+		
+		auto list_value = entity_list->get_value<uintptr_t>();
+		if (!list_value)
+			return { nullptr };
+
+		auto size = entity_list->get_size();
+		if (!size)
+			return { nullptr };
+
+		auto buffer = entity_list->get_buffer<uintptr_t>();
+		if (!buffer)
+			return { nullptr };
+
+		auto closest_entity_distance = 9999;
+		T best_ent = nullptr;
+
+		for (int i = 0; i <= size; i++) {
+			auto current_object = *reinterpret_cast<uintptr_t*>(buffer + 0x20 + (i * 0x8));
+			if (!current_object)
+				continue;
+
+			auto base_object = *reinterpret_cast<uintptr_t*>(current_object + 0x10);
+			if (!base_object)
+				continue;
+
+			auto object = *reinterpret_cast<uintptr_t*>(base_object + 0x30);
+			if (!object)
+				continue;
+
+			auto ent = *reinterpret_cast<uintptr_t*>(base_object + 0x28);
+			auto ent_class = *reinterpret_cast<uintptr_t*>(ent);
+			auto entity_class_name = (char*)*reinterpret_cast<uintptr_t*>(ent_class + 0x10);
+
+			auto name = *(int*)(entity_class_name);
+
+			auto target_position = ((BaseEntity*)target_entity)->get_transform()->get_position();
+			auto ent_position = ((BaseEntity*)ent)->get_transform()->get_position();
+			auto best_position = Vector3(0, 0, 0);
+			if(best_ent)
+				best_position = ((BaseEntity*)best_ent)->get_transform()->get_position();
+
+			if (!LI_FIND(strcmp)(entity_class_name, class_name)
+				&& ent_position.distance(target_position) < max_distance
+				&& (!best_ent || ent_position.distance(target_position) < best_position.distance(target_position)))
+			{
+				best_ent = reinterpret_cast<T>(ent);
+			}
+		}
+		return best_ent;
+	}
+
+	std::pair<aim_target, bool> resolve_closest_entity(float max_distance, bool get_code = true) {
+		aim_target closest_entity;
+		auto client_entities = il2cpp::value(_("BaseNetworkable"), _("clientEntities"), false);
+		if (!client_entities)
+			return { closest_entity, false };
+
+		rust::classes::list* entity_list = (rust::classes::list*)client_entities;
+
+		auto list_value = entity_list->get_value<uintptr_t>();
+		if (!list_value)
+			return { closest_entity, false };
+
+		auto size = entity_list->get_size();
+		if (!size)
+			return { closest_entity, false };
+
+		auto buffer = entity_list->get_buffer<uintptr_t>();
+		if (!buffer)
+			return { closest_entity, false };
+
+		auto closest_entity_distance = 9999;
+		bool is_code_lock = false;/*iscodelock/is_tree*/
+
+		for (int i = 0; i <= size; i++) {
+			auto current_object = *reinterpret_cast<uintptr_t*>(buffer + 0x20 + (i * 0x8));
+			if (!current_object)
+				continue;
+
+			auto base_object = *reinterpret_cast<uintptr_t*>(current_object + 0x10);
+			if (!base_object)
+				continue;
+
+			auto object = *reinterpret_cast<uintptr_t*>(base_object + 0x30);
+			if (!object)
+				continue;
+
+			auto ent = *reinterpret_cast<uintptr_t*>(base_object + 0x28);
+			auto ent_class = *reinterpret_cast<uintptr_t*>(ent);
+			auto entity_class_name = (char*)*reinterpret_cast<uintptr_t*>(ent_class + 0x10);
+
+			auto name = *(int*)(entity_class_name);
+
+			if (get_code) {
+
+				if (!(name == 'edoC') && !(name == 'LyeK'))
+					continue;
+
+				if (name == 'edoC')
+					is_code_lock = true;
+
+				auto flag = *reinterpret_cast<int*>(ent + 0x128);
+
+				if (flag == 16)//Locked
+					continue;
+			}
+			else {
+				if (name != 'eerT' && name != 'HerO')
+					continue;
+
+				if (name == 'HerO')
+					is_code_lock = false;
+				else
+					is_code_lock = true;
+
+				if (name == 'eerT') {
+					if (*(int*)(entity_class_name + 4) != 'itnE')
+						continue;
+				}
+			}
+
+			auto game_object = *reinterpret_cast<uintptr_t*>(object + 0x30);
+
+			auto Transform = *reinterpret_cast<uintptr_t*>(game_object + 0x8);
+
+			auto visual_state = *reinterpret_cast<uintptr_t*>(Transform + 0x38);
+
+			auto world_position = *reinterpret_cast<Vector3*>(visual_state + 0x90);
+
+			auto bone_pos = this->model()->boneTransforms()->get(48)->get_position();
+
+			auto distance = bone_pos.get_3d_dist(world_position);
+			if (distance < closest_entity_distance && distance < max_distance) {
+				auto object_class = *reinterpret_cast<uintptr_t*>(object + 0x30);
+				if (!object_class)
+					continue;
+
+				auto entity = *reinterpret_cast<uintptr_t*>(object_class + 0x18);
+				if (!entity)
+					continue;
+
+				auto baseentity = *reinterpret_cast<uintptr_t*>(entity + 0x28);
+				if (!baseentity)
+					continue;
+
+				auto ent = reinterpret_cast<BasePlayer*>(baseentity);
+
+				aim_target new_target;
+
+				auto local = ClosestPoint(this, world_position);
+				if (local.get_3d_dist(world_position) >= max_distance)
+					continue;
+
+				new_target.pos = world_position;
+				new_target.ent = (BasePlayer*)ent;
+				new_target.visible = /*unity::is_visible(bone_pos, world_position)*/true;
+				new_target.found = true;
+
+				closest_entity_distance = distance;
+				closest_entity = new_target;
+			}
+		}
+
+		return { closest_entity , is_code_lock };
+	}
+
+	bool is_sleeping()
+	{
+		auto Flags = *reinterpret_cast<int*>((uintptr_t)this + playerFlags);
+		return Flags & 16;
+	}
+
+	Item* get_active_weapon()
+	{
+		unsigned int ActUID = this->clActiveItem();//mem::read<unsigned int>((uintptr_t)this + clActiveItem);
+		if (!ActUID)
+			return 0;
+		Item* ActWeapon;
+
+		uint64_t Inventory = mem::read<uint64_t>((uintptr_t)this + player_inventory);
+		uint64_t Belt = mem::read<uint64_t>(Inventory + 0x28);
+		uint64_t ItemList = mem::read<uint64_t>(Belt + 0x38);
+
+		auto items = mem::read<uint64_t>(ItemList + 0x10);
+		if (!items)
+			return 0;
+
+		for (int i = 0; i < 6; i++) //For each slot	
+		{
+			Item* WeaponInfo = mem::read<Item*>(items + 0x20 + (i * 0x8));;
+
+			unsigned int WeaponUID = mem::read<unsigned int>((uintptr_t)WeaponInfo + 0x28);
+			if (!WeaponUID)
+				return 0;
+			if (ActUID == WeaponUID)
+			{
+				ActWeapon = WeaponInfo;
+				return ActWeapon;
+			}
+		}
+		return 0;
+	}
+
+	Networkable* get_networkable() {
+		return *reinterpret_cast<Networkable**>((uintptr_t)this + 0x58);
+	}
+
+	float get_health() {
+		return *reinterpret_cast<float*>((uintptr_t)this + _health);
+	}
+
+	float get_max_health() {
+		return *reinterpret_cast<float*>((uintptr_t)this + _maxHealth);
+	}
+
+	bool is_local_player() {
+		if (!this)
+			return false;
+
+		auto player_model = this->playerModel();
+		if (!player_model)
+			return false;
+		return player_model->isLocalPlayer();
+	}
+
+	GameObject* get_game_object()
+	{
+		if (!(uintptr_t)this)
+			return nullptr;
+
+		const auto unk0 = *reinterpret_cast<uintptr_t*>((uintptr_t)this + 0x10);
+		if (!unk0)
+			return nullptr;
+
+		const auto unk1 = *reinterpret_cast<GameObject**>(unk0 + 0x30);
+		if (!unk1)
+			return nullptr;
+
+		return unk1;
+	}
+
+	void console_echo(const wchar_t* str) {
+		//string::format(("%s %d"), _("B:"), (int)vars->visual.VisBcolor))
+		//auto s = string::wformat(_(L"trap [%d]: %s"), (int)get_fixedTime(), str);
+		console_msg((uintptr_t)this, str);
+	}
+
+	uintptr_t get_lookingat_entity() {
+		if (!this) return 0;
+		return *reinterpret_cast<uintptr_t*>(this + 0x508);
+	}
+};
+
+class Planner : public HeldEntity {
+public:
+	Vector3 rotationoffset() { return mem::read<Vector3>((uintptr_t)this + planner_rotationoffset); }
+	void rotationoffset(Vector3 o) { mem::write((uintptr_t)this + planner_rotationoffset, o); }
+	uintptr_t currentconstruction() { return mem::read<uintptr_t>((uintptr_t)this + planner_currentconstruction); }
+	void currentconstruction(uintptr_t o) { mem::write((uintptr_t)this + planner_rotationoffset, o); }
+	uintptr_t guide() { return mem::read<uintptr_t>((uintptr_t)this + planner_guide); }
+};
+
+class DecayEntity : public Component {
+public:
+};
+
+class StabilityEntity : public DecayEntity {
+public:
+};
+
+class BuildingBlock : public StabilityEntity{
+public:
+	rust::classes::BuildingGrade grade() { 
+		//public BuildingGrade.Enum grade; // 0x274
+		return *reinterpret_cast<rust::classes::BuildingGrade*>((uintptr_t)this + 0x274);
+	}
+
+	bool CanAffordUpgrade(rust::classes::BuildingGrade g, BasePlayer* p) {
+		if (!this) return false;
+
+		typedef bool (*AAA)(uintptr_t, int, BasePlayer*);//real rust 7202688
+		return ((AAA)(mem::game_assembly_base + 7202688))((uintptr_t)this, (int)g, p);
+		//return canaffordupgrade((uintptr_t)this, g, p);
+	}
+
+	bool CanChangeToGrade(rust::classes::BuildingGrade g, BasePlayer* p) {
+		if (!this) return false;
+
+		typedef bool (*AAA)(uintptr_t, int, BasePlayer*);//real rust 7203152
+		return ((AAA)(mem::game_assembly_base + 7203152))((uintptr_t)this, (int)g, p);
+		//return canchangetograde((uintptr_t)this, g, p);
+	}
+
+	void Upgrade(rust::classes::BuildingGrade g, BasePlayer* p) {
+		if (!this) return;
+		return upgradetograde((uintptr_t)this, g, p);
 	}
 };
 
@@ -1550,17 +2159,17 @@ public:
 		return points.size();
 	}
 
-	float Distance(BasePlayer* player, Vector3 point)
+	float Distance(BasePlayer* ent, Vector3 point)
 	{
-		Vector3 position = get_position((uintptr_t)_get_transform(player));
+		Vector3 position = ent->get_transform()->get_position();
 		if (Count() == 0)
 		{
 			return position.distance(point);
 		}
-		Vector4 rotation = get_rotation((uintptr_t)_get_transform(player));
-		Bounds bounds = GetBounds((uintptr_t)player);
+		Vector4 rotation = ent->get_transform()->get_rotation();
+		Bounds bounds = GetBounds((uintptr_t)ent);
 
-		auto trans = _get_transform(player);
+		auto trans = ent->get_transform();
 		bool flag = trans ? !(!trans) : false;
 		VMatrix _mv; _mv.matrix_identity();
 		VMatrix matrix4x = flag ? _mv : get_localToWorldMatrix(trans);
@@ -1601,743 +2210,6 @@ public:
 	}
 };
 
-class BasePlayer : public BaseCombatEntity {
-public:
-	Vector3 bodyAngles()
-	{
-		auto plr_input = *reinterpret_cast<uintptr_t*>(this + input);
-		if (!plr_input)
-			return {};
-
-		constexpr auto bodyAngles = 0x3C; //private Vector3 bodyAngles; 
-		return *reinterpret_cast<Vector3*>(plr_input + bodyAngles);
-
-	}
-
-	void set_bodyAngles(Vector3 a)
-	{
-		auto plr_input = *reinterpret_cast<uintptr_t*>(this + input);
-		if (!plr_input)
-			return;
-
-		constexpr auto bodyAngles = 0x3C; //private Vector3 bodyAngles;
-		*reinterpret_cast<Vector3*>(plr_input + bodyAngles) = a;
-	}
-	Vector3 recoilAngles()
-	{
-		auto plr_input = *reinterpret_cast<uintptr_t*>(this + input);
-		if (!plr_input)
-			return {};
-
-		constexpr auto bodyAngles = 0x64; //private Vector3 bodyAngles; 
-		return *reinterpret_cast<Vector3*>(plr_input + bodyAngles);
-
-	}
-
-	void recoilAngles(Vector3 a)
-	{
-		auto plr_input = *reinterpret_cast<uintptr_t*>(this + input);
-		if (!plr_input)
-			return;
-
-		constexpr auto bodyAngles = 0x64; //private Vector3 bodyAngles;
-		*reinterpret_cast<Vector3*>(plr_input + bodyAngles) = a;
-	}
-
-	void SpiderMan() {
-		*reinterpret_cast<float*>(this + 0xb0) = 0.f;
-	}
-	
-	float get_jump_height() {
-		return GetJumpHeight(this);
-	}
-
-	float get_radius() {
-		return GetRadius(this);
-	}
-
-	float boundspadding() {
-		if (!this) return 0;
-		return BoundsPadding(this);
-	}
-
-	float max_velocity() {
-		if (!this) return 0.f;
-
-		float s = get_maxspeed(this);
-		auto m = get_mountable() || vars->misc.interactive_debug;
-		if (m)
-			return s * 4;
-		return s;
-	}
-
-	void send_client_tick() {
-		if (!this) return;
-		return SendClientTick(this);
-	}
-
-	rust::classes::PlayerTick* lastSentTick() {
-		return *reinterpret_cast<rust::classes::PlayerTick**>((uintptr_t)this + 0x660);
-	}
-
-	void SendSignalBroadcast(rust::classes::Signal signal, wchar_t* str = _(L""))
-	{
-		if (!this) return;
-		return SendSignal((uintptr_t)this, signal, rust::classes::string(str));
-	}
-
-	void fov() {
-		bool zooming = false;
-
-
-		if (vars->visual.zoomtoggle && unity::GetKey((rust::classes::KeyCode)vars->keybinds.zoom)) {
-			zooming = true;
-		}
-		else {
-			zooming = false;
-		}
-
-		if (zooming) {//0x32182E0
-			auto convar = *reinterpret_cast<uintptr_t*>((uintptr_t)mem::game_assembly_base + 52698272); //"ConVar_Graphics_c*" real rust
-			//auto convar = *reinterpret_cast<uintptr_t*>((uintptr_t)mem::game_assembly_base + 52527840); //"ConVar_Graphics_c*" alkad rust
-			auto unknown = *reinterpret_cast<uintptr_t*>((uintptr_t)convar + 0xb8);
-			*reinterpret_cast<float*>(unknown + 0x18) = vars->visual.zoomfov;
-		}
-
-		if (!zooming) {
-			auto convar = *reinterpret_cast<uintptr_t*>((uintptr_t)mem::game_assembly_base + 52698272); //"ConVar_Graphics_c*" real rust
-			//auto convar = *reinterpret_cast<uintptr_t*>((uintptr_t)mem::game_assembly_base + 52527840); //"ConVar_Graphics_c*" alkad rust
-			auto unknown = *reinterpret_cast<uintptr_t*>((uintptr_t)convar + 0xb8);
-			*reinterpret_cast<float*>(unknown + 0x18) = vars->visual.playerfov;
-		}
-	}
-
-	BaseMountable* get_mountable() {
-		return mem::read<BaseMountable*>((uintptr_t)this + mounted);
-	}
-
-	wchar_t* get_player_name() {
-		auto player_name = (str)(*reinterpret_cast<uintptr_t*>((uintptr_t)this + _displayName));
-		return player_name->str;
-	}
-
-	aim_target get_aimbot_target(Vector3 source, float max_distance = 500) {
-		//if (esp::best_target.player
-		//	&& !esp::best_target.player->is_teammate(esp::local_player))
-		//	return esp::best_target;
-		aim_target best_target = aim_target();
-
-		if (!cliententities) {
-			cliententities = il2cpp::value(_("BaseNetworkable"), _("clientEntities"), false);
-			if (!cliententities)
-				return best_target;
-		}
-
-		rust::classes::list* entity_list = (rust::classes::list*)cliententities;
-
-		auto list_value = entity_list->get_value<uintptr_t>();
-		if (!list_value)
-			return best_target;
-
-		auto size = entity_list->get_size();
-		if (!size)
-			return best_target;
-
-		auto buffer = entity_list->get_buffer<uintptr_t>();
-		if (!buffer)
-			return best_target;
-
-		for (int i = 0; i <= size; i++) {
-			auto current_object = *reinterpret_cast<uintptr_t*>(buffer + 0x20 + (i * 0x8));
-			if (!current_object)
-				continue;
-
-			auto base_object = *reinterpret_cast<uintptr_t*>(current_object + 0x10);
-			if (!base_object)
-				continue;
-
-			auto object = *reinterpret_cast<uintptr_t*>(base_object + 0x30);
-			if (!object)
-				continue;
-
-			WORD tag = *reinterpret_cast<WORD*>(object + 0x54);
-
-			auto ent = *reinterpret_cast<uintptr_t*>(base_object + 0x28);
-
-			auto ent_class = *reinterpret_cast<uintptr_t*>(ent);
-			auto entity_class_name = (char*)*reinterpret_cast<uintptr_t*>(ent_class + 0x10);
-
-			bool is_heli = false;
-
-			if (*(int*)(entity_class_name + 4) == 'ileH')
-				is_heli = true;
-
-			if (tag == 6 && !vars->visual.playeresp)
-				continue;
-
-			if (is_heli && !vars->visual.heli_esp)
-				continue;
-
-			if (tag != 6 && !is_heli)// not a player
-				continue;
-
-			auto player = (BasePlayer*)current_object;
-			if (!player)
-				continue;
-
-			uintptr_t object_name_ptr = *reinterpret_cast<uintptr_t*>(object + 0x60);
-
-			rust::classes::string object_name = *reinterpret_cast<rust::classes::string*>(object_name_ptr);
-
-			if (m_strstr(object_name.zpad, _("LocalPlayer")))
-				continue;
-
-			aim_target target;
-			target.player = player;
-
-			if (!is_heli) {
-				if (!player->is_alive())
-					continue;
-
-				if (player->is_sleeping()) {
-					target.sleeping = true;
-					continue;
-				}
-
-				if (player->is_teammate(this)) {
-					target.teammate = true;
-				}
-
-				if (get_IsNpc(player->get_player_model())) {
-					if (!vars->visual.npc_esp)
-						continue;
-				}
-			}
-
-			auto pos = is_heli ? player->get_bone_transform(19)->get_bone_position() : player->get_bone_transform((int)rust::classes::Bone_List::head)->get_bone_position();
-			target.pos = pos;
-
-			target.is_heli = is_heli;
-
-			auto Networkable = target.player->get_networkable();
-			if (!Networkable)
-				continue;
-
-			auto id = Networkable->get_id();
-			if (!id)
-				continue;
-
-			target.network_id = id;
-
-			auto visible = player->is_visible(source, pos);
-			target.visible = visible;
-			//if (!visible)
-			//	continue;
-
-			auto distance = source.get_3d_dist(pos);
-			target.distance = distance;
-			if (distance > max_distance)
-				continue;
-
-			auto fov = unity::get_fov(pos);
-			target.fov = fov;
-			//if (fov >= 100)//>= max fov
-			//	continue;
-
-			if (target < best_target)
-				best_target = target;
-		}
-		return best_target;
-	}
-
-	uintptr_t get_weakspots() {
-		return *reinterpret_cast<uintptr_t*>(this + weakspots);
-	}
-
-	Vector3 get_new_velocity() {
-		auto player_model = *reinterpret_cast<uintptr_t*>((uintptr_t)this + playerModel);
-		return *reinterpret_cast<Vector3*>(player_model + newVelocity);
-	}
-
-	void set_new_velocity(Vector3 vel) {
-		auto player_model = *reinterpret_cast<uintptr_t*>((uintptr_t)this + playerModel);
-		*reinterpret_cast<Vector3*>(player_model + newVelocity) = vel;
-	}
-
-	ModelState* get_model_state() {
-		return *reinterpret_cast<ModelState**>((uintptr_t)this + modelState);
-	}
-
-	void set_client_tick_interval(float tick) {
-		if (!this)
-			return;
-
-		*reinterpret_cast<float*>((uintptr_t)this + clientTickInterval) = tick;
-	}
-
-	void set_admin_flag(rust::classes::PlayerFlags flag) {
-		int PlayerFlag = *reinterpret_cast<int*>((uintptr_t)this + playerFlags);
-
-		*reinterpret_cast<int*>((uintptr_t)this + playerFlags) = PlayerFlag |= (int)flag;
-	}
-
-	unsigned long get_steam_id() {
-		if (!this)
-			return 0;
-
-		if (!get_player_model())
-			return 0;
-
-		return *reinterpret_cast<unsigned long*>((uintptr_t)this + userID);
-	}
-
-	bool is_teammate(BasePlayer* local_player) {
-		auto team = mem::read<uintptr_t>((uintptr_t)local_player + clientTeam);
-
-		auto member = mem::read<uintptr_t>(team + 0x30);
-
-		auto size = mem::read<int>(member + 0x18);
-
-		auto list = mem::read<uintptr_t>(member + 0x10);
-
-		auto steam_id = get_steam_id();
-
-		for (int i = 0; i < size; i++) {
-			auto player = mem::read<uintptr_t>(list + 0x20 + i * 0x8);
-
-			auto id = mem::read<unsigned long>(player + 0x20);
-
-			if (id == steam_id)
-				return true;
-		}
-		return false;
-	}
-
-	auto get_last_sent_tick_time() {
-		return *reinterpret_cast<float*>((uintptr_t)this + lastSentTickTime);
-	}
-
-	Transform* get_bone_transform(int bone_id) {
-		uintptr_t entity_model = *reinterpret_cast<uintptr_t*>((uintptr_t)this + 0x130); //public Model model; // 
-		//uintptr_t entity_model = *reinterpret_cast<uintptr_t*>((uintptr_t)this + 0x128); //public Model model; // 
-		if (!entity_model) return nullptr;
-		uintptr_t bone_dict = *reinterpret_cast<uintptr_t*>(entity_model + 0x48);
-		Transform* BoneValue = *reinterpret_cast<Transform**>(bone_dict + 0x20 + bone_id * 0x8);
-
-		return BoneValue;
-	}
-
-	bool is_visible(Vector3 source, Vector3 destination, float p1 = 0.18f) {
-		return unity::is_visible(source, destination, (uintptr_t)this, p1);
-	}
-
-	rust::list<weapon*>* get_belt_items()
-	{
-		const auto inventory = *reinterpret_cast<uintptr_t*>((uintptr_t)this + player_inventory);
-		if (!inventory)
-			return {};
-
-		const auto container_belt = *reinterpret_cast<uintptr_t*>(inventory + containerBelt);
-		if (!container_belt)
-			return {};
-
-		// get_once(uint32_t, itemList, 0, get_offset("ItemContainer", "itemList"));
-		const auto list_wrapper = *reinterpret_cast<uintptr_t*>(container_belt + itemList);
-		if (!list_wrapper)
-			return {};
-
-		const auto item_list =
-			*reinterpret_cast<rust::list<weapon*>**>(list_wrapper + 0x10);
-		if (!item_list)
-			return {};
-
-		return item_list;
-	}
-
-	rust::list<weapon*>* get_wearable_items()
-	{
-		const auto     inventory = *reinterpret_cast<uintptr_t*>((uintptr_t)this + player_inventory);
-		if (!inventory)
-			return {};
-
-		const auto container_belt = *reinterpret_cast<uintptr_t*>(inventory + containerWear);
-		if (!container_belt)
-			return {};
-
-		// get_once(uint32_t, itemList, 0, get_offset("ItemContainer", "itemList"));
-		const auto list_wrapper = *reinterpret_cast<uintptr_t*>(container_belt + itemList);
-		if (!list_wrapper)
-			return {};
-
-		const auto item_list =
-			*reinterpret_cast<rust::list<weapon*>**>(list_wrapper + 0x10);
-		if (!item_list)
-			return {};
-
-		return item_list;
-	}
-
-	template<typename T = Networkable*>
-	T find_closest(char* class_name , Networkable* target_entity, float max_distance) {
-		auto client_entities = il2cpp::value(_("BaseNetworkable"), _("clientEntities"), false);
-		if (!client_entities)
-			return { nullptr };
-
-		rust::classes::list* entity_list = (rust::classes::list*)client_entities; 
-		
-		auto list_value = entity_list->get_value<uintptr_t>();
-		if (!list_value)
-			return { nullptr };
-
-		auto size = entity_list->get_size();
-		if (!size)
-			return { nullptr };
-
-		auto buffer = entity_list->get_buffer<uintptr_t>();
-		if (!buffer)
-			return { nullptr };
-
-		auto closest_entity_distance = 9999;
-		T best_ent = nullptr;
-
-		for (int i = 0; i <= size; i++) {
-			auto current_object = *reinterpret_cast<uintptr_t*>(buffer + 0x20 + (i * 0x8));
-			if (!current_object)
-				continue;
-
-			auto base_object = *reinterpret_cast<uintptr_t*>(current_object + 0x10);
-			if (!base_object)
-				continue;
-
-			auto object = *reinterpret_cast<uintptr_t*>(base_object + 0x30);
-			if (!object)
-				continue;
-
-			auto ent = *reinterpret_cast<uintptr_t*>(base_object + 0x28);
-			auto ent_class = *reinterpret_cast<uintptr_t*>(ent);
-			auto entity_class_name = (char*)*reinterpret_cast<uintptr_t*>(ent_class + 0x10);
-
-			auto name = *(int*)(entity_class_name);
-
-			auto target_position = get_position((uintptr_t)_get_transform((BasePlayer*)target_entity));
-			auto ent_position = get_position((uintptr_t)_get_transform((BasePlayer*)ent));
-			auto best_position = Vector3(0, 0, 0);
-			if(best_ent)
-				best_position = get_position((uintptr_t)_get_transform((BasePlayer*)best_ent));
-
-			if (!LI_FIND(strcmp)(entity_class_name, class_name)
-				&& ent_position.distance(target_position) < max_distance
-				&& (!best_ent || ent_position.distance(target_position) < best_position.distance(target_position)))
-			{
-				best_ent = reinterpret_cast<T>(ent);
-			}
-		}
-		return best_ent;
-	}
-
-	std::pair<aim_target, bool> resolve_closest_entity(float max_distance, bool get_code = true) {
-		aim_target closest_entity;
-		auto client_entities = il2cpp::value(_("BaseNetworkable"), _("clientEntities"), false);
-		if (!client_entities)
-			return { closest_entity, false };
-
-		rust::classes::list* entity_list = (rust::classes::list*)client_entities;
-
-		auto list_value = entity_list->get_value<uintptr_t>();
-		if (!list_value)
-			return { closest_entity, false };
-
-		auto size = entity_list->get_size();
-		if (!size)
-			return { closest_entity, false };
-
-		auto buffer = entity_list->get_buffer<uintptr_t>();
-		if (!buffer)
-			return { closest_entity, false };
-
-		auto closest_entity_distance = 9999;
-		bool is_code_lock = false;/*iscodelock/is_tree*/
-
-		for (int i = 0; i <= size; i++) {
-			auto current_object = *reinterpret_cast<uintptr_t*>(buffer + 0x20 + (i * 0x8));
-			if (!current_object)
-				continue;
-
-			auto base_object = *reinterpret_cast<uintptr_t*>(current_object + 0x10);
-			if (!base_object)
-				continue;
-
-			auto object = *reinterpret_cast<uintptr_t*>(base_object + 0x30);
-			if (!object)
-				continue;
-
-			auto ent = *reinterpret_cast<uintptr_t*>(base_object + 0x28);
-			auto ent_class = *reinterpret_cast<uintptr_t*>(ent);
-			auto entity_class_name = (char*)*reinterpret_cast<uintptr_t*>(ent_class + 0x10);
-
-			auto name = *(int*)(entity_class_name);
-
-			if (get_code) {
-
-				if (!(name == 'edoC') && !(name == 'LyeK'))
-					continue;
-
-				if (name == 'edoC')
-					is_code_lock = true;
-
-				auto flag = *reinterpret_cast<int*>(ent + 0x128);
-
-				if (flag == 16)//Locked
-					continue;
-			}
-			else {
-				if (name != 'eerT' && name != 'HerO')
-					continue;
-
-				if (name == 'HerO')
-					is_code_lock = false;
-				else
-					is_code_lock = true;
-
-				if (name == 'eerT') {
-					if (*(int*)(entity_class_name + 4) != 'itnE')
-						continue;
-				}
-			}
-
-			auto game_object = *reinterpret_cast<uintptr_t*>(object + 0x30);
-
-			auto Transform = *reinterpret_cast<uintptr_t*>(game_object + 0x8);
-
-			auto visual_state = *reinterpret_cast<uintptr_t*>(Transform + 0x38);
-
-			auto world_position = *reinterpret_cast<Vector3*>(visual_state + 0x90);
-
-			auto bone_pos = this->get_bone_transform(48)->get_bone_position();
-
-			auto distance = bone_pos.get_3d_dist(world_position);
-			if (distance < closest_entity_distance && distance < max_distance) {
-				auto object_class = *reinterpret_cast<uintptr_t*>(object + 0x30);
-				if (!object_class)
-					continue;
-
-				auto entity = *reinterpret_cast<uintptr_t*>(object_class + 0x18);
-				if (!entity)
-					continue;
-
-				auto baseentity = *reinterpret_cast<uintptr_t*>(entity + 0x28);
-				if (!baseentity)
-					continue;
-
-				auto player = reinterpret_cast<BasePlayer*>(baseentity);
-
-				aim_target new_target;
-
-				auto local = ClosestPoint(this, world_position);
-				if (local.get_3d_dist(world_position) >= max_distance)
-					continue;
-
-				new_target.pos = world_position;
-				new_target.player = (BasePlayer*)ent;
-				new_target.visible = /*unity::is_visible(bone_pos, world_position)*/true;
-				new_target.found = true;
-
-				closest_entity_distance = distance;
-				closest_entity = new_target;
-			}
-		}
-
-		return { closest_entity , is_code_lock };
-	}
-
-	bool is_sleeping()
-	{
-		auto Flags = *reinterpret_cast<int*>((uintptr_t)this + playerFlags);
-		return Flags & 16;
-	}
-
-	PlayerEyes* get_player_eyes() {
-		return *reinterpret_cast<PlayerEyes**>((uintptr_t)this + eyes);
-	}
-
-	weapon* get_active_weapon()
-	{
-		unsigned int ActUID = mem::read<unsigned int>((uintptr_t)this + clActiveItem);
-		if (!ActUID)
-			return 0;
-		weapon* ActWeapon;
-
-		uint64_t Inventory = mem::read<uint64_t>((uintptr_t)this + player_inventory);
-		uint64_t Belt = mem::read<uint64_t>(Inventory + 0x28);
-		uint64_t ItemList = mem::read<uint64_t>(Belt + 0x38);
-
-		auto items = mem::read<uint64_t>(ItemList + 0x10);
-		if (!items)
-			return 0;
-
-		for (int i = 0; i < 6; i++) //For each slot	
-		{
-			weapon* WeaponInfo = mem::read<weapon*>(items + 0x20 + (i * 0x8));;
-
-			unsigned int WeaponUID = mem::read<unsigned int>((uintptr_t)WeaponInfo + 0x28);
-			if (!WeaponUID)
-				return 0;
-			if (ActUID == WeaponUID)
-			{
-				ActWeapon = WeaponInfo;
-				return ActWeapon;
-			}
-		}
-		return 0;
-	}
-
-	uintptr_t get_player_model() {
-		return *reinterpret_cast<uintptr_t*>((uintptr_t)this + playerModel);
-	}
-
-	uintptr_t get_model() {
-		return *reinterpret_cast<uintptr_t*>((uintptr_t)this + model);
-	}
-
-	Networkable* get_networkable() {
-		return *reinterpret_cast<Networkable**>((uintptr_t)this + 0x58);
-	}
-
-	PlayerWalkMovement* get_movement() {
-		return *reinterpret_cast<PlayerWalkMovement**>((uintptr_t)this + movement);
-	}
-
-	float get_health() {
-		return *reinterpret_cast<float*>((uintptr_t)this + _health);
-	}
-
-	float get_max_health() {
-		return *reinterpret_cast<float*>((uintptr_t)this + _maxHealth);
-	}
-
-	bool is_local_player() {
-		if (!this)
-			return false;
-
-		auto player_model = get_player_model();
-		if (!player_model)
-			return false;
-
-		auto is_local = *reinterpret_cast<bool*>(player_model + isLocalPlayer);
-
-		return is_local;
-	}
-
-	bool is_alive() {
-		if (!this)
-			return 0;
-		const auto life_state = *reinterpret_cast<uint32_t*>((uintptr_t)this + lifestate);
-
-		return life_state == 0;
-	}
-
-	rust::classes::game_object* get_game_object()
-	{
-		if (!(uintptr_t)this)
-			return nullptr;
-
-		const auto unk0 = *reinterpret_cast<uintptr_t*>((uintptr_t)this + 0x10);
-		if (!unk0)
-			return nullptr;
-
-		const auto unk1 = *reinterpret_cast<rust::classes::game_object**>(unk0 + 0x30);
-		if (!unk1)
-			return nullptr;
-
-		return unk1;
-	}
-
-	Transform* find_closest_bone(Vector3 worldpos, bool visible_check = false) {
-		if (!this) return nullptr;
-		std::array<uintptr_t, 12> bonelist = {
-			*reinterpret_cast<uintptr_t*>(this->get_bone_transform(47)),
-			*reinterpret_cast<uintptr_t*>(this->get_bone_transform(48)),
-			*reinterpret_cast<uintptr_t*>(this->get_bone_transform(56)),
-			*reinterpret_cast<uintptr_t*>(this->get_bone_transform(55)),
-			*reinterpret_cast<uintptr_t*>(this->get_bone_transform(25)),
-			*reinterpret_cast<uintptr_t*>(this->get_bone_transform(24)),
-			*reinterpret_cast<uintptr_t*>(this->get_bone_transform(57)),
-			*reinterpret_cast<uintptr_t*>(this->get_bone_transform(26)),
-			*reinterpret_cast<uintptr_t*>(this->get_bone_transform(3)),
-			*reinterpret_cast<uintptr_t*>(this->get_bone_transform(14)),
-			*reinterpret_cast<uintptr_t*>(this->get_bone_transform(13)),
-			*reinterpret_cast<uintptr_t*>(this->get_bone_transform(2))
-		};
-		uintptr_t closest = bonelist[0];
-		for (auto bone : bonelist) {
-			auto bonepos = get_position(bone);
-			auto closestpos = get_position(closest);
-			if (bonepos.distance(worldpos) < closestpos.distance(worldpos)
-				&& (visible_check ? this->is_visible(bonepos, worldpos) : true)) {
-				closest = bone;
-			}
-		}
-		return *reinterpret_cast<Transform**>(closest);
-	}
-
-	void console_echo(const wchar_t* str) {
-		//string::format(("%s %d"), _("B:"), (int)vars->visual.VisBcolor))
-		//auto s = string::wformat(_(L"trap [%d]: %s"), (int)get_fixedTime(), str);
-		console_msg((uintptr_t)this, str);
-	}
-
-	uintptr_t get_lookingat_entity() {
-		if (!this) return 0;
-		return *reinterpret_cast<uintptr_t*>(this + 0x508);
-	}
-};
-
-class Planner : public HeldEntity {
-public:
-	Vector3 rotationoffset() { return mem::read<Vector3>((uintptr_t)this + planner_rotationoffset); }
-	void rotationoffset(Vector3 o) { mem::write((uintptr_t)this + planner_rotationoffset, o); }
-	uintptr_t currentconstruction() { return mem::read<uintptr_t>((uintptr_t)this + planner_currentconstruction); }
-	void currentconstruction(uintptr_t o) { mem::write((uintptr_t)this + planner_rotationoffset, o); }
-	uintptr_t guide() { return mem::read<uintptr_t>((uintptr_t)this + planner_guide); }
-};
-
-class DecayEntity : public Component {
-public:
-};
-
-class StabilityEntity : public DecayEntity {
-public:
-};
-
-class BuildingBlock : StabilityEntity{
-public:
-	rust::classes::BuildingGrade grade() { 
-		//public BuildingGrade.Enum grade; // 0x274
-		return *reinterpret_cast<rust::classes::BuildingGrade*>((uintptr_t)this + 0x274);
-	}
-
-	bool CanAffordUpgrade(rust::classes::BuildingGrade g, BasePlayer* p) {
-		if (!this) return false;
-
-		typedef bool (*AAA)(uintptr_t, int, BasePlayer*);//real rust 7202688
-		return ((AAA)(mem::game_assembly_base + 7202688))((uintptr_t)this, (int)g, p);
-		//return canaffordupgrade((uintptr_t)this, g, p);
-	}
-
-	bool CanChangeToGrade(rust::classes::BuildingGrade g, BasePlayer* p) {
-		if (!this) return false;
-
-		typedef bool (*AAA)(uintptr_t, int, BasePlayer*);//real rust 7203152
-		return ((AAA)(mem::game_assembly_base + 7203152))((uintptr_t)this, (int)g, p);
-		//return canchangetograde((uintptr_t)this, g, p);
-	}
-
-	void Upgrade(rust::classes::BuildingGrade g, BasePlayer* p) {
-		if (!this) return;
-		return upgradetograde((uintptr_t)this, g, p);
-	}
-};
-
 void attack_melee(aim_target target, BaseProjectile* baseprojectile, bool is_player = false) {
 	if (!target.visible)
 		return;
@@ -2362,19 +2234,19 @@ void attack_melee(aim_target target, BaseProjectile* baseprojectile, bool is_pla
 
 	Ray ray = Ray(local_position, (target.pos - local_position).Normalized());
 
-	Transform* trans = is_player ? target.player->get_bone_transform(48) : _get_transform(target.player);
+	Transform* trans = is_player ? target.ent->model()->boneTransforms()->get(48) : target.ent->get_transform();
 
 	if (!trans)
 		return;
 
-	hit_test->set_max_distance(1000);
-	hit_test->set_hit_transform(trans);
-	hit_test->set_attack_ray(ray);
-	hit_test->set_did_hit(true);
-	hit_test->set_hit_entity(target.player);
-	hit_test->set_hit_point(InverseTransformPoint(trans, target.pos));
-	hit_test->set_hit_normal(Vector3(0, 0, 0));
-	hit_test->set_damage_properties(baseprojectile->get_damage_properties());
+	hit_test->MaxDistance() = 1000;
+	hit_test->HitTransform() = trans;
+	hit_test->AttackRay() = ray;
+	hit_test->DidHit() = true;
+	hit_test->HitEntity() = target.ent;
+	hit_test->HitPoint() = InverseTransformPoint(trans, target.pos);
+	hit_test->HitNormal() = Vector3(0, 0, 0);
+	hit_test->damageProperties() = baseprojectile->get_damage_properties();
 
 	StartAttackCooldown(baseprojectile, baseprojectile->get_repeat_delay());
 

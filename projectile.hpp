@@ -109,7 +109,7 @@ void init_projectile() {
 	_launch = reinterpret_cast<void(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Projectile"), _("Launch"), 0, _(""), _(""))));
 }
 
-class Projectile {
+class Projectile : public BaseMonoBehaviour {
 public:
 	void initialVelocity(Vector3 d) { if (!this) return; safe_write(this + O::Projectile::initialVelocity, d, Vector3); }
 	Vector3 initialVelocity() { return safe_read(this + O::Projectile::initialVelocity, Vector3); }
@@ -303,22 +303,22 @@ public:
 	bool DoFatBulletHit(Projectile* pr, Vector3 point) {
 		float maxdist = GetHitDist();
 
-		auto target = esp::local_player->get_aimbot_target(point, maxdist);
+		auto target = esp::best_target;//esp::local_player->get_aimbot_target(point, maxdist);
 
-		if (get_isAlive((BaseProjectile*)pr) && target.player && !target.teammate) {
+		if (get_isAlive((BaseProjectile*)pr) && target.ent && !target.teammate) {
 			if (!unity::is_visible(target.pos, point, (uintptr_t)esp::local_player)) {
 				return false;
 			}
 
 			DWORD64 ht = hitTest();
 			safe_write(ht + 0x66, true, bool); //DidHit
-			safe_write(ht + 0x88, (DWORD64)target.player, DWORD64); //HitEntity
+			safe_write(ht + 0x88, (DWORD64)target.ent, DWORD64); //HitEntity
 			Transform* Transform;
 
 			if (!target.is_heli) {
-				Transform = FindBone(target.player, _(L"spine4"));
+				Transform = target.ent->FindBone(_(L"spine4"));
 				if (vars->combat.hitbox_override)
-					Transform = FindBone(target.player, _(L"head"));
+					Transform = target.ent->FindBone(_(L"head"));
 			}
 			if (!Transform)
 				return false;
@@ -496,8 +496,8 @@ public:
 			previoustraveledTime(this->traveledTime());
 		}
 
-		Transform* Transform = _get_transform((BasePlayer*)pr);
-		Vector3 pos = Transform->get_bone_position();
+		Transform* Transform = pr->get_transform();
+		Vector3 pos = Transform->get_position();
 		this->currentPosition(pos);
 
 		if (traveledTime() == 0) {
@@ -521,7 +521,7 @@ public:
 
 		Line(this->currentPosition(), this->previousPosition(), col(0.6, 0.1, 0.7, 1), 10.f, false, true);
 		
-		auto Trans = _get_transform((BasePlayer*)pr); //Component | Transform get_transform(); 
+		auto Trans = pr->get_transform();
 		set_position(Trans, currentPosition()); //Transform | void set_position(Vector3 value); 
 
 		Vector4 rotation = LookRotation(currentVelocity(), Vector3(0, 1, 0));

@@ -83,7 +83,7 @@ void load_config() {
 		else if (name == _("sulfur_ore")) vars->visual.sulfur_ore = std::stoi(value);
 		else if (name == _("stone_ore")) vars->visual.stone_ore = std::stoi(value);
 		else if (name == _("metal_ore")) vars->visual.metal_ore = std::stoi(value);
-		else if (name == _("weapon")) vars->visual.weapon = std::stoi(value);
+		else if (name == _("weapon")) vars->visual.Item = std::stoi(value);
 		else if (name == _("midhealth")) vars->visual.midhealth = std::stoi(value);
 		else if (name == _("midname")) vars->visual.midname = std::stoi(value);
 		else if (name == _("traps")) vars->visual.traps = std::stoi(value);
@@ -340,7 +340,7 @@ void save_config() {
 	itoa(vars->visual.metal_ore, buffer, 4);
 	str = (std::string(_("metal_ore=")) + std::string(buffer) + _("\n"));
 	f.write(str.c_str(), str.size());
-	itoa(vars->visual.weapon, buffer, 4);
+	itoa(vars->visual.Item, buffer, 4);
 	str = (std::string(_("weapon=")) + std::string(buffer) + _("\n"));
 	f.write(str.c_str(), str.size());
 	itoa(vars->visual.midhealth, buffer, 4);

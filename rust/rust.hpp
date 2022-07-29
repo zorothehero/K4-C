@@ -5,12 +5,13 @@
 #define STR_MERGE_IMPL(a, b) a##b
 #define STR_MERGE(a, b) STR_MERGE_IMPL(a, b)
 #define MAKE_PAD(size) STR_MERGE(_pad, __COUNTER__)[size]
-#define DEFINE_MEMBER_N(type, name, offset) struct {unsigned char MAKE_PAD(offset); type name;}
+#define member(type, name, offset) struct {unsigned char MAKE_PAD(offset); type name;}
 #define min(a,b)            (((a) < (b)) ? (a) : (b))
 
 struct Ray {
 	Vector3 origin;
 	Vector3 dir;
+	Ray() { }
 	Ray(Vector3 o, Vector3 d) {
 		origin = o;
 		dir = d;
@@ -149,72 +150,48 @@ namespace rust {
 		class Attack {
 		public:
 			union {
-				DEFINE_MEMBER_N(Vector3, pointStart, 0x14);
-				DEFINE_MEMBER_N(Vector3, pointEnd, 0x18);
-				DEFINE_MEMBER_N(unsigned int, hitID, 0x2C);
-				DEFINE_MEMBER_N(unsigned int, hitBone, 0x30);
-				DEFINE_MEMBER_N(Vector3, hitNormalLocal, 0x34);
-				DEFINE_MEMBER_N(Vector3, hitPositionLocal, 0x40);
-				DEFINE_MEMBER_N(Vector3, hitNormalWorld, 0x4C);
-				DEFINE_MEMBER_N(Vector3, hitPositionWorld, 0x48);
-				DEFINE_MEMBER_N(unsigned int, hitPartID, 0x64);
-				DEFINE_MEMBER_N(unsigned int, hitMaterialID, 0x68);
-				DEFINE_MEMBER_N(unsigned int, hitItem, 0x6C);
+				member(Vector3, pointStart, 0x14);
+				member(Vector3, pointEnd, 0x18);
+				member(unsigned int, hitID, 0x2C);
+				member(unsigned int, hitBone, 0x30);
+				member(Vector3, hitNormalLocal, 0x34);
+				member(Vector3, hitPositionLocal, 0x40);
+				member(Vector3, hitNormalWorld, 0x4C);
+				member(Vector3, hitPositionWorld, 0x48);
+				member(unsigned int, hitPartID, 0x64);
+				member(unsigned int, hitMaterialID, 0x68);
+				member(unsigned int, hitItem, 0x6C);
 			};
 		};
 
 		class InputMessage {
 		public:
-			DEFINE_MEMBER_N(bool, ShouldPool, 0x10);
-			DEFINE_MEMBER_N(bool, _disposed, 0x11);
-			DEFINE_MEMBER_N(int, buttons, 0x14);
-			DEFINE_MEMBER_N(Vector3, aimAngles, 0x18);
-			DEFINE_MEMBER_N(Vector3, mouseDelta, 0x24);
+			member(bool, ShouldPool, 0x10);
+			member(bool, _disposed, 0x11);
+			member(int, buttons, 0x14);
+			member(Vector3, aimAngles, 0x18);
+			member(Vector3, mouseDelta, 0x24);
 		};
 
 		class PlayerTick {
 		public:
-			DEFINE_MEMBER_N(bool, ShouldPool, 0x10);
-			DEFINE_MEMBER_N(bool, _disposed, 0x11);
-			DEFINE_MEMBER_N(InputMessage*, inputState, 0x18);
-			DEFINE_MEMBER_N(Vector3, position, 0x20);
+			member(bool, ShouldPool, 0x10);
+			member(bool, _disposed, 0x11);
+			member(InputMessage*, inputState, 0x18);
+			member(Vector3, position, 0x20);
 			//DEFINE_MEMBER_N(modelstate*, modelState, 0x30);
-			DEFINE_MEMBER_N(uintptr_t, modelState, 0x30);
-			DEFINE_MEMBER_N(UINT, activeItem, 0x38);
-			DEFINE_MEMBER_N(Vector3, eyePos, 0x3C);
-			DEFINE_MEMBER_N(UINT, parentID, 0x48);
-			DEFINE_MEMBER_N(UINT, deltaMs, 0x4C);
+			member(uintptr_t, modelState, 0x30);
+			member(UINT, activeItem, 0x38);
+			member(Vector3, eyePos, 0x3C);
+			member(UINT, parentID, 0x48);
+			member(UINT, deltaMs, 0x4C);
 		};
 
-		class game_object {
-		public:
-			template<typename T>
-			T get_class()
-			{
-				return *reinterpret_cast<T*>((uintptr_t)this + 0x30);
-			}
-
-			template<typename T>
-			T get_class(uint32_t second_offset)
-			{
-				const auto object = *reinterpret_cast<uintptr_t*>((uintptr_t)this + 0x30);
-				if (!object)
-					return nullptr;
-
-				return *reinterpret_cast<T*>(object + second_offset);
-			}
-
-			char* get_prefab_name() { return *reinterpret_cast<char**>((uintptr_t)this + 0x60); }
-
-			uint32_t get_tag() { return *reinterpret_cast<uint16_t*>((uintptr_t)this + 0x54); }
-
-			layer get_layer() { return *reinterpret_cast<layer*>(this + 0x50); }
-		};
 
 		class PlayerAttack {
 		public:
 			union {
-				DEFINE_MEMBER_N(Attack*, attack, 0x18);
+				member(Attack*, attack, 0x18);
 			};
 		};
 
@@ -235,30 +212,30 @@ namespace rust {
 		class PlayerProjectileAttack {
 		public:
 			union {
-				DEFINE_MEMBER_N(PlayerAttack*, playerAttack, 0x18);
-				DEFINE_MEMBER_N(Vector3, hitVelocity, 0x20);
-				DEFINE_MEMBER_N(float, hitDistance, 0x2C);
-				DEFINE_MEMBER_N(float, travelTime, 0x30);
+				member(PlayerAttack*, playerAttack, 0x18);
+				member(Vector3, hitVelocity, 0x20);
+				member(float, hitDistance, 0x2C);
+				member(float, travelTime, 0x30);
 			};
 		};
 
 		class PlayerProjectileRicochet {
 		public:
 			union {
-				DEFINE_MEMBER_N(Vector3, hitPosition, 0x18);
-				DEFINE_MEMBER_N(Vector3, inVelocity, 0x24);
-				DEFINE_MEMBER_N(Vector3, outVelocity, 0x30);
-				DEFINE_MEMBER_N(Vector3, hitNormal, 0x3C);
+				member(Vector3, hitPosition, 0x18);
+				member(Vector3, inVelocity, 0x24);
+				member(Vector3, outVelocity, 0x30);
+				member(Vector3, hitNormal, 0x3C);
 			};
 		};
 
 		class PlayerProjectileUpdate {
 		public:
 			union {
-				DEFINE_MEMBER_N(int, projectileID, 0x14);
-				DEFINE_MEMBER_N(Vector3, position, 0x18);
-				DEFINE_MEMBER_N(Vector3, velocity, 0x24);
-				DEFINE_MEMBER_N(float, traveltime, 0x30);
+				member(int, projectileID, 0x14);
+				member(Vector3, position, 0x18);
+				member(Vector3, velocity, 0x24);
+				member(float, traveltime, 0x30);
 			};
 		};
 
@@ -627,9 +604,9 @@ namespace rust {
 		class string {
 		public:
 			char zpad[0x10];
-
 			int size;
 			wchar_t str[128 + 1];
+			string() {}
 			string(const wchar_t* st) {
 				size = min(m_wcslen((wchar_t*)st), 128);
 				for (int i = 0; i < size; i++) {
@@ -676,27 +653,27 @@ namespace rust {
 		public:
 			union {
 				//              Type     Name    Offset
-				DEFINE_MEMBER_N(uintptr_t, type, 0x10);
-				DEFINE_MEMBER_N(Vector3, AttackRay, 0x14);
-				DEFINE_MEMBER_N(float, Radius, 0x2C);
-				DEFINE_MEMBER_N(float, Forgiveness, 0x30);
-				DEFINE_MEMBER_N(float, MaxDistance, 0x34);
-				DEFINE_MEMBER_N(uintptr_t, RayHit, 0x38);
-				DEFINE_MEMBER_N(bool, MultiHit, 0x64);
-				DEFINE_MEMBER_N(bool, BestHit, 0x65);
-				DEFINE_MEMBER_N(bool, DidHit, 0x66);
-				DEFINE_MEMBER_N(uintptr_t, damageProperties, 0x68);
-				DEFINE_MEMBER_N(uintptr_t, gameObject, 0x70);
-				DEFINE_MEMBER_N(uintptr_t, collider, 0x78);
-				DEFINE_MEMBER_N(uintptr_t, ignoreEntity, 0x80);
-				DEFINE_MEMBER_N(uintptr_t, HitEntity, 0x88);
-				DEFINE_MEMBER_N(Vector3, HitPoint, 0x90);
-				DEFINE_MEMBER_N(Vector3, HitNormal, 0x9C);
-				DEFINE_MEMBER_N(Vector3, HitNormal, 0x9C);
-				DEFINE_MEMBER_N(float, HitDistance, 0xA8);
-				DEFINE_MEMBER_N(uintptr_t, HitTransform, 0xB0);
-				DEFINE_MEMBER_N(unsigned int, HitPart, 0xB8);
-				DEFINE_MEMBER_N(string, HitMaterial, 0xC0);
+				member(uintptr_t, type, 0x10);
+				member(Vector3, AttackRay, 0x14);
+				member(float, Radius, 0x2C);
+				member(float, Forgiveness, 0x30);
+				member(float, MaxDistance, 0x34);
+				member(uintptr_t, RayHit, 0x38);
+				member(bool, MultiHit, 0x64);
+				member(bool, BestHit, 0x65);
+				member(bool, DidHit, 0x66);
+				member(uintptr_t, damageProperties, 0x68);
+				member(uintptr_t, gameObject, 0x70);
+				member(uintptr_t, collider, 0x78);
+				member(uintptr_t, ignoreEntity, 0x80);
+				member(uintptr_t, HitEntity, 0x88);
+				member(Vector3, HitPoint, 0x90);
+				member(Vector3, HitNormal, 0x9C);
+				member(Vector3, HitNormal, 0x9C);
+				member(float, HitDistance, 0xA8);
+				member(uintptr_t, HitTransform, 0xB0);
+				member(unsigned int, HitPart, 0xB8);
+				member(string, HitMaterial, 0xC0);
 			};
 		};
 	}

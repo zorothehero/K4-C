@@ -33,7 +33,7 @@ uintptr_t pools_offset = 0xAAE0A0;
 uintptr_t Method$System_Collections_Generic_List_Projectile__Clear__ = 14664112; //Method$System.Collections.Generic.List<Projectile>.Clear() (METHOD ADDRESS)
 
 class Projectile1;
-class Projectile1
+class Projectile1 : public BaseMonoBehaviour
 {
 public:
 
@@ -144,9 +144,9 @@ public:
 			//auto RealTarget = reinterpret_cast<BasePlayerSDK*>(CheatCore::m_cheat->AimbotTarget.entity);
 			auto RealTarget = esp::best_target;
 			//if (memory::IsAddressValid(RealTarget))
-			if (RealTarget.player)
+			if (RealTarget.ent)
 			{
-				if (!RealTarget.player)
+				if (!RealTarget.ent)
 					return {};
 				for (int i = 0; i <= 0; i++)
 				{
@@ -156,7 +156,7 @@ public:
 					travelTime = traveledTime;
 
 					//Bounds bnds = RealTarget->GetBounds1111();
-					Bounds bnds = GetBounds((uintptr_t)RealTarget.player);
+					Bounds bnds = GetBounds((uintptr_t)RealTarget.ent);
 
 					//Vector3 pos = bnds._m_Center;
 					Vector3 pos = bnds.m_center;
@@ -166,7 +166,7 @@ public:
 					float dst = prevDist;
 					bool wantsExit = false;
 
-					float maxHitDist = GetHitDist(min(travelTime, maxTime), RealTarget.player, true);
+					float maxHitDist = GetHitDist(min(travelTime, maxTime), (BasePlayer*)RealTarget.ent, true);
 					float maxTravelDst = _this->initialDistance() + startVelocityLen * min(travelTime + num, maxTime) * projectile_forgiviness;
 					float absoluteMaxDst = _this->initialDistance() + startVelocityLen * min((travelTime + (dst - maxHitDist) / 0.98f * (num * 2)), 7.95f) * projectile_forgiviness;
 					updateDist = min(absoluteMaxDst, updateDist);
@@ -226,7 +226,7 @@ public:
 
 								result.didHit = true;
 								result.hitDist = hDst;
-								result.hitEntity = RealTarget.player;
+								result.hitEntity = RealTarget.ent;
 								result.hitPosition = nearest;
 								result.hitTime = travelTime;
 								return result;
@@ -265,7 +265,7 @@ public:
 							result.silentCat = true;
 							result.hitDist = dst;
 							result.hitPosition = nearest;
-							result.hitEntity = RealTarget.player;
+							result.hitEntity = RealTarget.ent;
 							result.hitTime = travelTime;
 							result.outVelocity = velocity;
 							updateDist = dst;
@@ -275,7 +275,7 @@ public:
 						velocity += gravity * num;
 						velocity -= velocity * drag * num;
 						travelTime += num;
-						maxHitDist = GetHitDist(min(travelTime, maxTime), RealTarget.player, true);
+						maxHitDist = GetHitDist(min(travelTime, maxTime), (BasePlayer*)RealTarget.ent, true);
 						maxTravelDst = _this->initialDistance() + startVelocityLen * min(travelTime, maxTime) * projectile_forgiviness;
 					}
 				}
@@ -289,7 +289,7 @@ public:
 		return result;
 	}
 
-	bool DoHit(uintptr_t at, Vector3 point, float travelTime) {
+	bool DoHit(BaseEntity* at, Vector3 point, float travelTime) {
 		//if (!memory::IsAddressValid(at))
 		if (!at)
 			return false;
@@ -306,29 +306,29 @@ public:
 
 		if (ht && at) {
 			//ht->DidHit() = true;
-			ht->set_did_hit(true);
+			ht->DidHit() = true;
 			//ht->HitEntity() = at;
-			ht->set_hit_entity((BasePlayer*)at);
+			ht->HitEntity() = at;
 
 			if (at) {
-				auto Transform = _get_transform((BasePlayer*)at);
+				auto Transform = at->get_transform();
 				//if (!memory::IsAddressValid(ht))
 				if (!ht)
 					return false;
 
 				//ht->HitTransform() = Transform;
-				ht->set_hit_transform(Transform);
+				ht->HitTransform() = Transform;
 				//ht->HitPoint() = Transform->InverseTransformPoint(point);
-				ht->set_hit_point(InverseTransformPoint(Transform, point));
+				ht->HitPoint() = InverseTransformPoint(Transform, point);
 				//ht->HitMaterial() = Il2CppString::create(_("flesh"));
-				ht->set_hit_material(_(L"flesh"));
+				ht->HitMaterial() = _(L"flesh");
 			}
 			else
-				ht->set_hit_point(point);
+				ht->HitPoint() = point;
 			//ht->HitPoint() = point;
 
 		//ht->AttackRay() = Ray(point, Vector3(0, 0, 0));
-			ht->set_attack_ray(Ray(point, Vector3(0, 0, 0)));
+			ht->AttackRay() = Ray(point, Vector3(0, 0, 0));
 
 			float real_travel_time = _this->traveledTime();
 			//_this->traveledTime() = travelTime;
@@ -565,7 +565,7 @@ public:
 			if (projectileProtection1 < 6)
 			{
 				Vector3 dir2 = (initialTarget - movPos).Normalized();
-				reduceLen = GetHitDist(min(maxTime, desiredTime), data.hitEntity, true);
+				reduceLen = GetHitDist(min(maxTime, desiredTime), (BasePlayer*)data.hitEntity, true);
 				reduceLen = min(reduceLen, (initialTarget - from).Length());
 				target = initialTarget - dir2 * reduceLen;
 			}
@@ -694,17 +694,17 @@ public:
 		HIT:
 			_this->traveledDistance(result.hitDist);
 
-			result.hitPosition = result.hitEntity->get_bone_transform(47)->get_bone_position();
+			result.hitPosition = result.hitEntity->model()->boneTransforms()->get(47)->get_position();
 			//if (settings.AimbotCircle)
 			//	result.hitPosition = result.hitEntity->model()->boneTransforms()->get(47)->_get_position();
 
 			UpdateBulletTracer(_this->currentPosition(), result.hitPosition);
 			
-			flag = DoHit((uintptr_t)result.hitEntity, result.hitPosition, result.hitTime);
+			flag = DoHit(result.hitEntity, result.hitPosition, result.hitTime);
 
-			auto Transform = _get_transform(result.hitEntity);
+			auto Transform = result.hitEntity->get_transform();
 
-			hitPosition = get_position((uintptr_t)Transform);//transform->get_bone_position();
+			hitPosition = Transform->get_position();//transform->get_bone_position();
 		}
 		else if (result.silentCat && result.hitEntity)
 		{
@@ -745,11 +745,11 @@ public:
 	void UpdateVelocity()
 	{
 		auto _this = (Projectile*)this;
-		auto Transform = _get_transform((BasePlayer*)_this);
+		auto Transform = _this->get_transform();
 
 		if (Transform) {
 			
-			Vector3 pos = get_position((uintptr_t)Transform);
+			Vector3 pos = Transform->get_position();
 			_this->currentPosition() = pos;
 
 			if (_this->traveledTime() == 0.f)
@@ -879,7 +879,7 @@ public:
 		return _update((Projectile*)this);//hooks::orig::_update((Projectile*)this);//Hooks::ProjectileUpdateHk.get_original<decltype(&Hooks::_Update)>()(this);
 	}
 
-	float GetHitDist(float travel, BasePlayer* target, bool player) {
+	float GetHitDist(float travel, BasePlayer* target, bool ent) {
 		if (!target)
 			return 0.f;
 
@@ -888,27 +888,27 @@ public:
 			return 0.f;
 
 		float time = unity::get_realtimesincestartup();//UnityEngine::Time::get_realtimeSinceStartup();
-		float timeSinceLastTick = time - LocalPlayerBase->get_last_sent_tick_time();
+		float timeSinceLastTick = time - LocalPlayerBase->lastSentTickTime();
 		float timeSinceLastTickClamped = max(0.f, min(timeSinceLastTick, 1.f));
 
-		bool mountedplayer = target->get_mountable() ? 1 : 0;
+		bool mountedplayer = target->GetMountable() ? 1 : 0;
 
 		float Velocity = 0.f;
-		if (mountedplayer && target && !player)
+		if (mountedplayer && target && !ent)
 			Velocity = GetMountedVelocity(target);
 
-		else if (!player && !mountedplayer)
+		else if (!ent && !mountedplayer)
 			Velocity = 95.f;
 
 		float maxDist = 0.1f + (timeSinceLastTickClamped + 2.f / 60.f) * 1.5f * Velocity;
 
 		if (projectileProtection1 >= 6) {
-			if (player && !mountedplayer)
+			if (ent && !mountedplayer)
 				return min(1.4f, 1.4f);
 
 			else if (mountedplayer && target) {
 
-				BaseMountable* mounted = target->get_mountable();
+				BaseMountable* mounted = target->GetMountable();
 				if (mounted) {
 
 					auto realM = get_parent_entity((uintptr_t)mounted);

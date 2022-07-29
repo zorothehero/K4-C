@@ -27,7 +27,7 @@ struct TraceResult1 {
 public:
 	bool didHit;
 	bool silentCat;
-	BasePlayer* hitEntity;
+	BaseEntity* hitEntity;
 	Vector3 hitPosition;
 	Vector3 outVelocity;
 	float hitTime;
@@ -205,14 +205,14 @@ struct fired_projectile {
 	Projectile* fake;
 	float fired_at;
 	int updates;
-	aim_target player;
+	aim_target ent;
 };
 
 struct NodeTarget {
 	Vector3 pos;
 	int steps;
 	std::vector<Vector3> path;
-	uintptr_t ent;
+	BaseEntity* ent;
 };
 
 namespace misc
@@ -366,7 +366,7 @@ namespace misc
 	{
 		bool flag = false;
 		auto loco = esp::local_player;
-		auto eyepos = loco->get_player_eyes()->get_position() + offset;
+		auto eyepos = loco->eyes()->get_position() + offset;
 		float num = 1.5f;
 		float num2 = 2.f / 60.f;
 		float deltatime = get_deltaTime();
@@ -374,11 +374,11 @@ namespace misc
 		//float fixed_deltatime = get_fixeddeltaTime();
 		float num3 = 2.f * deltatime;
 		float num4 = (1.f + num2 + num3) * num;
-		float num5 = loco->max_velocity() + GetParentVelocity(loco).Length();
-		float num6 = loco->boundspadding() + num4 * num5;
+		float num5 = loco->max_velocity() + loco->GetParentVelocity().Length();
+		float num6 = loco->BoundsPadding() + num4 * num5;
 		float num7 = eyepos.distance(pos);
-		float num8 = fabs(GetParentVelocity(loco).y);
-		float num9 = loco->boundspadding() + num4 + num8 + loco->get_jump_height();
+		float num8 = fabs(loco->GetParentVelocity().y);
+		float num9 = loco->BoundsPadding() + num4 + num8 + loco->GetJumpHeight();
 		float num10 = fabs(eyepos.y - pos.y);
 
 		if (num10 > num9)
@@ -386,17 +386,17 @@ namespace misc
 			flag = true;
 		}
 
-		auto t = _get_transform(loco);
-		Vector3 position2 = t->get_bone_position();
-		Vector3 actual_eye_pos = loco->get_player_eyes()->get_position();
+		auto t = loco->get_transform();
+		Vector3 position2 = t->get_position();
+		Vector3 actual_eye_pos = loco->eyes()->get_position();
 
-		if (position2.distance(loco->get_player_eyes()->get_position()) > 0.06f
+		if (position2.distance(loco->eyes()->get_position()) > 0.06f
 			&& TestNoClipping(loco, cLastTickPos, position2))
 			//&& TestNoClipping(loco, cLastTickEyePos, position2))
 		{
 			flag = true;
 		}
-		else if (position2.distance(loco->get_player_eyes()->get_position()) > 0.01f
+		else if (position2.distance(loco->eyes()->get_position()) > 0.01f
 			&& TestNoClipping(loco, actual_eye_pos, eyepos)) {
 			flag = true;
 		}
@@ -408,23 +408,11 @@ namespace misc
 			//	protections::eye_penalty);
 		}
 		else if(protections::eye_protection >= 5 && 
-			loco->get_model_state()->has_flag(rust::classes::ModelState_Flag::Mounted)) {
+			loco->modelState()->has_flag(rust::classes::ModelState_Flag::Mounted)) {
 			eye_history.push_back(pos);
 		}
 
 		return flag;
-	}
-
-	bool OnProjectileAttack(Projectile* p,
-		BasePlayer* ply,
-		rust::classes::PlayerProjectileAttack* ppa)
-	{
-		auto playerAttack = ppa->playerAttack;
-
-
-
-
-		return true;
 	}
 
 	bool can_manipulate(BasePlayer* ply,
@@ -432,7 +420,7 @@ namespace misc
 		float mm_eye = 7.f) //7m only check rn
 	{
 		Vector3 v = *reinterpret_cast<Vector3*>((uintptr_t)ply + eyes);
-		Vector3 re_p = ply->get_bone_transform(47)->get_bone_position() + ply->get_bone_transform(47)->up() * (ply->get_player_eyes()->get_view_offset().y + v.y);
+		Vector3 re_p = ply->model()->boneTransforms()->get(47)->get_position() + ply->model()->boneTransforms()->get(47)->up() * (ply->eyes()->get_view_offset().y + v.y);
 
 		if (ply->is_visible(re_p, pos)) {
 			misc::best_lean = Vector3(0, 0, 0);
@@ -526,7 +514,7 @@ namespace misc
 			auto extrusion = 2.f;
 			Vector3 vec = (oldPos + newPos) * 0.5f;
 			auto margin = 0.05f;
-			float radius = GetRadius(ply);
+			float radius = _GetRadius(ply);
 			float height = GetHeight(ply);
 			Vector3 vec2 = vec + Vector3(0.f, radius - extrusion, 0.f);
 			Vector3 vec3 = vec + Vector3(0.f, height - radius, 0.f);
@@ -555,7 +543,7 @@ namespace misc
 				if (flag)
 				{
 					float num4 = max((flyhackPauseTime > 0.f ? 10.f : 1.5f), 0.f);
-					float num5 = GetJumpHeight(ply) + num4;
+					float num5 = _getjumpheight(ply) + num4;
 					if (flyhackDistanceVertical > num5)
 						return true;
 
@@ -586,7 +574,7 @@ namespace misc
 		}
 		else
 		{
-			auto trans = _get_transform(esp::local_player);
+			auto trans = esp::local_player->get_transform();
 			bool flag = trans ? !(!trans) : false;
 			VMatrix _mv; _mv.matrix_identity();
 
@@ -604,10 +592,10 @@ namespace misc
 			float crawling = 0.f;
 			if (protections::speedhack_protection >= 2)
 			{
-				bool flag2 = ply->get_model_state()->has_flag(rust::classes::ModelState_Flag::Sprinting);
-				bool flag3 = ply->get_model_state()->has_flag(rust::classes::ModelState_Flag::Ducked);
+				bool flag2 = ply->modelState()->has_flag(rust::classes::ModelState_Flag::Sprinting);
+				bool flag3 = ply->modelState()->has_flag(rust::classes::ModelState_Flag::Ducked);
 				bool flag4 = IsSwimming(ply);
-				bool flag5 = ply->get_model_state()->has_flag(rust::classes::ModelState_Flag::Crawling);
+				bool flag5 = ply->modelState()->has_flag(rust::classes::ModelState_Flag::Crawling);
 				running = (flag2 ? 1.0f : 0.f);
 				ducking = ((flag3 || flag4) ? 1.0f : 0.f);
 				crawling = (flag5 ? 1.0f : 0.f);
@@ -663,7 +651,7 @@ namespace misc
 
 		flyhackPauseTime = max(0.f, flyhackPauseTime - deltaTime);
 		ticks.Reset();
-		auto trans = _get_transform(esp::local_player);
+		auto trans = esp::local_player->get_transform();
 
 		if (ticks.HasNext()) {
 			bool flag = trans ? !(!trans) : false;
@@ -763,14 +751,14 @@ namespace misc
 			//settings::speedhack = speedhackDistance + 4.0f;
 			settings::speedhack = speedhackDistance + 3.9f;
 		}
-		ticks.Reset(_get_transform(esp::local_player)->get_bone_position());
+		ticks.Reset(esp::local_player->get_transform()->get_position());
 		ValidateEyeHistory(lp);
-		//ticks.Reset(esp::local_player->get_player_eyes()->get_position());
+		//ticks.Reset(esp::local_player->eyes()->get_position());
 	}
 
 	void ServerUpdate(float deltaTime,
 		BasePlayer* ply) {
-		desyncTimeRaw = max(ply->get_last_sent_tick_time() - deltaTime, 0.f);
+		desyncTimeRaw = max(ply->lastSentTickTime() - deltaTime, 0.f);
 		desyncTimeClamped = max(desyncTimeRaw, 1.f);
 		FinalizeTick(deltaTime);
 	}
@@ -988,12 +976,12 @@ namespace misc
 
 			Vector3 vel = pwm->get_TargetMovement();
 			vel = Vector3(vel.x / vel.length() * 5.5f, vel.y, vel.z / vel.length() * 5.5f);
-			auto eyepos = lp->get_player_eyes()->get_position();
+			auto eyepos = lp->eyes()->get_position();
 
-			auto Transform = _get_transform((BasePlayer*)node.ent);
+			auto Transform = node.ent->get_transform();
 			auto hp = *reinterpret_cast<float*>(node.ent + 0x178); //detect if broken with this fuck knows why
 			if (Transform && hp > 60) {
-				auto marker_pos = get_position((uintptr_t)Transform);
+				auto marker_pos = Transform->get_position();
 				Sphere(marker_pos, 1.f, col(1, 1, 1, 1), 0.02f, 100.f);
 				if (node.steps > 0
 					&& eyepos.distance(node.pos) < 1.f)
@@ -1059,7 +1047,7 @@ namespace misc
 						pwm->set_TargetMovement({ vel.x, vel.y += 10, vel.z });
 
 
-						//auto state = lp->get_model_state();
+						//auto state = lp->modelState();
 						//if (settings::vert_flyhack < 2.5f && settings::hor_flyhack < 6.f)
 						//{
 						//	pwm->force_jump(state, true);
@@ -1070,7 +1058,7 @@ namespace misc
 			}
 			else
 			{
-				misc::node.ent = (uintptr_t)lp->find_closest(_("OreResourceEntity"), (Networkable*)lp, 200.f);
+				misc::node.ent = (BaseEntity*)lp->find_closest(_("OreResourceEntity"), (Networkable*)lp, 200.f);
 
 				misc::node.path.clear();
 				misc::node.pos = Vector3(0, 0, 0);
@@ -1094,7 +1082,7 @@ namespace misc
 
 		target_pos.y -= 0.1f;
 
-		if (target.player) {
+		if (target.ent) {
 			auto travel = 0.f;
 			auto vel = (getmodifiedaimcone(0, rpc_position - target_pos, true)).Normalized() * original_vel.length();
 			auto drag = p->drag();
@@ -1158,14 +1146,14 @@ namespace misc
 				travel_t -= settings::desyncTime;
 
 			aimbot_velocity = Vector3(0, 0, 0);
-			if (target.player) {
+			if (target.ent) {
 				auto wv = target.avg_vel;
 
 				if (wv.is_empty() || wv.is_nan())
-					wv = GetWorldVelocity(target.player);
+					wv = target.ent->GetWorldVelocity();
 
 				if (target.is_heli)
-					wv = GetWorldVelocity(target.player);
+					wv = target.ent->GetWorldVelocity();
 
 				Vector3 player_velocity = Vector3(wv.x, 0, wv.z) * (target.is_heli ? 0.75f : 0.9f);
 

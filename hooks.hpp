@@ -155,9 +155,9 @@ namespace hooks {
 			if (!esp::local_player)
 				break;
 
-			auto weapon = esp::local_player->get_active_weapon();
+			auto Item = esp::local_player->get_active_weapon();
 
-			if (!weapon)
+			if (!Item)
 				break;
 
 			auto baseprojectile = esp::local_player->get_active_weapon()->get_base_projectile();
@@ -204,7 +204,7 @@ namespace hooks {
 
 			Vector3 aimbot_velocity = Vector3(0,0,0);
 
-			const auto stats = baseprojectile->get_stats(weapon->get_item_definition_id());
+			const auto stats = baseprojectile->get_stats(Item->get_item_definition_id());
 
 			Vector3 aim_angle;
 
@@ -219,7 +219,7 @@ namespace hooks {
 
 			//calc new target position with velocity
 			Vector3 target_velocity, target_pos;
-			if (target.player)
+			if (target.ent)
 			{
 				target_pos = target.pos;
 			}
@@ -240,7 +240,7 @@ namespace hooks {
 				original_vel = *reinterpret_cast<Vector3*>(projshoot + 0x24);
 				rpc_position = *reinterpret_cast<Vector3*>(projshoot + 0x18);
 
-				target.visible = target.player->is_visible(rpc_position, target.pos);
+				target.visible = target.ent->is_visible(rpc_position, target.pos);
 
 				if (misc::best_target == Vector3(0, 0, 0)
 					&& vars->combat.thick_bullet
@@ -249,10 +249,10 @@ namespace hooks {
 				{
 					for (auto v : sphere1m)
 					{
-						if (target.player)
+						if (target.ent)
 						{
-							if (target.player->is_visible(target_pos, target_pos + v)
-								&& target.player->is_visible(target_pos + v, rpc_position))
+							if (target.ent->is_visible(target_pos, target_pos + v)
+								&& target.ent->is_visible(target_pos + v, rpc_position))
 								misc::best_target = target_pos + v;
 						}
 					}
@@ -310,7 +310,7 @@ namespace hooks {
 
 			for (int i = 0; i < size; i++) {
 				auto projectile = *(uintptr_t*)(shoot_list + 0x20 + i * 0x8);
-				if (target.player && (target.visible || manipulated || misc::autoshot) && !target.teammate) {
+				if (target.ent && (target.visible || manipulated || misc::autoshot) && !target.teammate) {
 					*reinterpret_cast<Vector3*>(projectile + 0x24) = aimbot_velocity; //startvel
 				}
 			}
@@ -341,7 +341,7 @@ namespace hooks {
 
 
 				if (vars->combat.psilent || unity::GetKey(rust::classes::KeyCode(vars->keybinds.psilent))) {
-					if (target.player && !target.teammate) {
+					if (target.ent && !target.teammate) {
 						if (target.visible || vis_fat)
 						{
 							projectile->set_current_velocity(aimbot_velocity);
@@ -455,7 +455,7 @@ namespace hooks {
 		//
 		//	Vector3 direction = outvel.Normalized();
 		//
-		//	Vector3 targetpos = esp::best_target.player->get_bone_transform(48)->get_bone_position();
+		//	Vector3 targetpos = esp::best_target.player->model()->boneTransforms()->get(48)->get_bone_position();
 		//	Vector3 direction_to_target = targetpos - hitpos;
 		//
 		//	Vector3 newVelocity = direction_to_target.Normalized() * outvel.Length();
@@ -492,21 +492,21 @@ namespace hooks {
 			if (!hit_test)
 				break;
 
-			if (!hit_test->get_gameobject())
+			if (!hit_test->gameObject())
 				break;
 
-			auto layer = hit_test->get_gameobject()->get_layer();
-			auto prefab_name = hit_test->get_gameobject()->get_prefab_name();
+			auto layer = hit_test->gameObject()->get_layer();
+			auto prefab_name = hit_test->gameObject()->get_prefab_name();
 
 			aim_target target = esp::best_target;//esp::local_player->get_aimbot_target(camera_pos);
 
-			if (!target.player)
+			if (!target.ent)
 				break;
 
-			auto hit_entity = (BasePlayer*)hit_test->get_hit_entity();
+			auto hit_entity = (BasePlayer*)hit_test->HitEntity();
 			if (layer == rust::classes::layer::Player_Server) {
 				if (hit_entity->is_teammate(esp::local_player)) {
-					hit_test->set_ignore_entity(hit_entity);
+					hit_test->ignoreEntity() = hit_entity;
 					return;
 				}
 			}
@@ -548,32 +548,32 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 				};
 				
 				if (vars->combat.hitboxes.Head
-					 && esp::local_player->is_visible(target.player->get_bone_transform(
-						 (int)rust::classes::Bone_List::head)->get_bone_position(), projectile->get_current_position()))
+					 && esp::local_player->is_visible(target.ent->model()->boneTransforms()->get(
+						 (int)rust::classes::Bone_List::head)->get_position(), projectile->get_current_position()))
 					test[0] = { 698017942, 2173623152 };
 				if (vars->combat.hitboxes.Body
-					&& esp::local_player->is_visible(target.player->get_bone_transform(
-						(int)rust::classes::Bone_List::pelvis)->get_bone_position(), projectile->get_current_position()))
+					&& esp::local_player->is_visible(target.ent->model()->boneTransforms()->get(
+						(int)rust::classes::Bone_List::pelvis)->get_position(), projectile->get_current_position()))
 					test[1] = { 1031402764, 1750816991 };
 				if (vars->combat.hitboxes.Upperbody
-					&& esp::local_player->is_visible(target.player->get_bone_transform(
-						(int)rust::classes::Bone_List::spine4)->get_bone_position(), projectile->get_current_position()))
+					&& esp::local_player->is_visible(target.ent->model()->boneTransforms()->get(
+						(int)rust::classes::Bone_List::spine4)->get_position(), projectile->get_current_position()))
 					test[2] = { 3901657145, 1750816991 };
 				if (vars->combat.hitboxes.Hands
-					&& esp::local_player->is_visible(target.player->get_bone_transform(
-						(int)rust::classes::Bone_List::r_hand)->get_bone_position(), projectile->get_current_position()))
+					&& esp::local_player->is_visible(target.ent->model()->boneTransforms()->get(
+						(int)rust::classes::Bone_List::r_hand)->get_position(), projectile->get_current_position()))
 					test[3] = { 102231371, 1750816991 };
 				if (vars->combat.hitboxes.Penis
-					&& esp::local_player->is_visible(target.player->get_bone_transform(
-						(int)rust::classes::Bone_List::penis)->get_bone_position(), projectile->get_current_position()))
+					&& esp::local_player->is_visible(target.ent->model()->boneTransforms()->get(
+						(int)rust::classes::Bone_List::penis)->get_position(), projectile->get_current_position()))
 					test[4] = { 612182976, 2173623152 };
 				if (vars->combat.hitboxes.Legs
-					&& esp::local_player->is_visible(target.player->get_bone_transform(
-						(int)rust::classes::Bone_List::l_hip)->get_bone_position(), projectile->get_current_position()))
+					&& esp::local_player->is_visible(target.ent->model()->boneTransforms()->get(
+						(int)rust::classes::Bone_List::l_hip)->get_position(), projectile->get_current_position()))
 					test[5] = { 3892428003, 1750816991 };
 				if (vars->combat.hitboxes.Feet
-					&& esp::local_player->is_visible(target.player->get_bone_transform(
-						(int)rust::classes::Bone_List::r_foot)->get_bone_position(), projectile->get_current_position()))
+					&& esp::local_player->is_visible(target.ent->model()->boneTransforms()->get(
+						(int)rust::classes::Bone_List::r_foot)->get_position(), projectile->get_current_position()))
 					test[6] = { 920055401, 1750816991 };
 
 				int d = rand() % 6;
@@ -640,16 +640,16 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 				attack->hitNormalLocal = { 0, -1, 0 };
 			}
 			else {
-				auto weakspots = target.player->get_weakspots();
+				auto weakspots = ((BaseHelicopter*)target.ent)->weakspots();
 				if (!weakspots)
 					break;
 
-				auto size = *reinterpret_cast<uintptr_t*>(weakspots + 0x18);
+				auto size = weakspots->get_size();//*reinterpret_cast<uintptr_t*>(weakspots + 0x18);
 
 				bool tail_alive = false;
 				bool main_alive = false;
 				for (int i = 0; i < size; i++) {
-					auto weakspot = *(uintptr_t*)(weakspots + 0x20 + i * 0x8);
+					auto weakspot = weakspots->get(i);//*(uintptr_t*)(weakspots + 0x20 + i * 0x8);
 					if (!weakspot)
 						continue;
 					auto health = *reinterpret_cast<float*>(weakspot + 0x24);
@@ -679,7 +679,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 
 
 			if (layer != rust::classes::layer::Player_Server) {
-				hit_test->set_ignore_entity(hit_entity);
+				hit_test->ignoreEntity() = hit_entity;
 				return;
 			}
 		} while (0);
@@ -749,24 +749,12 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 	uintptr_t client_entities;
 
 	void hk_projectile_update(uintptr_t pr) {
-		//float offset = 0;
-		//if (misc::LineCircleIntersection(
-		//	esp::best_target.pos, 1.f, p->previousPosition(), p->currentPosition(), offset))
-		//{
-		//	
-		//}
-		
 		if (vars->combat.targetbehindwall) {
 			return _update((Projectile*)pr);
 			//((Projectile1*)pr)->Update();
 		}
 		else
 			return _update((Projectile*)pr);
-	}
-
-	bool __stdcall dohit_hk(Projectile* p, HitTest* h, Vector3 v1, Vector3 v2) {
-
-		return orig::DoHit(p, h, v1, v2);
 	}
 
 	void get_skydome()
@@ -851,10 +839,10 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 		if (!loco || loco->is_sleeping())
 			return;
 		auto time = unity::get_realtimesincestartup();//UnityEngine::Time::get_realtimeSinceStartup();
-		float _timeSinceLastTick = time - loco->get_last_sent_tick_time();
+		float _timeSinceLastTick = time - loco->lastSentTickTime();
 		if (loco && !loco->is_sleeping() && settings::desyncTime < 0.f) {
 			if (vars->misc.flyhack_stop) {
-				Vector3 curr = _get_transform(esp::local_player)->get_bone_position();
+				Vector3 curr = esp::local_player->get_transform()->get_position();
 				Vector3 old = misc::cLastTickPos;
 				Vector3 v4 = (curr - misc::cLastTickPos);
 				Vector3 ov = Vector3(curr.x, curr.y, curr.z);
@@ -872,8 +860,8 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 				}
 			}
 
-			misc::cLastTickEyePos = esp::local_player->get_player_eyes()->get_position();//get_transform(esp::local_player)->get_bone_position();//baseplayer->get_player_eyes()->get_position();
-			misc::cLastTickPos = _get_transform(esp::local_player)->get_bone_position();//get_transform(esp::local_player)->get_bone_position();//baseplayer->get_player_eyes()->get_position();
+			misc::cLastTickEyePos = esp::local_player->eyes()->get_position();//get_transform(esp::local_player)->get_bone_position();//baseplayer->eyes()->get_position();
+			misc::cLastTickPos = esp::local_player->get_transform()->get_position();//_get_transform(esp::local_player)->get_position();//get_transform(esp::local_player)->get_bone_position();//baseplayer->eyes()->get_position();
 			misc::ticks.AddPoint(misc::cLastTickPos);
 			//misc::ServerUpdate(misc::tickDeltaTime, esp::local_player);
 			misc::ServerUpdate(get_deltaTime(), esp::local_player);
@@ -919,7 +907,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 			settings::time_since_last_shot = misc::time_since_last_shot;
 			if (misc::just_shot && (misc::time_since_last_shot > 0.2f))
 			{
-				unity::ServerRPC((uintptr_t)held, rust::classes::string(_(L"StartReload")));
+				held->ServerRPC(_(L"StartReload"));
 				esp::local_player->console_echo(_(L"[trap]: ClientInput - starting reload"));
 				//esp::local_player->SendSignalBroadcast(rust::classes::Signal::Reload); //does this cause animation? YES
 				misc::just_shot = false;
@@ -931,7 +919,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 				&& !misc::did_reload)
 			{
 				esp::local_player->console_echo(_(L"[trap]: ClientInput - finishing reload"));
-				unity::ServerRPC((uintptr_t)held, rust::classes::string(_(L"Reload")));
+				held->ServerRPC(_(L"Reload"));
 				misc::did_reload = true;
 				misc::time_since_last_shot = 0;
 			}
@@ -946,7 +934,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 				if (vars->misc.autofarm)
 				{
 					if(misc::node.ent == 0)
-						misc::node.ent = (uintptr_t)loco->find_closest(_("OreResourceEntity"), (Networkable*)loco, 200.f);
+						misc::node.ent = (BaseEntity*)loco->find_closest(_("OreResourceEntity"), (Networkable*)loco, 200.f);
 					misc::autobot::auto_farm(player_walk_movement);
 				}
 				else
@@ -1000,7 +988,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 		if (!ammodef) return;
 		auto lp = esp::local_player;
 		if (!lp) return;
-		auto eyes = lp->get_player_eyes();
+		auto eyes = lp->eyes();
 		if (!eyes) return;
 
 
@@ -1169,9 +1157,9 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 			&& esp::closest_building_block) {
 
 			auto block = (BuildingBlock*)esp::closest_building_block;
-			auto tranny = _get_transform((BasePlayer*)block);
-			auto pos = get_position((uintptr_t)tranny);
-			auto distance = esp::local_player->get_player_eyes()->get_position().distance(pos);
+			auto tranny = block->get_transform();
+			auto pos = tranny->get_position();
+			auto distance = esp::local_player->eyes()->get_position().distance(pos);
 			
 			if (distance <= 16.f) {
 				typedef uintptr_t(*AAA)(uintptr_t);//GetDominatingBuildingPrivilege
@@ -1322,7 +1310,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 			get_skydome();
 
 			auto fixed_time = get_fixedTime();
-			auto tick_time = baseplayer->get_last_sent_tick_time();
+			auto tick_time = baseplayer->lastSentTickTime();
 			settings::desyncTime = (unity::get_realtimesincestartup() - tick_time) - 0.03125 * 3;
 
 			auto wpn = baseplayer->get_active_weapon();
@@ -1330,7 +1318,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 			auto held = wpn ? wpn->get_base_projectile() : nullptr;
 
 			if (vars->misc.attack_on_mountables) {
-				auto mountable = baseplayer->get_mountable();
+				auto mountable = baseplayer->GetMountable();
 				if (mountable)
 					mountable->canwielditem() = true;
 			}
@@ -1343,13 +1331,13 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 			}
 
 			bool t1 = orig::isdown(state, rust::classes::BUTTON::FIRE_PRIMARY);
-			auto t2 = orig::get_bodyleanoffset(baseplayer->get_player_eyes());
+			auto t2 = orig::get_bodyleanoffset(baseplayer->eyes());
 
 			if (vars->misc.admin_mode)
 				baseplayer->set_admin_flag(rust::classes::PlayerFlags::IsAdmin);
 
 			if (vars->misc.spiderman) {
-				baseplayer->SpiderMan();
+				baseplayer->GroundAngleNew();
 			}
 
 			baseplayer->fov();
@@ -1374,9 +1362,9 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 
 			float mm_eye = ((0.01f + ((settings::desyncTime + 2.f / 60.f + 0.125f) * baseplayer->max_velocity())));
 			float time = get_fixedTime();
-			if (esp::best_target.player && held && wpn)
+			if (esp::best_target.ent && held && wpn)
 			{
-				Vector3 target = esp::best_target.pos;//.player->get_bone_transform(48)->get_bone_position();
+				Vector3 target = esp::best_target.pos;//.player->model()->boneTransforms()->get(48)->get_bone_position();
 				//Sphere(target, 0.05, col(0.8, 0.9, 0.3, 1), 0.05f, 10.f);
 
 				auto getammo = [&](BaseProjectile* held)
@@ -1405,13 +1393,13 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 								!strcmp(held->get_class_name(), _("CrossbowWeapon")))
 							&& mag_ammo > 0)
 						{
-							auto v = esp::local_player->get_player_eyes()->get_position() + misc::best_lean;
+							auto v = esp::local_player->eyes()->get_position() + misc::best_lean;
 							esp::local_player->console_echo(string::wformat(_(L"[trap]: ClientInput - manipulator attempted shot from position (%d, %d, %d) with desync of %d"), (int)v.x, (int)v.y, (int)v.z, (int)(settings::desyncTime * 100.f)));
 
 							misc::manual = true;
 							hk_LaunchProjectile(held);
 							misc::best_target = Vector3(0, 0, 0);
-							baseplayer->send_client_tick();
+							baseplayer->SendClientTick();
 						}
 				}
 
@@ -1419,8 +1407,8 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 				{
 					float nextshot = misc::fixed_time_last_shot + held->get_repeat_delay();
 					//Sphere(target, 0.05f, col(0.6, 0.6, 0.6, 1), 0.02f, 100.f);
-					//Sphere(baseplayer->get_bone_transform(48)->get_bone_position(), 0.05f, col(0.6, 0.6, 0.6, 1), 0.02f, 100.f);
-					if (baseplayer->is_visible(target, baseplayer->get_bone_transform(48)->get_bone_position())
+					//Sphere(baseplayer->model()->boneTransforms()->get(48)->get_bone_position(), 0.05f, col(0.6, 0.6, 0.6, 1), 0.02f, 100.f);
+					if (baseplayer->is_visible(target, baseplayer->model()->boneTransforms()->get(48)->get_position())
 						&& get_fixedTime() > nextshot
 						&& held->get_time_since_deploy() > held->get_deploy_delay()
 						&& mag_ammo > 0)
@@ -1431,9 +1419,9 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 						shot_fired((uintptr_t)held);
 						did_attack_client_side((uintptr_t)held);
 						*reinterpret_cast<int*>((uintptr_t) * reinterpret_cast<uintptr_t*>((uintptr_t)held + primaryMagazine) + 0x1C) = (mag_ammo - 1);
-						baseplayer->send_client_tick();
+						baseplayer->SendClientTick();
 					}
-					else if (!baseplayer->is_visible(baseplayer->get_bone_transform(48)->get_bone_position(), target)
+					else if (!baseplayer->is_visible(baseplayer->model()->boneTransforms()->get(48)->get_position(), target)
 						//&& get_fixedTime() > nextshot
 						&& vars->combat.manipulator
 						&& mag_ammo > 0)
@@ -1478,10 +1466,10 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 
 			if (vars->misc.eyeoffset || unity::GetKey((rust::classes::KeyCode)vars->keybinds.neck))
 			{
-				baseplayer->get_player_eyes()->set_view_offset(Vector3(0, vars->misc.PlayerEyes, 0));
+				baseplayer->eyes()->set_view_offset(Vector3(0, vars->misc.PlayerEyes, 0));
 			}
 
-			if (auto movement = baseplayer->get_movement()) {
+			if (auto movement = baseplayer->movement()) {
 				if (vars->misc.spiderman) {
 					movement->set_ground_angles_new(-1);
 				}
@@ -1497,7 +1485,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 					movement->set_gravity_multiplier(2.35f);
 
 				if (vars->combat.always_shoot) {
-					if (auto ModelState = baseplayer->get_model_state()) {
+					if (auto ModelState = baseplayer->modelState()) {
 						ModelState->set_flag(rust::classes::ModelState_Flag::OnGround);
 						mem::write<float>((uint64_t)movement + 0x4C, 1); //private float <Grounded>k__BackingField; // 0x4C
 					}
@@ -1543,23 +1531,23 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 						//	}
 
 						float offset = 0.f;
-						auto target = current.player;
+						auto target = current.ent;
 						if (vars->combat.thick_bullet
 							&& projectile->authoritative()
 							&& projectile->IsAlive())
 							//&& vars->combat.thickness > 1.1f)//)
 						{
-							if (target.player)
+							if (target.ent)
 							{
-								auto current_position = get_position((uintptr_t)_get_transform((BasePlayer*)projectile));
+								auto current_position = projectile->get_transform()->get_position();
 
 								//transform* bonetrans = target.player->find_closest_bone(current_position, true
-								Transform* bonetrans = target.player->get_bone_transform(48);
+								Transform* bonetrans = target.ent->model()->boneTransforms()->get(48);
 								if (vars->combat.bodyaim)
-									bonetrans = target.player->get_bone_transform((int)rust::classes::Bone_List::pelvis);
+									bonetrans = target.ent->model()->boneTransforms()->get((int)rust::classes::Bone_List::pelvis);
 
 
-								Vector3 target_bone = get_position((uintptr_t)bonetrans); //target_bone.y -= 0.8f;
+								Vector3 target_bone = bonetrans->get_position(); //target_bone.y -= 0.8f;
 								//Sphere(target_bone, 2.2f, col(12, 150, 100, 50), 10.f, 100.f);
 
 								if (misc::LineCircleIntersection(target_bone, vars->combat.thickness, current_position, projectile->previousPosition(), offset))
@@ -1577,7 +1565,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 								float num11 = (settings::desyncTime + num8 + num9) * num2;
 								//typedef Vector3(*gpv)(uintptr_t);
 								//auto pv = ((gpv)(mem::game_assembly_base + 8331264))((uintptr_t)target.player);
-								auto pv = GetParentVelocity(target.player);
+								auto pv = target.ent->GetParentVelocity();
 								float mag = pv.length();
 								float num15 = 0.1f + num11 * mag + 0.1f;
 								//dist -= num15;
@@ -1606,16 +1594,16 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 								if (dist < 2.0f)
 								{
 									auto newpos = Vector3::move_towards(current_position, target_bone, 1.0f);
-									set_position(_get_transform((BasePlayer*)projectile), newpos);
+									set_position(projectile->get_transform(), newpos);
 
 
 									HitTest* ht = (HitTest*)projectile->hitTest();
-									ht->set_did_hit(true);
-									ht->set_hit_entity(target.player);
-									ht->set_hit_transform(bonetrans);
-									ht->set_hit_point(InverseTransformPoint(bonetrans, newpos));
-									ht->set_hit_normal(InverseTransformDirection(bonetrans, newpos));
-									Ray r(get_position((uintptr_t)_get_transform((BasePlayer*)projectile)), newpos);
+									ht->DidHit() = true;
+									ht->HitEntity() = target.ent;
+									ht->HitTransform() = bonetrans;
+									ht->HitPoint() = InverseTransformPoint(bonetrans, newpos);
+									ht->HitNormal() = InverseTransformDirection(bonetrans, newpos);
+									Ray r(projectile->get_transform()->get_position(), newpos);
 									safe_write(ht + 0x14, r, Ray);
 									DoHit(projectile, ht, newpos, HitNormalWorld((uintptr_t)ht));
 								}
@@ -1682,7 +1670,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 						attack_melee(target, baseprojectile);
 					};
 
-					if (target.player
+					if (target.ent
 						&& target.visible
 						&& vars->combat.aimbot
 						&& unity::GetKey((rust::classes::KeyCode)vars->keybinds.aimbot))
@@ -1693,7 +1681,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 						// smooth angles
 						// set bodyangles to result
 						//
-						Vector3 eyes = esp::local_player->get_player_eyes()->get_position();
+						Vector3 eyes = esp::local_player->eyes()->get_position();
 						Vector3 aim_dir;
 						Vector3 aim_vel;
 
@@ -1713,7 +1701,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 						//misc::get_prediction(target, eyes, target.pos, vel, aim_vel, aim_dir, (Projectile*)projectile, true);
 
 
-						Vector3 va = baseplayer->bodyAngles();
+						Vector3 va = baseplayer->input()->bodyAngles();
 						Vector2 vb = { va.x, va.y };
 
 						auto calc = [&](const Vector3& src, const Vector3& dst) {
@@ -1772,12 +1760,12 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 						step(ai);
 						normalize(ai.x, ai.y);
 						Vector3 i = { ai.x, ai.y, 0.0f };
-						baseplayer->set_bodyAngles(i);
+						baseplayer->input()->bodyAngles() = i;
 					}
 
 					if (vars->misc.silent_farm) {
 						auto entity = baseplayer->resolve_closest_entity(3, false);
-						if (entity.first.found && entity.first.player) {
+						if (entity.first.found && entity.first.ent) {
 							if (*(int*)(wep_class_name + 4) == 'eleM' || *(int*)(wep_class_name + 4) == 'mmah') {
 								attack(entity.first, entity.second);
 							}
@@ -1793,7 +1781,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 								if (baseprojectile->get_time_since_deploy() > baseprojectile->get_deploy_delay() && baseprojectile->get_next_attack_time() <= get_time()) {
 									if (time > nextActionTime) {
 										nextActionTime = time + period;
-										unity::ServerRPC((uintptr_t)baseprojectile, rust::classes::string(_(L"UseSelf")));
+										baseprojectile->ServerRPC(_(L"UseSelf"));
 									}
 								}
 							}
@@ -1807,8 +1795,8 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 
 								auto target = esp::best_target; //baseplayer->get_aimbot_target(camera_pos);
 
-								if (target.player && target.distance < 5) {
-									auto net = target.player->get_networkable();
+								if (target.ent && target.distance < 5) {
+									auto net = *reinterpret_cast<Networkable**>((uintptr_t)target.ent + 0x58);
 									if (net) {
 										auto id = net->get_id();
 										if (id) {
@@ -1860,12 +1848,12 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 
 			if (vars->misc.instant_revive) {
 
-				if (target.player)
+				if (target.ent)
 				{
-					esp::local_player->console_echo(string::wformat(_(L"[trap]: ClientInput - sending RPC_Assist to player %s"), target.player->get_player_name()));
+					esp::local_player->console_echo(string::wformat(_(L"[trap]: ClientInput - sending RPC_Assist to player %s"), ((BasePlayer*)target.ent)->_displayName()));
 
-					if (!target.is_heli && target.player && target.distance <= 5 && target.player->get_health() <= 4 && target.visible)
-						unity::ServerRPC((uintptr_t)target.player, rust::classes::string(_(L"RPC_Assist")));
+					if (!target.is_heli && target.ent && target.distance <= 5 && target.ent->health() <= 4 && target.visible)
+						target.ent->ServerRPC(_(L"RPC_Assist"));
 				}
 			}
 
@@ -1927,7 +1915,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 			if (vars->combat.manipulator2 && ((unity::GetKey(rust::classes::KeyCode(vars->keybinds.manipulator)))
 				|| misc::manipulate_vis))
 			{
-				if (wpn && held && esp::best_target.player) {
+				if (wpn && held && esp::best_target.ent) {
 					auto getammo = [&](BaseProjectile* held)
 					{
 						if (held)
@@ -1942,7 +1930,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 					auto mag_ammo = getammo(held);
 
 					float nextshot = misc::fixed_time_last_shot + held->get_repeat_delay();
-					if (CanManipulate(held, esp::best_target.player, state))
+					if (CanManipulate(held, (BasePlayer*)esp::best_target.ent, state))
 						if (nextshot < time
 							&& (held->get_time_since_deploy() > held->get_deploy_delay() ||
 								!strcmp(held->get_class_name(), _("BowWeapon")) ||
@@ -1950,19 +1938,19 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 								!strcmp(held->get_class_name(), _("CrossbowWeapon")))
 							&& mag_ammo > 0)
 						{
-							auto v = settings::RealGangstaShit;//esp::local_player->get_player_eyes()->get_position() + misc::best_lean;
+							auto v = settings::RealGangstaShit;//esp::local_player->eyes()->get_position() + misc::best_lean;
 							esp::local_player->console_echo(string::wformat(_(L"[trap]: ClientInput - manipulator2 attempted shot from position (%d, %d, %d) with desync of %d"), (int)v.x, (int)v.y, (int)v.z, (int)(settings::desyncTime * 100.f)));
 
 							misc::manual = true;
 							hk_LaunchProjectile(held);
-							baseplayer->send_client_tick();
+							baseplayer->SendClientTick();
 						}
 				}
 			}
 
 			orig::baseplayer_client_input(baseplayer, state);
 
-			auto model_state = baseplayer->get_model_state();
+			auto model_state = baseplayer->modelState();
 
 			//model_state->set_water_level(99999);
 
@@ -1973,7 +1961,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 			if (vars->misc.autofarm) {
 				if (misc::node.pos != Vector3(0, 0, 0))
 				{
-					auto dir = (misc::node.pos - baseplayer->get_player_eyes()->get_position()).Normalized();
+					auto dir = (misc::node.pos - baseplayer->eyes()->get_position()).Normalized();
 					state->set_aim_angles(dir);
 				}
 			}

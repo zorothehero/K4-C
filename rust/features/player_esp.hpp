@@ -72,9 +72,9 @@ namespace esp {
 
 	void draw_item(Vector2 w2s_position, uintptr_t label, Vector4 color, wchar_t* name = _(L""));
 
-	void draw_player(BasePlayer* player, bool is_npc);
+	void draw_player(BasePlayer* ent, bool is_npc);
 
-	void do_chams(BasePlayer* player);
+	void do_chams(BasePlayer* ent);
 
 	void draw_target_hotbar(aim_target target);
 
@@ -82,7 +82,7 @@ namespace esp {
 
 	void draw_middle(aim_target target);
 
-	void draw_weapon_icon(weapon* item, Vector2 w2s_position);
+	void draw_weapon_icon(Item* item, Vector2 w2s_position);
 
 	void offscreen_indicator(Vector3 position);
 
@@ -177,7 +177,7 @@ namespace esp {
 					aim_target target;
 
 					target.pos = world_position;
-					target.player = (BasePlayer*)ent;
+					target.ent = (BasePlayer*)ent;
 					target.visible = true;
 					attack_melee(target, baseprojectile);
 				};
@@ -192,7 +192,7 @@ namespace esp {
 				}
 			};
 
-			auto ent = *reinterpret_cast<uintptr_t*>(base_object + 0x28);
+			auto ent = *reinterpret_cast<BaseEntity**>(base_object + 0x28);
 			if (!ent)
 				continue;
 
@@ -236,31 +236,29 @@ namespace esp {
 
 			float dist = 10.f;
 			if(esp::local_player)
-				dist = esp::local_player->get_bone_transform(48)->get_bone_position().distance(world_position);
+				dist = esp::local_player->model()->boneTransforms()->get(48)->get_position().distance(world_position);
 
 			esp::matrix = unity::get_view_matrix();
 
 			//players
 			if (tag == 6 && vars->visual.playeresp)
 			{
-
-				auto player = reinterpret_cast<BasePlayer*>(ent);
-
+				BasePlayer* entity = (BasePlayer*)ent;
 				auto hit_player = [&]() {
-					auto weapon = esp::local_player->get_active_weapon();
-					if (weapon) {
-						auto baseprojectile = weapon->get_base_projectile();
+					auto Item = esp::local_player->get_active_weapon();
+					if (Item) {
+						auto baseprojectile = Item->get_base_projectile();
 						if (baseprojectile) {
 							auto class_name = baseprojectile->get_class_name();
 							if (*(int*)(class_name + 4) == 'eleM' || *(int*)(class_name + 4) == 'mmah') {
-								auto world_position = player->get_bone_transform(48)->get_bone_position();
+								auto world_position = ent->model()->boneTransforms()->get(48)->get_position();
 								auto local = ClosestPoint(esp::local_player, world_position);
-								auto camera = esp::local_player->get_bone_transform(48)->get_bone_position();
+								auto camera = esp::local_player->model()->boneTransforms()->get(48)->get_position();
 
 								if (camera.get_3d_dist(world_position) >= 4.2f)
 									return;
 
-								aim_target target = esp::local_player->get_aimbot_target(camera);
+								aim_target target = esp::best_target;
 
 								attack_melee(target, baseprojectile, true);
 							}
@@ -268,22 +266,22 @@ namespace esp {
 					}
 				};
 
-				if (!player->is_alive())
+				if (!entity->is_alive())
 					continue;
 
-				if (player->is_sleeping() && !vars->visual.sleeper_esp)
+				if (entity->is_sleeping() && !vars->visual.sleeper_esp)
 					continue;
 
 				bool is_npc = false;
 
-				if (get_IsNpc(player->get_player_model())) {
+				if (entity->playerModel()->isnpc()) {
 					is_npc = true;
 
 					if (!vars->visual.npc_esp)
 						continue;
 				}
 
-				if (player->is_local_player())
+				if (entity->is_local_player())
 				{
 					local_player = reinterpret_cast<BasePlayer*>(ent);
 					do_chams(local_player);
@@ -292,34 +290,34 @@ namespace esp {
 					if (esp::local_player) {
 						auto target = aim_target();
 						if(vars->combat.bodyaim)
-							target.pos = player->get_bone_transform((int)rust::classes::Bone_List::pelvis)->get_bone_position();
+							target.pos = ent->model()->boneTransforms()->get((int)rust::classes::Bone_List::pelvis)->get_position();
 						else
-							target.pos = player->get_bone_transform(48)->get_bone_position();
+							target.pos = ent->model()->boneTransforms()->get(48)->get_position();
 
-						auto distance = esp::local_player->get_bone_transform(48)->get_bone_position().get_3d_dist(target.pos);
+						auto distance = esp::local_player->model()->boneTransforms()->get(48)->get_position().get_3d_dist(target.pos);
 						target.distance = distance;
 
 						auto fov = unity::get_fov(target.pos);
 						target.fov = fov;
 
-						target.player = player;
+						target.ent = (BaseCombatEntity*)ent;
 
 						target.network_id = ent_id;
 
-						auto visible = player->is_visible(esp::local_player->get_bone_transform(48)->get_bone_position(), target.pos);
+						auto visible = ent->is_visible(esp::local_player->model()->boneTransforms()->get(48)->get_position(), target.pos);
 						target.visible = visible;
 
 						if (target < best_target
-							|| !best_target.player->is_alive()
-							|| (target.player && target.player->get_steam_id() == best_target.player->get_steam_id()))
+							|| !best_target.ent->is_alive()
+							|| (target.ent && ((BasePlayer*)target.ent)->get_steam_id() == ((BasePlayer*)target.ent)->get_steam_id()))
 						{
 							best_target.pos = target.pos;
 							best_target.distance = target.distance;
 							best_target.fov = target.fov;
-							best_target.player = target.player;
+							best_target.ent = target.ent;
 							best_target.visible = visible;
 
-							auto vel = GetWorldVelocity(target.player);
+							auto vel = target.ent->GetWorldVelocity();
 
 							float next_frame = best_target.last_frame + get_deltaTime();
 							if (get_fixedTime() > next_frame)
@@ -356,12 +354,12 @@ namespace esp {
 
 					if (draw) {
 
-						draw_player(player, is_npc);
+						draw_player(((BasePlayer*)ent), is_npc);
 
 						if (vars->visual.offscreen_indicator
 							&& !is_npc)
 						{
-							offscreen_indicator(player->get_player_eyes()->get_position());
+							offscreen_indicator(((BasePlayer*)ent)->eyes()->get_position());
 						}
 
 						if (vars->combat.silent_melee || unity::GetKey(rust::classes::KeyCode(vars->keybinds.silentmelee)))
@@ -414,19 +412,19 @@ namespace esp {
 
 				Vector2 w2s_position = {};
 				if (out_w2s(world_position, w2s_position))
-					esp::draw_hackable_crate(w2s_position, ent, { 0.45, 0.72, 1, 0.8 });
+					esp::draw_hackable_crate(w2s_position, (uintptr_t)ent, { 0.45, 0.72, 1, 0.8 });
 			}
 
 			if (vars->misc.auto_upgrade && local_player)
 			{
 				if (!LI_FIND(strcmp)(entity_class_name, _("BuildingBlock")))
 				{
-					auto lpos = get_position((uintptr_t)_get_transform(local_player));
+					auto lpos = local_player->get_transform()->get_position();
 					float dist_to_new = lpos.distance(world_position);
 					if (!closest_building_block)
-						closest_building_block = ent;
-					else if (dist_to_new < lpos.distance(get_position((uintptr_t)_get_transform((BasePlayer*)closest_building_block))))
-						closest_building_block = ent;
+						closest_building_block = (uintptr_t)ent;
+					else if (dist_to_new < lpos.distance(((BaseEntity*)closest_building_block)->get_transform()->get_position()))
+						closest_building_block = (uintptr_t)ent;
 				}
 			}
 
@@ -455,11 +453,11 @@ namespace esp {
 					if (*(int*)(object_name.zpad + 12) == 'ian.')
 						continue;
 
-					auto Item = *reinterpret_cast<uintptr_t*>(ent + 0x170); //public Item item; // 0x170
-					if (!Item)
+					auto _Item = *reinterpret_cast<uintptr_t*>(ent + 0x170); //public Item item; // 0x170
+					if (!_Item)
 						continue;
 
-					auto item = reinterpret_cast<weapon*>(Item);
+					auto item = reinterpret_cast<Item*>(_Item);
 
 					auto item_name = item->get_weapon_name();
 
@@ -515,16 +513,15 @@ namespace esp {
 
 
 				if (*(int*)(entity_class_name + 4) == 'ileH' && vars->visual.heli_esp) {
-					auto base_heli = reinterpret_cast<BasePlayer*>(ent);
+					auto base_heli = reinterpret_cast<BaseHelicopter*>(ent);
 
 					Vector2 rearrotor, beam, mainrotor;
-					out_w2s(base_heli->get_bone_transform(22)->get_bone_position(), rearrotor);
-					out_w2s(base_heli->get_bone_transform(19)->get_bone_position(), mainrotor);
-					out_w2s(base_heli->get_bone_transform(56)->get_bone_position(), beam);
+					out_w2s(base_heli->model()->boneTransforms()->get(22)->get_position(), rearrotor);
+					out_w2s(base_heli->model()->boneTransforms()->get(19)->get_position(), mainrotor);
+					out_w2s(base_heli->model()->boneTransforms()->get(56)->get_position(), beam);
 					esp_name = il2cpp::methods::new_string(("Patrol-heli"));
 					esp_color = Vector4(232, 232, 232, 255);
 
-					uintptr_t Transform = mem::read<uintptr_t>(base_heli->get_model() + 0x48); //boneTransforms; // 0x48
 
 					const Vector2 diff = { (beam.x + rearrotor.x) / 2, (beam.y + rearrotor.y) / 2 };
 
@@ -540,9 +537,9 @@ namespace esp {
 					if (base_heli->is_alive())
 					{
 						auto target = aim_target();
-						target.pos = base_heli->get_bone_transform(19)->get_bone_position();
+						target.pos = base_heli->model()->boneTransforms()->get(19)->get_position();
 
-						auto distance = esp::local_player->get_bone_transform(48)->get_bone_position().get_3d_dist(target.pos);
+						auto distance = esp::local_player->model()->boneTransforms()->get(48)->get_position().get_3d_dist(target.pos);
 						target.distance = distance;
 
 						auto fov = unity::get_fov(target.pos);
@@ -552,9 +549,9 @@ namespace esp {
 
 						if (fov < vars->combat.aimbotfov)
 						{
-							target.player = base_heli;
+							target.ent = base_heli;
 
-							auto visible = local_player->is_visible(esp::local_player->get_bone_transform(48)->get_bone_position(), target.pos);
+							auto visible = local_player->is_visible(esp::local_player->model()->boneTransforms()->get(48)->get_position(), target.pos);
 							target.visible = visible;
 
 							if (target < best_target)
@@ -579,9 +576,9 @@ namespace esp {
 				else if (vars->misc.norecycler && *(int*)(entity_class_name) == 'yceR' && get_fixedTime() > last_recycler + 0.35f) {
 					esp_name = il2cpp::methods::new_string(_("Recycler"));
 					esp_color = Vector4(232, 232, 232, 255);
-					if (esp::local_player->get_bone_transform(48)->get_bone_position().distance(world_position) < 4.5f)
+					if (esp::local_player->model()->boneTransforms()->get(48)->get_position().distance(world_position) < 4.5f)
 					{
-						unity::ServerRPC(ent, _(L"SVSwitch"));
+						ent->ServerRPC(_(L"SVSwitch"));
 						last_recycler = get_fixedTime();
 					}
 				}
@@ -633,7 +630,7 @@ namespace esp {
 						if (flag != 2048)
 							continue;
 					}
-					//auto s = il2cpp::methods::new_string(string::format(_("[%dm]"), (int)local_player->get_player_eyes()->get_position().distance(world_position)));
+					//auto s = il2cpp::methods::new_string(string::format(_("[%dm]"), (int)local_player->eyes()->get_position().distance(world_position)));
 					Vector2 w2s_position = {};
 					if (out_w2s(world_position, w2s_position))
 					{
@@ -662,9 +659,9 @@ namespace esp {
 			&& closest_building_block)
 		{
 			auto block = (BuildingBlock*)closest_building_block;
-			auto tranny = _get_transform((BasePlayer*)block);
-			auto pos = get_position((uintptr_t)tranny);
-			auto distance = local_player->get_player_eyes()->get_position().distance(pos);
+			auto tranny = block->get_transform();
+			auto pos = tranny->get_position();
+			auto distance = local_player->eyes()->get_position().distance(pos);
 
 			rust::classes::BuildingGrade upgrade_tier = rust::classes::BuildingGrade::Stone;
 
@@ -729,24 +726,24 @@ namespace esp {
 		auto list = mem::read<uintptr_t>(member + 0x10);
 
 		for (int i = 0; i < size; i++) {
-			auto player = mem::read<uintptr_t>(list + 0x20 + i * 0x8);
+			auto ent = mem::read<uintptr_t>(list + 0x20 + i * 0x8);
 
-			auto online = mem::read<bool>(player + 0x38);
+			auto online = mem::read<bool>(ent + 0x38);
 
 			if (!online && !vars->visual.sleeper_esp)
 				continue;
 
-			auto id = mem::read<unsigned long>(player + 0x20);
+			auto id = mem::read<unsigned long>(ent + 0x20);
 
 			if (id == esp::local_player->get_steam_id())
 				continue;
 
-			auto position = mem::read<Vector3>(player + 0x2C);
-			auto distance = esp::local_player->get_bone_transform(48)->get_bone_position().distance(position);
+			auto position = mem::read<Vector3>(ent + 0x2C);
+			auto distance = esp::local_player->model()->boneTransforms()->get(48)->get_position().distance(position);
 			if (distance < 350.f)
 				continue;
 
-			auto player_name = (str)(*reinterpret_cast<uintptr_t*>(player + 0x18));
+			auto player_name = (str)(*reinterpret_cast<uintptr_t*>(ent + 0x18));
 			auto name = player_name->str;
 			Vector2 out;
 			esp::out_w2s(position, out);
@@ -776,7 +773,7 @@ namespace esp {
 
 			WORD tag = *reinterpret_cast<WORD*>(object + 0x54);
 
-			auto ent = *reinterpret_cast<uintptr_t*>(base_object + 0x28);
+			auto ent = *reinterpret_cast<BaseEntity**>(base_object + 0x28);
 
 			auto net = *reinterpret_cast<Networkable**>(ent + 0x58);
 
@@ -791,7 +788,7 @@ namespace esp {
 			unsigned int id = net->get_id();
 
 			if (id == id_to_check)
-				return _get_transform((BasePlayer*)ent);
+				return ent->get_transform();
 		}
 	}
 

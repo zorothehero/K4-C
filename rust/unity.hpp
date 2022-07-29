@@ -56,7 +56,6 @@ namespace unity {
 
 	static auto LoadAsset = reinterpret_cast<uintptr_t(*)(uintptr_t bundle, rust::classes::string path, uintptr_t type)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("AssetBundle"), _("LoadAsset_Internal"), 2, _("name"), _("UnityEngine"), 1)));
 
-	static auto ServerRPC = reinterpret_cast<void (*)(uintptr_t, rust::classes::string funcName)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseEntity"), _("ServerRPC"), 1, _("funcName"), _(""), 1)));
 
 	static auto get_Scattering = reinterpret_cast<uintptr_t(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("TOD_Components"), _("get_Scattering"), 0, _(""), _(""))));
 	
@@ -112,8 +111,6 @@ namespace unity {
 
 		GetMouseButtonDown = reinterpret_cast<bool(*)(rust::classes::KeyCode button)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Input"), _("GetMouseButton"), 1, _("button"), _("UnityEngine"), 1)));
 
-		ServerRPC = reinterpret_cast<void (*)(uintptr_t, rust::classes::string funcName)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseEntity"), _("ServerRPC"), 1, _("funcName"), _(""), 1)));
-
 		CheckCapsule = reinterpret_cast<bool (*)(Vector3, Vector3, float, int, int)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GamePhysics"), _("CheckCapsule"), 0, _(""), _(""))));
 		
 		get_Scattering = reinterpret_cast<uintptr_t(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("TOD_Components"), _("get_Scattering"), 0, _(""), _(""))));
@@ -150,15 +147,15 @@ namespace unity {
 		return il2cpp::type_object(space, name);
 	}
 
-	bool is_visible(Vector3 source, Vector3 destination, uintptr_t player, float p1 = 0.18f) {
+	bool is_visible(Vector3 source, Vector3 destination, uintptr_t ent, float p1 = 0.18f) {
 		auto layer = (int)rust::classes::Layers::ProjectileLineOfSightCheck | (int)rust::classes::Layers::Terrain | (int)rust::classes::Layers::z;
 		typedef bool (*AAA)(Vector3, Vector3, rust::classes::Layers, float, uintptr_t);//real rust 0x50F790         //cracked 0x50ED80
 
 		//real rust 0x52D200
 		//alkad rust 0x50E9A0
 
-		return ((AAA)(mem::game_assembly_base + 0x52D200))(source, destination, rust::classes::Layers(layer), p1, player)
-			&& ((AAA)(mem::game_assembly_base + 0x52D200))(destination, source, rust::classes::Layers(layer), p1, player);
+		return ((AAA)(mem::game_assembly_base + 0x52D200))(source, destination, rust::classes::Layers(layer), p1, ent)
+			&& ((AAA)(mem::game_assembly_base + 0x52D200))(destination, source, rust::classes::Layers(layer), p1, ent);
 	}
 
 	auto camera = unity::get_main_camera();

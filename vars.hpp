@@ -93,7 +93,7 @@ struct Vars
 		bool sulfur_ore = false;
 		bool stone_ore = false;
 		bool metal_ore = false;
-		bool weapon = false;
+		bool Item = false;
 		bool midhealth = false;
 		bool midname = false;
 		bool traps = false;

@@ -1128,7 +1128,7 @@ namespace gui {
 		float t = 0.0f;
 
 		if (esp::local_player)
-			t = esp::local_player->get_last_sent_tick_time();
+			t = esp::local_player->lastSentTickTime();
 
 		if (opacity < 255.0f)
 			opacity += 2.f;
@@ -1222,7 +1222,7 @@ namespace gui {
 								Progbar({ 900, (650 + (bars++ * 10)) }, { 120, 4 }, settings::time_since_last_shot, (r - 0.2f));
 						}
 					}
-					if ((esp::best_target.player && esp::best_target.player->is_alive())
+					if ((esp::best_target.ent && esp::best_target.ent->is_alive())
 						&& vars->visual.snapline > 1)
 					{
 						Vector2 start = vars->visual.snapline == 2 ? Vector2(ScreenWidth / 2, 0) :
@@ -1744,20 +1744,20 @@ namespace esp
 	void draw_target_hotbar(aim_target target) {
 		auto screen = WorldToScreen(target.pos);
 
-		if (target.player && !target.is_heli && screen.z != 0 && !target.teammate) {
+		if (target.ent && !target.is_heli && screen.z != 0 && !target.teammate) {
 			auto draw_item = [&](bool draw_wearable, float x, float width) {
-				rust::list<weapon*>* belt = target.player->get_belt_items();
+				rust::list<Item*>* belt = ((BasePlayer*)target.ent)->get_belt_items();
 				if (draw_wearable)
-					belt = target.player->get_wearable_items();
+					belt = ((BasePlayer*)target.ent)->get_wearable_items();
 
 				if (belt) {
 					float info_y = 0;
-					weapon* result = nullptr;
+					Item* result = nullptr;
 
 
 					int current_item = 0;
 					//hotbar esp
-					belt->for_each([&](weapon* item, int32_t idx) {
+					belt->for_each([&](Item* item, int32_t idx) {
 						{
 							static int cases = 0;
 							//static float r = 1.00f, g = 0.00f, b = 1.00f;
@@ -1838,16 +1838,16 @@ namespace esp
 
 	void draw_middle(aim_target target) {
 		//check if player
-		if (target.player && !target.teammate && !target.sleeping && target.player != local_player) {
+		if (target.ent && !target.teammate && !target.sleeping && target.ent != local_player) {
 			//check if enabled
 			if (vars->visual.midname) {
 				//draw player name dropshadow
-				gui::Label(rust::classes::Rect{ 861, 442 , 200, 260 }, target.player->get_player_name(), gui::Color(0, 0, 0, 1), true, 12);
+				gui::Label(rust::classes::Rect{ 861, 442 , 200, 260 }, ((BasePlayer*)target.ent)->_displayName(), gui::Color(0, 0, 0, 1), true, 12);
 				// draw player name
-				gui::Label(rust::classes::Rect{ 862, 441, 200, 260 }, target.player->get_player_name(), gui::Color(1, 1, 1, 1), true, 12);
+				gui::Label(rust::classes::Rect{ 862, 441, 200, 260 }, ((BasePlayer*)target.ent)->_displayName(), gui::Color(1, 1, 1, 1), true, 12);
 			}
 			if (vars->visual.midhealth) {
-				const auto cur_health = target.player->get_health();
+				const auto cur_health = target.ent->health();
 				//draw player health dropshadow
 				gui::Label(rust::classes::Rect{ 861 , 457, 200, 260 }, il2cpp::methods::new_string(string::format(("[%.f]"), cur_health)), gui::Color(0, 0, 0, 1), true, 10);
 				//draw player health
@@ -2024,9 +2024,9 @@ namespace esp
 	}
 
 	void offscreen_indicator(Vector3 position) {
-		Vector3 local = esp::local_player->get_player_eyes()->get_position();
+		Vector3 local = esp::local_player->eyes()->get_position();
 		lollll(Vector2(1920 / 2, 1080 / 2));
-		float num = atan2(local.x - position.x, local.z - position.z) * 57.29578f - 180.f - EulerAngles(esp::local_player->get_player_eyes()->get_rotation()).y;
+		float num = atan2(local.x - position.x, local.z - position.z) * 57.29578f - 180.f - EulerAngles(esp::local_player->eyes()->get_rotation()).y;
 
 		if (!(num < -420 || num > -300)) return;
 
@@ -2042,7 +2042,7 @@ namespace esp
 		gui::line(tp1, tp2, rgba(249.f, 130.f, 109.f, 255.f));
 	}
 
-	void draw_weapon_icon(weapon* item, Vector2 w2s_position) {
+	void draw_weapon_icon(Item* item, Vector2 w2s_position) {
 
 		auto sprite = get_iconSprite(item);
 		if (!sprite)
@@ -2060,12 +2060,12 @@ namespace esp
 		}
 	}
 
-	void do_chams(BasePlayer* player)
+	void do_chams(BasePlayer* ent)
 	{
-		if (!player->is_alive() || player->is_sleeping()) return;
+		if (!ent->is_alive() || ent->is_sleeping()) return;
 		if (unity::bundle)
 		{
-			uintptr_t shader = unity::chams_shader_normal;
+			Shader* shader = 0;
 			switch (vars->visual.shader)
 			{
 			case 0:
@@ -2073,16 +2073,16 @@ namespace esp
 			case 1:
 				break;
 			case 2:
-				shader = unity::LoadAsset(unity::bundle, _(L"Chams"), unity::GetType(_("UnityEngine"), _("Shader")));
+				shader = (Shader*)unity::LoadAsset(unity::bundle, _(L"Chams"), unity::GetType(_("UnityEngine"), _("Shader")));
 				break;
 			case 3:
-				shader = unity::LoadAsset(unity::bundle, _(L"SeethroughShader"), unity::GetType(_("UnityEngine"), _("Shader")));
+				shader = (Shader*)unity::LoadAsset(unity::bundle, _(L"SeethroughShader"), unity::GetType(_("UnityEngine"), _("Shader")));
 				break;
 			case 4:
-				shader = unity::LoadAsset(unity::bundle, _(L"WireframeTransparent"), unity::GetType(_("UnityEngine"), _("Shader")));
+				shader = (Shader*)unity::LoadAsset(unity::bundle, _(L"WireframeTransparent"), unity::GetType(_("UnityEngine"), _("Shader")));
 				break;
 			case 5:
-				shader = unity::LoadAsset(unity::bundle, _(L"chamslit"), unity::GetType(_("UnityEngine"), _("Shader")));
+				shader = (Shader*)unity::LoadAsset(unity::bundle, _(L"chamslit"), unity::GetType(_("UnityEngine"), _("Shader")));
 				break;
 			}
 
@@ -2105,7 +2105,7 @@ namespace esp
 			}
 
 			if (vars->visual.hand_chams > 1
-				&& player->is_local_player()) {
+				&& ent->is_local_player()) {
 				auto model = gui::methods::get_activemodel();
 				auto renderers = ((Networkable*)model)->GetComponentsInChildren(unity::GetType(_("UnityEngine"), _("Renderer")));
 				if (renderers)
@@ -2114,26 +2114,26 @@ namespace esp
 
 					for (int i = 0; i < sz; i++) {
 						//if (sz == 2) i == 1; //skips front of weapon
-						auto renderer = *reinterpret_cast<uintptr_t*>(renderers + 0x20 + i * 0x8);
+						auto renderer = *reinterpret_cast<Renderer**>(renderers + 0x20 + i * 0x8);
 
 						if (!renderer) continue;
-						auto material = get_material(renderer);
+						Material* material = renderer->GetMaterial();
 						if (!material) continue;
 
 						switch (vars->visual.hand_chams)
 						{
 						case 2:
 						{
-							uintptr_t s = unity::LoadAsset(unity::bundle, _(L"SeethroughShader"), unity::GetType(_("UnityEngine"), _("Shader")));
+							Shader* s = (Shader*)unity::LoadAsset(unity::bundle, _(L"SeethroughShader"), unity::GetType(_("UnityEngine"), _("Shader")));
 							if (s)
-								unity::set_shader(material, s);
+								material->SetShader(s);
 							break;
 						}
 						case 3:
 						{
-							auto s = FindShader(rust::classes::string(_(L"Standard")));
-							unity::set_shader(material, s);
-							SetColor(material, _(L"_Color"), col(r, g, b, 0.5));
+							auto s = (Shader*)FindShader(rust::classes::string(_(L"Standard")));
+							material->SetShader(s);
+							material->SetColor(_(L"_Color"), col(r, g, b, 0.5));
 							break;
 						}
 						//case 4:
@@ -2166,20 +2166,20 @@ namespace esp
 				}
 				//unity::chams_shader = unity::LoadAsset(unity::bundle, _(L"Chams"), unity::GetType(_("UnityEngine"), _("Shader")));
 
-				auto _multiMesh = mem::read<uintptr_t>(player->get_player_model() + 0x2D0); //SkinnedMultiMesh _multiMesh;
+				auto _multiMesh = ent->playerModel()->_multiMesh();//mem::read<uintptr_t>(player->playerModel() + 0x2D0); //SkinnedMultiMesh _multiMesh;
 				if (!_multiMesh) return;
-				auto render = get_Renderers(_multiMesh);
+				auto render = _multiMesh->get_Renderers(); //get_Renderers(_multiMesh);
 				if (!render) return;
 
 				for (int i = 0; i < render->get_size(); i++) {
 					auto renderer = render->get_value(i);
 					if (!renderer) continue;
-					auto material = get_material(renderer);
+					auto material = renderer->GetMaterial();
 					if (!material) continue;
 					if (shader)
 					{
-						if (shader != unity::get_shader(material)) {
-							unity::set_shader(material, shader);
+						if (shader != material->GetShader()) {
+							material->SetShader(shader);
 						}
 						else
 						{
@@ -2195,15 +2195,15 @@ namespace esp
 							switch (vars->visual.shader)
 							{
 							case 2:
-								SetColor(material, _(L"_ColorVisible"), viscolor);
-								SetColor(material, _(L"_ColorBehind"), inviscolor);
+								material->SetColor(_(L"_ColorVisible"), viscolor);
+								material->SetColor(_(L"_ColorBehind"), inviscolor);
 								break;
 							case 4:
-								SetColor(material, _(L"_WireColor"), viscolor);
+								material->SetColor(_(L"_WireColor"), viscolor);
 								break;
 							case 5:
-								SetColor(material, _(L"_ColorVisible"), viscolor);
-								SetColor(material, _(L"_ColorBehind"), inviscolor);
+								material->SetColor(_(L"_ColorVisible"), viscolor);
+								material->SetColor(_(L"_ColorBehind"), inviscolor);
 								break;
 							}
 						}
@@ -2214,12 +2214,12 @@ namespace esp
 		}
 	}
 
-	void draw_player(BasePlayer* player, bool is_npc)
+	void draw_player(BasePlayer* ent, bool is_npc)
 	{
 		if (!local_player)
 			return;
 
-		do_chams(player);
+		do_chams(ent);
 
 		//   esp colors
 		auto visible_color = gui::Color(vars->visual.VisRcolor, vars->visual.VisGcolor, vars->visual.VisBcolor, 1);
@@ -2295,7 +2295,7 @@ namespace esp
 
 		bool is_visible = false;
 
-		bool is_teammate = player->is_teammate(local_player);
+		bool is_teammate = ent->is_teammate(local_player);
 
 		auto camera_position = unity::get_camera_pos();
 
@@ -2304,9 +2304,9 @@ namespace esp
 
 			for (auto& [bone_screen, bone_idx, on_screen, world_position, visible] : bones) {
 
-				auto Transform = player->get_bone_transform(bone_idx);
+				auto Transform = ent->model()->boneTransforms()->get(bone_idx);
 
-				world_position = Transform->get_bone_position();
+				world_position = Transform->get_position();
 
 				if (bone_idx == 48) // lol
 					world_position.y += 0.2f;
@@ -2344,7 +2344,7 @@ namespace esp
 
 		if (get_bounds(bounds, 4)) {
 			//if (!is_visible)
-			//is_visible = unity::is_visible(camera_position, player->get_bone_transform(48)->get_bone_position(), (uintptr_t)esp::local_player);
+			//is_visible = unity::is_visible(camera_position, player->model()->boneTransforms()->get(48)->get_bone_position(), (uintptr_t)esp::local_player);
 
 			is_visible = false;
 			for (auto& [bone_screen, bone_idx, on_screen, world_position, visible] : bones) {
@@ -2354,7 +2354,7 @@ namespace esp
 			//is_visible = unity::is_visible(camera_position, bones[47].world_position, (uintptr_t)esp::local_player);
 
 			gui::Color clr = !is_teammate ? (is_visible ? visible_color : invisible_color) : teammate_color;
-			if (HasPlayerFlag(player, rust::classes::PlayerFlags::SafeZone))
+			if (HasPlayerFlag(ent, rust::classes::PlayerFlags::SafeZone))
 				clr = safezone_color;
 
 			float box_width = bounds.right - bounds.left;
@@ -2376,8 +2376,9 @@ namespace esp
 
 				}
 			}
-			wchar_t* name = player->get_player_name();
-			auto player_weapon = player->get_active_weapon();
+			auto ffff = ((BasePlayer*)ent)->_displayName();
+			wchar_t* name = ffff.str;
+			auto player_weapon = ent->get_active_weapon();
 
 			if (vars->visual.full_box) {
 				//full box
@@ -2413,8 +2414,8 @@ namespace esp
 			}
 
 			//     health bar   
-			const auto cur_health = player->get_health();
-			const auto max_health = (is_npc ? player->get_max_health() : 100);
+			const auto cur_health = ent->get_health();
+			const auto max_health = (is_npc ? ent->get_max_health() : 100);
 			const auto health_pc = min(cur_health / max_health, 1);
 			const auto health_color =
 				HSV((health_pc * .25f), 1, .875f * 1);
@@ -2463,11 +2464,11 @@ namespace esp
 
 			if (name)
 			{
-				auto Transform = player->get_bone_transform(48);
+				auto Transform = ent->model()->boneTransforms()->get(48);
 
-				auto position = Transform->get_bone_position();
+				auto position = Transform->get_position();
 
-				auto distance = esp::local_player->get_bone_transform(48)->get_bone_position().distance(position);
+				auto distance = esp::local_player->model()->boneTransforms()->get(48)->get_position().distance(position);
 				//const char* new_name = ;
 				// PLAYER NAME
 
@@ -2480,7 +2481,7 @@ namespace esp
 
 						const wchar_t* woundedlol = L"Wounded";
 
-						if (HasPlayerFlag(player, rust::classes::PlayerFlags::Wounded)) {
+						if (HasPlayerFlag(ent, rust::classes::PlayerFlags::Wounded)) {
 
 							//outline 
 							gui::Label(rust::classes::Rect{ bounds.left - 79.5f  , bounds.top - 32.f, 79.f + half * 2 + 79.5f , 20 }, woundedlol, gui::Color(0, 0, 0, 120), true, 9.5);
@@ -2543,11 +2544,11 @@ namespace esp
 				for (size_t i = 0; i < 17; i++)
 				{
 					int id = skeleton_boneids[i++];
-					auto transform = player->get_bone_transform(id);
+					auto transform = player->model()->boneTransforms()->get(id);
 					Vector3 world_position = transform->get_bone_position();
 					Vector3 v1 = WorldToScreen(world_position);
 					if (id > 17) break;
-					transform = player->get_bone_transform(id);
+					transform = player->model()->boneTransforms()->get(id);
 					world_position = transform->get_bone_position();
 					Vector3 v2 = WorldToScreen(world_position);
 					if (v1.y >= 1080 || v1.x >= 1920 || v1.x <= 0 || v1.y <= 0) continue;
@@ -2557,111 +2558,111 @@ namespace esp
 				*/
 				
 				//jaw
-				auto Transform = player->get_bone_transform(48);
+				auto Transform = ent->model()->boneTransforms()->get(48);
 				if (!Transform) return;
-				Vector3 world_position = Transform->get_bone_position();
+				Vector3 world_position = Transform->get_position();
 				Vector3 jaw = WorldToScreen(world_position);
 
 				//spine4
-				Transform = player->get_bone_transform(22);
+				Transform = ent->model()->boneTransforms()->get(22);
 				if (!Transform) return;
-				world_position = Transform->get_bone_position();
+				world_position = Transform->get_position();
 				Vector3 spine4 = WorldToScreen(world_position);
 
 				//spine3
-				Transform = player->get_bone_transform(21);
+				Transform = ent->model()->boneTransforms()->get(21);
 				if (!Transform) return;
-				world_position = Transform->get_bone_position();
+				world_position = Transform->get_position();
 				Vector3 spine3 = WorldToScreen(world_position);
 
 				//pelvis
-				Transform = player->get_bone_transform(7);
+				Transform = ent->model()->boneTransforms()->get(7);
 				if (!Transform) return;
-				world_position = Transform->get_bone_position();
+				world_position = Transform->get_position();
 				Vector3 pelvis = WorldToScreen(world_position);
 
 				//l_hip
-				Transform = player->get_bone_transform(3);
+				Transform = ent->model()->boneTransforms()->get(3);
 				if (!Transform) return;
-				world_position = Transform->get_bone_position();
+				world_position = Transform->get_position();
 				Vector3 l_hip = WorldToScreen(world_position);
 
 				//r_knee
-				Transform = player->get_bone_transform(14);
+				Transform = ent->model()->boneTransforms()->get(14);
 				if (!Transform) return;
-				world_position = Transform->get_bone_position();
+				world_position = Transform->get_position();
 				Vector3 r_knee = WorldToScreen(world_position);
 
 				//l_ankle_scale
-				Transform = player->get_bone_transform(6);
+				Transform = ent->model()->boneTransforms()->get(6);
 				if (!Transform) return;
-				world_position = Transform->get_bone_position();
+				world_position = Transform->get_position();
 				Vector3 l_ankle_scale = WorldToScreen(world_position);
 
 				//r_ankle_scale
-				Transform = player->get_bone_transform(17);
+				Transform = ent->model()->boneTransforms()->get(17);
 				if (!Transform) return;
-				world_position = Transform->get_bone_position();
+				world_position = Transform->get_position();
 				Vector3 r_ankle_scale = WorldToScreen(world_position);
 
 				//r_foot
-				Transform = player->get_bone_transform(15);
+				Transform = ent->model()->boneTransforms()->get(15);
 				if (!Transform) return;
-				world_position = Transform->get_bone_position();
+				world_position = Transform->get_position();
 				Vector3 r_foot = WorldToScreen(world_position);
 
 				//l_foot
-				Transform = player->get_bone_transform(4);
+				Transform = ent->model()->boneTransforms()->get(4);
 				if (!Transform) return;
-				world_position = Transform->get_bone_position();
+				world_position = Transform->get_position();
 				Vector3 l_foot = WorldToScreen(world_position);
 
 				//r_upperarm
-				Transform = player->get_bone_transform(55);
+				Transform = ent->model()->boneTransforms()->get(55);
 				if (!Transform) return;
-				world_position = Transform->get_bone_position();
+				world_position = Transform->get_position();
 				Vector3 r_upperarm = WorldToScreen(world_position);
 
 				//l_upperarm
-				Transform = player->get_bone_transform(24);
+				Transform = ent->model()->boneTransforms()->get(24);
 				if (!Transform) return;
-				world_position = Transform->get_bone_position();
+				world_position = Transform->get_position();
 				Vector3 l_upperarm = WorldToScreen(world_position);
 
 				//r_forearm
-				Transform = player->get_bone_transform(56);
+				Transform = ent->model()->boneTransforms()->get(56);
 				if (!Transform) return;
-				world_position = Transform->get_bone_position();
+				world_position = Transform->get_position();
 				Vector3 r_forearm = WorldToScreen(world_position);
 
 				//l_forearm
-				Transform = player->get_bone_transform(25);
+				Transform = ent->model()->boneTransforms()->get(25);
 				if (!Transform) return;
-				world_position = Transform->get_bone_position();
+				world_position = Transform->get_position();
 				Vector3 l_forearm = WorldToScreen(world_position);
 
 				//r_hip
-				Transform = player->get_bone_transform(13);
+				Transform = ent->model()->boneTransforms()->get(13);
 				if (!Transform) return;
-				world_position = Transform->get_bone_position();
+				world_position = Transform->get_position();
 				Vector3 r_hip = WorldToScreen(world_position);
 
 				//l_knee
-				Transform = player->get_bone_transform(2);
+				Transform = ent->model()->boneTransforms()->get(2);
 				if (!Transform) return;
-				world_position = Transform->get_bone_position();
+				world_position = Transform->get_position();
 				Vector3 l_knee = WorldToScreen(world_position);
 
 				//l_hand
-				Transform = player->get_bone_transform(26);
+				Transform = ent->model()->boneTransforms()->get(26);
 				if (!Transform) return;
-				world_position = Transform->get_bone_position();
+				world_position = Transform->get_position();
 				Vector3 l_hand = WorldToScreen(world_position);
 
 				//r_hand
-				Transform = player->get_bone_transform(57);
+				Transform = ent->model()->boneTransforms()->get(57);
 				if (!Transform) return;
-				world_position = Transform->get_bone_position();
+				world_position = Transform->get_position();
 				Vector3 r_hand = WorldToScreen(world_position);
 
 				if (jaw.y >= 1080 || jaw.x >= 1920 || jaw.x <= 0 || jaw.y <= 0) return;

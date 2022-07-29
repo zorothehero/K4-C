@@ -58,7 +58,7 @@ inline bool CanManipulate(BaseProjectile* baseProjectile, BasePlayer* TargetPlay
 		//else
 		layermask = 1218519041;
 
-		bool IsMounted = LocalPlayer->get_model_state()->has_flag(rust::classes::ModelState_Flag::Mounted);
+		bool IsMounted = LocalPlayer->modelState()->has_flag(rust::classes::ModelState_Flag::Mounted);
 
 		float maxVelocity;
 		if (!IsMounted)
@@ -67,13 +67,13 @@ inline bool CanManipulate(BaseProjectile* baseProjectile, BasePlayer* TargetPlay
 			maxVelocity = GetMountedVelocity(LocalPlayer);//LocalPlayer->GetPlayerMaxVelocity();
 
 		auto time = unity::get_realtimesincestartup();//UnityEngine::Time::get_realtimeSinceStartup();
-		float _timeSinceLastTick = time - LocalPlayer->get_last_sent_tick_time();
+		float _timeSinceLastTick = time - LocalPlayer->lastSentTickTime();
 		float timeSinceLastTickClamped = max(0.f, min(_timeSinceLastTick, 1.f));
 		float maxDist = 0.1f + (timeSinceLastTickClamped + 2.f / 60.f) * 1.5f * maxVelocity;
 
 		static const float MaxVertical = 1.6;
 		float max_usable_verical = min(maxDist, MaxVertical);
-		Vector3 center = LocalPlayer->get_player_eyes()->GetCenter();
+		Vector3 center = LocalPlayer->eyes()->GetCenter();
 		//Vector3 LastLocalEye = LocalPlayer->lastSentTick()->eyePos;
 		Vector3 LastLocalEye = misc::cLastTickEyePos;
 		Vector3 Up = LastLocalEye + Vector3(0.f, max_usable_verical, 0.f);
@@ -90,11 +90,11 @@ inline bool CanManipulate(BaseProjectile* baseProjectile, BasePlayer* TargetPlay
 		//draw_line_(LastLocalEye, Up, ImColor(255, 0, 0, 255), 0.1f);
 		//draw_line_(LastLocalEye, Down, ImColor(255, 0, 0, 255), 0.1f);
 
-		Vector3 trg_pos = esp::best_target.pos;//player->get_bone_transform(48)->get_bone_position();
+		Vector3 trg_pos = esp::best_target.pos;//player->model()->boneTransforms()->get(48)->get_bone_position();
 
 		auto HitScan = [&](Vector3 from, bool do_ = true, int val = 0) {
 
-			Vector3 head_pos_ = esp::best_target.pos;//player->get_bone_transform(48)->get_bone_position();
+			Vector3 head_pos_ = esp::best_target.pos;//player->model()->boneTransforms()->get(48)->get_bone_position();
 
 			if (vars->combat.targetbehindwall && val) {
 				if ((val % 20) == 0) {
@@ -117,11 +117,11 @@ inline bool CanManipulate(BaseProjectile* baseProjectile, BasePlayer* TargetPlay
 				return std::make_pair(false, head_pos_);
 
 			if (vars->combat.HitScan) {
-				if (!esp::best_target.player) return std::make_pair(false, head_pos_);
+				if (!esp::best_target.ent) return std::make_pair(false, head_pos_);
 				for (auto bone : { 48, 3, 4, 15, 14, 26, 57 }) {
 					Vector3 TargetPosition;
 					if (bone == 48) TargetPosition = head_pos_;
-					else TargetPosition = esp::best_target.player->get_bone_transform(bone)->get_bone_position();
+					else TargetPosition = esp::best_target.ent->model()->boneTransforms()->get(bone)->get_position();
 					if (PLOS(from, TargetPosition, layermask)) {
 						settings::HitScanBone = bone;
 						return std::make_pair(true, TargetPosition);
