@@ -111,50 +111,50 @@ void init_projectile() {
 
 class Projectile {
 public:
-	void initialVelocity(Vector3 d) { safe_write(this + O::Projectile::initialVelocity, d, Vector3); }
+	void initialVelocity(Vector3 d) { if (!this) return; safe_write(this + O::Projectile::initialVelocity, d, Vector3); }
 	Vector3 initialVelocity() { return safe_read(this + O::Projectile::initialVelocity, Vector3); }
 	bool authoritative() { return safe_read(this + isAuthoritative, bool); }
 	Vector3 sentPosition() { return safe_read(this + O::Projectile::sentPosition, Vector3); }
-	void sentPosition(Vector3 d) { safe_write(this + O::Projectile::sentPosition, d, Vector3); }
+	void sentPosition(Vector3 d) { if (!this) return; safe_write(this + O::Projectile::sentPosition, d, Vector3); }
 
-	void currentVelocity(Vector3 d) { safe_write(this + O::Projectile::currentVelocity, d, Vector3); }
+	void currentVelocity(Vector3 d) { if (!this) return; safe_write(this + O::Projectile::currentVelocity, d, Vector3); }
 	Vector3 currentVelocity() { return safe_read(this + O::Projectile::currentVelocity, Vector3); }
 
 	float drag() { return safe_read(this + O::Projectile::drag, float); }
 
 	float previoustraveledTime() { return safe_read(this + O::Projectile::previousTraveledTime, float); }
-	void previoustraveledTime(float d) { safe_write(this + O::Projectile::previousTraveledTime, d, float); }
+	void previoustraveledTime(float d) { if (!this) return; safe_write(this + O::Projectile::previousTraveledTime, d, float); }
 
 	float gravityModifier() { return safe_read(this + O::Projectile::gravityModifier, float); }
-	void integrity(float f) { safe_write(this + O::Projectile::integrity, f, float); }
+	void integrity(float f) { if (!this) return; safe_write(this + O::Projectile::integrity, f, float); }
 	float integrity() { return safe_read(this + O::Projectile::integrity, float); }
 	float maxDistance() { return safe_read(this + O::Projectile::maxDistance, float); }
 	Vector3 currentPosition() { return safe_read(this + O::Projectile::currentPosition, Vector3); }
-	void currentPosition(Vector3 d) { safe_write(this + O::Projectile::currentPosition, d, Vector3); }
+	void currentPosition(Vector3 d) { if (!this) return; safe_write(this + O::Projectile::currentPosition, d, Vector3); }
 
-	void partialTime(float f) { safe_write(this + O::Projectile::tumbleSpeed, f, float); }
+	void partialTime(float f) { if (!this) return; safe_write(this + O::Projectile::tumbleSpeed, f, float); }
 	float partialTime() { return safe_read(this + O::Projectile::tumbleSpeed, float); }
 	Vector3 prevSentVelocity() { return safe_read(this + O::Projectile::tumbleAxis, Vector3); }
-	void prevSentVelocity(Vector3 d) { safe_write(this + O::Projectile::tumbleAxis, d, Vector3); }
+	void prevSentVelocity(Vector3 d) { if (!this) return; safe_write(this + O::Projectile::tumbleAxis, d, Vector3); }
 	float sentTraveledTime() { return safe_read(this + O::Projectile::closeFlybyDistance, float); }
-	void sentTraveledTime(float d) { safe_write(this + O::Projectile::closeFlybyDistance, d, float); }
+	void sentTraveledTime(float d) { if (!this) return; safe_write(this + O::Projectile::closeFlybyDistance, d, float); }
 	float ricochetChance() { return safe_read(this + O::Projectile::ricochetChance, float); }
-	void ricochetChance(float d) { safe_write(this + O::Projectile::ricochetChance, d, float); }
+	void ricochetChance(float d) { if (!this) return; safe_write(this + O::Projectile::ricochetChance, d, float); }
 	Vector3 prevSentPosition() { return safe_read(this + O::Projectile::sentPosition, Vector3); }
-	void prevSentPosition(Vector3 d) { safe_write(this + O::Projectile::sentPosition, d, Vector3); }
+	void prevSentPosition(Vector3 d) { if (!this) return; safe_write(this + O::Projectile::sentPosition, d, Vector3); }
 	bool needsLOS() { return safe_read(this + O::Projectile::createDecals, bool); }
-	void needsLOS(bool d) { safe_write(this + O::Projectile::createDecals, d, bool); }
+	void needsLOS(bool d) { if (!this) return; safe_write(this + O::Projectile::createDecals, d, bool); }
 
-	void SetEffectScale(float f) { return seteffect((uintptr_t)this, f); }
+	void SetEffectScale(float f) { if (!this) return; return seteffect((uintptr_t)this, f); }
 
 	float traveledDistance() { return safe_read(this + O::Projectile::traveledDistance, float); }
-	void traveledDistance(float d) { safe_write(this + O::Projectile::traveledDistance, d, float); }
+	void traveledDistance(float d) { if (!this) return; safe_write(this + O::Projectile::traveledDistance, d, float); }
 
 	float initialDistance() { return safe_read(this + O::Projectile::initialDistance, float); }
 	float SetInitialDistance(float d) { return safe_write(this + O::Projectile::initialDistance, d, float); }
 
 	float traveledTime() { return safe_read(this + O::Projectile::traveledTime, float); }
-	void traveledTime(float d) { safe_write(this + O::Projectile::traveledTime, d, float); }
+	void traveledTime(float d) { if (!this) return; safe_write(this + O::Projectile::traveledTime, d, float); }
 
 	Vector3 previousPosition() { return safe_read(this + O::Projectile::previousPosition, Vector3); }
 	void previousPosition(Vector3 d) { safe_write(this + O::Projectile::previousPosition, d, Vector3); }
@@ -176,11 +176,11 @@ public:
 	bool invisible() { return safe_read(this + O::Projectile::invisible, bool); }
 
 	float launchTime() { return safe_read(this + O::Projectile::launchTime, float); }
-	void launchTime(float d) { safe_write(this + O::Projectile::launchTime, d, float); }
+	void launchTime(float d) { if (!this) return;  safe_write(this + O::Projectile::launchTime, d, float); }
 
-	void Launch() { return _launch((uintptr_t)this); }
+	void Launch() { if (!this) return;  return _launch((uintptr_t)this); }
 
-	void Retire() { return _retire(this); }
+	void Retire() { if (!this) return;  return _retire(this); }
 
 	bool IsAlive() {
 		return (this->integrity() > 0.001f && this->traveledDistance() < this->maxDistance() && this->traveledTime() < 8);

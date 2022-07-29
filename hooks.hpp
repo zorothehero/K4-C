@@ -363,8 +363,8 @@ namespace hooks {
 					projectile->set_projectile_thickness(projectile->thickness);
 				
 				p->integrity(1.f);
-				 
-				 
+				float t = p->traveledTime();
+				
 				//create and SEND FAKE copy of projectile so game only updates original
 				//Projectile* fake = new Projectile(*p);
 				p->initialVelocity(aimbot_velocity);
@@ -395,8 +395,7 @@ namespace hooks {
 
 				if (vars->combat.targetbehindwall)
 				{
-					auto p1 = *reinterpret_cast<Projectile1**>(p);
-					p1->Launch1();
+					((Projectile1*)p)->Launch1();
 				}				
 			}
 			if (vars->combat.targetbehindwall)
@@ -752,6 +751,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 	uintptr_t client_entities;
 
 	void hk_projectile_update(uintptr_t pr) {
+		esp::local_player->console_echo(_(L"[trap]: ProjectileUpdate - Called"));
 		if (vars->combat.targetbehindwall) {
 			((Projectile1*)pr)->Update();
 		}
@@ -845,7 +845,8 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 
 		if (!loco || loco->is_sleeping())
 			return;
-
+		auto time = unity::get_realtimesincestartup();//UnityEngine::Time::get_realtimeSinceStartup();
+		float _timeSinceLastTick = time - loco->get_last_sent_tick_time();
 		if (loco && !loco->is_sleeping() && settings::desyncTime < 0.f) {
 			if (vars->misc.flyhack_stop) {
 				Vector3 curr = get_transform(esp::local_player)->get_bone_position();

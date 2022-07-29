@@ -652,6 +652,8 @@ public:
 	void DoRealMovement()
 	{
 		auto _this = (Projectile*)this;
+		if (!this) return;
+		if (!_this) return;
 		constexpr float num = 0.03125f;
 		constexpr float projectile_forgiviness = 1.5f;
 		constexpr float bulletUpdateRate = 0.0625f;
@@ -816,58 +818,70 @@ public:
 		//if (!memory::IsAddressValid(_this))
 			return;
 
-		auto owner = _this->owner();
-		if (!owner)
+		if (!_this->authoritative())
 		//if (!memory::IsAddressValid(owner))
 			return;
 
-		if (owner == LocalPlayer && vars->combat.targetbehindwall) {
-			while (this->IsAlive() && _this->traveledTime() < 0.09f)
+		if (vars->combat.targetbehindwall) {
+			while (_this->IsAlive() && _this->traveledTime() < 0.09f)
 				this->UpdateVelocity();
 		}
-		else if (owner == LocalPlayer && !vars->combat.targetbehindwall) {
+		else {	
 			_this->ricochetChance(0.f);
 			return _this->Launch();
 		}
 	}
 
 	void Update() {
-		do
-		{
-			auto _this = (Projectile*)this;
-			if (!_this)
-				break;
+		__try {
+			do
+			{
+				auto _this = (Projectile*)this;
+				if (!_this)
+					break;
 
-			base_player* owner = _this->owner();
-			if (!owner)
-				break;
+				base_player* owner = _this->owner();
+				if (!owner)
+					break;
 
-			auto LocalPlayer = esp::local_player;
-			if (!LocalPlayer)
-				break;
+				auto LocalPlayer = esp::local_player;
+				if (!LocalPlayer)
+					break;
 
-			if (!this->IsAlive() || _this->projectileID() == 0 || !owner) {
-				_this->Retire();
-				break;
-			}
-
-			float bulletUpdateRate = 0.01f;
-			if (owner == LocalPlayer && vars->combat.targetbehindwall) {
-				while (this->IsAlive()) {
-					float time = unity::get_realtimesincestartup();//UnityEngine::Time::get_realtimeSinceStartup();
-					if (time - _this->launchTime() < _this->traveledTime() + bulletUpdateRate) {
-						break;
-					}
-					UpdateVelocity();
+				if (!this->IsAlive() || _this->projectileID() == 0 || !owner) {
+					_this->Retire();
+					break;
 				}
-			}
-			else
-				return _update((Projectile*)this);
+
+				float bulletUpdateRate = 0.01f;
+				if (owner == LocalPlayer && vars->combat.targetbehindwall) {
+					while (this->IsAlive()) {
+						float time = unity::get_realtimesincestartup();//UnityEngine::Time::get_realtimeSinceStartup();
+						esp::local_player->console_echo(string::wformat(
+							_(L"[trap]: ProjectileUpdate - time: %d, launchtime: %d, traveledTime: 0.00%d, updateRate: 0.00%d, time - launchTime: 0.0%d, traveledTime + updateRate: %d / 100"),
+							(int)time,
+							(int)_this->launchTime(),
+							(int)_this->traveledTime() * 10000,
+							(int)bulletUpdateRate * 10000,
+							(int)(time - _this->launchTime()) * 100,
+							(int)_this->traveledTime() + bulletUpdateRate));
+						if (time - _this->launchTime() < _this->traveledTime() + bulletUpdateRate) {
+							break;
+						}
+						UpdateVelocity();
+					}
+				}
+				else
+					return _update((Projectile*)this);
 				//return Hooks::ProjectileUpdateHk.get_original<decltype(&Hooks::_Update)>()(this);
 
-		} while (0);
+			} while (0);
 
-		return _update((Projectile*)this);//hooks::orig::_update((Projectile*)this);//Hooks::ProjectileUpdateHk.get_original<decltype(&Hooks::_Update)>()(this);
+			return _update((Projectile*)this);//hooks::orig::_update((Projectile*)this);//Hooks::ProjectileUpdateHk.get_original<decltype(&Hooks::_Update)>()(this);
+		}
+		__except (true) {
+
+		}
 
 	}
 

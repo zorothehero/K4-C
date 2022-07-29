@@ -83,8 +83,8 @@ inline bool CanManipulate(base_projectile* baseProjectile, base_player* TargetPl
 		//0x52D200 losradius real rust
 		typedef bool(*lr)(Vector3, Vector3, int, float, uintptr_t);
 		bool CenterLOS = ((lr)(mem::game_assembly_base + 0x52D200))(center, LastLocalEye, layermask, 0.2f, 0);
-		bool UpLOS = CenterLOS && ((lr)(mem::game_assembly_base + 0x52D200))(LastLocalEye, Up, layermask, 0.2f, 0) && LastLocalEye.distance(Up) > 0.01f;// && LocalPlayer->checkNoclipMagicBullet(LastLocalEye, Up);
-		bool DownLOS = CenterLOS && ((lr)(mem::game_assembly_base + 0x52D200))(LastLocalEye, Down, layermask, 0.2f, 0) && LastLocalEye.distance(Down) > 0.01f;// && LocalPlayer->checkNoclipMagicBullet(LastLocalEye, Down);
+		bool UpLOS = CenterLOS && ((lr)(mem::game_assembly_base + 0x52D200))(LastLocalEye, Up, layermask, 0.2f, 0) && LastLocalEye.distance(Up) > 0.01f && misc::ValidateEyePos(LastLocalEye, Up);// && LocalPlayer->checkNoclipMagicBullet(LastLocalEye, Up);
+		bool DownLOS = CenterLOS && ((lr)(mem::game_assembly_base + 0x52D200))(LastLocalEye, Down, layermask, 0.2f, 0) && LastLocalEye.distance(Down) > 0.01f && misc::ValidateEyePos(LastLocalEye, Down);// && LocalPlayer->checkNoclipMagicBullet(LastLocalEye, Down);
 
 		static const bool debug_test = false;
 
