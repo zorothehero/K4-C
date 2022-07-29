@@ -29,7 +29,7 @@ struct Vars
 		bool always_shoot = false;
 		float melee_range = 1.f;
 		float thickness = 1.f;
-		bool HitScan = false;
+		bool HitScan = true;
 		bool norecoil = false;
 		bool nospread = false;
 		bool fast_bullet = false;
