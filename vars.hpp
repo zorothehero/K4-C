@@ -136,7 +136,7 @@ struct Vars
 		bool desync = false;
 		bool Movement = false;
 		bool eyeoffset = false;
-		float playereyes = 1.4;
+		float PlayerEyes = 1.4;
 		bool spinbot = false;
 		bool always_shoot = false;
 		bool attack_on_mountables = false;

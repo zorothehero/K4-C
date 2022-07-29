@@ -134,14 +134,14 @@ uintptr_t flying = il2cpp::value(_("PlayerWalkMovement"), _("flying"));
 uintptr_t model = il2cpp::value(_("BaseEntity"), _("model"));
 
 
-class base_projectile;
+class BaseProjectile;
 
-class transform;
+class Transform;
 
-class base_player;
+class BasePlayer;
 
 class HitTest;
-class modelstate;
+class ModelState;
 class col;
 
 typedef struct Str
@@ -155,23 +155,23 @@ class weapon;
 
 static auto GetNormal = reinterpret_cast<Vector3 (*)(uintptr_t, Vector3)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("TerrainHeightMap"), _("GetNormal"), 1, _(""), _(""))));
 
-static auto GetSpeed = reinterpret_cast<float (*)(base_player * baseplayer, float running, float ducking, float crawling)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("GetSpeed"), 3, _(""), _(""))));
+static auto GetSpeed = reinterpret_cast<float (*)(BasePlayer * baseplayer, float running, float ducking, float crawling)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("GetSpeed"), 3, _(""), _(""))));
 
-static auto IsSwimming = reinterpret_cast<bool (*)(base_player*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("IsSwimming"), 0, _(""), _(""))));
+static auto IsSwimming = reinterpret_cast<bool (*)(BasePlayer*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("IsSwimming"), 0, _(""), _(""))));
 
 static auto Line = reinterpret_cast<void (*)(Vector3, Vector3, col, float, bool, bool)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("DDraw"), _("Line"), 6, _(""), _("UnityEngine"))));
 
 static auto GetIndex = reinterpret_cast<int(*)(uintptr_t SkinSetCollection, float)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("SkinSetCollection"), _("GetIndex"), 1, _(""), _(""))));
 
-static auto set_onLadder = reinterpret_cast<void(*)(modelstate*, bool)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("ModelState"), _("set_onLadder"), 1, _(""), _(""))));
+static auto set_onLadder = reinterpret_cast<void(*)(ModelState*, bool)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("ModelState"), _("set_onLadder"), 1, _(""), _(""))));
 
-static auto GetWorldVelocity = reinterpret_cast<Vector3(*)(base_player * base_entity)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseEntity"), _("GetWorldVelocity"), 0, _(""), _(""))));
+static auto GetWorldVelocity = reinterpret_cast<Vector3(*)(BasePlayer * base_entity)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseEntity"), _("GetWorldVelocity"), 0, _(""), _(""))));
 
-static auto GetParentVelocity = reinterpret_cast<Vector3(*)(base_player * base_entity)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseEntity"), _("GetParentVelocity"), 0, _(""), _(""))));
+static auto GetParentVelocity = reinterpret_cast<Vector3(*)(BasePlayer * base_entity)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseEntity"), _("GetParentVelocity"), 0, _(""), _(""))));
 
-static auto HasPlayerFlag = reinterpret_cast<bool(*)(base_player*, rust::classes::PlayerFlags)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("HasPlayerFlag"), 1, _(""), _(""))));
+static auto HasPlayerFlag = reinterpret_cast<bool(*)(BasePlayer*, rust::classes::PlayerFlags)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("HasPlayerFlag"), 1, _(""), _(""))));
 
-static auto get_game_object_transform = reinterpret_cast<transform * (*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GameObject"), _("get_transform"), 0, _(""), _("UnityEngine"))));
+static auto get_game_object_transform = reinterpret_cast<Transform * (*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GameObject"), _("get_transform"), 0, _(""), _("UnityEngine"))));
 
 static auto get_iconSprite = reinterpret_cast<uintptr_t(*)(weapon * Item)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Item"), _("get_iconSprite"), 0, _(""), _(""))));
 
@@ -187,7 +187,7 @@ static auto get_frameCount = reinterpret_cast<int(*)()>(*reinterpret_cast<uintpt
 
 static auto get_timeScale = reinterpret_cast<float(*)()>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Time"), _("get_timeScale"), 0, _(""), _("UnityEngine"))));
 
-static auto FindBone = reinterpret_cast<transform * (*)(base_player*, rust::classes::string)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseEntity"), _("FindBone"), 1, _(""), _(""))));
+static auto FindBone = reinterpret_cast<Transform * (*)(BasePlayer*, rust::classes::string)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseEntity"), _("FindBone"), 1, _(""), _(""))));
 
 static auto get_mousePosition = reinterpret_cast<Vector3(*)()>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Input"), _("get_mousePosition"), 0, _(""), _("UnityEngine"))));
 
@@ -195,11 +195,11 @@ static auto FloorToInt = reinterpret_cast<int (*)(float)>(*reinterpret_cast<uint
 
 static auto get_gravity = reinterpret_cast<Vector3(*)()>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Physics"), _("get_gravity"), 1, _(""), _("UnityEngine"))));
 
-static auto get_isAlive = reinterpret_cast<bool (*)(base_projectile*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Projectile"), _("get_isAlive"), 0, _(""), _(""))));
+static auto get_isAlive = reinterpret_cast<bool (*)(BaseProjectile*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Projectile"), _("get_isAlive"), 0, _(""), _(""))));
 
-static auto get_position = reinterpret_cast<Vector3(*)(uintptr_t transform)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Transform"), _("get_position"), 0, _(""), _("UnityEngine"))));
+static auto get_position = reinterpret_cast<Vector3(*)(uintptr_t Transform)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Transform"), _("get_position"), 0, _(""), _("UnityEngine"))));
 
-static auto get_rotation = reinterpret_cast<Vector4(*)(uintptr_t transform)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Transform"), _("get_rotation"), 0, _(""), _("UnityEngine"))));
+static auto get_rotation = reinterpret_cast<Vector4(*)(uintptr_t Transform)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Transform"), _("get_rotation"), 0, _(""), _("UnityEngine"))));
 
 static auto FindShader = reinterpret_cast<uintptr_t(*)(rust::classes::string)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Shader"), _("Find"), 1, _(""), _("UnityEngine"))));
 
@@ -221,15 +221,15 @@ static auto get_IsNpc = reinterpret_cast<bool(*)(uintptr_t player_model)>(*reint
 
 static auto get_time = reinterpret_cast<float(*)()>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Time"), _("get_time"), 0, _(""), _("UnityEngine"))));
 
-static auto ClosestPoint = reinterpret_cast<Vector3(*)(base_player*, Vector3)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseEntity"), _("ClosestPoint"), 1, _("position"), _(""), 1)));
+static auto ClosestPoint = reinterpret_cast<Vector3(*)(BasePlayer*, Vector3)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseEntity"), _("ClosestPoint"), 1, _("position"), _(""), 1)));
 
-static auto InverseTransformPoint = reinterpret_cast<Vector3(*)(transform*, Vector3)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Transform"), _("InverseTransformPoint"), 1, _(""), _("UnityEngine"))));
+static auto InverseTransformPoint = reinterpret_cast<Vector3(*)(Transform*, Vector3)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Transform"), _("InverseTransformPoint"), 1, _(""), _("UnityEngine"))));
 
-static auto InverseTransformDirection = reinterpret_cast<Vector3(*)(transform*, Vector3)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Transform"), _("InverseTransformDirection"), 1, _(""), _("UnityEngine"))));
+static auto InverseTransformDirection = reinterpret_cast<Vector3(*)(Transform*, Vector3)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Transform"), _("InverseTransformDirection"), 1, _(""), _("UnityEngine"))));
 
-static auto get_localToWorldMatrix = reinterpret_cast<VMatrix(*)(transform*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Transform"), _("get_localToWorldMatrix"), 0, _(""), _("UnityEngine"))));
+static auto get_localToWorldMatrix = reinterpret_cast<VMatrix(*)(Transform*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Transform"), _("get_localToWorldMatrix"), 0, _(""), _("UnityEngine"))));
 
-static auto get_transform = reinterpret_cast<transform * (*)(base_player*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Component"), _("get_transform"), 0, _(""), _("UnityEngine"))));
+static auto _get_transform = reinterpret_cast<Transform * (*)(BasePlayer*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Component"), _("get_transform"), 0, _(""), _("UnityEngine"))));
 
 static auto get_gameObject = reinterpret_cast<uintptr_t(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Component"), _("get_gameObject"), 0, _(""), _("UnityEngine"))));
 
@@ -237,19 +237,19 @@ static auto get_component = reinterpret_cast<uintptr_t(*)(uintptr_t, uintptr_t)>
 
 static auto get_components_in_children = reinterpret_cast<uintptr_t(*)(uintptr_t, uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Component"), _("GetComponentsInChildren"), 0, _(""), _("UnityEngine"))));
 
-static auto set_position = reinterpret_cast<void(*)(transform*, Vector3 value)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Transform"), _("set_position"), 1, _(""), _("UnityEngine"))));
+static auto set_position = reinterpret_cast<void(*)(Transform*, Vector3 value)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Transform"), _("set_position"), 1, _(""), _("UnityEngine"))));
 
-static auto get_up = reinterpret_cast<Vector3(*)(transform*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Transform"), _("get_up"), 0, _(""), _("UnityEngine"))));
+static auto get_up = reinterpret_cast<Vector3(*)(Transform*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Transform"), _("get_up"), 0, _(""), _("UnityEngine"))));
 
 static auto LookRotation = reinterpret_cast<Vector4(*)(Vector3, Vector3 value)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Quaternion"), _("LookRotation"), 2, _(""), _("UnityEngine"))));
 
-static auto set_rotation = reinterpret_cast<void(*)(transform*, Vector4 value)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Transform"), _("set_rotation"), 1, _(""), _("UnityEngine"))));
+static auto set_rotation = reinterpret_cast<void(*)(Transform*, Vector4 value)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Transform"), _("set_rotation"), 1, _(""), _("UnityEngine"))));
 
-static auto StartAttackCooldown = reinterpret_cast<void(*)(base_projectile*, float)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("AttackEntity"), _("StartAttackCooldown"), 1, _(""), _(""))));
+static auto StartAttackCooldown = reinterpret_cast<void(*)(BaseProjectile*, float)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("AttackEntity"), _("StartAttackCooldown"), 1, _(""), _(""))));
 
-static auto ProcessAttack = reinterpret_cast<void(*)(base_projectile*, HitTest*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseMelee"), _("ProcessAttack"), 1, _(""), _(""))));
+static auto ProcessAttack = reinterpret_cast<void(*)(BaseProjectile*, HitTest*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseMelee"), _("ProcessAttack"), 1, _(""), _(""))));
 
-static auto GetProjectileVelocityScale = reinterpret_cast<float(*)(base_projectile*, bool max)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseProjectile"), _("GetProjectileVelocityScale"), 1, _("getMax"), _(""), 1)));
+static auto GetProjectileVelocityScale = reinterpret_cast<float(*)(BaseProjectile*, bool max)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseProjectile"), _("GetProjectileVelocityScale"), 1, _("getMax"), _(""), 1)));
 
 static auto get_Renderers = reinterpret_cast<rust::list<uintptr_t>*(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("SkinnedMultiMesh"), _("get_Renderers"), 0, _(""), _(""))));
 
@@ -257,11 +257,11 @@ static auto get_material = reinterpret_cast<uintptr_t(*)(uintptr_t)>(*reinterpre
 
 static auto set_material = reinterpret_cast<uintptr_t(*)(uintptr_t, uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Renderer"), _("set_material"), 0, _(""), _("UnityEngine"))));
 
-static auto get_maxspeed = reinterpret_cast<float(*)(base_player*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("GetMaxSpeed"), 0, _(""), _(""))));
+static auto get_maxspeed = reinterpret_cast<float(*)(BasePlayer*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("GetMaxSpeed"), 0, _(""), _(""))));
 
 static auto SendSignal = reinterpret_cast<void(*)(uintptr_t, rust::classes::Signal, rust::classes::string)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseEntity"), _("SendSignalBroadcast"), 2, _(""), _(""))));
 
-static auto BoundsPadding = reinterpret_cast<float(*)(base_player*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseEntity"), _("BoundsPadding"), 2, _(""), _(""))));
+static auto BoundsPadding = reinterpret_cast<float(*)(BasePlayer*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseEntity"), _("BoundsPadding"), 2, _(""), _(""))));
 
 static auto PEyes_get_position = reinterpret_cast<Vector3(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("PlayerEyes"), _("get_position"), 0, _(""), _(""))));
 
@@ -271,13 +271,13 @@ static auto PEyes_get_rotation = reinterpret_cast<Vector4(*)(uintptr_t)>(*reinte
 
 static auto bodyforward = reinterpret_cast<Vector3(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("PlayerEyes"), _("BodyForward"), 0, _(""), _(""))));
 
-static auto SendClientTick = reinterpret_cast<void(*)(base_player*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("SendClientTick"), 0, _(""), _(""))));
+static auto SendClientTick = reinterpret_cast<void(*)(BasePlayer*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("SendClientTick"), 0, _(""), _(""))));
 
-static auto GetJumpHeight = reinterpret_cast<float(*)(base_player*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("GetJumpHeight"), 0, _(""), _(""))));
+static auto GetJumpHeight = reinterpret_cast<float(*)(BasePlayer*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("GetJumpHeight"), 0, _(""), _(""))));
 
-static auto GetRadius = reinterpret_cast<float(*)(base_player*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("GetRadius"), 0, _(""), _(""))));
+static auto GetRadius = reinterpret_cast<float(*)(BasePlayer*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("GetRadius"), 0, _(""), _(""))));
 
-static auto GetHeight = reinterpret_cast<float(*)(base_player*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("GetHeight"), 0, _(""), _(""))));
+static auto GetHeight = reinterpret_cast<float(*)(BasePlayer*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("GetHeight"), 0, _(""), _(""))));
 
 static auto terrainheightmap_GetHeight = reinterpret_cast<int(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("TerrainHeightMap"), _("GetHeight"), 0, _(""), _(""))));
 
@@ -289,11 +289,11 @@ static auto did_attack_client_side = reinterpret_cast<void(*)(uintptr_t)>(*reint
 
 static auto getmodifiedaimcone = reinterpret_cast<Vector3(*)(float, Vector3, bool)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("AimConeUtil"), _("GetModifiedAimConeDirection"), 0, _(""), _(""))));
 
-static auto canaffordupgrade = reinterpret_cast<bool(*)(uintptr_t, rust::classes::BuildingGrade, base_player*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BuildingBlock"), _("CanAffordUpgrade"), 0, _(""), _(""))));
+static auto canaffordupgrade = reinterpret_cast<bool(*)(uintptr_t, rust::classes::BuildingGrade, BasePlayer*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BuildingBlock"), _("CanAffordUpgrade"), 0, _(""), _(""))));
 
-static auto canchangetograde = reinterpret_cast<bool(*)(uintptr_t, rust::classes::BuildingGrade, base_player*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BuildingBlock"), _("CanChangeToGrade"), 0, _(""), _(""))));
+static auto canchangetograde = reinterpret_cast<bool(*)(uintptr_t, rust::classes::BuildingGrade, BasePlayer*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BuildingBlock"), _("CanChangeToGrade"), 0, _(""), _(""))));
 
-static auto upgradetograde = reinterpret_cast<void(*)(uintptr_t, rust::classes::BuildingGrade, base_player*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BuildingBlock"), _("UpgradeToGrade"), 0, _(""), _(""))));
+static auto upgradetograde = reinterpret_cast<void(*)(uintptr_t, rust::classes::BuildingGrade, BasePlayer*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BuildingBlock"), _("UpgradeToGrade"), 0, _(""), _(""))));
 
 static auto set_jumped = reinterpret_cast<void(*)(uintptr_t, bool)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("ModelState"), _("set_jumped"), 0, _(""), _(""))));
 
@@ -359,10 +359,10 @@ void init_bp() {
 	terrainheightmap_GetHeight = reinterpret_cast<int(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("TerrainHeightMap"), _("GetHeight"), 0, _(""), _(""))));
 	GetNormal = reinterpret_cast<Vector3(*)(uintptr_t, Vector3)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("TerrainHeightMap"), _("GetNormal"), 1, _(""), _(""))));
 	Line = reinterpret_cast<void (*)(Vector3, Vector3, col, float, bool, bool)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("DDraw"), _("Line"), 6, _(""), _("UnityEngine"))));
-	set_onLadder = reinterpret_cast<void(*)(modelstate*, bool)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("ModelState"), _("set_onLadder"), 1, _(""), _(""))));
-	GetWorldVelocity = reinterpret_cast<Vector3(*)(base_player * base_entity)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseEntity"), _("GetWorldVelocity"), 0, _(""), _(""))));
-	HasPlayerFlag = reinterpret_cast<bool(*)(base_player*, rust::classes::PlayerFlags)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("HasPlayerFlag"), 1, _(""), _(""))));
-	get_game_object_transform = reinterpret_cast<transform * (*)(uintptr_t game_object)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GameObject"), _("get_transform"), 0, _(""), _("UnityEngine"))));
+	set_onLadder = reinterpret_cast<void(*)(ModelState*, bool)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("ModelState"), _("set_onLadder"), 1, _(""), _(""))));
+	GetWorldVelocity = reinterpret_cast<Vector3(*)(BasePlayer * base_entity)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseEntity"), _("GetWorldVelocity"), 0, _(""), _(""))));
+	HasPlayerFlag = reinterpret_cast<bool(*)(BasePlayer*, rust::classes::PlayerFlags)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("HasPlayerFlag"), 1, _(""), _(""))));
+	get_game_object_transform = reinterpret_cast<Transform * (*)(uintptr_t game_object)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GameObject"), _("get_transform"), 0, _(""), _("UnityEngine"))));
 	get_rect = reinterpret_cast<rust::classes::Rect(*)(uintptr_t sprite)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Sprite"), _("get_rect"), 0, _(""), _("UnityEngine"))));
 	get_iconSprite = reinterpret_cast<uintptr_t(*)(weapon * Item)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Item"), _("get_iconSprite"), 0, _(""), _(""))));
 	steamItem = il2cpp::value(_("ItemDefinition"), _("steamItem"));
@@ -370,10 +370,10 @@ void init_bp() {
 	get_texture = reinterpret_cast<uintptr_t(*)(uintptr_t sprite)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Sprite"), _("get_texture"), 0, _(""), _("UnityEngine"))));
 	set_name = reinterpret_cast<void(*)(uintptr_t, rust::classes::string)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Object"), _("set_name"), 1, _(""), _("UnityEngine"))));;
 	get_gameObject = reinterpret_cast<uintptr_t(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Component"), _("get_gameObject"), 0, _(""), _("UnityEngine"))));
-	InverseTransformDirection = reinterpret_cast<Vector3(*)(transform*, Vector3)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Transform"), _("InverseTransformDirection"), 1, _(""), _("UnityEngine"))));
+	InverseTransformDirection = reinterpret_cast<Vector3(*)(Transform*, Vector3)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Transform"), _("InverseTransformDirection"), 1, _(""), _("UnityEngine"))));
 	LookRotation = reinterpret_cast<Vector4(*)(Vector3, Vector3 value)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Quaternion"), _("LookRotation"), 2, _(""), _("UnityEngine"))));
-	set_rotation = reinterpret_cast<void(*)(transform*, Vector4 value)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Transform"), _("set_rotation"), 1, _(""), _("UnityEngine"))));
-	set_position = reinterpret_cast<void(*)(transform*, Vector3 value)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Transform"), _("set_position"), 1, _(""), _("UnityEngine"))));
+	set_rotation = reinterpret_cast<void(*)(Transform*, Vector4 value)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Transform"), _("set_rotation"), 1, _(""), _("UnityEngine"))));
+	set_position = reinterpret_cast<void(*)(Transform*, Vector3 value)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Transform"), _("set_position"), 1, _(""), _("UnityEngine"))));
 	SetInt = reinterpret_cast<void(*)(uintptr_t material, rust::classes::string name, int value)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Material"), _("SetInt"), 1, _(""), _("UnityEngine"))));
 	set_hideFlags = reinterpret_cast<void(*)(uintptr_t material, int value)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Object"), _("set_hideFlags"), 1, _(""), _("UnityEngine"))));
 	FindShader = reinterpret_cast<uintptr_t(*)(rust::classes::string)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Shader"), _("Find"), 1, _(""), _("UnityEngine"))));
@@ -386,12 +386,12 @@ void init_bp() {
 	GetIndex = reinterpret_cast<int(*)(uintptr_t SkinSetCollection, float)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("SkinSetCollection"), _("GetIndex"), 1, _(""), _(""))));
 	FloorToInt = reinterpret_cast<int (*)(float)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Mathf"), _("FloorToInt"), 1, _(""), _("UnityEngine"))));
 	get_gravity = reinterpret_cast<Vector3(*)()>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Physics"), _("get_gravity"), 1, _(""), _("UnityEngine"))));
-	FindBone = reinterpret_cast<transform * (*)(base_player*, rust::classes::string)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseEntity"), _("FindBone"), 1, _(""), _(""))));
-	get_isAlive = reinterpret_cast<bool (*)(base_projectile*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Projectile"), _("get_isAlive"), 0, _(""), _(""))));
+	FindBone = reinterpret_cast<Transform * (*)(BasePlayer*, rust::classes::string)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseEntity"), _("FindBone"), 1, _(""), _(""))));
+	get_isAlive = reinterpret_cast<bool (*)(BaseProjectile*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Projectile"), _("get_isAlive"), 0, _(""), _(""))));
 	get_mousePosition = reinterpret_cast<Vector3(*)()>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Input"), _("get_mousePosition"), 0, _(""), _("UnityEngine"))));
-	GetSpeed = reinterpret_cast<float (*)(base_player * baseplayer, float running, float ducking, float crawling)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("GetSpeed"), 3, _(""), _(""))));
+	GetSpeed = reinterpret_cast<float (*)(BasePlayer * baseplayer, float running, float ducking, float crawling)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("GetSpeed"), 3, _(""), _(""))));
 	get_frameCount = reinterpret_cast<int(*)()>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Time"), _("get_frameCount"), 0, _(""), _("UnityEngine"))));
-	get_rotation = reinterpret_cast<Vector4(*)(uintptr_t transform)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Transform"), _("get_rotation"), 0, _(""), _("UnityEngine"))));
+	get_rotation = reinterpret_cast<Vector4(*)(uintptr_t Transform)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Transform"), _("get_rotation"), 0, _(""), _("UnityEngine"))));
 	GetBounds = reinterpret_cast<Bounds(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("GetBounds"), 0, _(""), _(""))));
 
 	get_components_in_children = reinterpret_cast<uintptr_t(*)(uintptr_t, uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Component"), _("GetComponentsInChildren"), 0, _(""), _("UnityEngine"))));
@@ -399,19 +399,19 @@ void init_bp() {
 
 	PEyes_get_position = reinterpret_cast<Vector3(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("PlayerEyes"), _("get_position"), 0, _(""), _(""))));
 
-	GetRadius = reinterpret_cast<float(*)(base_player*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("GetRadius"), 0, _(""), _(""))));
+	GetRadius = reinterpret_cast<float(*)(BasePlayer*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("GetRadius"), 0, _(""), _(""))));
 
-	GetJumpHeight = reinterpret_cast<float(*)(base_player*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("GetJumpHeight"), 0, _(""), _(""))));
+	GetJumpHeight = reinterpret_cast<float(*)(BasePlayer*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("GetJumpHeight"), 0, _(""), _(""))));
 
-	BoundsPadding = reinterpret_cast<float(*)(base_player*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseEntity"), _("BoundsPadding"), 2, _(""), _(""))));
+	BoundsPadding = reinterpret_cast<float(*)(BasePlayer*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseEntity"), _("BoundsPadding"), 2, _(""), _(""))));
 
-	GetParentVelocity = reinterpret_cast<Vector3(*)(base_player * base_entity)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseEntity"), _("GetParentVelocity"), 0, _(""), _(""))));
+	GetParentVelocity = reinterpret_cast<Vector3(*)(BasePlayer * base_entity)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseEntity"), _("GetParentVelocity"), 0, _(""), _(""))));
 
-	SendClientTick = reinterpret_cast<void(*)(base_player*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("SendClientTick"), 0, _(""), _(""))));
+	SendClientTick = reinterpret_cast<void(*)(BasePlayer*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("SendClientTick"), 0, _(""), _(""))));
 
-	get_maxspeed = reinterpret_cast<float(*)(base_player*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("GetMaxSpeed"), 0, _(""), _(""))));
+	get_maxspeed = reinterpret_cast<float(*)(BasePlayer*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("GetMaxSpeed"), 0, _(""), _(""))));
 
-	get_up = reinterpret_cast<Vector3(*)(transform*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Transform"), _("get_up"), 0, _(""), _("UnityEngine"))));
+	get_up = reinterpret_cast<Vector3(*)(Transform*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Transform"), _("get_up"), 0, _(""), _("UnityEngine"))));
 
 	get_fixedTime = reinterpret_cast<float(*)()>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Time"), _("get_fixedTime"), 0, _(""), _("UnityEngine"))));
 
@@ -425,7 +425,7 @@ void init_bp() {
 
 	bodyforward = reinterpret_cast<Vector3(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("PlayerEyes"), _("BodyForward"), 0, _(""), _(""))));
 
-	get_localToWorldMatrix = reinterpret_cast<VMatrix(*)(transform*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Transform"), _("get_localToWorldMatrix"), 0, _(""), _("UnityEngine"))));
+	get_localToWorldMatrix = reinterpret_cast<VMatrix(*)(Transform*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Transform"), _("get_localToWorldMatrix"), 0, _(""), _("UnityEngine"))));
 	
 	getmodifiedaimcone = reinterpret_cast<Vector3(*)(float, Vector3, bool)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("AimConeUtil"), _("GetModifiedAimConeDirection"), 0, _(""), _(""))));
 
@@ -451,7 +451,7 @@ void init_bp() {
 
 	guidtopath = reinterpret_cast<rust::classes::string(*)(rust::classes::string)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GameManifest"), _("GUIDToPath"), 0, _(""), _(""))));
 
-	IsSwimming = reinterpret_cast<bool (*)(base_player*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("IsSwimming"), 0, _(""), _(""))));
+	IsSwimming = reinterpret_cast<bool (*)(BasePlayer*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("IsSwimming"), 0, _(""), _(""))));
 #pragma region il2
 
 	containerWear = il2cpp::value(_("PlayerInventory"), _("containerWear"));
@@ -537,7 +537,7 @@ void init_bp() {
 	groundAngleNew = il2cpp::value(_("PlayerWalkMovement"), _("groundAngleNew"));
 	flying = il2cpp::value(_("PlayerWalkMovement"), _("flying"));
 
-	get_position = reinterpret_cast<Vector3(*)(uintptr_t transform)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Transform"), _("get_position"), 0, _(""), _("UnityEngine"))));
+	get_position = reinterpret_cast<Vector3(*)(uintptr_t Transform)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Transform"), _("get_position"), 0, _(""), _("UnityEngine"))));
 
 	get_deltaTime = reinterpret_cast<float(*)()>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Time"), _("get_deltaTime"), 0, _(""), _("UnityEngine"))));
 
@@ -545,22 +545,30 @@ void init_bp() {
 
 	get_time = reinterpret_cast<float(*)()>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Time"), _("get_time"), 0, _(""), _("UnityEngine"))));
 
-	GetProjectileVelocityScale = reinterpret_cast<float(*)(base_projectile*, bool max)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseProjectile"), _("GetProjectileVelocityScale"), 1, _("getMax"), _(""), 1)));
+	GetProjectileVelocityScale = reinterpret_cast<float(*)(BaseProjectile*, bool max)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseProjectile"), _("GetProjectileVelocityScale"), 1, _("getMax"), _(""), 1)));
 
-	ClosestPoint = reinterpret_cast<Vector3(*)(base_player*, Vector3)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseEntity"), _("ClosestPoint"), 1, _("position"), _(""), 1)));
+	ClosestPoint = reinterpret_cast<Vector3(*)(BasePlayer*, Vector3)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseEntity"), _("ClosestPoint"), 1, _("position"), _(""), 1)));
 
-	StartAttackCooldown = reinterpret_cast<void(*)(base_projectile*, float)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("AttackEntity"), _("StartAttackCooldown"), 1, _(""), _(""))));
+	StartAttackCooldown = reinterpret_cast<void(*)(BaseProjectile*, float)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("AttackEntity"), _("StartAttackCooldown"), 1, _(""), _(""))));
 
-	get_transform = reinterpret_cast<transform * (*)(base_player*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Component"), _("get_transform"), 0, _(""), _("UnityEngine"))));
+	_get_transform = reinterpret_cast<Transform * (*)(BasePlayer*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Component"), _("get_transform"), 0, _(""), _("UnityEngine"))));
 
-	InverseTransformPoint = reinterpret_cast<Vector3(*)(transform*, Vector3)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Transform"), _("InverseTransformPoint"), 1, _(""), _("UnityEngine"))));
+	InverseTransformPoint = reinterpret_cast<Vector3(*)(Transform*, Vector3)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Transform"), _("InverseTransformPoint"), 1, _(""), _("UnityEngine"))));
 
-	ProcessAttack = reinterpret_cast<void(*)(base_projectile*, HitTest*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseMelee"), _("ProcessAttack"), 1, _(""), _(""))));
+	ProcessAttack = reinterpret_cast<void(*)(BaseProjectile*, HitTest*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseMelee"), _("ProcessAttack"), 1, _(""), _(""))));
 
 #pragma endregion
 }
 
-class transform {
+class Object {
+public:
+};
+
+class Component : public Object {
+public:
+};
+
+class Transform : public Component {
 public:
 	Vector3 up()
 	{
@@ -601,17 +609,29 @@ public:
 	}
 };
 
-class mono_behaviour {
+class MonoBehaviour {
 public:
-	transform* get_transform()
+	Transform* get_transform()
 	{
 		// const auto unk = *reinterpret_cast< uintptr_t* >( this + 0x30 );
 
-		return *reinterpret_cast<transform**>((uintptr_t)this + 0x8);
+		return *reinterpret_cast<Transform**>((uintptr_t)this + 0x8);
 	}
 };
 
-class item_mod_projectile {
+class BaseEntity : public MonoBehaviour {
+public:
+};
+
+class BaseCombatEntity : public BaseEntity {
+public:
+};
+
+class HeldEntity : public BaseEntity {
+public:
+};
+
+class ItemModProjectile : public MonoBehaviour {
 public:
 	float get_projectile_velocity() {
 		return *reinterpret_cast<float*>((uintptr_t)this + 0x34);
@@ -626,8 +646,7 @@ public:
 	}
 };
 
-class base_player;
-
+class BasePlayer;
 
 class HitTest {
 public:
@@ -644,16 +663,16 @@ public:
 		return *reinterpret_cast<rust::classes::game_object**>(gameObject + 0x10);
 	}
 
-	void set_hit_transform(transform* hit_transform) {
-		*reinterpret_cast<transform**>((uintptr_t)this + 0xB0) = hit_transform;
+	void set_hit_transform(Transform* hit_transform) {
+		*reinterpret_cast<Transform**>((uintptr_t)this + 0xB0) = hit_transform;
 	}
 
 	void set_hit_type(rust::classes::HitTestType hit_type) {
 		*reinterpret_cast<int*>((uintptr_t)this + 0x10) = (int)hit_type;
 	}
 
-	void set_ignore_entity(base_player* entity_to_ignore) {
-		*reinterpret_cast<base_player**>((uintptr_t)this + 0x80) = entity_to_ignore;
+	void set_ignore_entity(BasePlayer* entity_to_ignore) {
+		*reinterpret_cast<BasePlayer**>((uintptr_t)this + 0x80) = entity_to_ignore;
 	}
 
 	void set_radius(float radius) {
@@ -676,8 +695,8 @@ public:
 		*reinterpret_cast<float*>((uintptr_t)this + 0x34) = max_dist;
 	}
 
-	void set_hit_entity(base_player* entity) {
-		*reinterpret_cast<base_player**>((uintptr_t)this + 0x88) = entity;
+	void set_hit_entity(BasePlayer* entity) {
+		*reinterpret_cast<BasePlayer**>((uintptr_t)this + 0x88) = entity;
 	}
 
 	uintptr_t& get_hit_entity() {
@@ -717,9 +736,11 @@ public:
 		return *reinterpret_cast<float*>((uintptr_t)this + 0x18);
 	}
 };
-class ItemDefinition {
+
+class ItemDefinition : public MonoBehaviour {
 public:
 };
+
 class GatherProperties {
 public:
 	GatherPropertyEntry*& tree() {
@@ -731,7 +752,12 @@ public:
 	}
 };
 
-class base_projectile {
+
+class AttackEntity : public HeldEntity {
+public:
+};
+
+class BaseProjectile : public AttackEntity {
 public:
 	float projectilevel_scale = projectileVelocityScale();
 	bool first = false;
@@ -795,8 +821,8 @@ public:
 		*reinterpret_cast<float*>((uintptr_t)this + integrity) = to_set;
 	}
 
-	item_mod_projectile* get_item_mod_projectile() {
-		return *reinterpret_cast<item_mod_projectile**>((uintptr_t)this + mod);
+	ItemModProjectile* get_item_mod_projectile() {
+		return *reinterpret_cast<ItemModProjectile**>((uintptr_t)this + mod);
 	}
 
 	weapon_stats_t get_stats(int32_t weapon_id) {
@@ -1107,13 +1133,13 @@ public:
 		return *reinterpret_cast<int32_t*>(item_definition + itemid);
 	}
 
-	base_projectile* get_base_projectile() {
+	BaseProjectile* get_base_projectile() {
 		if (!this) return nullptr;
-		return *reinterpret_cast<base_projectile**>((uintptr_t)this + heldEntity);
+		return *reinterpret_cast<BaseProjectile**>((uintptr_t)this + heldEntity);
 	}
 };
 
-class modelstate {
+class ModelState {
 public:
 	void set_water_level(float water_level) {
 		*reinterpret_cast<float*>((uintptr_t)this + 0x14) = water_level;
@@ -1145,7 +1171,11 @@ public:
 	}
 };
 
-class playerwalkmovement {
+class BaseMovement : public MonoBehaviour {
+public:
+};
+
+class PlayerWalkMovement : public BaseMovement {
 public:
 	void set_swimming(bool flag) {
 		*reinterpret_cast<bool*>((uintptr_t)this + swimming) = flag;
@@ -1198,7 +1228,7 @@ public:
 		return *reinterpret_cast<bool*>((uintptr_t)this + 0x142); //private bool sliding
 	}
 
-	void force_jump(modelstate* state, bool indirection = false) {
+	void force_jump(ModelState* state, bool indirection = false) {
 		if (!this) return;
 		return do_jump((uintptr_t)this, (uintptr_t)state, indirection);
 	}
@@ -1239,14 +1269,14 @@ public:
 		return *reinterpret_cast<bool*>((uintptr_t)this + 0x142) = g; //private bool sliding
 	}
 
-	void teleport_to(Vector3 p, base_player* ply) {
+	void teleport_to(Vector3 p, BasePlayer* ply) {
 		return teleportto((uintptr_t)this, p, (uintptr_t)ply);
 	}
 };
 
 auto cliententities = il2cpp::value(_("BaseNetworkable"), _("clientEntities"), false);
 
-class networkable {
+class Networkable {
 public:
 	unsigned int get_id() {
 		return *reinterpret_cast<unsigned int*>((uintptr_t)this + 0x10);
@@ -1268,7 +1298,7 @@ class aim_target {
 public:
 	Vector3 pos;
 
-	base_player* player = NULL;
+	BasePlayer* player = NULL;
 
 	float distance = 5000;
 	float fov = vars->combat.aimbotfov;
@@ -1300,7 +1330,7 @@ float get_2d_dist(const Vector2& Src, const Vector3& Dst) {
 	return Vector3::my_sqrt(powFFFFFFFFFFFFFFFFFFFFFF(Src.x - Dst.x) + powFFFFFFFFFFFFFFFFFFFFFF(Src.y - Dst.y));
 }
 
-class playereyes {
+class PlayerEyes : public Component {
 public:
 	void set_view_offset(Vector3 offset) {
 		*reinterpret_cast<Vector3*>((uintptr_t)this + viewOffset) = offset;
@@ -1331,7 +1361,7 @@ public:
 	}
 };
 
-class input_state {
+class InputState {
 public:
 	void set_aim_angles(Vector3 aim_angle) {
 		auto current = mem::read<uintptr_t>((uintptr_t)this + 0x10);
@@ -1341,14 +1371,12 @@ public:
 
 };
 
-class basemountable {
+class BaseMountable : public BaseCombatEntity {
 public:
 	bool& canwielditem() {
 		return *reinterpret_cast<bool*>((uintptr_t)this + canWieldItems);
 	}
 };
-
-
 
 struct OBB {
 public:
@@ -1522,17 +1550,17 @@ public:
 		return points.size();
 	}
 
-	float Distance(base_player* player, Vector3 point)
+	float Distance(BasePlayer* player, Vector3 point)
 	{
-		Vector3 position = get_position((uintptr_t)get_transform(player));
+		Vector3 position = get_position((uintptr_t)_get_transform(player));
 		if (Count() == 0)
 		{
 			return position.distance(point);
 		}
-		Vector4 rotation = get_rotation((uintptr_t)get_transform(player));
+		Vector4 rotation = get_rotation((uintptr_t)_get_transform(player));
 		Bounds bounds = GetBounds((uintptr_t)player);
 
-		auto trans = get_transform(player);
+		auto trans = _get_transform(player);
 		bool flag = trans ? !(!trans) : false;
 		VMatrix _mv; _mv.matrix_identity();
 		VMatrix matrix4x = flag ? _mv : get_localToWorldMatrix(trans);
@@ -1573,7 +1601,7 @@ public:
 	}
 };
 
-class base_player {
+class BasePlayer : public BaseCombatEntity {
 public:
 	Vector3 bodyAngles()
 	{
@@ -1684,8 +1712,8 @@ public:
 		}
 	}
 
-	basemountable* get_mountable() {
-		return mem::read<basemountable*>((uintptr_t)this + mounted);
+	BaseMountable* get_mountable() {
+		return mem::read<BaseMountable*>((uintptr_t)this + mounted);
 	}
 
 	wchar_t* get_player_name() {
@@ -1753,7 +1781,7 @@ public:
 			if (tag != 6 && !is_heli)// not a player
 				continue;
 
-			auto player = (base_player*)current_object;
+			auto player = (BasePlayer*)current_object;
 			if (!player)
 				continue;
 
@@ -1791,11 +1819,11 @@ public:
 
 			target.is_heli = is_heli;
 
-			auto networkable = target.player->get_networkable();
-			if (!networkable)
+			auto Networkable = target.player->get_networkable();
+			if (!Networkable)
 				continue;
 
-			auto id = networkable->get_id();
+			auto id = Networkable->get_id();
 			if (!id)
 				continue;
 
@@ -1836,8 +1864,8 @@ public:
 		*reinterpret_cast<Vector3*>(player_model + newVelocity) = vel;
 	}
 
-	modelstate* get_model_state() {
-		return *reinterpret_cast<modelstate**>((uintptr_t)this + modelState);
+	ModelState* get_model_state() {
+		return *reinterpret_cast<ModelState**>((uintptr_t)this + modelState);
 	}
 
 	void set_client_tick_interval(float tick) {
@@ -1863,7 +1891,7 @@ public:
 		return *reinterpret_cast<unsigned long*>((uintptr_t)this + userID);
 	}
 
-	bool is_teammate(base_player* local_player) {
+	bool is_teammate(BasePlayer* local_player) {
 		auto team = mem::read<uintptr_t>((uintptr_t)local_player + clientTeam);
 
 		auto member = mem::read<uintptr_t>(team + 0x30);
@@ -1889,12 +1917,12 @@ public:
 		return *reinterpret_cast<float*>((uintptr_t)this + lastSentTickTime);
 	}
 
-	transform* get_bone_transform(int bone_id) {
+	Transform* get_bone_transform(int bone_id) {
 		uintptr_t entity_model = *reinterpret_cast<uintptr_t*>((uintptr_t)this + 0x130); //public Model model; // 
 		//uintptr_t entity_model = *reinterpret_cast<uintptr_t*>((uintptr_t)this + 0x128); //public Model model; // 
 		if (!entity_model) return nullptr;
 		uintptr_t bone_dict = *reinterpret_cast<uintptr_t*>(entity_model + 0x48);
-		transform* BoneValue = *reinterpret_cast<transform**>(bone_dict + 0x20 + bone_id * 0x8);
+		Transform* BoneValue = *reinterpret_cast<Transform**>(bone_dict + 0x20 + bone_id * 0x8);
 
 		return BoneValue;
 	}
@@ -1949,8 +1977,8 @@ public:
 		return item_list;
 	}
 
-	template<typename T = networkable*>
-	T find_closest(char* class_name , networkable* target_entity, float max_distance) {
+	template<typename T = Networkable*>
+	T find_closest(char* class_name , Networkable* target_entity, float max_distance) {
 		auto client_entities = il2cpp::value(_("BaseNetworkable"), _("clientEntities"), false);
 		if (!client_entities)
 			return { nullptr };
@@ -1991,11 +2019,11 @@ public:
 
 			auto name = *(int*)(entity_class_name);
 
-			auto target_position = get_position((uintptr_t)get_transform((base_player*)target_entity));
-			auto ent_position = get_position((uintptr_t)get_transform((base_player*)ent));
+			auto target_position = get_position((uintptr_t)_get_transform((BasePlayer*)target_entity));
+			auto ent_position = get_position((uintptr_t)_get_transform((BasePlayer*)ent));
 			auto best_position = Vector3(0, 0, 0);
 			if(best_ent)
-				best_position = get_position((uintptr_t)get_transform((base_player*)best_ent));
+				best_position = get_position((uintptr_t)_get_transform((BasePlayer*)best_ent));
 
 			if (!LI_FIND(strcmp)(entity_class_name, class_name)
 				&& ent_position.distance(target_position) < max_distance
@@ -2079,9 +2107,9 @@ public:
 
 			auto game_object = *reinterpret_cast<uintptr_t*>(object + 0x30);
 
-			auto transform = *reinterpret_cast<uintptr_t*>(game_object + 0x8);
+			auto Transform = *reinterpret_cast<uintptr_t*>(game_object + 0x8);
 
-			auto visual_state = *reinterpret_cast<uintptr_t*>(transform + 0x38);
+			auto visual_state = *reinterpret_cast<uintptr_t*>(Transform + 0x38);
 
 			auto world_position = *reinterpret_cast<Vector3*>(visual_state + 0x90);
 
@@ -2101,7 +2129,7 @@ public:
 				if (!baseentity)
 					continue;
 
-				auto player = reinterpret_cast<base_player*>(baseentity);
+				auto player = reinterpret_cast<BasePlayer*>(baseentity);
 
 				aim_target new_target;
 
@@ -2110,7 +2138,7 @@ public:
 					continue;
 
 				new_target.pos = world_position;
-				new_target.player = (base_player*)ent;
+				new_target.player = (BasePlayer*)ent;
 				new_target.visible = /*unity::is_visible(bone_pos, world_position)*/true;
 				new_target.found = true;
 
@@ -2128,8 +2156,8 @@ public:
 		return Flags & 16;
 	}
 
-	playereyes* get_player_eyes() {
-		return *reinterpret_cast<playereyes**>((uintptr_t)this + eyes);
+	PlayerEyes* get_player_eyes() {
+		return *reinterpret_cast<PlayerEyes**>((uintptr_t)this + eyes);
 	}
 
 	weapon* get_active_weapon()
@@ -2171,12 +2199,12 @@ public:
 		return *reinterpret_cast<uintptr_t*>((uintptr_t)this + model);
 	}
 
-	networkable* get_networkable() {
-		return *reinterpret_cast<networkable**>((uintptr_t)this + 0x58);
+	Networkable* get_networkable() {
+		return *reinterpret_cast<Networkable**>((uintptr_t)this + 0x58);
 	}
 
-	playerwalkmovement* get_movement() {
-		return *reinterpret_cast<playerwalkmovement**>((uintptr_t)this + movement);
+	PlayerWalkMovement* get_movement() {
+		return *reinterpret_cast<PlayerWalkMovement**>((uintptr_t)this + movement);
 	}
 
 	float get_health() {
@@ -2224,7 +2252,7 @@ public:
 		return unk1;
 	}
 
-	transform* find_closest_bone(Vector3 worldpos, bool visible_check = false) {
+	Transform* find_closest_bone(Vector3 worldpos, bool visible_check = false) {
 		if (!this) return nullptr;
 		std::array<uintptr_t, 12> bonelist = {
 			*reinterpret_cast<uintptr_t*>(this->get_bone_transform(47)),
@@ -2249,7 +2277,7 @@ public:
 				closest = bone;
 			}
 		}
-		return *reinterpret_cast<transform**>(closest);
+		return *reinterpret_cast<Transform**>(closest);
 	}
 
 	void console_echo(const wchar_t* str) {
@@ -2264,7 +2292,7 @@ public:
 	}
 };
 
-class Planner {
+class Planner : public HeldEntity {
 public:
 	Vector3 rotationoffset() { return mem::read<Vector3>((uintptr_t)this + planner_rotationoffset); }
 	void rotationoffset(Vector3 o) { mem::write((uintptr_t)this + planner_rotationoffset, o); }
@@ -2273,36 +2301,44 @@ public:
 	uintptr_t guide() { return mem::read<uintptr_t>((uintptr_t)this + planner_guide); }
 };
 
-class BuildingBlock {
+class DecayEntity : public Component {
+public:
+};
+
+class StabilityEntity : public DecayEntity {
+public:
+};
+
+class BuildingBlock : StabilityEntity{
 public:
 	rust::classes::BuildingGrade grade() { 
 		//public BuildingGrade.Enum grade; // 0x274
 		return *reinterpret_cast<rust::classes::BuildingGrade*>((uintptr_t)this + 0x274);
 	}
 
-	bool CanAffordUpgrade(rust::classes::BuildingGrade g, base_player* p) {
+	bool CanAffordUpgrade(rust::classes::BuildingGrade g, BasePlayer* p) {
 		if (!this) return false;
 
-		typedef bool (*AAA)(uintptr_t, int, base_player*);//real rust 7202688
+		typedef bool (*AAA)(uintptr_t, int, BasePlayer*);//real rust 7202688
 		return ((AAA)(mem::game_assembly_base + 7202688))((uintptr_t)this, (int)g, p);
 		//return canaffordupgrade((uintptr_t)this, g, p);
 	}
 
-	bool CanChangeToGrade(rust::classes::BuildingGrade g, base_player* p) {
+	bool CanChangeToGrade(rust::classes::BuildingGrade g, BasePlayer* p) {
 		if (!this) return false;
 
-		typedef bool (*AAA)(uintptr_t, int, base_player*);//real rust 7203152
+		typedef bool (*AAA)(uintptr_t, int, BasePlayer*);//real rust 7203152
 		return ((AAA)(mem::game_assembly_base + 7203152))((uintptr_t)this, (int)g, p);
 		//return canchangetograde((uintptr_t)this, g, p);
 	}
 
-	void Upgrade(rust::classes::BuildingGrade g, base_player* p) {
+	void Upgrade(rust::classes::BuildingGrade g, BasePlayer* p) {
 		if (!this) return;
 		return upgradetograde((uintptr_t)this, g, p);
 	}
 };
 
-void attack_melee(aim_target target, base_projectile* baseprojectile, bool is_player = false) {
+void attack_melee(aim_target target, BaseProjectile* baseprojectile, bool is_player = false) {
 	if (!target.visible)
 		return;
 
@@ -2326,7 +2362,7 @@ void attack_melee(aim_target target, base_projectile* baseprojectile, bool is_pl
 
 	Ray ray = Ray(local_position, (target.pos - local_position).Normalized());
 
-	transform* trans = is_player ? target.player->get_bone_transform(48) : get_transform(target.player);
+	Transform* trans = is_player ? target.player->get_bone_transform(48) : _get_transform(target.player);
 
 	if (!trans)
 		return;

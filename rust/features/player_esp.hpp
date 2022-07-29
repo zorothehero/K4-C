@@ -16,7 +16,7 @@ namespace esp {
 	float time_last_upgrade = 0.f;
 	float rl_time = 0.f;
 	uintptr_t client_entities;
-	base_player* local_player;
+	BasePlayer* local_player;
 	VMatrix matrix;
 	aim_target best_target = aim_target();
 	uintptr_t closest_building_block = 0;
@@ -72,9 +72,9 @@ namespace esp {
 
 	void draw_item(Vector2 w2s_position, uintptr_t label, Vector4 color, wchar_t* name = _(L""));
 
-	void draw_player(base_player* player, bool is_npc);
+	void draw_player(BasePlayer* player, bool is_npc);
 
-	void do_chams(base_player* player);
+	void do_chams(BasePlayer* player);
 
 	void draw_target_hotbar(aim_target target);
 
@@ -139,7 +139,7 @@ namespace esp {
 
 			bool is_looking_at_entity = false;
 
-			auto do_melee_attack = [&](base_projectile* baseprojectile)
+			auto do_melee_attack = [&](BaseProjectile* baseprojectile)
 			{
 				auto ent = *reinterpret_cast<uintptr_t*>(base_object + 0x28);
 
@@ -151,8 +151,8 @@ namespace esp {
 
 					auto game_object = *reinterpret_cast<uintptr_t*>(_class + 0x30);
 
-					auto transform = *reinterpret_cast<uintptr_t*>(game_object + 0x8);
-					auto visual_state = *reinterpret_cast<uintptr_t*>(transform + 0x38);
+					auto Transform = *reinterpret_cast<uintptr_t*>(game_object + 0x8);
+					auto visual_state = *reinterpret_cast<uintptr_t*>(Transform + 0x38);
 
 
 					auto world_position = *reinterpret_cast<Vector3*>(visual_state + 0x90);
@@ -177,7 +177,7 @@ namespace esp {
 					aim_target target;
 
 					target.pos = world_position;
-					target.player = (base_player*)ent;
+					target.player = (BasePlayer*)ent;
 					target.visible = true;
 					attack_melee(target, baseprojectile);
 				};
@@ -211,11 +211,11 @@ namespace esp {
 			if (!game_object)
 				continue;
 
-			auto transform = *reinterpret_cast<uintptr_t*>(game_object + 0x8);
-			if (!transform)
+			auto Transform = *reinterpret_cast<uintptr_t*>(game_object + 0x8);
+			if (!Transform)
 				continue;
 
-			auto visual_state = *reinterpret_cast<uintptr_t*>(transform + 0x38);
+			auto visual_state = *reinterpret_cast<uintptr_t*>(Transform + 0x38);
 			if (!visual_state)
 				continue;
 
@@ -231,7 +231,7 @@ namespace esp {
 			if (!object_name.zpad)
 				continue;
 
-			auto ent_net = *reinterpret_cast<networkable**>(ent + 0x58);
+			auto ent_net = *reinterpret_cast<Networkable**>(ent + 0x58);
 			auto ent_id = ent_net->get_id();
 
 			float dist = 10.f;
@@ -244,7 +244,7 @@ namespace esp {
 			if (tag == 6 && vars->visual.playeresp)
 			{
 
-				auto player = reinterpret_cast<base_player*>(ent);
+				auto player = reinterpret_cast<BasePlayer*>(ent);
 
 				auto hit_player = [&]() {
 					auto weapon = esp::local_player->get_active_weapon();
@@ -285,7 +285,7 @@ namespace esp {
 
 				if (player->is_local_player())
 				{
-					local_player = reinterpret_cast<base_player*>(ent);
+					local_player = reinterpret_cast<BasePlayer*>(ent);
 					do_chams(local_player);
 				}
 				else {
@@ -375,7 +375,7 @@ namespace esp {
 				auto look = local_player->get_lookingat_entity();
 				if (look)
 				{
-					auto net2 = *reinterpret_cast<networkable**>(look + 0x58);
+					auto net2 = *reinterpret_cast<Networkable**>(look + 0x58);
 					auto look_id = net2->get_id();
 					if (look_id == ent_id)
 					{
@@ -421,11 +421,11 @@ namespace esp {
 			{
 				if (!LI_FIND(strcmp)(entity_class_name, _("BuildingBlock")))
 				{
-					auto lpos = get_position((uintptr_t)get_transform(local_player));
+					auto lpos = get_position((uintptr_t)_get_transform(local_player));
 					float dist_to_new = lpos.distance(world_position);
 					if (!closest_building_block)
 						closest_building_block = ent;
-					else if (dist_to_new < lpos.distance(get_position((uintptr_t)get_transform((base_player*)closest_building_block))))
+					else if (dist_to_new < lpos.distance(get_position((uintptr_t)_get_transform((BasePlayer*)closest_building_block))))
 						closest_building_block = ent;
 				}
 			}
@@ -515,7 +515,7 @@ namespace esp {
 
 
 				if (*(int*)(entity_class_name + 4) == 'ileH' && vars->visual.heli_esp) {
-					auto base_heli = reinterpret_cast<base_player*>(ent);
+					auto base_heli = reinterpret_cast<BasePlayer*>(ent);
 
 					Vector2 rearrotor, beam, mainrotor;
 					out_w2s(base_heli->get_bone_transform(22)->get_bone_position(), rearrotor);
@@ -524,7 +524,7 @@ namespace esp {
 					esp_name = il2cpp::methods::new_string(("Patrol-heli"));
 					esp_color = Vector4(232, 232, 232, 255);
 
-					uintptr_t transform = mem::read<uintptr_t>(base_heli->get_model() + 0x48); //boneTransforms; // 0x48
+					uintptr_t Transform = mem::read<uintptr_t>(base_heli->get_model() + 0x48); //boneTransforms; // 0x48
 
 					const Vector2 diff = { (beam.x + rearrotor.x) / 2, (beam.y + rearrotor.y) / 2 };
 
@@ -662,7 +662,7 @@ namespace esp {
 			&& closest_building_block)
 		{
 			auto block = (BuildingBlock*)closest_building_block;
-			auto tranny = get_transform((base_player*)block);
+			auto tranny = _get_transform((BasePlayer*)block);
 			auto pos = get_position((uintptr_t)tranny);
 			auto distance = local_player->get_player_eyes()->get_position().distance(pos);
 
@@ -754,7 +754,7 @@ namespace esp {
 		}
 	}
 
-	transform* find_transform_by_id(unsigned int id_to_check) {
+	Transform* find_transform_by_id(unsigned int id_to_check) {
 		auto list = (rust::classes::list*)(cliententities);
 		auto value = list->get_value<uintptr_t>();
 		if (!value) return nullptr;
@@ -778,20 +778,20 @@ namespace esp {
 
 			auto ent = *reinterpret_cast<uintptr_t*>(base_object + 0x28);
 
-			auto net = *reinterpret_cast<networkable**>(ent + 0x58);
+			auto net = *reinterpret_cast<Networkable**>(ent + 0x58);
 
 			auto game_object = *reinterpret_cast<uintptr_t*>(object + 0x30);
 			if (!game_object)
 				continue;
 
-			auto transform = *reinterpret_cast<uintptr_t*>(game_object + 0x8);
-			if (!transform)
+			auto Transform = *reinterpret_cast<uintptr_t*>(game_object + 0x8);
+			if (!Transform)
 				continue;
 
 			unsigned int id = net->get_id();
 
 			if (id == id_to_check)
-				return get_transform((base_player*)ent);
+				return _get_transform((BasePlayer*)ent);
 		}
 	}
 

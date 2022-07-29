@@ -27,7 +27,7 @@ struct TraceResult1 {
 public:
 	bool didHit;
 	bool silentCat;
-	base_player* hitEntity;
+	BasePlayer* hitEntity;
 	Vector3 hitPosition;
 	Vector3 outVelocity;
 	float hitTime;
@@ -65,12 +65,12 @@ enum class MessageType : BYTE
 	ConsoleReplicatedVars = 25,
 };
 
-float GetMountedVelocity(base_player* target)
+float GetMountedVelocity(BasePlayer* target)
 {
 	if (!target)
 		return 0.f;
 
-	basemountable* mounted = (basemountable*)get_mounted((uintptr_t)target);
+	BaseMountable* mounted = (BaseMountable*)get_mounted((uintptr_t)target);
 
 	if (!mounted)
 		return 0.f;
@@ -299,7 +299,7 @@ namespace misc
 		return u.f;
 	}
 
-	void AddViolation(base_player* ply, 
+	void AddViolation(BasePlayer* ply, 
 		antihacktype type, 
 		float amount) {
 		//if (Interface.CallHook("OnPlayerViolation", ply, type, amount) != null)
@@ -331,7 +331,7 @@ namespace misc
 		}
 	}
 
-	void FadeViolations(base_player* ply, 
+	void FadeViolations(BasePlayer* ply, 
 		float deltaTime) {
 		if (unity::get_realtimesincestartup() - lastViolationTime > 10.0f)
 		{
@@ -339,7 +339,7 @@ namespace misc
 		}
 	}
 
-	bool TestNoClipping(base_player* ply = esp::local_player,
+	bool TestNoClipping(BasePlayer* ply = esp::local_player,
 		Vector3 oldPos = Vector3(0, 0, 0),
 		Vector3 newPos = Vector3(0, 0, 0),
 		float radius = 0.01f,
@@ -386,7 +386,7 @@ namespace misc
 			flag = true;
 		}
 
-		auto t = get_transform(loco);
+		auto t = _get_transform(loco);
 		Vector3 position2 = t->get_bone_position();
 		Vector3 actual_eye_pos = loco->get_player_eyes()->get_position();
 
@@ -416,7 +416,7 @@ namespace misc
 	}
 
 	bool OnProjectileAttack(Projectile* p,
-		base_player* ply,
+		BasePlayer* ply,
 		rust::classes::PlayerProjectileAttack* ppa)
 	{
 		auto playerAttack = ppa->playerAttack;
@@ -427,7 +427,7 @@ namespace misc
 		return true;
 	}
 
-	bool can_manipulate(base_player* ply,
+	bool can_manipulate(BasePlayer* ply,
 		Vector3 pos,
 		float mm_eye = 7.f) //7m only check rn
 	{
@@ -516,7 +516,7 @@ namespace misc
 		return false;
 	}
 
-	bool TestFlying2(base_player* ply,
+	bool TestFlying2(BasePlayer* ply,
 		Vector3 oldPos = Vector3(0, 0, 0),
 		Vector3 newPos = Vector3(0, 0, 0),
 		bool verifyGrounded = true)
@@ -574,7 +574,7 @@ namespace misc
 		return false;
 	}
 
-	bool IsSpeeding(base_player* ply,
+	bool IsSpeeding(BasePlayer* ply,
 		TickInterpolator ticks,
 		float deltaTime) {
 		bool result;
@@ -586,7 +586,7 @@ namespace misc
 		}
 		else
 		{
-			auto trans = get_transform(esp::local_player);
+			auto trans = _get_transform(esp::local_player);
 			bool flag = trans ? !(!trans) : false;
 			VMatrix _mv; _mv.matrix_identity();
 
@@ -663,7 +663,7 @@ namespace misc
 
 		flyhackPauseTime = max(0.f, flyhackPauseTime - deltaTime);
 		ticks.Reset();
-		auto trans = get_transform(esp::local_player);
+		auto trans = _get_transform(esp::local_player);
 
 		if (ticks.HasNext()) {
 			bool flag = trans ? !(!trans) : false;
@@ -690,7 +690,7 @@ namespace misc
 		return false;
 	}
 
-	bool ValidateMove(base_player* ply, 
+	bool ValidateMove(BasePlayer* ply, 
 		TickInterpolator ticks, 
 		float deltaTime)
 	{
@@ -724,7 +724,7 @@ namespace misc
 		return true;
 	}
 
-	void ValidateEyeHistory(base_player* ply) {
+	void ValidateEyeHistory(BasePlayer* ply) {
 		for (size_t i = 0; i < eye_history.size(); i++)
 		{
 			Vector3 point = eye_history[i];
@@ -763,13 +763,13 @@ namespace misc
 			//settings::speedhack = speedhackDistance + 4.0f;
 			settings::speedhack = speedhackDistance + 3.9f;
 		}
-		ticks.Reset(get_transform(esp::local_player)->get_bone_position());
+		ticks.Reset(_get_transform(esp::local_player)->get_bone_position());
 		ValidateEyeHistory(lp);
 		//ticks.Reset(esp::local_player->get_player_eyes()->get_position());
 	}
 
 	void ServerUpdate(float deltaTime,
-		base_player* ply) {
+		BasePlayer* ply) {
 		desyncTimeRaw = max(ply->get_last_sent_tick_time() - deltaTime, 0.f);
 		desyncTimeClamped = max(desyncTimeRaw, 1.f);
 		FinalizeTick(deltaTime);
@@ -971,8 +971,8 @@ namespace misc
 			//	PathSmooth(node.path);
 		}
 
-		void do_jump(playerwalkmovement* pwm,
-			modelstate* state,
+		void do_jump(PlayerWalkMovement* pwm,
+			ModelState* state,
 			float force = 10.f) {
 			if (!pwm || !state) return;
 			state->set_flag(rust::classes::ModelState_Flag::OnGround);
@@ -982,7 +982,7 @@ namespace misc
 			pwm->set_body_velocity(Vector3(vel.x, force, vel.z));
 		}
 
-		void auto_farm(playerwalkmovement* pwm) {
+		void auto_farm(PlayerWalkMovement* pwm) {
 			auto lp = esp::local_player;
 			if (!lp || !pwm) return;
 
@@ -990,10 +990,10 @@ namespace misc
 			vel = Vector3(vel.x / vel.length() * 5.5f, vel.y, vel.z / vel.length() * 5.5f);
 			auto eyepos = lp->get_player_eyes()->get_position();
 
-			auto transform = get_transform((base_player*)node.ent);
+			auto Transform = _get_transform((BasePlayer*)node.ent);
 			auto hp = *reinterpret_cast<float*>(node.ent + 0x178); //detect if broken with this fuck knows why
-			if (transform && hp > 60) {
-				auto marker_pos = get_position((uintptr_t)transform);
+			if (Transform && hp > 60) {
+				auto marker_pos = get_position((uintptr_t)Transform);
 				Sphere(marker_pos, 1.f, col(1, 1, 1, 1), 0.02f, 100.f);
 				if (node.steps > 0
 					&& eyepos.distance(node.pos) < 1.f)
@@ -1070,7 +1070,7 @@ namespace misc
 			}
 			else
 			{
-				misc::node.ent = (uintptr_t)lp->find_closest(_("OreResourceEntity"), (networkable*)lp, 200.f);
+				misc::node.ent = (uintptr_t)lp->find_closest(_("OreResourceEntity"), (Networkable*)lp, 200.f);
 
 				misc::node.path.clear();
 				misc::node.pos = Vector3(0, 0, 0);

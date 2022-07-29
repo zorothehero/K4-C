@@ -1,7 +1,7 @@
 #pragma once
 #include "projectile1.hpp"
 
-inline bool CanManipulate(base_projectile* baseProjectile, base_player* TargetPlayer, input_state* input)
+inline bool CanManipulate(BaseProjectile* baseProjectile, BasePlayer* TargetPlayer, InputState* input)
 {
 	auto LocalPlayer = esp::local_player;//CheatCore::m_cheat->LocalPlayer;
 

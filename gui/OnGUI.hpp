@@ -1562,7 +1562,7 @@ namespace gui {
 					checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Suicide"), &vars->misc.TakeFallDamage, misc_tab, true, &vars->keybinds.suicide);
 					checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Longneck"), &vars->misc.eyeoffset, misc_tab, true, &vars->keybinds.neck);
 					checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Auto upgrade"), &vars->misc.auto_upgrade, misc_tab);
-					Slider(event_type, menu_pos, mouse_pos, il2cpp::methods::new_string(_("Size")), pos, vars->misc.playereyes, 1.5f, misc_tab);
+					Slider(event_type, menu_pos, mouse_pos, il2cpp::methods::new_string(_("Size")), pos, vars->misc.PlayerEyes, 1.5f, misc_tab);
 					//checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Player FOV"), &vars->misc.playerfovtoggle, misc_tab);
 					Slider(event_type, menu_pos, mouse_pos, il2cpp::methods::new_string(_("Player fov")), pos, vars->visual.playerfov, 150, misc_tab);
 					checkbox(event_type, menu_pos, pos, mouse_pos, _(L"Zoom"), &vars->visual.zoomtoggle, misc_tab, true, &vars->keybinds.zoom);
@@ -2060,7 +2060,7 @@ namespace esp
 		}
 	}
 
-	void do_chams(base_player* player)
+	void do_chams(BasePlayer* player)
 	{
 		if (!player->is_alive() || player->is_sleeping()) return;
 		if (unity::bundle)
@@ -2107,7 +2107,7 @@ namespace esp
 			if (vars->visual.hand_chams > 1
 				&& player->is_local_player()) {
 				auto model = gui::methods::get_activemodel();
-				auto renderers = ((networkable*)model)->GetComponentsInChildren(unity::GetType(_("UnityEngine"), _("Renderer")));
+				auto renderers = ((Networkable*)model)->GetComponentsInChildren(unity::GetType(_("UnityEngine"), _("Renderer")));
 				if (renderers)
 				{
 					auto sz = *reinterpret_cast<int*>(renderers + 0x18);
@@ -2214,7 +2214,7 @@ namespace esp
 		}
 	}
 
-	void draw_player(base_player* player, bool is_npc)
+	void draw_player(BasePlayer* player, bool is_npc)
 	{
 		if (!local_player)
 			return;
@@ -2304,9 +2304,9 @@ namespace esp
 
 			for (auto& [bone_screen, bone_idx, on_screen, world_position, visible] : bones) {
 
-				auto transform = player->get_bone_transform(bone_idx);
+				auto Transform = player->get_bone_transform(bone_idx);
 
-				world_position = transform->get_bone_position();
+				world_position = Transform->get_bone_position();
 
 				if (bone_idx == 48) // lol
 					world_position.y += 0.2f;
@@ -2463,9 +2463,9 @@ namespace esp
 
 			if (name)
 			{
-				auto transform = player->get_bone_transform(48);
+				auto Transform = player->get_bone_transform(48);
 
-				auto position = transform->get_bone_position();
+				auto position = Transform->get_bone_position();
 
 				auto distance = esp::local_player->get_bone_transform(48)->get_bone_position().distance(position);
 				//const char* new_name = ;
@@ -2557,111 +2557,111 @@ namespace esp
 				*/
 				
 				//jaw
-				auto transform = player->get_bone_transform(48);
-				if (!transform) return;
-				Vector3 world_position = transform->get_bone_position();
+				auto Transform = player->get_bone_transform(48);
+				if (!Transform) return;
+				Vector3 world_position = Transform->get_bone_position();
 				Vector3 jaw = WorldToScreen(world_position);
 
 				//spine4
-				transform = player->get_bone_transform(22);
-				if (!transform) return;
-				world_position = transform->get_bone_position();
+				Transform = player->get_bone_transform(22);
+				if (!Transform) return;
+				world_position = Transform->get_bone_position();
 				Vector3 spine4 = WorldToScreen(world_position);
 
 				//spine3
-				transform = player->get_bone_transform(21);
-				if (!transform) return;
-				world_position = transform->get_bone_position();
+				Transform = player->get_bone_transform(21);
+				if (!Transform) return;
+				world_position = Transform->get_bone_position();
 				Vector3 spine3 = WorldToScreen(world_position);
 
 				//pelvis
-				transform = player->get_bone_transform(7);
-				if (!transform) return;
-				world_position = transform->get_bone_position();
+				Transform = player->get_bone_transform(7);
+				if (!Transform) return;
+				world_position = Transform->get_bone_position();
 				Vector3 pelvis = WorldToScreen(world_position);
 
 				//l_hip
-				transform = player->get_bone_transform(3);
-				if (!transform) return;
-				world_position = transform->get_bone_position();
+				Transform = player->get_bone_transform(3);
+				if (!Transform) return;
+				world_position = Transform->get_bone_position();
 				Vector3 l_hip = WorldToScreen(world_position);
 
 				//r_knee
-				transform = player->get_bone_transform(14);
-				if (!transform) return;
-				world_position = transform->get_bone_position();
+				Transform = player->get_bone_transform(14);
+				if (!Transform) return;
+				world_position = Transform->get_bone_position();
 				Vector3 r_knee = WorldToScreen(world_position);
 
 				//l_ankle_scale
-				transform = player->get_bone_transform(6);
-				if (!transform) return;
-				world_position = transform->get_bone_position();
+				Transform = player->get_bone_transform(6);
+				if (!Transform) return;
+				world_position = Transform->get_bone_position();
 				Vector3 l_ankle_scale = WorldToScreen(world_position);
 
 				//r_ankle_scale
-				transform = player->get_bone_transform(17);
-				if (!transform) return;
-				world_position = transform->get_bone_position();
+				Transform = player->get_bone_transform(17);
+				if (!Transform) return;
+				world_position = Transform->get_bone_position();
 				Vector3 r_ankle_scale = WorldToScreen(world_position);
 
 				//r_foot
-				transform = player->get_bone_transform(15);
-				if (!transform) return;
-				world_position = transform->get_bone_position();
+				Transform = player->get_bone_transform(15);
+				if (!Transform) return;
+				world_position = Transform->get_bone_position();
 				Vector3 r_foot = WorldToScreen(world_position);
 
 				//l_foot
-				transform = player->get_bone_transform(4);
-				if (!transform) return;
-				world_position = transform->get_bone_position();
+				Transform = player->get_bone_transform(4);
+				if (!Transform) return;
+				world_position = Transform->get_bone_position();
 				Vector3 l_foot = WorldToScreen(world_position);
 
 				//r_upperarm
-				transform = player->get_bone_transform(55);
-				if (!transform) return;
-				world_position = transform->get_bone_position();
+				Transform = player->get_bone_transform(55);
+				if (!Transform) return;
+				world_position = Transform->get_bone_position();
 				Vector3 r_upperarm = WorldToScreen(world_position);
 
 				//l_upperarm
-				transform = player->get_bone_transform(24);
-				if (!transform) return;
-				world_position = transform->get_bone_position();
+				Transform = player->get_bone_transform(24);
+				if (!Transform) return;
+				world_position = Transform->get_bone_position();
 				Vector3 l_upperarm = WorldToScreen(world_position);
 
 				//r_forearm
-				transform = player->get_bone_transform(56);
-				if (!transform) return;
-				world_position = transform->get_bone_position();
+				Transform = player->get_bone_transform(56);
+				if (!Transform) return;
+				world_position = Transform->get_bone_position();
 				Vector3 r_forearm = WorldToScreen(world_position);
 
 				//l_forearm
-				transform = player->get_bone_transform(25);
-				if (!transform) return;
-				world_position = transform->get_bone_position();
+				Transform = player->get_bone_transform(25);
+				if (!Transform) return;
+				world_position = Transform->get_bone_position();
 				Vector3 l_forearm = WorldToScreen(world_position);
 
 				//r_hip
-				transform = player->get_bone_transform(13);
-				if (!transform) return;
-				world_position = transform->get_bone_position();
+				Transform = player->get_bone_transform(13);
+				if (!Transform) return;
+				world_position = Transform->get_bone_position();
 				Vector3 r_hip = WorldToScreen(world_position);
 
 				//l_knee
-				transform = player->get_bone_transform(2);
-				if (!transform) return;
-				world_position = transform->get_bone_position();
+				Transform = player->get_bone_transform(2);
+				if (!Transform) return;
+				world_position = Transform->get_bone_position();
 				Vector3 l_knee = WorldToScreen(world_position);
 
 				//l_hand
-				transform = player->get_bone_transform(26);
-				if (!transform) return;
-				world_position = transform->get_bone_position();
+				Transform = player->get_bone_transform(26);
+				if (!Transform) return;
+				world_position = Transform->get_bone_position();
 				Vector3 l_hand = WorldToScreen(world_position);
 
 				//r_hand
-				transform = player->get_bone_transform(57);
-				if (!transform) return;
-				world_position = transform->get_bone_position();
+				Transform = player->get_bone_transform(57);
+				if (!Transform) return;
+				world_position = Transform->get_bone_position();
 				Vector3 r_hand = WorldToScreen(world_position);
 
 				if (jaw.y >= 1080 || jaw.x >= 1920 || jaw.x <= 0 || jaw.y <= 0) return;

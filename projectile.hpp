@@ -168,7 +168,7 @@ public:
 
 	int projectileID() { return safe_read(this + O::Projectile::projectileID, int); }
 
-	base_player* owner() { return (base_player*)safe_read(this + O::Projectile::owner, DWORD64); }
+	BasePlayer* owner() { return (BasePlayer*)safe_read(this + O::Projectile::owner, DWORD64); }
 	DWORD64 sourceWeaponPrefab() { return safe_read(this + O::Projectile::sourceWeaponPrefab, DWORD64); }
 
 	DWORD64 damageDistances() { return safe_read(this + O::Projectile::damageDistances, DWORD64); }
@@ -268,10 +268,10 @@ public:
 		safe_write(ht + 0x70, go, DWORD64); //gameObject
 		if (info.bone != 0) {
 
-			Vector3 hitpoint = InverseTransformPoint(safe_read(ht + 0xB0, transform*)/*HitTransform*/, info.point);
+			Vector3 hitpoint = InverseTransformPoint(safe_read(ht + 0xB0, Transform*)/*HitTransform*/, info.point);
 			safe_write(ht + 0x90, hitpoint, Vector3); //hitPoint
 
-			Vector3 normalpoint = InverseTransformDirection(safe_read(ht + 0xB0, transform*)/*HitTransform*/, info.normal);
+			Vector3 normalpoint = InverseTransformDirection(safe_read(ht + 0xB0, Transform*)/*HitTransform*/, info.normal);
 			safe_write(ht + 0x9C, normalpoint, Vector3); //HitNormal
 		}
 
@@ -305,7 +305,7 @@ public:
 
 		auto target = esp::local_player->get_aimbot_target(point, maxdist);
 
-		if (get_isAlive((base_projectile*)pr) && target.player && !target.teammate) {
+		if (get_isAlive((BaseProjectile*)pr) && target.player && !target.teammate) {
 			if (!unity::is_visible(target.pos, point, (uintptr_t)esp::local_player)) {
 				return false;
 			}
@@ -313,7 +313,7 @@ public:
 			DWORD64 ht = hitTest();
 			safe_write(ht + 0x66, true, bool); //DidHit
 			safe_write(ht + 0x88, (DWORD64)target.player, DWORD64); //HitEntity
-			transform* Transform;
+			Transform* Transform;
 
 			if (!target.is_heli) {
 				Transform = FindBone(target.player, _(L"spine4"));
@@ -398,7 +398,7 @@ public:
 		safe_write(ht + 0x14, ray, Ray); //AttackRay
 		safe_write(ht + 0x34, magnitude, float); //MaxDistance
 
-		base_player* ow = this->owner();
+		BasePlayer* ow = this->owner();
 		safe_write(ht + 0x80, (DWORD64)ow, DWORD64); //IgnoreEntity
 		safe_write(ht + 0x2C, 0, float); //Radius
 		safe_write(ht + 0x30, 0.15f, float); //Forgiveness                                        FAT BULLET
@@ -496,7 +496,7 @@ public:
 			previoustraveledTime(this->traveledTime());
 		}
 
-		transform* Transform = get_transform((base_player*)pr);
+		Transform* Transform = _get_transform((BasePlayer*)pr);
 		Vector3 pos = Transform->get_bone_position();
 		this->currentPosition(pos);
 
@@ -521,7 +521,7 @@ public:
 
 		Line(this->currentPosition(), this->previousPosition(), col(0.6, 0.1, 0.7, 1), 10.f, false, true);
 		
-		auto Trans = get_transform((base_player*)pr); //Component | Transform get_transform(); 
+		auto Trans = _get_transform((BasePlayer*)pr); //Component | Transform get_transform(); 
 		set_position(Trans, currentPosition()); //Transform | void set_position(Vector3 value); 
 
 		Vector4 rotation = LookRotation(currentVelocity(), Vector3(0, 1, 0));
@@ -540,12 +540,12 @@ void OnProjectileUpdate(Projectile* unk) {
 		//if(!vars->combat.magic_bullet)
 		//	return Update(unk);
 
-		base_player* owner = (base_player*)safe_read(unk + 0xD0, DWORD64);
+		BasePlayer* owner = (BasePlayer*)safe_read(unk + 0xD0, DWORD64);
 		if (!owner)
 			return;
 
 		if (owner->is_local_player()) {
-			if (get_isAlive((base_projectile*)unk)) {
+			if (get_isAlive((BaseProjectile*)unk)) {
 				for (; unk->IsAlive(); unk->UpdateVelocity(0.03125f, unk)) {
 
 					if (unk->launchTime() <= 0) {

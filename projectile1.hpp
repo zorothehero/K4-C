@@ -308,10 +308,10 @@ public:
 			//ht->DidHit() = true;
 			ht->set_did_hit(true);
 			//ht->HitEntity() = at;
-			ht->set_hit_entity((base_player*)at);
+			ht->set_hit_entity((BasePlayer*)at);
 
 			if (at) {
-				auto Transform = get_transform((base_player*)at);
+				auto Transform = _get_transform((BasePlayer*)at);
 				//if (!memory::IsAddressValid(ht))
 				if (!ht)
 					return false;
@@ -702,9 +702,9 @@ public:
 			
 			flag = DoHit((uintptr_t)result.hitEntity, result.hitPosition, result.hitTime);
 
-			auto transform = get_transform(result.hitEntity);
+			auto Transform = _get_transform(result.hitEntity);
 
-			hitPosition = get_position((uintptr_t)transform);//transform->get_bone_position();
+			hitPosition = get_position((uintptr_t)Transform);//transform->get_bone_position();
 		}
 		else if (result.silentCat && result.hitEntity)
 		{
@@ -745,7 +745,7 @@ public:
 	void UpdateVelocity()
 	{
 		auto _this = (Projectile*)this;
-		auto Transform = get_transform((base_player*)_this);
+		auto Transform = _get_transform((BasePlayer*)_this);
 
 		if (Transform) {
 			
@@ -839,7 +839,7 @@ public:
 			if (!_this)
 				break;
 
-			base_player* owner = _this->owner();
+			BasePlayer* owner = _this->owner();
 			if (!owner)
 				break;
 
@@ -879,7 +879,7 @@ public:
 		return _update((Projectile*)this);//hooks::orig::_update((Projectile*)this);//Hooks::ProjectileUpdateHk.get_original<decltype(&Hooks::_Update)>()(this);
 	}
 
-	float GetHitDist(float travel, base_player* target, bool player) {
+	float GetHitDist(float travel, BasePlayer* target, bool player) {
 		if (!target)
 			return 0.f;
 
@@ -908,7 +908,7 @@ public:
 
 			else if (mountedplayer && target) {
 
-				basemountable* mounted = target->get_mountable();
+				BaseMountable* mounted = target->get_mountable();
 				if (mounted) {
 
 					auto realM = get_parent_entity((uintptr_t)mounted);

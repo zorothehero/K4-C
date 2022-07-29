@@ -119,7 +119,7 @@ void load_config() {
 		else if (name == _("desync")) vars->misc.desync = std::stoi(value);
 		else if (name == _("Movement")) vars->misc.Movement = std::stoi(value);
 		else if (name == _("eyeoffset")) vars->misc.eyeoffset = std::stoi(value);
-		else if (name == _("playereyes")) vars->misc.playereyes = std::stof(value);
+		else if (name == _("PlayerEyes")) vars->misc.PlayerEyes = std::stof(value);
 		else if (name == _("spinbot")) vars->misc.spinbot = std::stoi(value);
 		else if (name == _("always_shoot")) vars->misc.always_shoot = std::stoi(value);
 		else if (name == _("attack_on_mountables")) vars->misc.attack_on_mountables = std::stoi(value);
@@ -440,8 +440,8 @@ void save_config() {
 	itoa(vars->misc.eyeoffset, buffer, 4);
 	str = (std::string(_("eyeoffset=")) + std::string(buffer) + _("\n"));
 	f.write(str.c_str(), str.size());
-	sprintf(buffer, _("%.2f"), vars->misc.playereyes);
-	str = (std::string(_("playereyes=")) + std::string(buffer) + _("\n"));
+	sprintf(buffer, _("%.2f"), vars->misc.PlayerEyes);
+	str = (std::string(_("PlayerEyes=")) + std::string(buffer) + _("\n"));
 	f.write(str.c_str(), str.size());
 	itoa(vars->misc.spinbot, buffer, 4);
 	str = (std::string(_("spinbot=")) + std::string(buffer) + _("\n"));

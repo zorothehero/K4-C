@@ -3,24 +3,24 @@
 
 namespace hooks {
 	namespace orig {
-		static auto baseplayer_client_input = reinterpret_cast<void (*)(base_player*, input_state*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("ClientInput"), -1, _(""), _(""))));
-		static auto BaseProjectile_OnSignal = reinterpret_cast<void (*)(base_projectile*, int, rust::classes::string)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseProjectile"), _("OnSignal"), 2, _(""), _(""))));
-		static auto playerwalkmovement_client_input = reinterpret_cast<void (*)(playerwalkmovement*, uintptr_t, modelstate*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("PlayerWalkMovement"), _("ClientInput"), -1, _(""), _(""))));
-		static auto DoFixedUpdate = reinterpret_cast<void (*)(playerwalkmovement*, modelstate*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("PlayerWalkMovement"), _("DoFixedUpdate"), -1, _(""), _(""))));
-		static auto UpdateVelocity = reinterpret_cast<void (*)(playerwalkmovement*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("PlayerWalkMovement"), _("UpdateVelocity"), -1, _(""), _(""))));
-		static auto blocksprint = reinterpret_cast<void (*)(base_player*, float)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("BlockSprint"), 1, _(""), _(""))));
+		static auto baseplayer_client_input = reinterpret_cast<void (*)(BasePlayer*, InputState*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("ClientInput"), -1, _(""), _(""))));
+		static auto BaseProjectile_OnSignal = reinterpret_cast<void (*)(BaseProjectile*, int, rust::classes::string)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseProjectile"), _("OnSignal"), 2, _(""), _(""))));
+		static auto playerwalkmovement_client_input = reinterpret_cast<void (*)(PlayerWalkMovement*, uintptr_t, ModelState*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("PlayerWalkMovement"), _("ClientInput"), -1, _(""), _(""))));
+		static auto DoFixedUpdate = reinterpret_cast<void (*)(PlayerWalkMovement*, ModelState*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("PlayerWalkMovement"), _("DoFixedUpdate"), -1, _(""), _(""))));
+		static auto UpdateVelocity = reinterpret_cast<void (*)(PlayerWalkMovement*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("PlayerWalkMovement"), _("UpdateVelocity"), -1, _(""), _(""))));
+		static auto blocksprint = reinterpret_cast<void (*)(BasePlayer*, float)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("BlockSprint"), 1, _(""), _(""))));
 		static auto OnNetworkMessage = reinterpret_cast<void (*)(uintptr_t, uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Client"), _("OnNetworkMessage"), 1, _(""), _(""))));
 		static auto IsConnected = reinterpret_cast<bool (*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Client"), _("IsConnected"), 0, _(""), _("Network"))));
 		static auto Run = reinterpret_cast<rust::classes::string(*)(uintptr_t, rust::classes::string, uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("ConsoleSystem"), _("Run"), 0, _(""), _(""))));
 
 
-		static auto get_bodyleanoffset = reinterpret_cast<Vector3(*)(playereyes*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("PlayerEyes"), _("get_BodyLeanOffset"), 0, _(""), _(""))));
-		static auto EyePositionForPlayer = reinterpret_cast<Vector3(*)(basemountable*, base_player*, Vector4)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseMountable"), _("EyePositionForPlayer"), 2, _(""), _(""))));
-		static auto isdown = reinterpret_cast<bool(*)(input_state*, int)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("InputState"), _("IsDown"), 1, _(""), _(""))));
+		static auto get_bodyleanoffset = reinterpret_cast<Vector3(*)(PlayerEyes*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("PlayerEyes"), _("get_BodyLeanOffset"), 0, _(""), _(""))));
+		static auto EyePositionForPlayer = reinterpret_cast<Vector3(*)(BaseMountable*, BasePlayer*, Vector4)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseMountable"), _("EyePositionForPlayer"), 2, _(""), _(""))));
+		static auto isdown = reinterpret_cast<bool(*)(InputState*, int)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("InputState"), _("IsDown"), 1, _(""), _(""))));
 		static auto eokadoattack = reinterpret_cast<void(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("FlintStrikeWeapon"), _("DoAttack"), 0, _(""), _(""))));
 		static auto baseprojectile_launchprojectile = reinterpret_cast<void(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseProjectile"), _("LaunchProjectile"), 0, _(""), _(""))));
 		static auto attackent_addpunch = reinterpret_cast<void(*)(uintptr_t, Vector3, float)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("HeldEntity"), _("AddPunch"), 0, _(""), _(""))));
-		static auto baseprojectile_createprojectile = reinterpret_cast<uintptr_t(*)(base_projectile*, rust::classes::string, Vector3, Vector3, Vector3)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseProjectile"), _("CreateProjectile"), 0, _(""), _(""))));
+		static auto baseprojectile_createprojectile = reinterpret_cast<uintptr_t(*)(BaseProjectile*, rust::classes::string, Vector3, Vector3, Vector3)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseProjectile"), _("CreateProjectile"), 0, _(""), _(""))));
 		static auto DoHit = reinterpret_cast<bool (*)(Projectile*, HitTest*, Vector3, Vector3)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Projectile"), _("DoHit"), -1, _(""), _(""))));
 
 		static auto _update = reinterpret_cast<void (*)(Projectile*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Projectile"), _("Update"), 0, _(""), _(""))));
@@ -44,19 +44,19 @@ namespace hooks {
 	static auto serverrpc_uint = rb::pattern::find_rel(
 		_("GameAssembly.dll"), _("74 3A 4C 8B 0D ? ? ? ? 48 8B CB"));
 
-	static auto set_sprinting = reinterpret_cast<void (*)(modelstate*, bool value)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("ModelState"), _("set_sprinting"), -1, _(""), _(""))));
+	static auto set_sprinting = reinterpret_cast<void (*)(ModelState*, bool value)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("ModelState"), _("set_sprinting"), -1, _(""), _(""))));
 
 	static auto draw_get = reinterpret_cast<void (*)()>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("DDraw"), _("Get"), 0, _(""), _("UnityEngine"))));
 
-	static auto set_flying = reinterpret_cast<void (*)(modelstate * model_state, bool value)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("ModelState"), _("set_flying"), 1, _(""), _(""))));
+	static auto set_flying = reinterpret_cast<void (*)(ModelState * model_state, bool value)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("ModelState"), _("set_flying"), 1, _(""), _(""))));
 
-	static auto get_ducked = reinterpret_cast<bool (*)(modelstate*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("ModelState"), _("get_ducked"), 0, _(""), _(""))));
+	static auto get_ducked = reinterpret_cast<bool (*)(ModelState*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("ModelState"), _("get_ducked"), 0, _(""), _(""))));
 
-	static auto OnLand = reinterpret_cast<void (*)(base_player*, float fVelocity)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("OnLand"), 1, _("fVelocity"), _(""), 1)));
+	static auto OnLand = reinterpret_cast<void (*)(BasePlayer*, float fVelocity)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("OnLand"), 1, _("fVelocity"), _(""), 1)));
 
-	static auto change_code_rpc = reinterpret_cast<void (*)(base_player*, rust::classes::string, uintptr_t, bool, uintptr_t)>(mem::game_assembly_base + offsets::BaseEntity$$ServerRPC_string_bool_Address); //BaseEntity$$ServerRPC<string, bool> Address
+	static auto change_code_rpc = reinterpret_cast<void (*)(BasePlayer*, rust::classes::string, uintptr_t, bool, uintptr_t)>(mem::game_assembly_base + offsets::BaseEntity$$ServerRPC_string_bool_Address); //BaseEntity$$ServerRPC<string, bool> Address
 
-	static auto ServerRPC_int = reinterpret_cast<void (*)(base_projectile*, rust::classes::string funcName, unsigned int arg1, uintptr_t)>(mem::game_assembly_base + offsets::BaseEntity$$ServerRPC_uint_);
+	static auto ServerRPC_int = reinterpret_cast<void (*)(BaseProjectile*, rust::classes::string funcName, unsigned int arg1, uintptr_t)>(mem::game_assembly_base + offsets::BaseEntity$$ServerRPC_uint_);
 	
 	static auto get_resourcePath = reinterpret_cast<rust::classes::string (*)(uintptr_t)>(mem::game_assembly_base + offsets::Method$ResourceRef_method);
 
@@ -68,26 +68,26 @@ namespace hooks {
 	void init_hooks() {
 		orig::IsConnected = reinterpret_cast<bool (*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Client"), _("IsConnected"), 0, _(""), _("Network"))));
 		orig::OnNetworkMessage = reinterpret_cast<void (*)(uintptr_t, uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Client"), _("OnNetworkMessage"), 1, _(""), _(""))));
-		orig::BaseProjectile_OnSignal = reinterpret_cast<void (*)(base_projectile*, int, rust::classes::string)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseProjectile"), _("OnSignal"), 2, _(""), _(""))));
-		orig::baseplayer_client_input = reinterpret_cast<void (*)(base_player*, input_state*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("ClientInput"), -1, _(""), _(""))));
-		orig::playerwalkmovement_client_input = reinterpret_cast<void (*)(playerwalkmovement*, uintptr_t, modelstate*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("PlayerWalkMovement"), _("ClientInput"), -1, _(""), _(""))));
-		orig::DoFixedUpdate = reinterpret_cast<void (*)(playerwalkmovement*, modelstate*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("PlayerWalkMovement"), _("DoFixedUpdate"), -1, _(""), _(""))));
-		orig::blocksprint = reinterpret_cast<void (*)(base_player*, float)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("BlockSprint"), 1, _(""), _(""))));
+		orig::BaseProjectile_OnSignal = reinterpret_cast<void (*)(BaseProjectile*, int, rust::classes::string)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseProjectile"), _("OnSignal"), 2, _(""), _(""))));
+		orig::baseplayer_client_input = reinterpret_cast<void (*)(BasePlayer*, InputState*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("ClientInput"), -1, _(""), _(""))));
+		orig::playerwalkmovement_client_input = reinterpret_cast<void (*)(PlayerWalkMovement*, uintptr_t, ModelState*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("PlayerWalkMovement"), _("ClientInput"), -1, _(""), _(""))));
+		orig::DoFixedUpdate = reinterpret_cast<void (*)(PlayerWalkMovement*, ModelState*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("PlayerWalkMovement"), _("DoFixedUpdate"), -1, _(""), _(""))));
+		orig::blocksprint = reinterpret_cast<void (*)(BasePlayer*, float)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("BlockSprint"), 1, _(""), _(""))));
 		orig::Run = reinterpret_cast<rust::classes::string(*)(uintptr_t, rust::classes::string, uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("ConsoleSystem"), _("Run"), 0, _(""), _(""))));
 
-		orig::get_bodyleanoffset = reinterpret_cast<Vector3(*)(playereyes*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("PlayerEyes"), _("get_BodyLeanOffset"), 0, _(""), _(""))));
+		orig::get_bodyleanoffset = reinterpret_cast<Vector3(*)(PlayerEyes*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("PlayerEyes"), _("get_BodyLeanOffset"), 0, _(""), _(""))));
 
-		orig::isdown = reinterpret_cast<bool(*)(input_state*, int)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("InputState"), _("IsDown"), 1, _(""), _(""))));
+		orig::isdown = reinterpret_cast<bool(*)(InputState*, int)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("InputState"), _("IsDown"), 1, _(""), _(""))));
 
-		orig::UpdateVelocity = reinterpret_cast<void (*)(playerwalkmovement*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("PlayerWalkMovement"), _("UpdateVelocity"), -1, _(""), _(""))));
+		orig::UpdateVelocity = reinterpret_cast<void (*)(PlayerWalkMovement*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("PlayerWalkMovement"), _("UpdateVelocity"), -1, _(""), _(""))));
 
-		orig::EyePositionForPlayer = reinterpret_cast<Vector3(*)(basemountable*, base_player*, Vector4)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseMountable"), _("EyePositionForPlayer"), 2, _(""), _(""))));
+		orig::EyePositionForPlayer = reinterpret_cast<Vector3(*)(BaseMountable*, BasePlayer*, Vector4)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseMountable"), _("EyePositionForPlayer"), 2, _(""), _(""))));
 
 		orig::eokadoattack = reinterpret_cast<void(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("FlintStrikeWeapon"), _("DoAttack"), 0, _(""), _(""))));
 
 		orig::baseprojectile_launchprojectile = reinterpret_cast<void(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseProjectile"), _("LaunchProjectile"), 0, _(""), _(""))));
 
-		orig::baseprojectile_createprojectile = reinterpret_cast<uintptr_t(*)(base_projectile*, rust::classes::string, Vector3, Vector3, Vector3)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseProjectile"), _("CreateProjectile"), 0, _(""), _(""))));
+		orig::baseprojectile_createprojectile = reinterpret_cast<uintptr_t(*)(BaseProjectile*, rust::classes::string, Vector3, Vector3, Vector3)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseProjectile"), _("CreateProjectile"), 0, _(""), _(""))));
 
 		orig::DoHit = reinterpret_cast<bool (*)(Projectile*, HitTest*, Vector3, Vector3)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Projectile"), _("DoHit"), -1, _(""), _(""))));
 
@@ -101,23 +101,23 @@ namespace hooks {
 		serverrpc_uint = rb::pattern::find_rel(
 			_("GameAssembly.dll"), _("74 3A 4C 8B 0D ? ? ? ? 48 8B CB"));
 
-		ServerRPC_int = reinterpret_cast<void (*)(base_projectile*, rust::classes::string funcName, unsigned int arg1, uintptr_t)>(mem::game_assembly_base + offsets::BaseEntity$$ServerRPC_uint_);
+		ServerRPC_int = reinterpret_cast<void (*)(BaseProjectile*, rust::classes::string funcName, unsigned int arg1, uintptr_t)>(mem::game_assembly_base + offsets::BaseEntity$$ServerRPC_uint_);
 
 		get_resourcePath = reinterpret_cast<rust::classes::string(*)(uintptr_t)>(mem::game_assembly_base + offsets::Method$ResourceRef_method);
 
-		change_code_rpc = reinterpret_cast<void (*)(base_player*, rust::classes::string, uintptr_t, bool, uintptr_t)>(mem::game_assembly_base + offsets::BaseEntity$$ServerRPC_string_bool_Address);
+		change_code_rpc = reinterpret_cast<void (*)(BasePlayer*, rust::classes::string, uintptr_t, bool, uintptr_t)>(mem::game_assembly_base + offsets::BaseEntity$$ServerRPC_string_bool_Address);
 
-		set_sprinting = reinterpret_cast<void (*)(modelstate*, bool value)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("ModelState"), _("set_sprinting"), -1, _(""), _(""))));
+		set_sprinting = reinterpret_cast<void (*)(ModelState*, bool value)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("ModelState"), _("set_sprinting"), -1, _(""), _(""))));
 
 		draw_get = reinterpret_cast<void (*)()>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("DDraw"), _("Get"), 0, _(""), _("UnityEngine"))));
 
-		set_flying = reinterpret_cast<void (*)(modelstate * model_state, bool value)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("ModelState"), _("set_flying"), 1, _(""), _(""))));
+		set_flying = reinterpret_cast<void (*)(ModelState * model_state, bool value)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("ModelState"), _("set_flying"), 1, _(""), _(""))));
 
-		get_ducked = reinterpret_cast<bool (*)(modelstate*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("ModelState"), _("get_ducked"), 0, _(""), _(""))));
+		get_ducked = reinterpret_cast<bool (*)(ModelState*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("ModelState"), _("get_ducked"), 0, _(""), _(""))));
 
 		PerformanceUI_Update = reinterpret_cast<void (*)(void*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("PerformanceUI"), _("Update"), -1, _(""), _("Facepunch"))));
 
-		OnLand = reinterpret_cast<void (*)(base_player*, float fVelocity)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("OnLand"), 1, _("fVelocity"), _(""), 1)));
+		OnLand = reinterpret_cast<void (*)(BasePlayer*, float fVelocity)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("OnLand"), 1, _("fVelocity"), _(""), 1)));
 
 		DoHit = reinterpret_cast<bool (*)(Projectile*, HitTest*, Vector3, Vector3)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Projectile"), _("DoHit"), -1, _(""), _(""))));
 	}
@@ -168,7 +168,7 @@ namespace hooks {
 			if (*(int*)(wep_class_name + 4) == 'eleM' || *(int*)(wep_class_name) == 'ddaP')
 				break;
 
-			base_projectile* projectile_list = *reinterpret_cast<base_projectile**>(
+			BaseProjectile* projectile_list = *reinterpret_cast<BaseProjectile**>(
 				*reinterpret_cast<uintptr_t*>((uintptr_t)baseprojectile + 0x370) + 0x10); //createdProjectiles;
 
 			esp::matrix = unity::get_view_matrix();
@@ -300,7 +300,7 @@ namespace hooks {
 
 			for (int i = 0; i < projectile_list->get_size(); i++) 
 			{
-				auto projectile = *(base_projectile**)((uintptr_t)projectile_list + 0x20 + i * 0x8);
+				auto projectile = *(BaseProjectile**)((uintptr_t)projectile_list + 0x20 + i * 0x8);
 				p = *(Projectile**)((uintptr_t)projectile_list + 0x20 + i * 0x8);
 				Vector3 a;
 				misc::get_prediction(target, rpc_position, target_pos, original_vel, aimbot_velocity, a, travel_t, p);
@@ -316,7 +316,7 @@ namespace hooks {
 			}
 
 			for (int i = 0; i < projectile_list->get_size(); i++) {
-				auto projectile = *(base_projectile**)((uintptr_t)projectile_list + 0x20 + i * 0x8);
+				auto projectile = *(BaseProjectile**)((uintptr_t)projectile_list + 0x20 + i * 0x8);
 				p = *(Projectile**)((uintptr_t)projectile_list + 0x20 + i * 0x8);
 
 				if (!projectile)
@@ -470,7 +470,7 @@ namespace hooks {
 	}
 
 	void hk_serverrpc_playerprojectileattack(int64_t rcx, int64_t rdx, int64_t r9, int64_t _ppa, int64_t arg5) {
-		auto        projectile = reinterpret_cast<base_projectile*>(get_rbx_value());
+		auto        projectile = reinterpret_cast<BaseProjectile*>(get_rbx_value());
 		auto  ppa = reinterpret_cast<rust::classes::PlayerProjectileAttack*>(_ppa);
 		auto& attack = ppa->playerAttack->attack;
 
@@ -503,7 +503,7 @@ namespace hooks {
 			if (!target.player)
 				break;
 
-			auto hit_entity = (base_player*)hit_test->get_hit_entity();
+			auto hit_entity = (BasePlayer*)hit_test->get_hit_entity();
 			if (layer == rust::classes::layer::Player_Server) {
 				if (hit_entity->is_teammate(esp::local_player)) {
 					hit_test->set_ignore_entity(hit_entity);
@@ -726,8 +726,8 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 			if (tranny) {
 				//transform* tr = get_transform((base_player*)FindEntity);
 				//transform* Traaa = get_transform//FindEntity->_get_transform();
-				*reinterpret_cast<Vector3*>(ppa + 0x20) = InverseTransformPoint((transform*)tranny,		_lp);
-				*reinterpret_cast<Vector3*>(ppa + 0x2C) = InverseTransformDirection((transform*)tranny, _ln);
+				*reinterpret_cast<Vector3*>(ppa + 0x20) = InverseTransformPoint((Transform*)tranny,		_lp);
+				*reinterpret_cast<Vector3*>(ppa + 0x2C) = InverseTransformDirection((Transform*)tranny, _ln);
 
 				esp::local_player->console_echo(string::wformat(_(L"[trap] DoPlace - Spoofed %d to %d with position (%d, %d, %d)"), 
 					(int)ogid,
@@ -842,7 +842,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 		}
 	}
 
-	void hk_playerwalkmovement_ClientInput(playerwalkmovement* player_walk_movement, uintptr_t inputstate, modelstate* model_state) {
+	void hk_playerwalkmovement_ClientInput(PlayerWalkMovement* player_walk_movement, uintptr_t inputstate, ModelState* model_state) {
 		orig::playerwalkmovement_client_input(player_walk_movement, inputstate, model_state);
 		Vector3 vel = player_walk_movement->get_TargetMovement();
 		auto loco = esp::local_player;
@@ -854,7 +854,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 		float _timeSinceLastTick = time - loco->get_last_sent_tick_time();
 		if (loco && !loco->is_sleeping() && settings::desyncTime < 0.f) {
 			if (vars->misc.flyhack_stop) {
-				Vector3 curr = get_transform(esp::local_player)->get_bone_position();
+				Vector3 curr = _get_transform(esp::local_player)->get_bone_position();
 				Vector3 old = misc::cLastTickPos;
 				Vector3 v4 = (curr - misc::cLastTickPos);
 				Vector3 ov = Vector3(curr.x, curr.y, curr.z);
@@ -873,7 +873,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 			}
 
 			misc::cLastTickEyePos = esp::local_player->get_player_eyes()->get_position();//get_transform(esp::local_player)->get_bone_position();//baseplayer->get_player_eyes()->get_position();
-			misc::cLastTickPos = get_transform(esp::local_player)->get_bone_position();//get_transform(esp::local_player)->get_bone_position();//baseplayer->get_player_eyes()->get_position();
+			misc::cLastTickPos = _get_transform(esp::local_player)->get_bone_position();//get_transform(esp::local_player)->get_bone_position();//baseplayer->get_player_eyes()->get_position();
 			misc::ticks.AddPoint(misc::cLastTickPos);
 			//misc::ServerUpdate(misc::tickDeltaTime, esp::local_player);
 			misc::ServerUpdate(get_deltaTime(), esp::local_player);
@@ -946,7 +946,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 				if (vars->misc.autofarm)
 				{
 					if(misc::node.ent == 0)
-						misc::node.ent = (uintptr_t)loco->find_closest(_("OreResourceEntity"), (networkable*)loco, 200.f);
+						misc::node.ent = (uintptr_t)loco->find_closest(_("OreResourceEntity"), (Networkable*)loco, 200.f);
 					misc::autobot::auto_farm(player_walk_movement);
 				}
 				else
@@ -984,7 +984,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 
 	std::vector<Projectile*> created_projectiles = {};
 
-	void LaunchProjectileClientSide_R(base_projectile* p,
+	void LaunchProjectileClientSide_R(BaseProjectile* p,
 		uintptr_t ammodef,
 		int projectilecount = 1,
 		float spread = 1.f)
@@ -1004,7 +1004,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 		if (!eyes) return;
 
 
-		auto mod = (uintptr_t)((networkable*)ammodef)->GetComponent(unity::GetType(_(""), _("ItemModProjectile")));
+		auto mod = (uintptr_t)((Networkable*)ammodef)->GetComponent(unity::GetType(_(""), _("ItemModProjectile")));
 		if (mod) {
 			created_projectiles.clear();
 			//game gets spread based upon weapon mods here, we will keep as 1
@@ -1043,8 +1043,8 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 					}
 				}
 
-				uintptr_t attackentity = (uintptr_t)((networkable*)p)->GetComponent(unity::GetType(_(""), _("AttackEntity")));
-				auto proj = (Projectile*)((networkable*)mod)->GetComponent(unity::GetType(_(""), _("Projectile")));
+				uintptr_t attackentity = (uintptr_t)((Networkable*)p)->GetComponent(unity::GetType(_(""), _("AttackEntity")));
+				auto proj = (Projectile*)((Networkable*)mod)->GetComponent(unity::GetType(_(""), _("Projectile")));
 				//projectileVelocityScale() could be incorrect
 				Vector3 vector2 = vector * (getrandomvel((uintptr_t)mod) * 1.49f/*p->projectileVelocityScale()*/ * num * num2);
 
@@ -1103,13 +1103,13 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 		}
 	}
 
-	void hk_LaunchProjectile(base_projectile* p)
+	void hk_LaunchProjectile(BaseProjectile* p)
 	{
 		//define function that recreates launchprojectile
 		if (vars->misc.emulate_p) {
 			auto m = *reinterpret_cast<uintptr_t*>((uintptr_t)p + 0x2C0); //public BaseProjectile.Magazine primaryMagazine; // 0x2C0
 			auto ammo = *reinterpret_cast<uintptr_t*>((uintptr_t)m + 0x20); //public ItemDefinition ammoType; // 0x20
-			auto mod = ((networkable*)ammo)->GetComponent(unity::GetType(_(""), _("ItemModProjectile")));
+			auto mod = ((Networkable*)ammo)->GetComponent(unity::GetType(_(""), _("ItemModProjectile")));
 			//auto projectile = (Projectile*)((networkable*)mod)->GetComponent(unity::GetType(_(""), _("Projectile")));
 			if (mod)
 			{
@@ -1169,7 +1169,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 			&& esp::closest_building_block) {
 
 			auto block = (BuildingBlock*)esp::closest_building_block;
-			auto tranny = get_transform((base_player*)block);
+			auto tranny = _get_transform((BasePlayer*)block);
 			auto pos = get_position((uintptr_t)tranny);
 			auto distance = esp::local_player->get_player_eyes()->get_position().distance(pos);
 			
@@ -1198,7 +1198,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 
 	float last_gesture_rpc = 0.f;
 
-	void hk_baseplayer_ClientInput(base_player* baseplayer, input_state* state) {
+	void hk_baseplayer_ClientInput(BasePlayer* baseplayer, InputState* state) {
 
 		//if(!do_fixed_update_ptr)
 		//do_fixed_update_ptr = mem::hook_virtual_function(_("PlayerWalkMovement"), _("DoFixedUpdate"), &hk_dofixedupdate);
@@ -1379,7 +1379,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 				Vector3 target = esp::best_target.pos;//.player->get_bone_transform(48)->get_bone_position();
 				//Sphere(target, 0.05, col(0.8, 0.9, 0.3, 1), 0.05f, 10.f);
 
-				auto getammo = [&](base_projectile* held)
+				auto getammo = [&](BaseProjectile* held)
 				{
 					if (held)
 					{
@@ -1478,7 +1478,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 
 			if (vars->misc.eyeoffset || unity::GetKey((rust::classes::KeyCode)vars->keybinds.neck))
 			{
-				baseplayer->get_player_eyes()->set_view_offset(Vector3(0, vars->misc.playereyes, 0));
+				baseplayer->get_player_eyes()->set_view_offset(Vector3(0, vars->misc.PlayerEyes, 0));
 			}
 
 			if (auto movement = baseplayer->get_movement()) {
@@ -1497,8 +1497,8 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 					movement->set_gravity_multiplier(2.35f);
 
 				if (vars->combat.always_shoot) {
-					if (auto modelstate = baseplayer->get_model_state()) {
-						modelstate->set_flag(rust::classes::ModelState_Flag::OnGround);
+					if (auto ModelState = baseplayer->get_model_state()) {
+						ModelState->set_flag(rust::classes::ModelState_Flag::OnGround);
 						mem::write<float>((uint64_t)movement + 0x4C, 1); //private float <Grounded>k__BackingField; // 0x4C
 					}
 				}
@@ -1551,10 +1551,10 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 						{
 							if (target.player)
 							{
-								auto current_position = get_position((uintptr_t)get_transform((base_player*)projectile));
+								auto current_position = get_position((uintptr_t)_get_transform((BasePlayer*)projectile));
 
 								//transform* bonetrans = target.player->find_closest_bone(current_position, true
-								transform* bonetrans = target.player->get_bone_transform(48);
+								Transform* bonetrans = target.player->get_bone_transform(48);
 								if (vars->combat.bodyaim)
 									bonetrans = target.player->get_bone_transform((int)rust::classes::Bone_List::pelvis);
 
@@ -1606,7 +1606,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 								if (dist < 2.0f)
 								{
 									auto newpos = Vector3::move_towards(current_position, target_bone, 1.0f);
-									set_position(get_transform((base_player*)projectile), newpos);
+									set_position(_get_transform((BasePlayer*)projectile), newpos);
 
 
 									HitTest* ht = (HitTest*)projectile->hitTest();
@@ -1615,7 +1615,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 									ht->set_hit_transform(bonetrans);
 									ht->set_hit_point(InverseTransformPoint(bonetrans, newpos));
 									ht->set_hit_normal(InverseTransformDirection(bonetrans, newpos));
-									Ray r(get_position((uintptr_t)get_transform((base_player*)projectile)), newpos);
+									Ray r(get_position((uintptr_t)_get_transform((BasePlayer*)projectile)), newpos);
 									safe_write(ht + 0x14, r, Ray);
 									DoHit(projectile, ht, newpos, HitNormalWorld((uintptr_t)ht));
 								}
@@ -1699,8 +1699,8 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 
 						auto m = *reinterpret_cast<uintptr_t*>((uintptr_t)baseprojectile + 0x2C0); //public BaseProjectile.Magazine primaryMagazine; // 0x2C0
 						auto ammo = *reinterpret_cast<uintptr_t*>((uintptr_t)m + 0x20); //public ItemDefinition ammoType; // 0x20
-						auto mod = ((networkable*)ammo)->GetComponent(unity::GetType(_(""), _("ItemModProjectile")));
-						auto projectile = (Projectile*)((networkable*)mod)->GetComponent(unity::GetType(_(""), _("Projectile")));
+						auto mod = ((Networkable*)ammo)->GetComponent(unity::GetType(_(""), _("ItemModProjectile")));
+						auto projectile = (Projectile*)((Networkable*)mod)->GetComponent(unity::GetType(_(""), _("Projectile")));
 
 						//auto v = projectile->initialVelocity();//((base_projectile*)projectile)->get_item_mod_projectile()->get_projectile_velocity();
 						//auto v1 = ((base_projectile*)projectile)->projectileVelocityScale();
@@ -1928,7 +1928,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 				|| misc::manipulate_vis))
 			{
 				if (wpn && held && esp::best_target.player) {
-					auto getammo = [&](base_projectile* held)
+					auto getammo = [&](BaseProjectile* held)
 					{
 						if (held)
 						{
