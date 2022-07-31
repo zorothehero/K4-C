@@ -153,13 +153,12 @@ uintptr_t model = il2cpp::value(_("BaseEntity"), _("model"));
 
 
 class BaseProjectile;
-
 class Transform;
-
 class BasePlayer;
-
 class HitTest;
 class ModelState;
+class Transform;
+class Item;
 class col;
 
 typedef struct Str
@@ -169,7 +168,6 @@ typedef struct Str
 	wchar_t str[1];
 } *str;
 
-class Item;
 
 static auto GetNormal = reinterpret_cast<Vector3 (*)(uintptr_t, Vector3)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("TerrainHeightMap"), _("GetNormal"), 1, _(""), _(""))));
 
@@ -561,7 +559,6 @@ class Object {
 
 };
 
-class Transform;
 class Component : public Object {
 public:
 	Transform* get_transform() {
