@@ -1280,7 +1280,7 @@ namespace gui {
 		fill_box(rust::classes::Rect{ 10, 6, 80, 16 }, rgba(14.f, 18.f, 24.f, 255));
 		outline_box({ 10, 6 }, { 80, 16 }, rgba(249.f, 130.f, 109.f, 255.f));
 		fill_box(rust::classes::Rect{ 10, 20, 81, 3 }, rgba(249.f, 130.f, 109.f, 255));
-		gui::Label(rust::classes::Rect{ 12, 4, 80, 20 }, _(L"traphouse"), gui::Color(1, 1, 1, 1), true, 12);
+		gui::Label(rust::classes::Rect{ 12, 4, 80, 20 }, _(L"trap.sh"), gui::Color(1, 1, 1, 1), true, 12);
 
 		if (open) {
 			{
@@ -1842,9 +1842,9 @@ namespace esp
 			//check if enabled
 			if (vars->visual.midname) {
 				//draw player name dropshadow
-				gui::Label(rust::classes::Rect{ 861, 442 , 200, 260 }, ((BasePlayer*)target.ent)->_displayName(), gui::Color(0, 0, 0, 1), true, 12);
+				gui::Label(rust::classes::Rect{ 861, 442 , 200, 260 }, ((BasePlayer*)target.ent)->_displayName()->str, gui::Color(0, 0, 0, 1), true, 12);
 				// draw player name
-				gui::Label(rust::classes::Rect{ 862, 441, 200, 260 }, ((BasePlayer*)target.ent)->_displayName(), gui::Color(1, 1, 1, 1), true, 12);
+				gui::Label(rust::classes::Rect{ 862, 441, 200, 260 }, ((BasePlayer*)target.ent)->_displayName()->str, gui::Color(1, 1, 1, 1), true, 12);
 			}
 			if (vars->visual.midhealth) {
 				const auto cur_health = target.ent->health();
@@ -2376,8 +2376,8 @@ namespace esp
 
 				}
 			}
-			auto ffff = ((BasePlayer*)ent)->_displayName();
-			wchar_t* name = ffff.str;
+			//auto name = ((BasePlayer*)ent)->get_player_name();
+			auto name = ((BasePlayer*)ent)->_displayName()->str;
 			auto player_weapon = ent->get_active_weapon();
 
 			if (vars->visual.full_box) {

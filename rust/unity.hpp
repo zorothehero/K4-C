@@ -152,10 +152,10 @@ namespace unity {
 		typedef bool (*AAA)(Vector3, Vector3, rust::classes::Layers, float, uintptr_t);//real rust 0x50F790         //cracked 0x50ED80
 
 		//real rust 0x52D200
-		//alkad rust 0x50E9A0
+		//alkad rust 0x52C6A0
 
-		return ((AAA)(mem::game_assembly_base + 0x52D200))(source, destination, rust::classes::Layers(layer), p1, ent)
-			&& ((AAA)(mem::game_assembly_base + 0x52D200))(destination, source, rust::classes::Layers(layer), p1, ent);
+		return ((AAA)(mem::game_assembly_base + 0x52C6A0))(source, destination, rust::classes::Layers(layer), p1, ent)
+			&& ((AAA)(mem::game_assembly_base + 0x52C6A0))(destination, source, rust::classes::Layers(layer), p1, ent);
 	}
 
 	auto camera = unity::get_main_camera();

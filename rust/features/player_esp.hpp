@@ -374,7 +374,7 @@ namespace esp {
 
 			if (local_player && GetAsyncKeyState(0x37))
 			{
-				auto look = local_player->get_lookingat_entity();
+				auto look = local_player->_lookingAtEntity();
 				if (look)
 				{
 					auto net2 = *reinterpret_cast<Networkable**>(look + 0x58);

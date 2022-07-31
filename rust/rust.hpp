@@ -19,6 +19,23 @@ struct Ray {
 };
 
 namespace rust {
+	template<typename T = void*>
+	class Array {
+	public:
+		uint32_t size() {
+			if (!this) return 0;
+			return *reinterpret_cast<uint32_t*>(this + 0x18);
+		}
+		T get(int idx) {
+			if (!this) return T{};
+			return *reinterpret_cast<T*>(this + (0x20 + (idx * 0x8)));
+		}
+		void add(int idx, T value) {
+			if (!this) return;
+			*reinterpret_cast<T*>(this + (0x20 + (idx * 0x8))) = value;
+		}
+	};
+
 	template<typename T>
 	class list {
 	public:

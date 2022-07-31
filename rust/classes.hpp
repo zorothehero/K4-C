@@ -668,7 +668,7 @@ public:
 
 class Model : public MonoBehaviour {
 public:
-	FIELD(_("Model"), _("boneTransforms"), boneTransforms, rust::list<Transform*>*);
+	FIELD(_("Model"), _("boneTransforms"), boneTransforms, rust::Array<Transform*>*);
 };
 
 class BaseNetworkable : public BaseMonoBehaviour {
@@ -1354,6 +1354,14 @@ public:
 	}
 };
 
+class BaseNetwork {
+public:
+};
+class Client : public BaseNetwork {
+public:
+	
+};
+
 class aim_target {
 public:
 	Vector3 pos;
@@ -1512,7 +1520,7 @@ public:
 	FIELD(_("BasePlayer"), _("eyes"), eyes, PlayerEyes*);
 	FIELD(_("BasePlayer"), _("lastSentTickTime"), lastSentTickTime, float);
 	FIELD(_("BasePlayer"), _("net"), net, Networkable*);
-	FIELD(_("BasePlayer"), _("_displayName"), _displayName, rust::classes::string);
+	FIELD(_("BasePlayer"), _("_displayName"), _displayName, str);
 
 	void GroundAngleNew() {
 		*reinterpret_cast<float*>(this + 0xb0) = -1.0f;
@@ -1550,6 +1558,11 @@ public:
 		return *reinterpret_cast<rust::classes::PlayerTick**>((uintptr_t)this + 0x660);
 	}
 
+	wchar_t* get_player_name() {
+		auto player_name = (str)(*reinterpret_cast<uintptr_t*>((uintptr_t)this + 0x6E8)); //zzzz
+		return player_name->str;
+	}
+
 	void SendSignalBroadcast(rust::classes::Signal signal, wchar_t* str = _(L""))
 	{
 		if (!this) return;
@@ -1568,14 +1581,14 @@ public:
 		}
 
 		if (zooming) {//0x32182E0
-			auto convar = *reinterpret_cast<uintptr_t*>((uintptr_t)mem::game_assembly_base + 52698272); //"ConVar_Graphics_c*" real rust
-			//auto convar = *reinterpret_cast<uintptr_t*>((uintptr_t)mem::game_assembly_base + 52527840); //"ConVar_Graphics_c*" alkad rust
+			auto convar = *reinterpret_cast<uintptr_t*>((uintptr_t)mem::game_assembly_base + 52689952); //"ConVar_Graphics_c*" alkad rust
+			//auto convar = *reinterpret_cast<uintptr_t*>((uintptr_t)mem::game_assembly_base + 52698272); //"	" real rust
 			auto unknown = *reinterpret_cast<uintptr_t*>((uintptr_t)convar + 0xb8);
 			*reinterpret_cast<float*>(unknown + 0x18) = vars->visual.zoomfov;
 		}
 
 		if (!zooming) {
-			auto convar = *reinterpret_cast<uintptr_t*>((uintptr_t)mem::game_assembly_base + 52698272); //"ConVar_Graphics_c*" real rust
+			auto convar = *reinterpret_cast<uintptr_t*>((uintptr_t)mem::game_assembly_base + 52689952); //"ConVar_Graphics_c*" real rust
 			//auto convar = *reinterpret_cast<uintptr_t*>((uintptr_t)mem::game_assembly_base + 52527840); //"ConVar_Graphics_c*" alkad rust
 			auto unknown = *reinterpret_cast<uintptr_t*>((uintptr_t)convar + 0xb8);
 			*reinterpret_cast<float*>(unknown + 0x18) = vars->visual.playerfov;
@@ -1935,11 +1948,6 @@ public:
 		//auto s = string::wformat(_(L"trap [%d]: %s"), (int)get_fixedTime(), str);
 		console_msg((uintptr_t)this, str);
 	}
-
-	uintptr_t get_lookingat_entity() {
-		if (!this) return 0;
-		return *reinterpret_cast<uintptr_t*>(this + 0x508);
-	}
 };
 
 class Planner : public HeldEntity {
@@ -1987,6 +1995,16 @@ public:
 		return upgradetograde((uintptr_t)this, g, p);
 	}
 };
+
+namespace ConVar {
+	class Graphics {
+	public:
+		static float& _fov() {
+			static auto clazz = il2cpp::find_class(_("Graphics"), _("ConVar"));//CLASS("Assembly-CSharp::ConVar::Graphics");
+			return *reinterpret_cast<float*>(std::uint64_t(clazz + 0x00B8) + 0x18);
+		}
+	};
+}
 
 struct OBB {
 public:

@@ -58,7 +58,7 @@ namespace hooks {
 
 	static auto ServerRPC_int = reinterpret_cast<void (*)(BaseProjectile*, rust::classes::string funcName, unsigned int arg1, uintptr_t)>(mem::game_assembly_base + offsets::BaseEntity$$ServerRPC_uint_);
 	
-	static auto get_resourcePath = reinterpret_cast<rust::classes::string (*)(uintptr_t)>(mem::game_assembly_base + offsets::Method$ResourceRef_method);
+	//static auto get_resourcePath = reinterpret_cast<rust::classes::string (*)(uintptr_t)>(mem::game_assembly_base + offsets::Method$ResourceRef_method);
 
 	static auto DoHit = reinterpret_cast<bool (*)(Projectile*, HitTest*, Vector3, Vector3)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Projectile"), _("DoHit"), -1, _(""), _(""))));
 
@@ -103,7 +103,7 @@ namespace hooks {
 
 		ServerRPC_int = reinterpret_cast<void (*)(BaseProjectile*, rust::classes::string funcName, unsigned int arg1, uintptr_t)>(mem::game_assembly_base + offsets::BaseEntity$$ServerRPC_uint_);
 
-		get_resourcePath = reinterpret_cast<rust::classes::string(*)(uintptr_t)>(mem::game_assembly_base + offsets::Method$ResourceRef_method);
+		//get_resourcePath = reinterpret_cast<rust::classes::string(*)(uintptr_t)>(mem::game_assembly_base + offsets::Method$ResourceRef_method);
 
 		change_code_rpc = reinterpret_cast<void (*)(BasePlayer*, rust::classes::string, uintptr_t, bool, uintptr_t)>(mem::game_assembly_base + offsets::BaseEntity$$ServerRPC_string_bool_Address);
 
@@ -1171,6 +1171,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 		return result;
 	}
 
+
 	void hk_performance_update(void* instance) {
 		if (wake) {
 			__go = il2cpp::methods::object_new(il2cpp::init_class(_("GameObject"), _("UnityEngine")));
@@ -1275,19 +1276,6 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 				hooks::orig::playerprojectileattack = *serverrpc_playerprojectileattack;
 
 				*serverrpc_playerprojectileattack = reinterpret_cast<uintptr_t>(&hooks::hk_serverrpc_playerprojectileattack);
-			}
-		}
-
-		static uintptr_t* serverrpc_createbuilding;
-		if (!serverrpc_createbuilding) {
-			auto method_serverrpc_createbuilding = *reinterpret_cast<uintptr_t*>(mem::game_assembly_base + offsets::Method$BaseEntity_ServerRPC_CreateBuilding___);
-
-			if (method_serverrpc_createbuilding) {
-				serverrpc_createbuilding = **(uintptr_t***)(method_serverrpc_createbuilding + 0x30);
-
-				hooks::orig::createbuilding = *serverrpc_createbuilding;
-
-				*serverrpc_createbuilding = reinterpret_cast<uintptr_t>(&hooks::hk_serverrpc_doplace);
 			}
 		}
 

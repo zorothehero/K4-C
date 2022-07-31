@@ -244,7 +244,7 @@ namespace il2cpp {
 		return 0;
 	}
 
-	inline auto find_class(const char* name, const char* name_space = "") -> const std::uintptr_t {
+	inline auto find_class(const char* name, const char* name_space = "") -> const uintptr_t {
 		const auto domain = methods::domain_get();
 
 		std::uintptr_t assembly_count{ 0 };
