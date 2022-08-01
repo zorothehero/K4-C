@@ -688,19 +688,16 @@ public:
 		auto off = reinterpret_cast<Vector3(*)(BaseEntity*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseEntity"), _("GetParentVelocity"), 0, _(""), _(""))));
 		return off(this);
 	}
-
 	void ServerRPC(wchar_t* func) {
 		if (!this) return;
 		auto off = reinterpret_cast<void (*)(BaseEntity*, rust::classes::string)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseEntity"), _("ServerRPC"), 1, _("funcName"), _(""), 1)));
 		return off(this, func);
 	}
-
 	Transform* FindBone(wchar_t* bone) {
 		if (!this) return nullptr;
 		auto off = reinterpret_cast<Transform * (*)(BaseEntity*, rust::classes::string)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseEntity"), _("FindBone"), 1, _(""), _(""))));
 		return off(this, bone);
 	}
-
 	bool is_visible(Vector3 source, Vector3 destination, float p1 = 0.18f) {
 		return unity::is_visible(source, destination, (uintptr_t)this, p1);
 	}
@@ -1134,6 +1131,8 @@ public:
 
 class Item {
 public:
+	FIELD(_("Item"), _("heldEntity"), heldEntity, HeldEntity*);
+
 	uintptr_t get_icon_sprite() {
 		const auto     item_definition = mem::read<uintptr_t>((uintptr_t)this + info);
 		if (!item_definition)
@@ -1190,9 +1189,10 @@ public:
 		return *reinterpret_cast<int32_t*>(item_definition + itemid);
 	}
 
-	BaseProjectile* get_base_projectile() {
+	template<typename T>
+	T* GetHeldEntity() {
 		if (!this) return nullptr;
-		return *reinterpret_cast<BaseProjectile**>((uintptr_t)this + heldEntity);
+		return ((T*)this->heldEntity());
 	}
 };
 
@@ -1354,6 +1354,7 @@ public:
 class BaseNetwork {
 public:
 };
+
 class Client : public BaseNetwork {
 public:
 	
@@ -1578,14 +1579,14 @@ public:
 		}
 
 		if (zooming) {//0x32182E0
-			auto convar = *reinterpret_cast<uintptr_t*>((uintptr_t)mem::game_assembly_base + 52689952); //"ConVar_Graphics_c*" alkad rust
-			//auto convar = *reinterpret_cast<uintptr_t*>((uintptr_t)mem::game_assembly_base + 52698272); //"	" real rust
+			//auto convar = *reinterpret_cast<uintptr_t*>((uintptr_t)mem::game_assembly_base + 52689952); //"ConVar_Graphics_c*" alkad rust
+			auto convar = *reinterpret_cast<uintptr_t*>((uintptr_t)mem::game_assembly_base + 52698272); //"	" real rust
 			auto unknown = *reinterpret_cast<uintptr_t*>((uintptr_t)convar + 0xb8);
 			*reinterpret_cast<float*>(unknown + 0x18) = vars->visual.zoomfov;
 		}
 
 		if (!zooming) {
-			auto convar = *reinterpret_cast<uintptr_t*>((uintptr_t)mem::game_assembly_base + 52689952); //"ConVar_Graphics_c*" real rust
+			auto convar = *reinterpret_cast<uintptr_t*>((uintptr_t)mem::game_assembly_base + 52698272); //"ConVar_Graphics_c*" real rust
 			//auto convar = *reinterpret_cast<uintptr_t*>((uintptr_t)mem::game_assembly_base + 52527840); //"ConVar_Graphics_c*" alkad rust
 			auto unknown = *reinterpret_cast<uintptr_t*>((uintptr_t)convar + 0xb8);
 			*reinterpret_cast<float*>(unknown + 0x18) = vars->visual.playerfov;
@@ -1870,7 +1871,7 @@ public:
 		return Flags & 16;
 	}
 
-	Item* get_active_weapon()
+	Item* GetActiveItem()
 	{
 		//unsigned int ActUID = this->clActiveItem();
 		unsigned int ActUID = mem::read<unsigned int>((uintptr_t)this + 0x5D0); //private uint clActiveItem; //

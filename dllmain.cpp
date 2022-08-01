@@ -122,7 +122,7 @@ bool DllMain(HMODULE hmodule)
 			init_projectile();
             
             typedef rust::list<uintptr_t>* (*AAA)();//real rust 36223520 ALKAD 36217232 "Name": "ConsoleSystem.Index$$get_All",
-            rust::list<uintptr_t>* command_list = ((AAA)(mem::game_assembly_base + 36217232))();
+            rust::list<uintptr_t>* command_list = ((AAA)(mem::game_assembly_base + 36223520))();
 
             if (command_list) {
                 auto sz = *reinterpret_cast<int*>(command_list + 0x18);
@@ -150,7 +150,7 @@ bool DllMain(HMODULE hmodule)
     il2cpp::hook(&gui::OnGUI, _("OnGUI"), _("DevControls"), _(""), 0);
     il2cpp::hook(&hooks::hk_projectile_update, _("Update"), _("Projectile"), _(""), 0);
     mem::hook_virtual_function(_("BasePlayer"), _("ClientInput"), &hooks::hk_baseplayer_ClientInput);
-    mem::hook_virtual_function(_("BaseProjectile"), _("LaunchProjectile"), &hooks::hk_LaunchProjectile);
+    mem::hook_virtual_function(_("BaseProjectile"), _("LaunchProjectile"), &hooks::hk_projectile_launchprojectile);
     
 
 	//il2cpp::hook(&hooks::hk_DoHit, _("DoHit"), _("Projectile"), _(""), 3);

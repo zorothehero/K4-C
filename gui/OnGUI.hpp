@@ -1211,12 +1211,12 @@ namespace gui {
 						Progbar({ 900, (650 + (bars++ * 10)) }, { 120, 4 }, settings::speedhack, 1.0f);
 					}
 					//put extra gui things here
-					auto held = esp::local_player->get_active_weapon();
+					auto held = esp::local_player->GetActiveItem();
 					if (vars->combat.always_reload)
 					{
-						if (held->get_base_projectile())
+						if (held->heldEntity())
 						{
-							auto b = held->get_base_projectile();
+							auto b = held->heldEntity();
 							auto r = esp::rl_time;
 							if (settings::time_since_last_shot < r)
 								Progbar({ 900, (650 + (bars++ * 10)) }, { 120, 4 }, settings::time_since_last_shot, (r - 0.2f));
@@ -2378,7 +2378,7 @@ namespace esp
 			}
 			//auto name = ((BasePlayer*)ent)->get_player_name();
 			auto name = ((BasePlayer*)ent)->_displayName()->str;
-			auto player_weapon = ent->get_active_weapon();
+			auto player_weapon = ent->GetActiveItem();
 
 			if (vars->visual.full_box) {
 				//full box

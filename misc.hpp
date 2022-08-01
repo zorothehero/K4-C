@@ -356,7 +356,7 @@ namespace misc
 			typedef bool (*AAA)(Ray, float, float, int);
 			//real rust 0x2273840
 			//alkad rust 0x2271FB0
-			flag = ((AAA)(mem::game_assembly_base + 0x2271FB0))(z, radius, magnitude, 429990145);
+			flag = ((AAA)(mem::game_assembly_base + 0x2273840))(z, radius, magnitude, 429990145);
 		}
 		return flag;
 	}
@@ -405,7 +405,7 @@ namespace misc
 		{
 			//AddViolation(loco, 
 			//	antihacktype::EyeHack, 
-			//	protections::eye_penalty);
+			//	protections::eye_penalty); 
 		}
 		else if(protections::eye_protection >= 5 && 
 			loco->modelState()->has_flag(rust::classes::ModelState_Flag::Mounted)) {
@@ -608,7 +608,7 @@ namespace misc
 			{
 				auto getheightmap = [&]() {
 					//real rust 52698608
-					uintptr_t kl = *reinterpret_cast<uintptr_t*>(mem::game_assembly_base + 52690304); //52698608 real
+					uintptr_t kl = *reinterpret_cast<uintptr_t*>(mem::game_assembly_base + 52698608); //52690304 alkad
 					uintptr_t fieldz = *reinterpret_cast<uintptr_t*>(kl + 0xB8);
 					uintptr_t heightmap = *reinterpret_cast<uintptr_t*>(fieldz + 0xB0);
 					return heightmap;

@@ -79,7 +79,7 @@ inline bool CanManipulate(BaseProjectile* baseProjectile, BasePlayer* TargetPlay
 		Vector3 Up = LastLocalEye + Vector3(0.f, max_usable_verical, 0.f);
 		Vector3 Down = LastLocalEye + Vector3(0.f, -max_usable_verical, 0.f);
 
-		//0x52D200 losradius real rust
+		//0x52D200 losradius real rust alkad
 		typedef bool(*lr)(Vector3, Vector3, int, float, uintptr_t);
 		bool CenterLOS = ((lr)(mem::game_assembly_base + 0x52D200))(center, LastLocalEye, layermask, 0.2f, 0);
 		bool UpLOS = CenterLOS && ((lr)(mem::game_assembly_base + 0x52D200))(LastLocalEye, Up, layermask, 0.2f, 0) && LastLocalEye.distance(Up) > 0.01f && misc::ValidateEyePos(LastLocalEye, Up);// && LocalPlayer->checkNoclipMagicBullet(LastLocalEye, Up);

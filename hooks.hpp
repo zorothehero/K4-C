@@ -140,10 +140,69 @@ namespace hooks {
 #pragma code_seg(pop)
 #pragma optimize("", on)
 
+#define ptr_assert(val) \
+    if(val == 0)        \
+    return
+	uintptr_t client_entities;
+
 	bool flying = false, is_speeding = false, is_lagging = false, has_intialized_methods = false, wake = true;
-	float nextActionTime = 0, period = 1.4721;
+	float nextActionTime = 0, period = 1.4721, last_gesture_rpc = 0.f;;
 	Vector3 m_debugcam_toggle_pos, m_debugcam_pos;
 	uintptr_t do_fixed_update_ptr, client_input_ptr, bodylean_ptr, mounteyepos_ptr, isdown_ptr, __go;
+
+	void get_skydome()
+	{
+		uintptr_t m_skydome = NULL;
+		uintptr_t m_camera = NULL;
+		uintptr_t last_object = NULL;
+		{
+			auto gom = mem::read<uintptr_t>(mem::unity_player_base + 0x17C1F18);
+			auto current_tagged_base = mem::read<uintptr_t>(gom + 0x08);
+			auto current_tagged_obj = mem::read<uintptr_t>(current_tagged_base + 0x10);
+
+			while (current_tagged_obj &&
+				current_tagged_obj != last_object &&
+				(!m_skydome || !m_camera)) {
+				INT16 tag = mem::read<uintptr_t>(current_tagged_obj + 0x54);
+
+				if (!m_camera) {
+					if (tag == 5) {
+						uintptr_t objClass = mem::read<uintptr_t>(current_tagged_obj + 0x30);
+
+						uintptr_t ent = mem::read<uintptr_t>(objClass + 0x18);
+
+						m_camera = mem::read<uintptr_t>(current_tagged_obj + 0x18);
+					}
+				}
+
+				if (!m_skydome)
+				{
+					if (tag == 20011) {
+						uint64_t p = mem::read<uint64_t>(current_tagged_obj + 0x30);
+						uint64_t p1 = mem::read<uint64_t>(p + 0x18);
+						uint64_t tod_sky = mem::read<uint64_t>(p1 + 0x28);
+
+						const auto TOD_Day = *reinterpret_cast<uintptr_t*>(tod_sky + 0x50);
+						const auto TOD_Night = *reinterpret_cast<uintptr_t*>(tod_sky + 0x58);
+						const auto TOD_Stars = *reinterpret_cast<uintptr_t*>(tod_sky + 0x70);
+						if (vars->visual.always_day) {
+							*(float*)(TOD_Night + 0x50) = 4.f;
+							*(float*)(TOD_Night + 0x54) = 1.f;
+							*(float*)(TOD_Day + 0x50) = 1.f;
+							*(float*)(TOD_Day + 0x54) = 1.f;
+							*(float*)(TOD_Stars + 0x14) = vars->visual.staramount;
+						}
+
+
+						m_skydome = mem::read<uintptr_t>(current_tagged_obj + 0x18);
+					}
+				}
+				last_object = current_tagged_obj;
+				current_tagged_base = mem::read<uintptr_t>(current_tagged_base + 0x8);
+				current_tagged_obj = mem::read<uintptr_t>(current_tagged_base + 0x10);
+			}
+		}
+	}
 
 	void hk_serverrpc_projectileshoot(int64_t rcx, int64_t rdx, int64_t r9, int64_t projectileShoot, int64_t arg5) {
 		Projectile* p;
@@ -155,12 +214,12 @@ namespace hooks {
 			if (!esp::local_player)
 				break;
 
-			auto Item = esp::local_player->get_active_weapon();
+			auto Item = esp::local_player->GetActiveItem();
 
 			if (!Item)
 				break;
 
-			auto baseprojectile = esp::local_player->get_active_weapon()->get_base_projectile();
+			auto baseprojectile = esp::local_player->GetActiveItem()->GetHeldEntity<BaseProjectile>();
 			if (!baseprojectile)
 				break;
 
@@ -676,20 +735,20 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 				}
 			}
 
-
-			if (layer != rust::classes::layer::Player_Server) {
+			if (layer == rust::classes::layer::Deployed) {
 				hit_test->ignoreEntity() = hit_entity;
 				return;
 			}
+			//if (layer != rust::classes::layer::Player_Server) {
+			//	hit_test->ignoreEntity() = hit_entity;
+			//	return;
+			//}
 		} while (0);
 
 
 
 		return orig_fn(rcx, rdx, r9, _ppa, arg5);
 	}
-
-	Vector3 _lp;
-	Vector3 _ln;
 
 	void hk_serverrpc_doplace(int64_t rcx, int64_t rdx, int64_t r9, int64_t _ppa, int64_t arg5) {
 		//auto  planner = *reinterpret_cast<uintptr_t*>(get_rbx_value());
@@ -712,8 +771,8 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 
 		if (GetAsyncKeyState(0x38)) { 
 			auto lastplacement = *reinterpret_cast<uintptr_t*>(guide + 0x18);
-			//auto position = *reinterpret_cast<Vector3*>(lastplacement + 0x34);
-			//auto normal = *reinterpret_cast<Vector3*>(lastplacement + 0x40);
+			auto position = *reinterpret_cast<Vector3*>(lastplacement + 0x34);
+			auto normal = *reinterpret_cast<Vector3*>(lastplacement + 0x40);
 			
 			auto ogid = *reinterpret_cast<unsigned int*>(ppa + 0x14);
 
@@ -725,108 +784,19 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 			if (tranny) {
 				//transform* tr = get_transform((base_player*)FindEntity);
 				//transform* Traaa = get_transform//FindEntity->_get_transform();
-				*reinterpret_cast<Vector3*>(ppa + 0x20) = InverseTransformPoint((Transform*)tranny,		_lp);
-				*reinterpret_cast<Vector3*>(ppa + 0x2C) = InverseTransformDirection((Transform*)tranny, _ln);
+				*reinterpret_cast<Vector3*>(ppa + 0x20) = InverseTransformPoint((Transform*)tranny,		position);
+				*reinterpret_cast<Vector3*>(ppa + 0x2C) = InverseTransformDirection((Transform*)tranny, normal);
 
 				esp::local_player->console_echo(string::wformat(_(L"[trap] DoPlace - Spoofed %d to %d with position (%d, %d, %d)"), 
 					(int)ogid,
 					(int)esp::selected_entity_id,
-					(int)_lp.x,
-					(int)_lp.y,
-					(int)_lp.z
+					(int)position.x,
+					(int)position.y,
+					(int)position.z
 				));
 			}
-			_lp = *reinterpret_cast<Vector3*>(ppa + 0x20);
-			_ln = *reinterpret_cast<Vector3*>(ppa + 0x2C);
 		}
 		return orig_fn(rcx, rdx, r9, _ppa, arg5);
-	}
-
-#define ptr_assert(val) \
-    if(val == 0)        \
-    return
-	uintptr_t client_entities;
-
-	void hk_projectile_update(uintptr_t pr) {
-		if (vars->combat.targetbehindwall) {
-			return _update((Projectile*)pr);
-			//((Projectile1*)pr)->Update();
-		}
-		else
-			return _update((Projectile*)pr);
-	}
-
-	void get_skydome()
-	{
-		uintptr_t m_skydome = NULL;
-		uintptr_t m_camera = NULL;
-		uintptr_t last_object = NULL;
-		{
-			auto gom = mem::read<uintptr_t>(mem::unity_player_base + 0x17C1F18);
-			auto current_tagged_base = mem::read<uintptr_t>(gom + 0x08);
-			auto current_tagged_obj = mem::read<uintptr_t>(current_tagged_base + 0x10);
-
-			while (current_tagged_obj &&
-				current_tagged_obj != last_object &&
-				(!m_skydome || !m_camera)) {
-				INT16 tag = mem::read<uintptr_t>(current_tagged_obj + 0x54);
-
-				if (!m_camera) {
-					if (tag == 5) {
-						uintptr_t objClass = mem::read<uintptr_t>(current_tagged_obj + 0x30);
-
-						uintptr_t ent = mem::read<uintptr_t>(objClass + 0x18);
-
-						m_camera = mem::read<uintptr_t>(current_tagged_obj + 0x18);
-					}
-				}
-
-				if (!m_skydome)
-				{
-					if (tag == 20011) {
-						uint64_t p = mem::read<uint64_t>(current_tagged_obj + 0x30);
-						uint64_t p1 = mem::read<uint64_t>(p + 0x18);
-						uint64_t tod_sky = mem::read<uint64_t>(p1 + 0x28);
-
-						//ambientcolor
-						//*reinterpret_cast<Vector4*>(tod_sky + 0x1F4) = Vector4(249.f/255, 130.f / 255, 109.f / 255, 255.f);
-						////moon halo color
-						//*reinterpret_cast<Vector4*>(tod_sky + 0x204) = Vector4(249.f / 255, 130.f / 255, 109.f / 255, 255.f);
-						////moon sky color
-						//*reinterpret_cast<Vector4*>(tod_sky + 0x184) = Vector4(249.f / 255, 130.f / 255, 109.f / 255, 255.f);
-						////moon light color
-						//*reinterpret_cast<Vector4*>(tod_sky + 0x144) = Vector4(249.f / 255, 130.f / 255, 109.f / 255, 255.f);
-
-						//auto components = *reinterpret_cast<uintptr_t*>(tod_sky + 0xA8);
-						//
-						//typedef uintptr_t(*ind)(uintptr_t);
-						//auto star_renderer = ((ind)(mem::game_assembly_base + 0x9F4A40))(components);
-						//
-						//if (!unity::galaxy_material)
-						//	unity::galaxy_material = unity::LoadAsset(unity::galaxy_bundle, _(L"GalaxyMaterial_10"), unity::GetType(_("UnityEngine"), _("Material")));
-						// 
-						//set_material(star_renderer, unity::galaxy_material);
-						
-						const auto TOD_Day =   *reinterpret_cast<uintptr_t*>(tod_sky + 0x50);
-						const auto TOD_Night = *reinterpret_cast<uintptr_t*>(tod_sky + 0x58);
-						const auto TOD_Stars = *reinterpret_cast<uintptr_t*>(tod_sky + 0x70);
-						if (vars->visual.always_day) {
-							*(float*)(TOD_Night + 0x50) = 4.f;
-							*(float*)(TOD_Night + 0x54) = 1.f;
-							*(float*)(TOD_Day + 0x50) = 1.f;
-							*(float*)(TOD_Day + 0x54) = 1.f;
-							*(float*)(TOD_Stars + 0x14) = vars->visual.staramount;
-						}
-
-
-						m_skydome = mem::read<uintptr_t>(current_tagged_obj + 0x18);
-					}
-				}
-				last_object = current_tagged_obj;
-				current_tagged_base = mem::read<uintptr_t>(current_tagged_base + 0x8);
-				current_tagged_obj = mem::read<uintptr_t>(current_tagged_base + 0x10);
-			}
-		}
 	}
 
 	void hk_playerwalkmovement_ClientInput(PlayerWalkMovement* player_walk_movement, uintptr_t inputstate, ModelState* model_state) {
@@ -897,8 +867,8 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 			misc::autobot::do_jump(player_walk_movement, model_state);
 		}
 		
-		auto wpn = esp::local_player->get_active_weapon();
-		auto held = wpn ? wpn->get_base_projectile() : nullptr;
+		auto wpn = esp::local_player->GetActiveItem();
+		auto held = wpn ? wpn->GetHeldEntity<BaseProjectile>() : nullptr;
 		if (vars->combat.always_reload
 			&& held)
 		{
@@ -969,151 +939,12 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 		}
 	}
 
-	std::vector<Projectile*> created_projectiles = {};
-
-	void LaunchProjectileClientSide_R(BaseProjectile* p,
-		uintptr_t ammodef,
-		int projectilecount = 1,
-		float spread = 1.f)
+	void hk_projectile_launchprojectile(BaseProjectile* p)
 	{
-		//this will essentially be recreation of 
-		//LaunchProjectileClientSide as that is 
-		//what LaunchProjectile calls
-
-		//presume spread is 1 unless nospread, 0
-
-		spread = 0.f;
-		if (!p) return;
-		if (!ammodef) return;
-		auto lp = esp::local_player;
-		if (!lp) return;
-		auto eyes = lp->eyes();
-		if (!eyes) return;
-
-
-		auto mod = (uintptr_t)((Networkable*)ammodef)->GetComponent(unity::GetType(_(""), _("ItemModProjectile")));
-		if (mod) {
-			created_projectiles.clear();
-			//game gets spread based upon weapon mods here, we will keep as 1
-
-			float num = 1.f; //?
-			float num2 = 1.f; //?
-			//projectileshoot ps{};
-
-
-			auto projectileshoot_class = il2cpp::init_class(_("ProjectileShoot"), _("ProtoBuf"));
-			projectileshoot* ps = (projectileshoot*)il2cpp::methods::object_new(projectileshoot_class);
-			//ps.projectiles = rust::list<projectileshoot_projectile>();
-			ps->ammoType = *reinterpret_cast<int*>(ammodef + 0x18 /*public int itemid; // 0x18*/);
-			//ps->projectiles = //rust::list<projectileshoot_projectile*>*;
-			for (size_t i = 0; i < projectilecount; i++)
-			{
-				Vector3 position = eyes->get_position();
-				Vector3 vector = eyes->body_forward();
-				auto projectilespread = *reinterpret_cast<float*>((uintptr_t)mod + 0x30);
-				if (spread > 0.f || projectilespread > 0.f) {
-					Vector4 rot = eyes->get_rotation();
-					float num3 = animcurve_evaluate(*reinterpret_cast<uintptr_t*>((uintptr_t)p + 0x2E8), 1.f); //(Random.Range(0f, 1f));
-
-					//real rust 0x94FEF0
-					typedef float(*ind)(uintptr_t, int, int);//public float GetIndexedSpreadScalar(int shotIndex, int maxShots) { }
-					auto indexed = ((ind)(mem::game_assembly_base + 0x94FEF0))(mod, i, projectilecount);
-
-					typedef float(*scalar)(uintptr_t);//public float GetIndexedSpreadScalar(int shotIndex, int maxShots) { }
-					auto spreadscalar = ((scalar)(mem::game_assembly_base + 0x94FFC0))((uintptr_t)mod);
-
-					float num4 = (projectilecount > 1) ? indexed : spreadscalar;
-					vector = getmodifiedaimcone(num * spread + projectilespread * num4, rot.vm(Vector3(0, 1, 0)), projectilecount <= 1);
-
-					{
-						//if global.dev draw arrow??????
-					}
-				}
-
-				uintptr_t attackentity = (uintptr_t)((Networkable*)p)->GetComponent(unity::GetType(_(""), _("AttackEntity")));
-				auto proj = (Projectile*)((Networkable*)mod)->GetComponent(unity::GetType(_(""), _("Projectile")));
-				//projectileVelocityScale() could be incorrect
-				Vector3 vector2 = vector * (getrandomvel((uintptr_t)mod) * 1.49f/*p->projectileVelocityScale()*/ * num * num2);
-
-				srand(time(0));
-				int seed = rand() % 0xfffffff + 1;
-
-				auto projectileid = *reinterpret_cast<int*>((uintptr_t)lp + 0x638) + 1;
-
-				auto gameobjref = *reinterpret_cast<uintptr_t*>((uintptr_t)mod + 0x18 /*public GameObjectRef projectileObject; 0x18*/);
-
-				typedef uintptr_t(__stdcall* createprojectile)(uintptr_t, rust::classes::string, Vector3, Vector3, Vector3);
-				auto projectile = ((createprojectile)(mem::game_assembly_base + 0x8C84D0))((uintptr_t)p, _(L"assets/prefabs/ammo/rifle/riflebullet.prefab"), position, vector, vector2);
-
-				if (projectile) {
-					*reinterpret_cast<uintptr_t*>((uintptr_t)	projectile + 0xE8 /*public ItemModProjectile mod; // 0xE8*/) = mod;
-					*reinterpret_cast<int*>((uintptr_t)			projectile + 0xF4 /*public int seed; // 0xF4*/) = seed;
-					*reinterpret_cast<uintptr_t*>((uintptr_t)	projectile + 0xD0 /*public BasePlayer owner; // 0xD0*/) = (uintptr_t)lp;
-					*reinterpret_cast<uintptr_t*>((uintptr_t)	projectile + 0xD8 /*public AttackEntity sourceWeaponPrefab; // 0xD8*/) = attackentity;
-					*reinterpret_cast<uintptr_t*>((uintptr_t)	projectile + 0xE0 /*public Projectile sourceProjectilePrefab; // 0xE0*/) = (uintptr_t)proj;
-					*reinterpret_cast<int*>((uintptr_t)			projectile + 0xF0 /*public int projectileID; // 0xF0*/) = projectileid;
-					*reinterpret_cast<bool*>((uintptr_t)		projectile + 0x114 /*public bool invisible; // 0x114*/) = false/*this.IsSilenced();*/;
-					created_projectiles.push_back((Projectile*)projectile);
-				}
-
-				projectileshoot_projectile shoot;
-				shoot.projectileID = projectileid;
-				shoot.startPos = position;
-				shoot.startVel = vector2;
-				shoot.seed = seed;
-					
-				//ps.projectiles.push_back(shoot);
-				for (size_t i = 0; i < numprojectiles; i++)
-					(*reinterpret_cast<rust::list<projectileshoot_projectile*>**>(((uintptr_t)ps) + 0x18))->add(i, &shoot);
-
-				auto first = ps->projectiles[0];
-				//auto z = first->projectileID;
-			}
-
-			
-			//call projectileshoot with our projectile
-			//base.ServerRPC<ProjectileShoot>("CLProject", projectileShoot);
-			typedef void(*rpc)(uintptr_t, rust::classes::string, projectileshoot*, uintptr_t);
-			uintptr_t method_addr = mem::read<uintptr_t>(mem::game_assembly_base + 52469984);
-			misc::emulated = true;
-			((rpc)(mem::game_assembly_base + 24767696))((uintptr_t)lp, _(L"CLProject"), ps, method_addr);
-
-			typedef Vector3(*inherit)(uintptr_t); 
-			Vector3 inheritedvel = ((inherit)(mem::game_assembly_base + 0x7F1040))((uintptr_t)lp);
-
-			for (auto c : created_projectiles)
-			{
-				c->UpdateVelocity(get_deltaTime(), c);
-				c->currentVelocity() += inheritedvel;
-			}	
-			created_projectiles.clear();
-		}
-	}
-
-	void hk_LaunchProjectile(BaseProjectile* p)
-	{
-		//define function that recreates launchprojectile
-		if (vars->misc.emulate_p) {
-			auto m = *reinterpret_cast<uintptr_t*>((uintptr_t)p + 0x2C0); //public BaseProjectile.Magazine primaryMagazine; // 0x2C0
-			auto ammo = *reinterpret_cast<uintptr_t*>((uintptr_t)m + 0x20); //public ItemDefinition ammoType; // 0x20
-			auto mod = ((Networkable*)ammo)->GetComponent(unity::GetType(_(""), _("ItemModProjectile")));
-			//auto projectile = (Projectile*)((networkable*)mod)->GetComponent(unity::GetType(_(""), _("Projectile")));
-			if (mod)
-			{
-				auto ac = GetAimCone((uintptr_t)p);
-				//int numprojectiles = *reinterpret_cast<int*>(mod + numprojectiles);
-				int numprojectiles = 1;
-				LaunchProjectileClientSide_R(p, ammo, numprojectiles/*public int numProjectiles; // 0x2C*/, ac);
-				return;
-			}
-			else
-				esp::local_player->console_echo(_(L"[K4] NO ITEMMODPROJECTILE"));
-		}
-
 		if (vars->combat.doubletap)
 		{
-			auto held = esp::local_player->get_active_weapon();
-			auto m = held->get_base_projectile()->get_repeat_delay() * .75f; //we can shoot 25% faster??? more bullets?? :DDD
+			auto held = esp::local_player->GetActiveItem()->GetHeldEntity<BaseProjectile>();
+			auto m = held->get_repeat_delay() * .75f; //we can shoot 25% faster??? more bullets?? :DDD
 
 			int r = settings::desyncTime / m;
 			if (r > 1)
@@ -1149,28 +980,14 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 		return orig::baseprojectile_launchprojectile((uintptr_t)p);
 	}
 
-	uintptr_t hk_GetBuildingPrivilege(uintptr_t base_entity) {
-		uintptr_t result = 0;
-
-		if (vars->misc.force_privlidge
-			&& esp::closest_building_block) {
-
-			auto block = (BuildingBlock*)esp::closest_building_block;
-			auto tranny = block->get_transform();
-			auto pos = tranny->get_position();
-			auto distance = esp::local_player->eyes()->get_position().distance(pos);
-			
-			if (distance <= 16.f) {
-				typedef uintptr_t(*AAA)(uintptr_t);//GetDominatingBuildingPrivilege
-				auto building = ((AAA)(mem::game_assembly_base + 0x866050))(esp::closest_building_block);
-				typedef uintptr_t(*AAA)(uintptr_t);//GetDominatingBuildingPrivilege
-				return ((AAA)(mem::game_assembly_base + 7088112))(building);
-			}
+	void hk_projectile_update(uintptr_t pr) {
+		if (vars->combat.targetbehindwall) {
+			return _update((Projectile*)pr);
+			//((Projectile1*)pr)->Update();
 		}
-
-		return result;
+		else
+			return _update((Projectile*)pr);
 	}
-
 
 	void hk_performance_update(void* instance) {
 		if (wake) {
@@ -1183,8 +1000,6 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 		}
 		PerformanceUI_Update(instance);
 	}
-
-	float last_gesture_rpc = 0.f;
 
 	void hk_baseplayer_ClientInput(BasePlayer* baseplayer, InputState* state) {
 
@@ -1300,9 +1115,9 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 			auto tick_time = baseplayer->lastSentTickTime();
 			settings::desyncTime = (unity::get_realtimesincestartup() - tick_time) - 0.03125 * 3;
 
-			auto wpn = baseplayer->get_active_weapon();
+			auto wpn = baseplayer->GetActiveItem();
 
-			auto held = wpn ? wpn->get_base_projectile() : nullptr;
+			auto held = wpn ? wpn->GetHeldEntity<BaseProjectile>() : nullptr;
 
 			if (vars->misc.attack_on_mountables) {
 				auto mountable = baseplayer->GetMountable();
@@ -1384,7 +1199,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 							esp::local_player->console_echo(string::wformat(_(L"[trap]: ClientInput - manipulator attempted shot from position (%d, %d, %d) with desync of %d"), (int)v.x, (int)v.y, (int)v.z, (int)(settings::desyncTime * 100.f)));
 
 							misc::manual = true;
-							hk_LaunchProjectile(held);
+							hk_projectile_launchprojectile(held);
 							misc::best_target = Vector3(0, 0, 0);
 							baseplayer->SendClientTick();
 						}
@@ -1401,7 +1216,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 						&& mag_ammo > 0)
 					{
 						misc::autoshot = true;
-						hk_LaunchProjectile(held);
+						hk_projectile_launchprojectile(held);
 						updateammodisplay((uintptr_t)held);
 						shot_fired((uintptr_t)held);
 						did_attack_client_side((uintptr_t)held);
@@ -1479,7 +1294,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 				}
 			}
 
-			auto item = baseplayer->get_active_weapon();
+			auto item = baseplayer->GetActiveItem();
 
 
 			if (vars->misc.speedhack || unity::GetKey(rust::classes::KeyCode(vars->keybinds.timescale))) {
@@ -1493,7 +1308,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 
 			auto target = esp::best_target; //baseplayer->get_aimbot_target(unity::get_camera_pos());
 			if (item) {
-				auto baseprojectile = item->get_base_projectile();
+				auto baseprojectile = item->GetHeldEntity<BaseProjectile>();
 				if (baseprojectile) {
 					for (int i = 0; i < 32; i++) {
 						auto current = misc::fired_projectiles[i];
@@ -1530,69 +1345,73 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 
 								//transform* bonetrans = target.player->find_closest_bone(current_position, true
 								Transform* bonetrans = target.ent->model()->boneTransforms()->get(48);
-								if (vars->combat.bodyaim)
-									bonetrans = target.ent->model()->boneTransforms()->get((int)rust::classes::Bone_List::pelvis);
 
-
-								Vector3 target_bone = bonetrans->get_position(); //target_bone.y -= 0.8f;
-								//Sphere(target_bone, 2.2f, col(12, 150, 100, 50), 10.f, 100.f);
-
-								if (misc::LineCircleIntersection(target_bone, vars->combat.thickness, current_position, projectile->previousPosition(), offset))
+								if (bonetrans)
 								{
-									current_position = Vector3::move_towards(target_bone, current_position, vars->combat.thickness);
-								}
-
-								auto dist = target_bone.distance(current_position);
+									if (vars->combat.bodyaim)
+										bonetrans = target.ent->model()->boneTransforms()->get((int)rust::classes::Bone_List::pelvis);
 
 
-								//fuck with shit pussy wagon
-								float num2 = 1.0f + 0.5f;
-								float num8 = 2.0f / 60.0f;
-								float num9 = 2.0f * max(max(get_deltaTime(), get_smoothdeltaTime()), get_fixeddeltaTime());
-								float num11 = (settings::desyncTime + num8 + num9) * num2;
-								//typedef Vector3(*gpv)(uintptr_t);
-								//auto pv = ((gpv)(mem::game_assembly_base + 8331264))((uintptr_t)target.player);
-								auto pv = target.ent->GetParentVelocity();
-								float mag = pv.length();
-								float num15 = 0.1f + num11 * mag + 0.1f;
-								//dist -= num15;
+									Vector3 target_bone = bonetrans->get_position(); //target_bone.y -= 0.8f;
+									//Sphere(target_bone, 2.2f, col(12, 150, 100, 50), 10.f, 100.f);
 
-								/*if (target.player->get_mountable())
-								{
-									Sphere(target_bone, 3.0f, col(12, 150, 100, 50), 10.f, 100.f);
-									if (dist < 3.0f)
+									if (misc::LineCircleIntersection(target_bone, vars->combat.thickness, current_position, projectile->previousPosition(), offset))
 									{
-										auto newpos = Vector3::move_towards(target_bone, current_position, 1.0f);
-										set_position(get_transform((base_player*)projectile), newpos);
+										current_position = Vector3::move_towards(target_bone, current_position, vars->combat.thickness);
+									}
+
+									auto dist = target_bone.distance(current_position);
+
+
+									//fuck with shit pussy wagon
+									float num2 = 1.0f + 0.5f;
+									float num8 = 2.0f / 60.0f;
+									float num9 = 2.0f * max(max(get_deltaTime(), get_smoothdeltaTime()), get_fixeddeltaTime());
+									float num11 = (settings::desyncTime + num8 + num9) * num2;
+									//typedef Vector3(*gpv)(uintptr_t);
+									//auto pv = ((gpv)(mem::game_assembly_base + 8331264))((uintptr_t)target.player);
+									auto pv = target.ent->GetParentVelocity();
+									float mag = pv.length();
+									float num15 = 0.1f + num11 * mag + 0.1f;
+									//dist -= num15;
+
+									/*if (target.player->get_mountable())
+									{
+										Sphere(target_bone, 3.0f, col(12, 150, 100, 50), 10.f, 100.f);
+										if (dist < 3.0f)
+										{
+											auto newpos = Vector3::move_towards(target_bone, current_position, 1.0f);
+											set_position(get_transform((base_player*)projectile), newpos);
+
+											HitTest* ht = (HitTest*)projectile->hitTest();
+											ht->set_did_hit(true);
+											ht->set_hit_entity(target.player);
+											ht->set_hit_transform(bonetrans);
+											ht->set_hit_point(InverseTransformPoint(bonetrans, newpos));
+											ht->set_hit_normal(InverseTransformDirection(bonetrans, newpos));
+											Ray r(get_position((uintptr_t)get_transform((base_player*)projectile)), newpos);
+											safe_write(ht + 0x14, r, Ray);
+
+											esp::local_player->console_echo(string::wformat(_(L"[trap]: Fat bullet - Called with distance: %dm"), (int)dist));
+											DoHit(projectile, ht, newpos, HitNormalWorld((uintptr_t)ht));
+										}
+									}*/
+									if (dist < 2.0f)
+									{
+										auto newpos = Vector3::move_towards(current_position, target_bone, 1.0f);
+										set_position(projectile->get_transform(), newpos);
+
 
 										HitTest* ht = (HitTest*)projectile->hitTest();
-										ht->set_did_hit(true);
-										ht->set_hit_entity(target.player);
-										ht->set_hit_transform(bonetrans);
-										ht->set_hit_point(InverseTransformPoint(bonetrans, newpos));
-										ht->set_hit_normal(InverseTransformDirection(bonetrans, newpos));
-										Ray r(get_position((uintptr_t)get_transform((base_player*)projectile)), newpos);
+										ht->DidHit() = true;
+										ht->HitEntity() = target.ent;
+										ht->HitTransform() = bonetrans;
+										ht->HitPoint() = InverseTransformPoint(bonetrans, newpos);
+										ht->HitNormal() = InverseTransformDirection(bonetrans, newpos);
+										Ray r(projectile->get_transform()->get_position(), newpos);
 										safe_write(ht + 0x14, r, Ray);
-
-										esp::local_player->console_echo(string::wformat(_(L"[trap]: Fat bullet - Called with distance: %dm"), (int)dist));
 										DoHit(projectile, ht, newpos, HitNormalWorld((uintptr_t)ht));
 									}
-								}*/
-								if (dist < 2.0f)
-								{
-									auto newpos = Vector3::move_towards(current_position, target_bone, 1.0f);
-									set_position(projectile->get_transform(), newpos);
-
-
-									HitTest* ht = (HitTest*)projectile->hitTest();
-									ht->DidHit() = true;
-									ht->HitEntity() = target.ent;
-									ht->HitTransform() = bonetrans;
-									ht->HitPoint() = InverseTransformPoint(bonetrans, newpos);
-									ht->HitNormal() = InverseTransformDirection(bonetrans, newpos);
-									Ray r(projectile->get_transform()->get_position(), newpos);
-									safe_write(ht + 0x14, r, Ray);
-									DoHit(projectile, ht, newpos, HitNormalWorld((uintptr_t)ht));
 								}
 							}
 						}
@@ -1700,7 +1519,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 							else if (pitch > 180) pitch = 180;
 							if (yaw < -360) yaw = -360;
 							else if (yaw > 360) yaw = 360;
-							esp::local_player->console_echo(string::wformat(_(L"[trap]: ClientInput - yaw: %d, pitch: %d"), (int)yaw, (int)pitch));
+							//esp::local_player->console_echo(string::wformat(_(L"[trap]: ClientInput - yaw: %d, pitch: %d"), (int)yaw, (int)pitch));
 						};
 						auto step = [&](Vector2& angles) {
 							bool smooth = true;
@@ -1929,7 +1748,7 @@ StringPool::Get(xorstr_("spine4")) = 827230707
 							esp::local_player->console_echo(string::wformat(_(L"[trap]: ClientInput - manipulator2 attempted shot from position (%d, %d, %d) with desync of %d"), (int)v.x, (int)v.y, (int)v.z, (int)(settings::desyncTime * 100.f)));
 
 							misc::manual = true;
-							hk_LaunchProjectile(held);
+							hk_projectile_launchprojectile(held);
 							baseplayer->SendClientTick();
 						}
 				}

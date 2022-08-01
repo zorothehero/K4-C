@@ -245,9 +245,9 @@ namespace esp {
 			{
 				BasePlayer* entity = (BasePlayer*)ent;
 				auto hit_player = [&]() {
-					auto Item = esp::local_player->get_active_weapon();
+					auto Item = esp::local_player->GetActiveItem();
 					if (Item) {
-						auto baseprojectile = Item->get_base_projectile();
+						auto baseprojectile = Item->GetHeldEntity<BaseProjectile>();
 						if (baseprojectile) {
 							auto class_name = baseprojectile->get_class_name();
 							if (*(int*)(class_name + 4) == 'eleM' || *(int*)(class_name + 4) == 'mmah') {
@@ -309,7 +309,7 @@ namespace esp {
 
 						if (target < best_target
 							|| !best_target.ent->is_alive()
-							|| (target.ent && ((BasePlayer*)target.ent)->get_steam_id() == ((BasePlayer*)target.ent)->get_steam_id()))
+							|| (target.ent && ((BasePlayer*)target.ent)->get_steam_id() == ((BasePlayer*)best_target.ent)->get_steam_id()))
 						{
 							best_target.pos = target.pos;
 							best_target.distance = target.distance;
@@ -348,8 +348,8 @@ namespace esp {
 							}
 						}
 						
-						if (target.fov < vars->combat.aimbotfov
-							&& target.fov < best_target.fov)
+						if (target < best_target
+							&& target.fov < vars->combat.aimbotfov)
 							best_target = target;
 						if (best_target.fov > vars->combat.aimbotfov)
 							best_target = aim_target();
