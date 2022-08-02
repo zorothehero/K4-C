@@ -197,7 +197,7 @@ struct projectileshoot {
 	//std::array<projectileshoot_projectile, 8> projectiles; //0x18
 	//projectileshoot_projectile projectiles[];
 	//std::vector<projectileshoot_projectile> projectiles;
-	rust::list<projectileshoot_projectile*>* projectiles; //0x18
+	System::list<projectileshoot_projectile*>* projectiles; //0x18
 };
 
 struct fired_projectile {

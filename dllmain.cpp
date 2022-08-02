@@ -121,8 +121,8 @@ bool DllMain(HMODULE hmodule)
 			
 			init_projectile();
             
-            typedef rust::list<uintptr_t>* (*AAA)();//real rust 36223520 ALKAD 36217232 "Name": "ConsoleSystem.Index$$get_All",
-            rust::list<uintptr_t>* command_list = ((AAA)(mem::game_assembly_base + 36223520))();
+            typedef System::list<uintptr_t>* (*AAA)();//real rust 36223520 ALKAD 36217232 "Name": "ConsoleSystem.Index$$get_All",
+            System::list<uintptr_t>* command_list = ((AAA)(mem::game_assembly_base + 36223520))();
 
             if (command_list) {
                 auto sz = *reinterpret_cast<int*>(command_list + 0x18);
@@ -130,7 +130,7 @@ bool DllMain(HMODULE hmodule)
                 { 
                     auto cmd = *reinterpret_cast<uintptr_t*>(command_list + 0x20 + i * 0x8);
                     if (!cmd) continue;
-                    auto name = (rust::classes::string*)*reinterpret_cast<uintptr_t*>((uintptr_t)cmd + 0x10);
+                    auto name = (System::string*)*reinterpret_cast<uintptr_t*>((uintptr_t)cmd + 0x10);
                     if (!LI_FIND(wcscmp)(name->str, _(L"noclip")) ||
                         !LI_FIND(wcscmp)(name->str, _(L"debugcamera")) ||
                         !LI_FIND(wcscmp)(name->str, _(L"debug.debugcamera")) ||

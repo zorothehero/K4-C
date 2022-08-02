@@ -1,7 +1,7 @@
 #pragma once
 #include "projectile1.hpp"
 
-inline bool CanManipulate(BaseProjectile* baseProjectile, BasePlayer* TargetPlayer, InputState* input)
+inline bool CanManipulate(BaseProjectile* baseProjectile, BasePlayer* TargetPlayer, InputState* input)	
 {
 	auto LocalPlayer = esp::local_player;//CheatCore::m_cheat->LocalPlayer;
 
@@ -23,7 +23,7 @@ inline bool CanManipulate(BaseProjectile* baseProjectile, BasePlayer* TargetPlay
 
 		if (settings::MagicBulletTimer >= 1.f)
 		{
-			LocalPlayer->set_client_tick_interval(0.05f);
+			LocalPlayer->clientTickInterval() = 0.05f;
 			settings::MagicBulletTimer = 0;
 		}
 		else
@@ -31,12 +31,12 @@ inline bool CanManipulate(BaseProjectile* baseProjectile, BasePlayer* TargetPlay
 			if (Previous && Current)
 				*reinterpret_cast<int*>(Previous + 0x14) = *reinterpret_cast<int*>(Current + 0x14);//0;
 
-			LocalPlayer->set_client_tick_interval(99999.f);
+			LocalPlayer->clientTickInterval() = 99999.f;
 		}
 
 	}
 	else {
-		LocalPlayer->set_client_tick_interval(0.05f);
+		LocalPlayer->clientTickInterval() = 0.05f;
 		settings::MagicBulletTimer = 0;
 	}
 

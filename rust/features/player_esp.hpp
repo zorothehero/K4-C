@@ -66,7 +66,7 @@ namespace esp {
 
 	void draw_heli(float x, float y, float w, float h);
 
-	void draw_tool_cupboard(Vector2 w2s_position, uintptr_t label, Vector4 color, rust::list<PlayerNameID*>* authorizedPlayers_list);
+	void draw_tool_cupboard(Vector2 w2s_position, uintptr_t label, Vector4 color, System::list<PlayerNameID*>* authorizedPlayers_list);
 
 	void draw_hackable_crate(Vector2 w2s_position, uintptr_t crate, Vector4 color);
 
@@ -161,7 +161,7 @@ namespace esp {
 					if (local.get_3d_dist(world_position) >= 5)
 						return;
 
-					auto gathering = baseprojectile->Gathering();
+					auto gathering = ((BaseMelee*)baseprojectile)->gathering();
 
 					if (is_tree) {
 						if (!(gathering->tree()->gatherDamage() > 1)) {
@@ -309,7 +309,7 @@ namespace esp {
 
 						if (target < best_target
 							|| !best_target.ent->is_alive()
-							|| (target.ent && ((BasePlayer*)target.ent)->get_steam_id() == ((BasePlayer*)best_target.ent)->get_steam_id()))
+							|| (target.ent && ((BasePlayer*)target.ent)->userID() == ((BasePlayer*)best_target.ent)->userID()))
 						{
 							best_target.pos = target.pos;
 							best_target.distance = target.distance;
@@ -506,7 +506,7 @@ namespace esp {
 					auto authorizedPlayers_wrapper = *reinterpret_cast<uintptr_t*>(ent + 0x598);
 					if (!authorizedPlayers_wrapper)
 						continue;
-					const auto authorizedPlayers_list = *reinterpret_cast<rust::list<PlayerNameID*>**>(authorizedPlayers_wrapper + 0x10);
+					const auto authorizedPlayers_list = *reinterpret_cast<System::list<PlayerNameID*>**>(authorizedPlayers_wrapper + 0x10);
 					if (!authorizedPlayers_list)
 						continue;
 
@@ -739,7 +739,7 @@ namespace esp {
 
 			auto id = mem::read<unsigned long>(ent + 0x20);
 
-			if (id == esp::local_player->get_steam_id())
+			if (id == esp::local_player->userID())
 				continue;
 
 			auto position = mem::read<Vector3>(ent + 0x2C);

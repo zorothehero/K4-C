@@ -78,14 +78,14 @@ namespace gui {
 
 		static auto Label = reinterpret_cast<void(*)(rust::classes::Rect position, uintptr_t content, uintptr_t style)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GUI"), _("Label"), 3, _("content"), _("UnityEngine"), 2)));
 
-		static auto _Label = reinterpret_cast<void(*)(rust::classes::Rect, rust::classes::string)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GUI"), _("Label"), 2, _("text"), _("UnityEngine"), 2)));
+		static auto _Label = reinterpret_cast<void(*)(rust::classes::Rect, System::string)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GUI"), _("Label"), 2, _("text"), _("UnityEngine"), 2)));
 		static auto ptr_Label = reinterpret_cast<void(*)(rust::classes::Rect, uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GUI"), _("Label"), 2, _("text"), _("UnityEngine"), 2)));
 
 		static auto set_alignment = reinterpret_cast<void(*)(uintptr_t label, uintptr_t value)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GUIStyle"), _("set_alignment"), -1, _(""), _("UnityEngine"))));
 
 		static auto get_current = reinterpret_cast<uintptr_t(*)()>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Event"), _("get_current"), 0, _(""), _("UnityEngine"))));
 
-		static auto gui_content_temp = reinterpret_cast<uintptr_t(*)(rust::classes::string*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GUIContent"), _("Temp"), 1, _("t"), _("UnityEngine"), 1)));
+		static auto gui_content_temp = reinterpret_cast<uintptr_t(*)(System::string*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GUIContent"), _("Temp"), 1, _("t"), _("UnityEngine"), 1)));
 
 		static auto gui_content_temp_ptr = reinterpret_cast<uintptr_t(*)(uintptr_t*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GUIContent"), _("Temp"), 1, _("t"), _("UnityEngine"), 1)));
 
@@ -96,7 +96,7 @@ namespace gui {
 		static auto DrawTexture = reinterpret_cast<void (*)(rust::classes::Rect, uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GUI"), _("DrawTexture"), 2, _("image"), _("UnityEngine"), 2)));
 		
 		//Rect position, Texture image, ScaleMode scaleMode, bool alphaBlend, float imageAspect, Color color, float borderWidth, float borderRadius
-		static auto Box = reinterpret_cast<void (*)(rust::classes::Rect, rust::classes::string)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GUI"), _("Box"), 2, _("text"), _("UnityEngine"), 2)));
+		static auto Box = reinterpret_cast<void (*)(rust::classes::Rect, System::string)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GUI"), _("Box"), 2, _("text"), _("UnityEngine"), 2)));
 
 		static auto DrawLine = reinterpret_cast<void (*)(Vector3, Vector3, gui::Color)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Debug"), _("DrawLine"), 3, _("color"), _("UnityEngine"), 3)));
 
@@ -124,7 +124,7 @@ namespace gui {
 		
 		static auto dont_destroy_on_load = reinterpret_cast<void(*)(uintptr_t target)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Object"), _("DontDestroyOnLoad"), 0, _(""), _("UnityEngine"))));
 		
-		static auto create = reinterpret_cast<void(*)(uintptr_t self, rust::classes::string shader)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GameObject"), _("Internal_CreateGameObject"), 0, _(""), _("UnityEngine"))));
+		static auto create = reinterpret_cast<void(*)(uintptr_t self, System::string shader)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GameObject"), _("Internal_CreateGameObject"), 0, _(""), _("UnityEngine"))));
 		
 		static auto add_component = reinterpret_cast<void(*)(uintptr_t self, uintptr_t componentType)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GameObject"), _("Internal_AddComponentWithType"), 0, _(""), _("UnityEngine"))));
 
@@ -150,13 +150,13 @@ namespace gui {
 
 		methods::Label = reinterpret_cast<void(*)(rust::classes::Rect position, uintptr_t content, uintptr_t style)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GUI"), _("Label"), 3, _("content"), _("UnityEngine"), 2)));
 
-		methods::_Label = reinterpret_cast<void(*)(rust::classes::Rect, rust::classes::string)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GUI"), _("Label"), 2, _("text"), _("UnityEngine"), 2)));
+		methods::_Label = reinterpret_cast<void(*)(rust::classes::Rect, System::string)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GUI"), _("Label"), 2, _("text"), _("UnityEngine"), 2)));
 
 		methods::set_alignment = reinterpret_cast<void(*)(uintptr_t label, uintptr_t value)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GUIStyle"), _("set_alignment"), -1, _(""), _("UnityEngine"))));
 
 		methods::get_current = reinterpret_cast<uintptr_t(*)()>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Event"), _("get_current"), 0, _(""), _("UnityEngine"))));
 
-		methods::gui_content_temp = reinterpret_cast<uintptr_t(*)(rust::classes::string*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GUIContent"), _("Temp"), 1, _("t"), _("UnityEngine"), 1)));
+		methods::gui_content_temp = reinterpret_cast<uintptr_t(*)(System::string*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GUIContent"), _("Temp"), 1, _("t"), _("UnityEngine"), 1)));
 
 		methods::set_skin = reinterpret_cast<void(*)(uintptr_t skin)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GUI"), _("set_skin"), 0, _(""), _("UnityEngine"))));
 
@@ -164,13 +164,13 @@ namespace gui {
 
 		unity::LoadAllAssets = reinterpret_cast<uintptr_t(*)(uintptr_t bundle, uintptr_t type)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("AssetBundle"), _("LoadAllAssets"), 1, _("type"), _("UnityEngine"), 1)));
 
-		unity::LoadFromFile = reinterpret_cast<uintptr_t(*)(rust::classes::string path)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("AssetBundle"), _("LoadFromFile"), 1, _("path"), _("UnityEngine"), 1)));
+		unity::LoadFromFile = reinterpret_cast<uintptr_t(*)(System::string path)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("AssetBundle"), _("LoadFromFile"), 1, _("path"), _("UnityEngine"), 1)));
 
-		unity::LoadAsset = reinterpret_cast<uintptr_t(*)(uintptr_t bundle, rust::classes::string path, uintptr_t type)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("AssetBundle"), _("LoadAsset"), 2, _("name"), _("UnityEngine"), 1)));
+		unity::LoadAsset = reinterpret_cast<uintptr_t(*)(uintptr_t bundle, System::string path, uintptr_t type)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("AssetBundle"), _("LoadAsset"), 2, _("name"), _("UnityEngine"), 1)));
 
 		methods::DrawTexture = reinterpret_cast<void (*)(rust::classes::Rect, uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GUI"), _("DrawTexture"), 2, _("image"), _("UnityEngine"), 2)));
 
-		methods::Box = reinterpret_cast<void (*)(rust::classes::Rect, rust::classes::string)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GUI"), _("Box"), 2, _("text"), _("UnityEngine"), 2)));
+		methods::Box = reinterpret_cast<void (*)(rust::classes::Rect, System::string)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GUI"), _("Box"), 2, _("text"), _("UnityEngine"), 2)));
 
 		methods::DrawLine = reinterpret_cast<void (*)(Vector3, Vector3, gui::Color)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Debug"), _("DrawLine"), 3, _("color"), _("UnityEngine"), 3)));
 
@@ -187,7 +187,7 @@ namespace gui {
 		methods::Color = reinterpret_cast<void(*)(col)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GL"), _("Color"), 0, _(""), _("UnityEngine"))));
 		//methods::dont_destroy_on_load = reinterpret_cast<void(*)(uintptr_t target)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Object"), _("DontDestroyOnLoad"), 0, _(""), _("UnityEngine"))));
 		//
-		//methods::create = reinterpret_cast<void(*)(uintptr_t self, rust::classes::string shader)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GameObject"), _("InternalCreateGameObject"), 0, _(""), _("UnityEngine"))));
+		//methods::create = reinterpret_cast<void(*)(uintptr_t self, System::string shader)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GameObject"), _("InternalCreateGameObject"), 0, _(""), _("UnityEngine"))));
 		//
 		//methods::add_component = reinterpret_cast<void(*)(uintptr_t self, uintptr_t componentType)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GameObject"), _("InternalAddComponentWithType"), 0, _(""), _("UnityEngine"))));
 
@@ -570,13 +570,13 @@ namespace gui {
 		//unity::galaxy_bundle = unity::LoadFromFile(_(L"galaxy.chams"));
 		unity::bundle_font = unity::LoadFromFile(_(L"font.assets"));
 
-		const auto set_font = [&](rust::classes::string font_name, int size) {
+		const auto set_font = [&](System::string font_name, int size) {
 			static auto font = unity::LoadAsset(unity::bundle_font, font_name, il2cpp::type_object("UnityEngine", "Font"));
 			*reinterpret_cast<std::uintptr_t*>(skin + 0x18) = font; // lol.
 			methods::set_fontSize(label, size);
 		};
 
-		//static auto font = methods::LoadAsset(unity::bundle_font, rust::classes::string(_(L"minecraftchmc.ttf")), il2cpp::type_object(_("UnityEngine"), _("Font")));
+		//static auto font = methods::LoadAsset(unity::bundle_font, System::string(_(L"minecraftchmc.ttf")), il2cpp::type_object(_("UnityEngine"), _("Font")));
 		//*reinterpret_cast<uintptr_t*>(skin + 0x18) = font;
 
 		//methods::set_fontSize(label, 24);
@@ -586,7 +586,7 @@ namespace gui {
 		methods::set_color(Color(1, 1, 1, 1));
 	}
 
-	void Label(rust::classes::Rect pos, rust::classes::string text, Color clr, bool centered = false, float size = 12) {
+	void Label(rust::classes::Rect pos, System::string text, Color clr, bool centered = false, float size = 12) {
 		methods::set_color(clr);
 
 		uintptr_t content = methods::gui_content_temp(&text);
@@ -609,7 +609,7 @@ namespace gui {
 		methods::ptr_Label(pos, text);
 	}
 
-	void Label(rust::classes::Rect pos, rust::classes::string text, float font_size = 0) {
+	void Label(rust::classes::Rect pos, System::string text, float font_size = 0) {
 
 		if (!font_size)
 			methods::_Label(pos, text);
@@ -701,7 +701,7 @@ namespace gui {
 			}
 		}
 
-		gui::Label({ poz.x , poz.y, poz.wid, poz.hei }, rust::classes::string(name), rgba(159.f, 163.f, 169.f, (opacity / 255.f)), true, 10);
+		gui::Label({ poz.x , poz.y, poz.wid, poz.hei }, System::string(name), rgba(159.f, 163.f, 169.f, (opacity / 255.f)), true, 10);
 		current_pos.y += 15;
 		return false;
 	}
@@ -724,17 +724,17 @@ namespace gui {
 		}
 
 		
-		gui::Label({ poz.x + 4, poz.y, poz.wid, poz.hei }, rust::classes::string(name), rgba(159.f, 163.f, 169.f, (opacity / 255.f)), false, 10);
+		gui::Label({ poz.x + 4, poz.y, poz.wid, poz.hei }, System::string(name), rgba(159.f, 163.f, 169.f, (opacity / 255.f)), false, 10);
 
 		if(inputting_text)
 		{
 			rust::classes::Rect t = rust::classes::Rect(pos.x + tab_size.x + 2.0f, pos.y + current_pos.y + 18, 150, 2);
 			fill_box(t, rgba(249.f, 130.f, 109.f, 255.f));
 			pinputtext = str;
-			gui::Label({ poz.x + 44, poz.y, poz.wid, poz.hei }, rust::classes::string(str->c_str()), rgba(249.f, 130.f, 109.f, (opacity / 255.f)), false, 10);
+			gui::Label({ poz.x + 44, poz.y, poz.wid, poz.hei }, System::string(str->c_str()), rgba(249.f, 130.f, 109.f, (opacity / 255.f)), false, 10);
 		}
 		else
-			gui::Label({ poz.x + 44, poz.y, poz.wid, poz.hei }, rust::classes::string(str->c_str()), rgba(159.f, 163.f, 169.f, (opacity / 255.f)), false, 10);
+			gui::Label({ poz.x + 44, poz.y, poz.wid, poz.hei }, System::string(str->c_str()), rgba(159.f, 163.f, 169.f, (opacity / 255.f)), false, 10);
 		//draw label of current_text
 		current_pos.y += 20;
 	}
@@ -751,7 +751,7 @@ namespace gui {
 			poz = rust::classes::Rect(pos.x + tab_size.x + 2.0f, pos.y + current_pos.y, 150, 20);
 		}
 
-		gui::Label({ poz.x + 5, poz.y, poz.wid, poz.hei }, rust::classes::string(name), rgba(159.f, 163.f, 169.f, (opacity / 255.f)), false, 13);
+		gui::Label({ poz.x + 5, poz.y, poz.wid, poz.hei }, System::string(name), rgba(159.f, 163.f, 169.f, (opacity / 255.f)), false, 13);
 
 		if (combo_clicked)
 		{
@@ -802,14 +802,14 @@ namespace gui {
 
 				auto name = combo_str[i];
 
-				gui::Label({ poz.x + 1, poz.y, poz.wid, poz.hei }, rust::classes::string(name), rgba(159.f, 163.f, 169.f, (opacity / 255.f)), true, 10);
+				gui::Label({ poz.x + 1, poz.y, poz.wid, poz.hei }, System::string(name), rgba(159.f, 163.f, 169.f, (opacity / 255.f)), true, 10);
 
 				bool s = *combo[i];
 				if (s)
-					gui::Label({ poz.x + 1, poz.y, poz.wid, poz.hei }, rust::classes::string(name), rgba(249.f, 130.f, 109.f, (opacity / 255.f)), true, 10);
+					gui::Label({ poz.x + 1, poz.y, poz.wid, poz.hei }, System::string(name), rgba(249.f, 130.f, 109.f, (opacity / 255.f)), true, 10);
 
 				if (poz.Contains(mouse))
-					gui::Label({ poz.x + 1, poz.y, poz.wid, poz.hei }, rust::classes::string(name), rgba(181, 140, 132, (opacity / 255.f)), true, 10);
+					gui::Label({ poz.x + 1, poz.y, poz.wid, poz.hei }, System::string(name), rgba(181, 140, 132, (opacity / 255.f)), true, 10);
 			}
 		}
 		current_pos.y += 30;
@@ -831,7 +831,7 @@ namespace gui {
 
 		auto sz = sizeof(str_list) / sizeof(str_list[0]);
 
-		gui::Label({ poz.x + 5, poz.y, poz.wid, poz.hei }, rust::classes::string(string::wformat(_(L"%s: %s"), button_name, str_list[*selected])), rgba(159.f, 163.f, 169.f, (opacity / 255.f)), false, 13);
+		gui::Label({ poz.x + 5, poz.y, poz.wid, poz.hei }, System::string(string::wformat(_(L"%s: %s"), button_name, str_list[*selected])), rgba(159.f, 163.f, 169.f, (opacity / 255.f)), false, 13);
 
 		if (list_clicked && list_open == selected)
 		{
@@ -880,20 +880,20 @@ namespace gui {
 
 				auto name = str_list[i];
 
-				gui::Label({ poz.x + 1, poz.y, poz.wid, poz.hei }, rust::classes::string(name), rgba(159.f, 163.f, 169.f, (opacity / 255.f)), true, 10);
+				gui::Label({ poz.x + 1, poz.y, poz.wid, poz.hei }, System::string(name), rgba(159.f, 163.f, 169.f, (opacity / 255.f)), true, 10);
 
 				if (*selected > 8)
 					*selected = 0;
 				bool s = LI_FIND(wcscmp)(str_list[*selected], str_list[i]) == 0;
 				if (s)
-					gui::Label({ poz.x + 1, poz.y, poz.wid, poz.hei }, rust::classes::string(name), rgba(249.f, 130.f, 109.f, (opacity / 255.f)), true, 10);
+					gui::Label({ poz.x + 1, poz.y, poz.wid, poz.hei }, System::string(name), rgba(249.f, 130.f, 109.f, (opacity / 255.f)), true, 10);
 
 				if (poz.Contains(mouse))
 				{
 					poz = rust::classes::Rect(pos.x + tab_size.x + 2.0f + 2, pos.y + current_pos.y + (i * 20) + 2, 146, 16);
 					fill_box(poz, rgba(22, 27, 36, 255.f));
 					poz = rust::classes::Rect(pos.x + tab_size.x + 2.0f, pos.y + current_pos.y + (i * 20), 150, 20);
-					gui::Label({ poz.x + 1, poz.y, poz.wid, poz.hei }, rust::classes::string(name), rgba(181, 140, 132, (opacity / 255.f)), true, 10);
+					gui::Label({ poz.x + 1, poz.y, poz.wid, poz.hei }, System::string(name), rgba(181, 140, 132, (opacity / 255.f)), true, 10);
 				}
 			}
 		}
@@ -928,10 +928,10 @@ namespace gui {
 			if (getting_keybind && keybind_ref == ref_clicked)
 			{
 				fill_box(rust::classes::Rect(poz.x, poz.y + 14.f, poz.wid, 2.f), rgba(249.f, 130.f, 109.f, (opacity / 255.f)));
-				gui::Label({ poz.x + 1, poz.y, poz.wid, poz.hei }, rust::classes::string(get_keystr(*keybind_ref)), rgba(249.f, 130.f, 109.f, (opacity / 255.f)), true, 10);
+				gui::Label({ poz.x + 1, poz.y, poz.wid, poz.hei }, System::string(get_keystr(*keybind_ref)), rgba(249.f, 130.f, 109.f, (opacity / 255.f)), true, 10);
 			}
 
-			gui::Label({ poz.x + 1, poz.y, poz.wid, poz.hei }, rust::classes::string(get_keystr(*keybind_ref)), rgba(159.f, 163.f, 169.f, (opacity / 255.f)), true, 10);
+			gui::Label({ poz.x + 1, poz.y, poz.wid, poz.hei }, System::string(get_keystr(*keybind_ref)), rgba(159.f, 163.f, 169.f, (opacity / 255.f)), true, 10);
 		}
 
 		float o1 = (opacity / 255.f);
@@ -1680,7 +1680,7 @@ namespace esp
 		gui::outline_box({ x - w / 2 - 1, y - h / 2 - 1 }, { w + 2, h + 2 }, { 0, 0, 0, 1 });
 	}
 
-	void draw_tool_cupboard(Vector2 w2s_position, uintptr_t new_str_text, Vector4 color, rust::list<PlayerNameID*>* authorizedPlayers_list)
+	void draw_tool_cupboard(Vector2 w2s_position, uintptr_t new_str_text, Vector4 color, System::list<PlayerNameID*>* authorizedPlayers_list)
 	{
 		auto label = [&](float y, wchar_t* text)
 		{
@@ -1746,7 +1746,7 @@ namespace esp
 
 		if (target.ent && !target.is_heli && screen.z != 0 && !target.teammate) {
 			auto draw_item = [&](bool draw_wearable, float x, float width) {
-				rust::list<Item*>* belt = ((BasePlayer*)target.ent)->get_belt_items();
+				System::list<Item*>* belt = ((BasePlayer*)target.ent)->get_belt_items();
 				if (draw_wearable)
 					belt = ((BasePlayer*)target.ent)->get_wearable_items();
 
@@ -2131,7 +2131,7 @@ namespace esp
 						}
 						case 3:
 						{
-							auto s = (Shader*)FindShader(rust::classes::string(_(L"Standard")));
+							auto s = (Shader*)FindShader(System::string(_(L"Standard")));
 							material->SetShader(s);
 							material->SetColor(_(L"_Color"), col(r, g, b, 0.5));
 							break;
@@ -2141,7 +2141,7 @@ namespace esp
 						//	if (unity::galaxy_material && material != unity::galaxy_material)
 						//	{
 						//		//unity::set_shader(material, unity::space_material);
-						//		//auto s = FindShader(rust::classes::string(_(L"Standard")));
+						//		//auto s = FindShader(System::string(_(L"Standard")));
 						//		//unity::set_shader(unity::galaxy_material, s);
 						//		set_material(renderer, unity::galaxy_material);
 						//		SetInt(unity::galaxy_material, _(L"_ZTest"), 8);
@@ -2414,8 +2414,8 @@ namespace esp
 			}
 
 			//     health bar   
-			const auto cur_health = ent->get_health();
-			const auto max_health = (is_npc ? ent->get_max_health() : 100);
+			const auto cur_health = ent->health();
+			const auto max_health = (is_npc ? ent->maxHealth() : 100);
 			const auto health_pc = min(cur_health / max_health, 1);
 			const auto health_color =
 				HSV((health_pc * .25f), 1, .875f * 1);

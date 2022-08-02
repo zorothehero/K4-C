@@ -539,7 +539,7 @@ public:
 		}
 
 
-		((rust::classes::PlayerProjectileUpdate*)g_UpdateReusable)->projectileID = _this->projectileID();
+		((protobuf::PlayerProjectileUpdate*)g_UpdateReusable)->projectileID = _this->projectileID();
 		//((ProtoBuf::PlayerProjectileUpdate*)g_UpdateReusable)->projectileID() = _this->projectileID();
 
 		constexpr float num = 0.03125f;
@@ -614,9 +614,9 @@ public:
 
 			prevPos = movPos;
 
-			((rust::classes::PlayerProjectileUpdate*)g_UpdateReusable)->position = movPos;
-			((rust::classes::PlayerProjectileUpdate*)g_UpdateReusable)->velocity = velocity;
-			((rust::classes::PlayerProjectileUpdate*)g_UpdateReusable)->traveltime = desiredTime;
+			((protobuf::PlayerProjectileUpdate*)g_UpdateReusable)->position = movPos;
+			((protobuf::PlayerProjectileUpdate*)g_UpdateReusable)->velocity = velocity;
+			((protobuf::PlayerProjectileUpdate*)g_UpdateReusable)->traveltime = desiredTime;
 
 			//((ProtoBuf::PlayerProjectileUpdate*)g_UpdateReusable)->curPosition() = movPos;
 			//((ProtoBuf::PlayerProjectileUpdate*)g_UpdateReusable)->curVelocity() = velocity;
@@ -891,7 +891,7 @@ public:
 		float timeSinceLastTick = time - LocalPlayerBase->lastSentTickTime();
 		float timeSinceLastTickClamped = max(0.f, min(timeSinceLastTick, 1.f));
 
-		bool mountedplayer = target->GetMountable() ? 1 : 0;
+		bool mountedplayer = target->mounted() ? 1 : 0;
 
 		float Velocity = 0.f;
 		if (mountedplayer && target && !ent)
@@ -908,7 +908,7 @@ public:
 
 			else if (mountedplayer && target) {
 
-				BaseMountable* mounted = target->GetMountable();
+				BaseMountable* mounted = target->mounted();
 				if (mounted) {
 
 					auto realM = get_parent_entity((uintptr_t)mounted);

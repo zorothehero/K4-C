@@ -18,7 +18,7 @@ struct Ray {
 	}
 };
 
-namespace rust {
+namespace System {
 	template<typename T = void*>
 	class Array {
 	public:
@@ -44,7 +44,7 @@ namespace rust {
 			const auto internal_list = reinterpret_cast<uintptr_t>(this + 0x20);
 			return *reinterpret_cast<T*>(internal_list + idx * sizeof(T));
 		}
-		
+
 		T get_value(uint32_t idx)
 		{
 			const auto list = *reinterpret_cast<uintptr_t*>((uintptr_t)this + 0x10);
@@ -73,6 +73,125 @@ namespace rust {
 		}
 	};
 
+	class string {
+	public:
+		char zpad[0x10];
+		int size;
+		wchar_t str[128 + 1];
+		string() {}
+		string(const wchar_t* st) {
+			size = min(m_wcslen((wchar_t*)st), 128);
+			for (int i = 0; i < size; i++) {
+				str[i] = st[i];
+			}
+			str[size] = 0;
+		}
+	};
+}
+
+namespace protobuf {
+	enum class HitTestType
+	{
+		Generic = 0,
+		ProjectileEffect = 1,
+		Projectile = 2,
+		MeleeAttack = 3,
+		Use = 4,
+	};
+
+	class Attack {
+	public:
+		union {
+			member(Vector3, pointStart, 0x14);
+			member(Vector3, pointEnd, 0x18);
+			member(unsigned int, hitID, 0x2C);
+			member(unsigned int, hitBone, 0x30);
+			member(Vector3, hitNormalLocal, 0x34);
+			member(Vector3, hitPositionLocal, 0x40);
+			member(Vector3, hitNormalWorld, 0x4C);
+			member(Vector3, hitPositionWorld, 0x48);
+			member(unsigned int, hitPartID, 0x64);
+			member(unsigned int, hitMaterialID, 0x68);
+			member(unsigned int, hitItem, 0x6C);
+		};
+	};
+
+	class InputMessage {
+	public:
+		member(bool, ShouldPool, 0x10);
+		member(bool, _disposed, 0x11);
+		member(int, buttons, 0x14);
+		member(Vector3, aimAngles, 0x18);
+		member(Vector3, mouseDelta, 0x24);
+	};
+
+	class PlayerTick {
+	public:
+		member(bool, ShouldPool, 0x10);
+		member(bool, _disposed, 0x11);
+		member(InputMessage*, inputState, 0x18);
+		member(Vector3, position, 0x20);
+		//DEFINE_MEMBER_N(modelstate*, modelState, 0x30);
+		member(uintptr_t, modelState, 0x30);
+		member(UINT, activeItem, 0x38);
+		member(Vector3, eyePos, 0x3C);
+		member(UINT, parentID, 0x48);
+		member(UINT, deltaMs, 0x4C);
+	};
+
+	class PlayerAttack {
+	public:
+		union {
+			member(Attack*, attack, 0x18);
+		};
+	};
+
+	class CreateBuilding {
+	public:
+		bool ShouldPool; // 0x10
+		bool _disposed; // 0x11
+		unsigned int entity; // 0x14
+		unsigned int socket; // 0x18
+		bool onterrain; // 0x1C
+		Vector3 position; // 0x20
+		Vector3 normal; // 0x2C
+		Ray ray; // 0x38
+		unsigned int blockID; // 0x50
+		Vector3 rotation; // 0x54
+	};
+
+	class PlayerProjectileAttack {
+	public:
+		union {
+			member(PlayerAttack*, playerAttack, 0x18);
+			member(Vector3, hitVelocity, 0x20);
+			member(float, hitDistance, 0x2C);
+			member(float, travelTime, 0x30);
+		};
+	};
+
+	class PlayerProjectileRicochet {
+	public:
+		union {
+			member(Vector3, hitPosition, 0x18);
+			member(Vector3, inVelocity, 0x24);
+			member(Vector3, outVelocity, 0x30);
+			member(Vector3, hitNormal, 0x3C);
+		};
+	};
+
+	class PlayerProjectileUpdate {
+	public:
+		union {
+			member(int, projectileID, 0x14);
+			member(Vector3, position, 0x18);
+			member(Vector3, velocity, 0x24);
+			member(float, traveltime, 0x30);
+		};
+	};
+}
+
+namespace rust {
 	namespace classes {
 		enum class Signal {
 			Attack,
@@ -153,107 +272,6 @@ namespace rust {
 			SKYDOME = 20012,
 			RIVERMESH = 20014,
 			MONUMENT = 20015 //Airport, Powerplant, etc
-		};
-
-		enum class HitTestType
-		{
-			Generic = 0,
-			ProjectileEffect = 1,
-			Projectile = 2,
-			MeleeAttack = 3,
-			Use = 4,
-		};
-
-		class Attack {
-		public:
-			union {
-				member(Vector3, pointStart, 0x14);
-				member(Vector3, pointEnd, 0x18);
-				member(unsigned int, hitID, 0x2C);
-				member(unsigned int, hitBone, 0x30);
-				member(Vector3, hitNormalLocal, 0x34);
-				member(Vector3, hitPositionLocal, 0x40);
-				member(Vector3, hitNormalWorld, 0x4C);
-				member(Vector3, hitPositionWorld, 0x48);
-				member(unsigned int, hitPartID, 0x64);
-				member(unsigned int, hitMaterialID, 0x68);
-				member(unsigned int, hitItem, 0x6C);
-			};
-		};
-
-		class InputMessage {
-		public:
-			member(bool, ShouldPool, 0x10);
-			member(bool, _disposed, 0x11);
-			member(int, buttons, 0x14);
-			member(Vector3, aimAngles, 0x18);
-			member(Vector3, mouseDelta, 0x24);
-		};
-
-		class PlayerTick {
-		public:
-			member(bool, ShouldPool, 0x10);
-			member(bool, _disposed, 0x11);
-			member(InputMessage*, inputState, 0x18);
-			member(Vector3, position, 0x20);
-			//DEFINE_MEMBER_N(modelstate*, modelState, 0x30);
-			member(uintptr_t, modelState, 0x30);
-			member(UINT, activeItem, 0x38);
-			member(Vector3, eyePos, 0x3C);
-			member(UINT, parentID, 0x48);
-			member(UINT, deltaMs, 0x4C);
-		};
-
-
-		class PlayerAttack {
-		public:
-			union {
-				member(Attack*, attack, 0x18);
-			};
-		};
-
-		class CreateBuilding {
-		public:
-			bool ShouldPool; // 0x10
-			bool _disposed; // 0x11
-			unsigned int entity; // 0x14
-			unsigned int socket; // 0x18
-			bool onterrain; // 0x1C
-			Vector3 position; // 0x20
-			Vector3 normal; // 0x2C
-			Ray ray; // 0x38
-			unsigned int blockID; // 0x50
-			Vector3 rotation; // 0x54
-		};
-
-		class PlayerProjectileAttack {
-		public:
-			union {
-				member(PlayerAttack*, playerAttack, 0x18);
-				member(Vector3, hitVelocity, 0x20);
-				member(float, hitDistance, 0x2C);
-				member(float, travelTime, 0x30);
-			};
-		};
-
-		class PlayerProjectileRicochet {
-		public:
-			union {
-				member(Vector3, hitPosition, 0x18);
-				member(Vector3, inVelocity, 0x24);
-				member(Vector3, outVelocity, 0x30);
-				member(Vector3, hitNormal, 0x3C);
-			};
-		};
-
-		class PlayerProjectileUpdate {
-		public:
-			union {
-				member(int, projectileID, 0x14);
-				member(Vector3, position, 0x18);
-				member(Vector3, velocity, 0x24);
-				member(float, traveltime, 0x30);
-			};
 		};
 
 		enum class Layers
@@ -618,21 +636,6 @@ namespace rust {
 			Crawling = 4096,
 		};
 
-		class string {
-		public:
-			char zpad[0x10];
-			int size;
-			wchar_t str[128 + 1];
-			string() {}
-			string(const wchar_t* st) {
-				size = min(m_wcslen((wchar_t*)st), 128);
-				for (int i = 0; i < size; i++) {
-					str[i] = st[i];
-				}
-				str[size] = 0;
-			}
-		};
-
 		class Rect {
 		public:
 			float x; // 0x10
@@ -665,34 +668,5 @@ namespace rust {
 			KeyUp = 5,
 			Repaint = 7
 		};
-
-		class HitTest {
-		public:
-			union {
-				//              Type     Name    Offset
-				member(uintptr_t, type, 0x10);
-				member(Vector3, AttackRay, 0x14);
-				member(float, Radius, 0x2C);
-				member(float, Forgiveness, 0x30);
-				member(float, MaxDistance, 0x34);
-				member(uintptr_t, RayHit, 0x38);
-				member(bool, MultiHit, 0x64);
-				member(bool, BestHit, 0x65);
-				member(bool, DidHit, 0x66);
-				member(uintptr_t, damageProperties, 0x68);
-				member(uintptr_t, gameObject, 0x70);
-				member(uintptr_t, collider, 0x78);
-				member(uintptr_t, ignoreEntity, 0x80);
-				member(uintptr_t, HitEntity, 0x88);
-				member(Vector3, HitPoint, 0x90);
-				member(Vector3, HitNormal, 0x9C);
-				member(Vector3, HitNormal, 0x9C);
-				member(float, HitDistance, 0xA8);
-				member(uintptr_t, HitTransform, 0xB0);
-				member(unsigned int, HitPart, 0xB8);
-				member(string, HitMaterial, 0xC0);
-			};
-		};
 	}
-
 }

@@ -402,7 +402,7 @@ public:
 		safe_write(ht + 0x80, (DWORD64)ow, DWORD64); //IgnoreEntity
 		safe_write(ht + 0x2C, 0, float); //Radius
 		safe_write(ht + 0x30, 0.15f, float); //Forgiveness                                        FAT BULLET
-		if (!esp::local_player || ow->get_steam_id() == esp::local_player->get_steam_id()) {
+		if (!esp::local_player || ow->userID() == esp::local_player->userID()) {
 			safe_write(ht + 0x10, 0x2, int); //Type
 		}
 		else safe_write(ht + 0x10, 0x1, int); //Type	`

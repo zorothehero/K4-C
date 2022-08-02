@@ -54,7 +54,6 @@ uintptr_t clActiveItem = il2cpp::value(_("BasePlayer"), _("clActiveItem"));
 uintptr_t playerModel = il2cpp::value(_("BasePlayer"), _("playerModel"));
 uintptr_t clientTeam = il2cpp::value(_("BasePlayer"), _("clientTeam"));
 uintptr_t playerFlags = il2cpp::value(_("BasePlayer"), _("playerFlags"));
-uintptr_t clientTickInterval = il2cpp::value(_("BasePlayer"), _("clientTickInterval"));
 uintptr_t eyes = il2cpp::value(_("BasePlayer"), _("eyes"));
 uintptr_t _lastSentTickTime = il2cpp::value(_("BasePlayer"), _("lastSentTickTime"));
 uintptr_t modelState = il2cpp::value(_("BasePlayer"), _("modelState"));
@@ -62,8 +61,6 @@ uintptr_t input = il2cpp::value(_("BasePlayer"), _("input"));
 uintptr_t containerBelt = il2cpp::value(_("PlayerInventory"), _("containerBelt"));
 uintptr_t containerWear = il2cpp::value(_("PlayerInventory"), _("containerWear"));
 uintptr_t itemList = il2cpp::value(_("ItemContainer"), _("itemList"));
-uintptr_t userID = il2cpp::value(_("BasePlayer"), _("userID"));
-uintptr_t mounted = il2cpp::value(_("BasePlayer"), _("mounted"));
 
 uintptr_t building_grade = il2cpp::value(_("BuildingBlock"), _("grade"));
 
@@ -83,19 +80,6 @@ uintptr_t heldEntity = il2cpp::value(_("Item"), _("heldEntity"));
 
 uintptr_t canWieldItems = il2cpp::value(_("BaseMountable"), _("canWieldItems"));
 
-uintptr_t recoil = il2cpp::value(_("BaseProjectile"), _("recoil"));
-uintptr_t automatic = il2cpp::value(_("BaseProjectile"), _("automatic"));
-
-uintptr_t aimSway = il2cpp::value(_("BaseProjectile"), _("aimSway"));
-uintptr_t aimSwaySpeed = il2cpp::value(_("BaseProjectile"), _("aimSwaySpeed"));
-uintptr_t primaryMagazine = il2cpp::value(_("BaseProjectile"), _("primaryMagazine"));
-
-uintptr_t aimCone = il2cpp::value(_("BaseProjectile"), _("aimCone"));
-uintptr_t hipAimCone = il2cpp::value(_("BaseProjectile"), _("hipAimCone"));
-uintptr_t aimConePenaltyMax = il2cpp::value(_("BaseProjectile"), _("aimConePenaltyMax"));
-uintptr_t aimconePenaltyPerShot = il2cpp::value(_("BaseProjectile"), _("aimconePenaltyPerShot"));
-uintptr_t stancePenaltyScale = il2cpp::value(_("BaseProjectile"), _("stancePenaltyScale"));
-
 uintptr_t successFraction = il2cpp::value(_("FlintStrikeWeapon"), _("successFraction"));
 uintptr_t didSparkThisFrame = il2cpp::value(_("FlintStrikeWeapon"), _("_didSparkThisFrame"));
 
@@ -103,12 +87,10 @@ uintptr_t currentVelocity = il2cpp::value(_("Projectile"), _("currentVelocity"))
 uintptr_t currentPosition = il2cpp::value(_("Projectile"), _("currentPosition"));
 uintptr_t thickness_addr = il2cpp::value(_("Projectile"), _("thickness"));
 uintptr_t traveledTime = il2cpp::value(_("Projectile"), _("traveledTime"));
-uintptr_t isAuthoritative = il2cpp::value(_("Projectile"), _("isAuthoritative"));
-uintptr_t projectileVelocityScale_addr = il2cpp::value(_("BaseProjectile"), _("projectileVelocityScale"));
+uintptr_t isAuthoritative = il2cpp::value(_("Projectile"), _("isAuthoritative")); 
+
 uintptr_t mod = il2cpp::value(_("Projectile"), _("mod"));
 uintptr_t hitTest = il2cpp::value(_("Projectile"), _("hitTest"));
-
-uintptr_t damageProperties = il2cpp::value(_("BaseMelee"), _("damageProperties"));
 
 uintptr_t weakspots = il2cpp::value(_("BaseHelicopter"), _("weakspots"));
 
@@ -132,14 +114,7 @@ uintptr_t TargetMovement = il2cpp::value(_("BaseMovement"), _("<TargetMovement>k
 
 uintptr_t lastHitTime = il2cpp::value(_("Chainsaw"), _("lastHitTime"));
 uintptr_t lastHitMaterial = il2cpp::value(_("Chainsaw"), _("lastHitMaterial"));
-uintptr_t gathering = il2cpp::value(_("BaseMelee"), _("gathering"));
 
-uintptr_t nextAttackTime = il2cpp::value(_("AttackEntity"), _("nextAttackTime"));
-uintptr_t timeSinceDeploy = il2cpp::value(_("AttackEntity"), _("timeSinceDeploy"));
-uintptr_t deployDelay = il2cpp::value(_("AttackEntity"), _("deployDelay"));
-uintptr_t repeatDelay = il2cpp::value(_("AttackEntity"), _("repeatDelay"));
-uintptr_t reloadTime = il2cpp::value(_("BaseProjectile"), _("reloadTime"));
-uintptr_t nextreloadTime = il2cpp::value(_("BaseProjectile"), _("nextReloadTime"));
 uintptr_t integrity = il2cpp::value(_("Projectile"), _("integrity"));
 
 uintptr_t groundAngleNew = il2cpp::value(_("PlayerWalkMovement"), _("groundAngleNew"));
@@ -191,7 +166,7 @@ static auto get_texture = reinterpret_cast<uintptr_t(*)(uintptr_t sprite)>(*rein
 
 static auto get_rect = reinterpret_cast<rust::classes::Rect(*)(uintptr_t sprite)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Sprite"), _("get_rect"), 0, _(""), _("UnityEngine"))));
 
-static auto StringPool_Get = reinterpret_cast<unsigned int(*)(rust::classes::string)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("StringPool"), _("Get"), 1, _("str"), _(""))));
+static auto StringPool_Get = reinterpret_cast<unsigned int(*)(System::string)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("StringPool"), _("Get"), 1, _("str"), _(""))));
 
 static auto set_timeScale = reinterpret_cast<void(*)(float)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Time"), _("set_timeScale"), 1, _(""), _("UnityEngine"))));
 
@@ -209,13 +184,13 @@ static auto get_isAlive = reinterpret_cast<bool (*)(BaseProjectile*)>(*reinterpr
 
 static auto get_rotation = reinterpret_cast<Vector4(*)(uintptr_t Transform)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Transform"), _("get_rotation"), 0, _(""), _("UnityEngine"))));
 
-static auto FindShader = reinterpret_cast<uintptr_t(*)(rust::classes::string)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Shader"), _("Find"), 1, _(""), _("UnityEngine"))));
+static auto FindShader = reinterpret_cast<uintptr_t(*)(System::string)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Shader"), _("Find"), 1, _(""), _("UnityEngine"))));
 
 static auto set_hideFlags = reinterpret_cast<void(*)(uintptr_t material, int value)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Object"), _("set_hideFlags"), 1, _(""), _("UnityEngine"))));
 
-static auto set_name = reinterpret_cast<void(*)(uintptr_t, rust::classes::string)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Object"), _("set_name"), 1, _(""), _("UnityEngine"))));
+static auto set_name = reinterpret_cast<void(*)(uintptr_t, System::string)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Object"), _("set_name"), 1, _(""), _("UnityEngine"))));
 
-static auto SetInt = reinterpret_cast<void(*)(uintptr_t material, rust::classes::string name, int value)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Material"), _("SetInt"), 1, _(""), _("UnityEngine"))));
+static auto SetInt = reinterpret_cast<void(*)(uintptr_t material, System::string name, int value)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Material"), _("SetInt"), 1, _(""), _("UnityEngine"))));
 
 static auto get_deltaTime = reinterpret_cast<float(*)()>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Time"), _("get_deltaTime"), 0, _(""), _("UnityEngine"))));
 
@@ -257,7 +232,7 @@ static auto ProcessAttack = reinterpret_cast<void(*)(BaseProjectile*, HitTest*)>
 
 static auto GetProjectileVelocityScale = reinterpret_cast<float(*)(BaseProjectile*, bool max)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseProjectile"), _("GetProjectileVelocityScale"), 1, _("getMax"), _(""), 1)));
 
-//static auto get_Renderers = reinterpret_cast<rust::list<uintptr_t>*(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("SkinnedMultiMesh"), _("get_Renderers"), 0, _(""), _(""))));
+//static auto get_Renderers = reinterpret_cast<System::list<uintptr_t>*(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("SkinnedMultiMesh"), _("get_Renderers"), 0, _(""), _(""))));
 
 static auto get_material = reinterpret_cast<uintptr_t(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Renderer"), _("get_material"), 0, _(""), _("UnityEngine"))));
 
@@ -265,7 +240,7 @@ static auto set_material = reinterpret_cast<uintptr_t(*)(uintptr_t, uintptr_t)>(
 
 static auto get_maxspeed = reinterpret_cast<float(*)(BasePlayer*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("GetMaxSpeed"), 0, _(""), _(""))));
 
-static auto SendSignal = reinterpret_cast<void(*)(uintptr_t, rust::classes::Signal, rust::classes::string)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseEntity"), _("SendSignalBroadcast"), 2, _(""), _(""))));
+static auto SendSignal = reinterpret_cast<void(*)(uintptr_t, rust::classes::Signal, System::string)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseEntity"), _("SendSignalBroadcast"), 2, _(""), _(""))));
 
 static auto _BoundsPadding = reinterpret_cast<float(*)(BasePlayer*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseEntity"), _("BoundsPadding"), 2, _(""), _(""))));
 
@@ -309,7 +284,7 @@ static auto set_rigidbody_velocity = reinterpret_cast<void(*)(uintptr_t, Vector3
 
 static auto get_rigidbody_velocity = reinterpret_cast<Vector3(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Rigidbody"), _("get_velocity"), 0, _(""), _("UnityEngine"))));
 
-static auto console_msg = reinterpret_cast<void(*)(uintptr_t, rust::classes::string)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("ConsoleMessage"), 0, _(""), _(""))));
+static auto console_msg = reinterpret_cast<void(*)(uintptr_t, System::string)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("ConsoleMessage"), 0, _(""), _(""))));
 
 static auto teleportto = reinterpret_cast<void(*)(uintptr_t, Vector3, uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseMovement"), _("TeleportTo"), 0, _(""), _(""))));
 
@@ -317,7 +292,7 @@ static auto GetAimCone = reinterpret_cast<float(*)(uintptr_t)>(*reinterpret_cast
 
 static auto animcurve_evaluate = reinterpret_cast<float(*)(uintptr_t, float)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("AnimationCurve"), _("Evaluate"), 0, _(""), _("UnityEngine"))));
 
-static auto guidtopath = reinterpret_cast<rust::classes::string(*)(rust::classes::string)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GameManifest"), _("GUIDToPath"), 0, _(""), _(""))));
+static auto guidtopath = reinterpret_cast<System::string(*)(System::string)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GameManifest"), _("GUIDToPath"), 0, _(""), _(""))));
 
 static auto GetBounds = reinterpret_cast<Bounds(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("GetBounds"), 0, _(""), _(""))));
 
@@ -325,7 +300,7 @@ static auto get_mounted = reinterpret_cast<uintptr_t(*)(uintptr_t)>(*reinterpret
 
 static auto get_parent_entity = reinterpret_cast<uintptr_t(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseNetworkable"), _("GetParentEntity"), 0, _(""), _(""))));
 
-static auto get_short_prefab_name = reinterpret_cast<rust::classes::string(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseNetworkable"), _("get_ShortPrefabName"), 0, _(""), _(""))));
+static auto get_short_prefab_name = reinterpret_cast<System::string(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseNetworkable"), _("get_ShortPrefabName"), 0, _(""), _(""))));
 
 static auto get_max_fwd_speed = reinterpret_cast<float(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("ModularCar"), _("GetMaxForwardSpeed"), 0, _(""), _(""))));
 
@@ -357,7 +332,7 @@ float current_time;
 void init_bp() {
 	get_center = reinterpret_cast<Vector3(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("PlayerEyes"), _("get_center"), 0, _(""), _(""))));
 	get_max_fwd_speed = reinterpret_cast<float(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("ModularCar"), _("GetMaxForwardSpeed"), 0, _(""), _(""))));
-	get_short_prefab_name = reinterpret_cast<rust::classes::string(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseNetworkable"), _("get_ShortPrefabName"), 0, _(""), _(""))));
+	get_short_prefab_name = reinterpret_cast<System::string(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseNetworkable"), _("get_ShortPrefabName"), 0, _(""), _(""))));
 	get_parent_entity = reinterpret_cast<uintptr_t(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseNetworkable"), _("GetParentEntity"), 0, _(""), _(""))));
 	get_mounted = reinterpret_cast<uintptr_t(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("GetMounted"), 0, _(""), _(""))));
 	terrainheightmap_GetHeight = reinterpret_cast<int(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("TerrainHeightMap"), _("GetHeight"), 0, _(""), _(""))));
@@ -371,18 +346,18 @@ void init_bp() {
 	steamItem = il2cpp::value(_("ItemDefinition"), _("steamItem"));
 	iconSprite = il2cpp::value(_("ItemDefinition"), _("iconSprite"));
 	get_texture = reinterpret_cast<uintptr_t(*)(uintptr_t sprite)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Sprite"), _("get_texture"), 0, _(""), _("UnityEngine"))));
-	set_name = reinterpret_cast<void(*)(uintptr_t, rust::classes::string)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Object"), _("set_name"), 1, _(""), _("UnityEngine"))));;
+	set_name = reinterpret_cast<void(*)(uintptr_t, System::string)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Object"), _("set_name"), 1, _(""), _("UnityEngine"))));;
 	get_gameObject = reinterpret_cast<uintptr_t(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Component"), _("get_gameObject"), 0, _(""), _("UnityEngine"))));
 	InverseTransformDirection = reinterpret_cast<Vector3(*)(Transform*, Vector3)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Transform"), _("InverseTransformDirection"), 1, _(""), _("UnityEngine"))));
 	LookRotation = reinterpret_cast<Vector4(*)(Vector3, Vector3 value)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Quaternion"), _("LookRotation"), 2, _(""), _("UnityEngine"))));
 	set_rotation = reinterpret_cast<void(*)(Transform*, Vector4 value)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Transform"), _("set_rotation"), 1, _(""), _("UnityEngine"))));
 	set_position = reinterpret_cast<void(*)(Transform*, Vector3 value)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Transform"), _("set_position"), 1, _(""), _("UnityEngine"))));
-	SetInt = reinterpret_cast<void(*)(uintptr_t material, rust::classes::string name, int value)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Material"), _("SetInt"), 1, _(""), _("UnityEngine"))));
+	SetInt = reinterpret_cast<void(*)(uintptr_t material, System::string name, int value)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Material"), _("SetInt"), 1, _(""), _("UnityEngine"))));
 	set_hideFlags = reinterpret_cast<void(*)(uintptr_t material, int value)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Object"), _("set_hideFlags"), 1, _(""), _("UnityEngine"))));
-	FindShader = reinterpret_cast<uintptr_t(*)(rust::classes::string)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Shader"), _("Find"), 1, _(""), _("UnityEngine"))));
-	//get_Renderers = reinterpret_cast<rust::list<uintptr_t> *(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("SkinnedMultiMesh"), _("get_Renderers"), 0, _(""), _(""))));
+	FindShader = reinterpret_cast<uintptr_t(*)(System::string)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Shader"), _("Find"), 1, _(""), _("UnityEngine"))));
+	//get_Renderers = reinterpret_cast<System::list<uintptr_t> *(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("SkinnedMultiMesh"), _("get_Renderers"), 0, _(""), _(""))));
 	//get_material = reinterpret_cast<uintptr_t(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Renderer"), _("get_material"), 0, _(""), _("UnityEngine"))));
-	StringPool_Get = reinterpret_cast<unsigned int(*)(rust::classes::string)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("StringPool"), _("Get"), 1, _("str"), _(""))));
+	StringPool_Get = reinterpret_cast<unsigned int(*)(System::string)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("StringPool"), _("Get"), 1, _("str"), _(""))));
 	set_timeScale = reinterpret_cast<void(*)(float)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Time"), _("set_timeScale"), 1, _(""), _("UnityEngine"))));
 	get_timeScale = reinterpret_cast<float(*)()>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Time"), _("get_timeScale"), 0, _(""), _("UnityEngine"))));
 	GetIndex = reinterpret_cast<int(*)(uintptr_t SkinSetCollection, float)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("SkinSetCollection"), _("GetIndex"), 1, _(""), _(""))));
@@ -414,7 +389,7 @@ void init_bp() {
 
 	get_fixedTime = reinterpret_cast<float(*)()>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Time"), _("get_fixedTime"), 0, _(""), _("UnityEngine"))));
 
-	SendSignal = reinterpret_cast<void(*)(uintptr_t, rust::classes::Signal, rust::classes::string)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseEntity"), _("SendSignalBroadcast"), 2, _(""), _(""))));
+	SendSignal = reinterpret_cast<void(*)(uintptr_t, rust::classes::Signal, System::string)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseEntity"), _("SendSignalBroadcast"), 2, _(""), _(""))));
 
 	updateammodisplay = reinterpret_cast<void(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseProjectile"), _("UpdateAmmoDisplay"), 0, _(""), _(""))));
 
@@ -436,7 +411,7 @@ void init_bp() {
 
 	get_rigidbody_velocity = reinterpret_cast<Vector3(*)(uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Rigidbody"), _("get_velocity"), 0, _(""), _("UnityEngine"))));
 
-	console_msg = reinterpret_cast<void(*)(uintptr_t, rust::classes::string)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("ConsoleMessage"), 0, _(""), _(""))));
+	console_msg = reinterpret_cast<void(*)(uintptr_t, System::string)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("ConsoleMessage"), 0, _(""), _(""))));
 
 	teleportto = reinterpret_cast<void(*)(uintptr_t, Vector3, uintptr_t)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseMovement"), _("TeleportTo"), 0, _(""), _(""))));
 
@@ -448,21 +423,16 @@ void init_bp() {
 
 	animcurve_evaluate = reinterpret_cast<float(*)(uintptr_t, float)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("AnimationCurve"), _("Evaluate"), 0, _(""), _("UnityEngine"))));
 
-	guidtopath = reinterpret_cast<rust::classes::string(*)(rust::classes::string)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GameManifest"), _("GUIDToPath"), 0, _(""), _(""))));
+	guidtopath = reinterpret_cast<System::string(*)(System::string)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("GameManifest"), _("GUIDToPath"), 0, _(""), _(""))));
 
 	IsSwimming = reinterpret_cast<bool (*)(BasePlayer*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BasePlayer"), _("IsSwimming"), 0, _(""), _(""))));
 #pragma region il2
 
 	containerWear = il2cpp::value(_("PlayerInventory"), _("containerWear"));
 	canWieldItems = il2cpp::value(_("BaseMountable"), _("canWieldItems"));
-	mounted = il2cpp::value(_("BasePlayer"), _("mounted"));
 	containerBelt = il2cpp::value(_("PlayerInventory"), _("containerBelt"));
 	itemList = il2cpp::value(_("ItemContainer"), _("itemList"));
 	integrity = il2cpp::value(_("Projectile"), _("integrity"));
-	weakspots = il2cpp::value(_("BaseHelicopter"), _("weakspots"));
-
-	model = il2cpp::value(_("BaseEntity"), _("model"));
-	gathering = il2cpp::value(_("BaseMelee"), _("gathering"));
 
 	lastHitTime = il2cpp::value(_("Chainsaw"), _("lastHitTime"));
 	lastHitMaterial = il2cpp::value(_("Chainsaw"), _("lastHitMaterial"));
@@ -471,7 +441,6 @@ void init_bp() {
 	groundTime = il2cpp::value(_("PlayerWalkMovement"), _("groundTime"));
 	gravityMultiplier = il2cpp::value(_("PlayerWalkMovement"), _("gravityMultiplier"));
 
-	damageProperties = il2cpp::value(_("BaseMelee"), _("damageProperties"));
 	movement = il2cpp::value(_("BasePlayer"), _("movement"));
 	_displayName = il2cpp::value(_("BasePlayer"), _("_displayName"));
 	player_inventory = il2cpp::value(_("BasePlayer"), _("inventory"));
@@ -479,20 +448,12 @@ void init_bp() {
 	playerModel = il2cpp::value(_("BasePlayer"), _("playerModel"));
 	clientTeam = il2cpp::value(_("BasePlayer"), _("clientTeam"));
 	playerFlags = il2cpp::value(_("BasePlayer"), _("playerFlags"));
-	clientTickInterval = il2cpp::value(_("BasePlayer"), _("clientTickInterval"));
 	eyes = il2cpp::value(_("BasePlayer"), _("eyes"));
-	_lastSentTickTime = il2cpp::value(_("BasePlayer"), _("lastSentTickTime"));
 	modelState = il2cpp::value(_("BasePlayer"), _("modelState"));
 	input = il2cpp::value(_("BasePlayer"), _("input"));
-	userID = il2cpp::value(_("BasePlayer"), _("userID"));
 
 	newVelocity = il2cpp::value(_("PlayerModel"), _("newVelocity"));
 	isLocalPlayer = il2cpp::value(_("PlayerModel"), _("isLocalPlayer"));
-
-	nextAttackTime = il2cpp::value(_("AttackEntity"), _("nextAttackTime"));
-	timeSinceDeploy = il2cpp::value(_("AttackEntity"), _("timeSinceDeploy"));
-	deployDelay = il2cpp::value(_("AttackEntity"), _("deployDelay"));
-	repeatDelay = il2cpp::value(_("AttackEntity"), _("repeatDelay"));
 
 	_health = il2cpp::value(_("BaseCombatEntity"), _("_health"));
 	_maxHealth = il2cpp::value(_("BaseCombatEntity"), _("_maxHealth"));
@@ -501,19 +462,6 @@ void init_bp() {
 	net = il2cpp::value(_("BaseNetworkable"), _("net"));
 
 	heldEntity = il2cpp::value(_("Item"), _("heldEntity"));
-
-	recoil = il2cpp::value(_("BaseProjectile"), _("recoil"));
-	automatic = il2cpp::value(_("BaseProjectile"), _("automatic"));
-
-	aimSway = il2cpp::value(_("BaseProjectile"), _("aimSway"));
-	aimSwaySpeed = il2cpp::value(_("BaseProjectile"), _("aimSwaySpeed"));
-	primaryMagazine = il2cpp::value(_("BaseProjectile"), _("primaryMagazine"));
-
-	aimCone = il2cpp::value(_("BaseProjectile"), _("aimCone"));
-	hipAimCone = il2cpp::value(_("BaseProjectile"), _("hipAimCone"));
-	aimConePenaltyMax = il2cpp::value(_("BaseProjectile"), _("aimConePenaltyMax"));
-	aimconePenaltyPerShot = il2cpp::value(_("BaseProjectile"), _("aimconePenaltyPerShot"));
-	stancePenaltyScale = il2cpp::value(_("BaseProjectile"), _("stancePenaltyScale"));
 
 	currentVelocity = il2cpp::value(_("Projectile"), _("currentVelocity"));
 	currentPosition = il2cpp::value(_("Projectile"), _("currentPosition"));
@@ -665,7 +613,7 @@ public:
 
 class Model : public MonoBehaviour {
 public:
-	FIELD(_("Model"), _("boneTransforms"), boneTransforms, rust::Array<Transform*>*);
+	FIELD(_("Model"), _("boneTransforms"), boneTransforms, System::Array<Transform*>*);
 };
 
 class BaseNetworkable : public BaseMonoBehaviour {
@@ -690,12 +638,12 @@ public:
 	}
 	void ServerRPC(wchar_t* func) {
 		if (!this) return;
-		auto off = reinterpret_cast<void (*)(BaseEntity*, rust::classes::string)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseEntity"), _("ServerRPC"), 1, _("funcName"), _(""), 1)));
+		auto off = reinterpret_cast<void (*)(BaseEntity*, System::string)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseEntity"), _("ServerRPC"), 1, _("funcName"), _(""), 1)));
 		return off(this, func);
 	}
 	Transform* FindBone(wchar_t* bone) {
 		if (!this) return nullptr;
-		auto off = reinterpret_cast<Transform * (*)(BaseEntity*, rust::classes::string)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseEntity"), _("FindBone"), 1, _(""), _(""))));
+		auto off = reinterpret_cast<Transform * (*)(BaseEntity*, System::string)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("BaseEntity"), _("FindBone"), 1, _(""), _(""))));
 		return off(this, bone);
 	}
 	bool is_visible(Vector3 source, Vector3 destination, float p1 = 0.18f) {
@@ -725,25 +673,21 @@ class BaseHelicopter_Weakspot {
 
 class BaseHelicopter : public BaseCombatEntity {
 public:
-	FIELD(_("BaseHelicopter"), _("weakspots"), weakspots, rust::list<BaseHelicopter_Weakspot*>*);
+	FIELD(_("BaseHelicopter"), _("weakspots"), weakspots, System::list<BaseHelicopter_Weakspot*>*);
 };
 
 class ItemModProjectile : public MonoBehaviour {
 public:
-	float get_projectile_velocity() {
-		return *reinterpret_cast<float*>((uintptr_t)this + 0x34);
-	}
-
-	float& projectileSpread() {
-		return *reinterpret_cast<float*>((uintptr_t)this + 0x30);
-	}
-
-	float& projectileVelocitySpread() {
-		return *reinterpret_cast<float*>((uintptr_t)this + 0x38);
-	}
+	FIELD(_("ItemModProjectile"), _("projectileVelocity"), projectileVelocity, float);
+	FIELD(_("ItemModProjectile"), _("projectileSpread"), projectileSpread, float);
+	FIELD(_("ItemModProjectile"), _("projectileVelocitySpread"), projectileVelocitySpread, float);
 };
 
 class BasePlayer;
+
+class RecoilProperties {
+	
+};
 
 class DamageProperties {
 
@@ -773,7 +717,7 @@ public:
 	FIELD(_("HitTest"), _("HitDistance"), HitDistance, float);
 	FIELD(_("HitTest"), _("HitTransform"), HitTransform, Transform*);
 	FIELD(_("HitTest"), _("HitPart"), HitPart, UINT);
-	FIELD(_("HitTest"), _("HitMaterial"), HitMaterial, rust::classes::string);
+	FIELD(_("HitTest"), _("HitMaterial"), HitMaterial, System::string);
 	FIELD(_("HitTest"), _("gameObject"), gameObject, GameObject*);
 };
 
@@ -809,62 +753,51 @@ public:
 
 class AttackEntity : public HeldEntity {
 public:
+	FIELD(_("AttackEntity"), _("nextAttackTime"), nextAttackTime, float);
+	FIELD(_("AttackEntity"), _("timeSinceDeploy"), timeSinceDeploy, float);
+	FIELD(_("AttackEntity"), _("deployDelay"), deployDelay, float);
+	FIELD(_("AttackEntity"), _("repeatDelay"), repeatDelay, float);
+};
+
+class BaseMelee : public AttackEntity {
+public:
+	FIELD(_("BaseMelee"), _("gathering"), gathering, GatherProperties*);
+	FIELD(_("BaseMelee"), _("damageProperties"), damageProperties, DamageProperties*);
+};
+
+class Magazine {
+	
 };
 
 class BaseProjectile : public AttackEntity {
-public:
-	float projectilevel_scale = projectileVelocityScale();
-	bool first = false;
-	float thickness = 0;
+public:	
+	FIELD(_("BaseProjectile"), _("reloadTime"), reloadTime, float);
+	FIELD(_("BaseProjectile"), _("nextReloadTime"), nextReloadTime, float);
+	FIELD(_("BaseProjectile"), _("recoil"), recoil, RecoilProperties*);
+	FIELD(_("BaseProjectile"), _("automatic"), automatic, bool);
+	FIELD(_("BaseProjectile"), _("aimSway"), aimSway, float);
+	FIELD(_("BaseProjectile"), _("aimSwaySpeed"), aimSwaySpeed, float);
+	FIELD(_("BaseProjectile"), _("primaryMagazine"), primaryMagazine, Magazine*);
+	FIELD(_("BaseProjectile"), _("aimCone"), aimCone, float);
+	FIELD(_("BaseProjectile"), _("hipAimCone"), hipAimCone, float);
+	FIELD(_("BaseProjectile"), _("aimConePenaltyMax"), aimConePenaltyMax, float);
+	FIELD(_("BaseProjectile"), _("aimconePenaltyPerShot"), aimconePenaltyPerShot, float);
+	FIELD(_("BaseProjectile"), _("stancePenaltyScale"), stancePenaltyScale, float);
+	FIELD(_("BaseProjectile"), _("projectileVelocityScale"), projectileVelocityScale, float);
+	
 
-	GatherProperties*& Gathering() {
-		return *reinterpret_cast<GatherProperties**>((uintptr_t)this + gathering);
-	}
 
 	void set_last_hit_time(float time) {
 		*reinterpret_cast<float*>((uintptr_t)this + lastHitTime) = time;
 	}
 
-	void set_last_hit_material(rust::classes::string material) {
-		*reinterpret_cast<rust::classes::string*>((uintptr_t)this + lastHitMaterial) = material;
-	}
-
-	float get_next_attack_time() {
-		return *reinterpret_cast<float*>((uintptr_t)this + nextAttackTime);
-	}
-
-	float get_time_since_deploy() {
-		return *reinterpret_cast<float*>((uintptr_t)this + timeSinceDeploy);
-	}
-
-	float get_deploy_delay() {
-		return *reinterpret_cast<float*>((uintptr_t)this + deployDelay);
-	}
-
-	float get_repeat_delay() {
-		return *reinterpret_cast<float*>((uintptr_t)this + repeatDelay);
-	}
-
-	void set_repeat_delay(float r) {
-		*reinterpret_cast<float*>((uintptr_t)this + repeatDelay) = r;
-		return;
-	}
-
-	float get_reload_time() {
-		return *reinterpret_cast<float*>((uintptr_t)this + reloadTime);
-	}
-
-	float get_next_reload_time() {
-		return *reinterpret_cast<float*>((uintptr_t)this + nextreloadTime);
+	void set_last_hit_material(System::string material) {
+		*reinterpret_cast<System::string*>((uintptr_t)this + lastHitMaterial) = material;
 	}
 
 	char* get_class_name() {
 		auto bp = *reinterpret_cast<uintptr_t*>(this);
 		return (char*)*reinterpret_cast<uintptr_t*>(bp + 0x10);
-	}
-
-	DamageProperties* get_damage_properties() {
-		return *reinterpret_cast<DamageProperties**>((uintptr_t)this + damageProperties);
 	}
 
 	HitTest* get_hit_test() {
@@ -880,8 +813,8 @@ public:
 	}
 
 	weapon_stats_t get_stats(int32_t weapon_id) {
-		const auto primary_magazine = *reinterpret_cast<uintptr_t*>((uintptr_t)this + primaryMagazine);
-		if (primary_magazine == 1)
+		const auto primary_magazine = (uintptr_t)this->primaryMagazine();//*reinterpret_cast<uintptr_t*>((uintptr_t)this + primaryMagazine);
+		if (!primary_magazine)
 			return weapon_stats_t{ xf(1000) };
 
 		float velocity = xf(1000);
@@ -1017,28 +950,8 @@ public:
 		*reinterpret_cast<Vector3*>((uintptr_t)this + currentPosition) = cp;
 	}
 
-	void set_projectile_thickness(float thickness)
-	{
-		*reinterpret_cast<float*>((uintptr_t)this + thickness_addr) = thickness;
-	}
-
-	float get_projectile_thickness()
-	{
-		return *reinterpret_cast<float*>((uintptr_t)this + thickness_addr);
-	}
-
-	float& projectileVelocityScale()
-	{
-		return *reinterpret_cast<float*>((uintptr_t)this + projectileVelocityScale_addr);
-	}
-
 	void set_travel_time(float f) {
 		*reinterpret_cast<float*>((uintptr_t)this + traveledTime) = f;
-	}
-
-	void SetProjectileVelocityScale(float r)
-	{
-		*reinterpret_cast<float*>((uintptr_t)this + projectileVelocityScale_addr) = r;
 	}
 
 	void set_current_velocity(Vector3 position)
@@ -1054,7 +967,7 @@ public:
 	float opy = 0.f;
 
 	void set_recoil() {
-		auto recoil_properties = *reinterpret_cast<uintptr_t*>((uintptr_t)this + recoil);
+		auto recoil_properties = (uintptr_t)this->recoil();//*reinterpret_cast<uintptr_t*>((uintptr_t)this + recoil);
 		
 		float recoilx = vars->combat.recoilx;
 		float recoily = vars->combat.recoily;
@@ -1082,23 +995,14 @@ public:
 		}
 	}
 
-	void set_no_sway() {
-		*reinterpret_cast<float*>((uintptr_t)this + aimSway) = 0;
-		*reinterpret_cast<float*>((uintptr_t)this + aimSwaySpeed) = 0;
-	}
-
-	bool& is_automatic() {
-		return *reinterpret_cast<bool*>((uintptr_t)this + automatic);
-	}
-
 	void set_no_spread(float scale = 0.f) {
-		auto recoil_properties = *reinterpret_cast<uintptr_t*>((uintptr_t)this + recoil);
+		auto recoil_properties = this->recoil();//*reinterpret_cast<uintptr_t*>((uintptr_t)this + recoil);
 		auto new_recoil_properties = *reinterpret_cast<uintptr_t*>((uintptr_t)recoil_properties + 0x78);
-		*reinterpret_cast<float*>((uintptr_t)this + aimCone) = scale;
-		*reinterpret_cast<float*>((uintptr_t)this + hipAimCone) = scale;
-		*reinterpret_cast<float*>((uintptr_t)this + aimConePenaltyMax) = scale;
-		*reinterpret_cast<float*>((uintptr_t)this + aimconePenaltyPerShot) = scale;
-		*reinterpret_cast<float*>((uintptr_t)this + stancePenaltyScale) = scale;
+		this->aimCone() = scale;
+		this->hipAimCone() = scale;
+		this->aimConePenaltyMax() = scale;
+		this->aimconePenaltyPerShot() = scale;
+		this->stancePenaltyScale() = scale;
 
 		if(new_recoil_properties)
 			*reinterpret_cast<float*>(new_recoil_properties + 0x60) = scale; //aimconeCurveScale
@@ -1345,9 +1249,9 @@ public:
 		return (T*)get_component((uintptr_t)this, type);
 	}
 
-	rust::list<uintptr_t>* GetComponentsInChildren(uintptr_t type) {
+	System::list<uintptr_t>* GetComponentsInChildren(uintptr_t type) {
 		if (!this || !type) return nullptr;
-		return reinterpret_cast<rust::list<uintptr_t>*>(get_components_in_children((uintptr_t)this, type));
+		return reinterpret_cast<System::list<uintptr_t>*>(get_components_in_children((uintptr_t)this, type));
 	}
 };
 
@@ -1461,9 +1365,9 @@ public:
 		auto off = reinterpret_cast<void(*)(Material*, Shader*)>(il2cpp::methods::resolve_icall(_("UnityEngine.Material::set_shader()")));
 		return off(this, s);
 	}
-	void SetColor(rust::classes::string s, col c) {
+	void SetColor(System::string s, col c) {
 		if (!this) return;
-		auto off = reinterpret_cast<void(*)(Material*, rust::classes::string, col)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Material"), _("SetColor"), 2, _("name"), _("UnityEngine"), 1)));
+		auto off = reinterpret_cast<void(*)(Material*, System::string, col)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("Material"), _("SetColor"), 2, _("name"), _("UnityEngine"), 1)));
 		return off(this, s, c);
 	}
 };
@@ -1480,9 +1384,9 @@ public:
 class SkinnedMultiMesh : public MonoBehaviour {
 public:	
 
-	rust::list<Renderer*>* get_Renderers() {
+	System::list<Renderer*>* get_Renderers() {
 		if (!this) return nullptr;
-		auto off = reinterpret_cast<rust::list<Renderer*>*(*)(SkinnedMultiMesh*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("SkinnedMultiMesh"), _("get_Renderers"), 0, _(""), _(""))));
+		auto off = reinterpret_cast<System::list<Renderer*>*(*)(SkinnedMultiMesh*)>(*reinterpret_cast<uintptr_t*>(il2cpp::method(_("SkinnedMultiMesh"), _("get_Renderers"), 0, _(""), _(""))));
 		return off(this);
 	}
 };
@@ -1519,7 +1423,10 @@ public:
 	FIELD(_("BasePlayer"), _("lastSentTickTime"), lastSentTickTime, float);
 	FIELD(_("BasePlayer"), _("net"), net, Networkable*);
 	FIELD(_("BasePlayer"), _("_displayName"), _displayName, str);
-
+	FIELD(_("BasePlayer"), _("userID"), userID, ULONG);
+	FIELD(_("BasePlayer"), _("clientTickInterval"), clientTickInterval, float);
+	FIELD(_("BasePlayer"), _("mounted"), mounted, BaseMountable*);
+	
 	void GroundAngleNew() {
 		*reinterpret_cast<float*>(this + 0xb0) = -1.0f;
 	}
@@ -1541,7 +1448,7 @@ public:
 		if (!this) return 0.f;
 
 		float s = get_maxspeed(this);
-		auto m = GetMountable() || vars->misc.interactive_debug;
+		auto m = this->mounted() || vars->misc.interactive_debug;
 		if (m)
 			return s * 4;
 		return s;
@@ -1552,8 +1459,8 @@ public:
 		return _SendClientTick(this);
 	}
 
-	rust::classes::PlayerTick* lastSentTick() {
-		return *reinterpret_cast<rust::classes::PlayerTick**>((uintptr_t)this + 0x660);
+	protobuf::PlayerTick* lastSentTick() {
+		return *reinterpret_cast<protobuf::PlayerTick**>((uintptr_t)this + 0x660);
 	}
 
 	wchar_t* get_player_name() {
@@ -1564,7 +1471,7 @@ public:
 	void SendSignalBroadcast(rust::classes::Signal signal, wchar_t* str = _(L""))
 	{
 		if (!this) return;
-		return SendSignal((uintptr_t)this, signal, rust::classes::string(str));
+		return SendSignal((uintptr_t)this, signal, System::string(str));
 	}
 
 	void fov() {
@@ -1593,31 +1500,10 @@ public:
 		}
 	}
 
-	BaseMountable* GetMountable() {
-		return mem::read<BaseMountable*>((uintptr_t)this + mounted);
-	}
-
-	void set_client_tick_interval(float tick) {
-		if (!this)
-			return;
-
-		*reinterpret_cast<float*>((uintptr_t)this + clientTickInterval) = tick;
-	}
-
 	void set_admin_flag(rust::classes::PlayerFlags flag) {
 		int PlayerFlag = *reinterpret_cast<int*>((uintptr_t)this + playerFlags);
 
 		*reinterpret_cast<int*>((uintptr_t)this + playerFlags) = PlayerFlag |= (int)flag;
-	}
-
-	unsigned long get_steam_id() {
-		if (!this)
-			return 0;
-
-		if (!playerModel())
-			return 0;
-
-		return *reinterpret_cast<unsigned long*>((uintptr_t)this + userID);
 	}
 
 	bool is_teammate(BasePlayer* local_player) {
@@ -1629,7 +1515,7 @@ public:
 
 		auto list = mem::read<uintptr_t>(member + 0x10);
 
-		auto steam_id = get_steam_id();
+		auto steam_id = this->userID();
 
 		for (int i = 0; i < size; i++) {
 			auto ent = mem::read<uintptr_t>(list + 0x20 + i * 0x8);
@@ -1646,7 +1532,7 @@ public:
 	//	return *reinterpret_cast<float*>((uintptr_t)this + _lastSentTickTime);
 	//}
 
-	rust::list<Item*>* get_belt_items()
+	System::list<Item*>* get_belt_items()
 	{
 		const auto inventory = *reinterpret_cast<uintptr_t*>((uintptr_t)this + player_inventory);
 		if (!inventory)
@@ -1662,14 +1548,14 @@ public:
 			return {};
 
 		const auto item_list =
-			*reinterpret_cast<rust::list<Item*>**>(list_wrapper + 0x10);
+			*reinterpret_cast<System::list<Item*>**>(list_wrapper + 0x10);
 		if (!item_list)
 			return {};
 
 		return item_list;
 	}
 
-	rust::list<Item*>* get_wearable_items()
+	System::list<Item*>* get_wearable_items()
 	{
 		const auto     inventory = *reinterpret_cast<uintptr_t*>((uintptr_t)this + player_inventory);
 		if (!inventory)
@@ -1685,7 +1571,7 @@ public:
 			return {};
 
 		const auto item_list =
-			*reinterpret_cast<rust::list<Item*>**>(list_wrapper + 0x10);
+			*reinterpret_cast<System::list<Item*>**>(list_wrapper + 0x10);
 		if (!item_list)
 			return {};
 
@@ -1901,18 +1787,6 @@ public:
 			}
 		}
 		return 0;
-	}
-
-	Networkable* get_networkable() {
-		return *reinterpret_cast<Networkable**>((uintptr_t)this + 0x58);
-	}
-
-	float get_health() {
-		return *reinterpret_cast<float*>((uintptr_t)this + _health);
-	}
-
-	float get_max_health() {
-		return *reinterpret_cast<float*>((uintptr_t)this + _maxHealth);
 	}
 
 	bool is_local_player() {
@@ -2236,10 +2110,10 @@ void attack_melee(aim_target target, BaseProjectile* baseprojectile, bool is_pla
 
 	Vector3 local_position = unity::get_camera_pos();
 
-	if (baseprojectile->get_next_attack_time() >= get_time())
+	if (baseprojectile->nextAttackTime() >= get_time())
 		return;
 
-	if (baseprojectile->get_time_since_deploy() < baseprojectile->get_deploy_delay())
+	if (baseprojectile->timeSinceDeploy() < baseprojectile->deployDelay())
 		return;
 
 	auto hit_test_class = il2cpp::init_class(_("HitTest"));
@@ -2263,9 +2137,9 @@ void attack_melee(aim_target target, BaseProjectile* baseprojectile, bool is_pla
 	hit_test->HitEntity() = target.ent;
 	hit_test->HitPoint() = InverseTransformPoint(trans, target.pos);
 	hit_test->HitNormal() = Vector3(0, 0, 0);
-	hit_test->damageProperties() = baseprojectile->get_damage_properties();
+	hit_test->damageProperties() = (DamageProperties*)*reinterpret_cast<uintptr_t*>(baseprojectile + 0x50);
 
-	StartAttackCooldown(baseprojectile, baseprojectile->get_repeat_delay());
+	StartAttackCooldown(baseprojectile, baseprojectile->repeatDelay());
 
 	return ProcessAttack(baseprojectile, hit_test);
 }
