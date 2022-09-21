@@ -2,4 +2,5 @@
 
 $ Rust internal (K4-Rust)- forked from amogushook/nekopaste.
 
-There is some weird stuff in these commits, what can I say... /s
+hallo, this is not a good src to learn from
+there is some weird stuff in these commits, what can I say... /s
